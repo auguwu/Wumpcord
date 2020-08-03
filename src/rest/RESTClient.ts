@@ -22,6 +22,7 @@
 
 import { USER_AGENT, RestVersion } from '../util/Constants';
 import { HttpClient, HttpMethod } from '@augu/orchid';
+import { DiscordRestError } from '../errors/DiscordRestError';
 import { Queue } from '@augu/immutable';
 
 interface RatelimitBucket<T> {
@@ -82,7 +83,7 @@ export class RESTClient {
   }
 
   private _request(bucket: RatelimitBucket<any>) {
-    return new Promise<void>((resolve) => {
+    return new Promise<void>((resolve, reject) => {
       this
         .http
         .request({
@@ -102,7 +103,12 @@ export class RESTClient {
           }
 
           bucket.callback(data);
-        });
+        }).catch(error => reject(new DiscordRestError({
+          statusCode: error.statusCode,
+          message: `Unexpected ${error.statusCode}: ${error.message}`,
+          method: bucket.dispatch.method,
+          route: bucket.dispatch.endpoint
+        })));
     });
   }
 }

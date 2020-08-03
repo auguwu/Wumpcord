@@ -30,7 +30,9 @@
     "@types/ws": "5.1.0",
     "@typescript-eslint/eslint-plugin": "3.8.0",
     "@typescript-eslint/parser": "3.8.0",
+    "erlpack": "0.1.3",
     "eslint": "7.6.0",
-    "typescript": "3.9.7"
+    "typescript": "3.9.7",
+    "zlib-sync": "0.1.7"
   }
 }
