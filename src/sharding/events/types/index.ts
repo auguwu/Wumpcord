@@ -20,5 +20,6 @@
  * SOFTWARE.
  */
 
-export * from './MessageCreate';
-export * from './Ready';
+import type { Shard } from '../../Shard';
+
+export type Event<T> = (this: Shard, data: T) => void;

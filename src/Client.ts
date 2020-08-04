@@ -22,6 +22,7 @@
 
 import type { ClientOptions as WebSocketClientOptions } from 'ws';
 import { GatewayIntents, EventType, GatewayVersion } from './util/Constants';
+import { EventEmitter } from 'events';
 import { Collection } from '@augu/immutable';
 import { ClientUser } from './structures';
 import { RESTClient } from './rest';
@@ -75,7 +76,7 @@ interface NonNulledWSOptions {
 /**
  * Represents a non-sharded/clustered client
  */
-export class Client {
+export class Client extends EventEmitter {
   /**
    * Represents the first shard ID
    */
@@ -137,6 +138,8 @@ export class Client {
    * @param opts The options to use
    */
   constructor(opts: ClientOptions) {
+    super();
+
     this.firstShardID = 0;
     this.lastShardID = 1;
     this.channels = 0;
@@ -187,7 +190,11 @@ export class Client {
     for (let i = 0; i < this.lastShardID; i++) {
       const shard = new Shard(this, i);
       await shard.connect();
-    
+
+      shard.on('error', (id, error) => this.emit('shardError', id, error));
+      shard.on('establish', (id) => this.emit('shardConnect', id));
+      shard.on('disconnect', (id) => this.emit('shardDisconnect', id));
+
       this.shards.set(i, shard);
     }
   }

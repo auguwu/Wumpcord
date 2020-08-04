@@ -31,7 +31,7 @@ export class BaseStore<T> {
   /**
    * The client
    */
-  private client!: Client;
+  public client!: Client;
 
   /**
    * The class to inherit from

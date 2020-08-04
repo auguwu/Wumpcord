@@ -20,5 +20,10 @@
  * SOFTWARE.
  */
 
-export * from './MessageCreate';
-export * from './Ready';
+import type * as models from '../../util/models';
+import type { Event } from './types';
+
+export const MessageCreate: Event<models.MessagePacket> = function onMessage(data) {
+  // todo: this lol
+  this.client.emit('message', data.d);
+};

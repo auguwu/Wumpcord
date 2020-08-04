@@ -68,7 +68,7 @@ export class Shard extends EventEmitter {
    * @param client The sharded client
    * @param id The shard's ID
    */
-  constructor(private client: Client, public id: number) {
+  constructor(public client: Client, public id: number) {
     super();
 
     this._heartbeatInterval = undefined;
@@ -292,10 +292,7 @@ export class Shard extends EventEmitter {
 
     switch (data.op) {
       case Constants.OPCodes.Event: {
-        if (!this.client.options.disabledEvents.includes(data.t)) {
-          const event = events[data.t].apply(this);
-          event(data.d);
-        }
+        if (!this.client.options.disabledEvents.includes(data.t)) events[data.t].apply(this, [data]);
       } break;
 
       case Constants.OPCodes.Heartbeat: {
@@ -341,7 +338,7 @@ export class Shard extends EventEmitter {
     }
   }
 
-  private ackHeartbeat() {
+  ackHeartbeat() {
     if (this.status === ShardStatus.Throttling) return;
     
     this.lastSent = new Date().getTime();
