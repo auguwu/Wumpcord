@@ -20,32 +20,38 @@
  * SOFTWARE.
  */
 
-import { ChannelTypes } from '../util/Constants';
-import type * as models from '../util/models';
 import type { Client } from '../Client';
-import { Base } from './Base';
 
-export class Channel extends Base {
+const EPOCH = 1420070400000;
+const DELTA = 4194304;
+
+/**
+ * Represents a "base" structure
+ */
+export abstract class Base {
   /**
-   * The channel's type
+   * The client itself
    */
-  public type: number;
+  public client: Client;
 
   /**
-   * Creates a new [Channel]
+   * Creates a new [Base]
    * @param client The client
-   * @param data The data
+   * @param id The ID (if provided)
    */
-  constructor(client: Client, data: models.ChannelPacket) {
-    super(client, data.id);
-
-    this.type = data.type;
+  constructor(client: Client, public id?: string) {
+    this.client = client;
   }
 
   /**
-   * Gets the channel's mention
+   * Gets the timestamp of this [Base] was created (in Discord time)
    */
-  get mention() {
-    return this.type === ChannelTypes.Text ? `<#${this.id}>` : this.id;
+  get createdAt() {
+    const time = Math.floor(Number(this.id!) / DELTA) + EPOCH;
+    return new Date(time);
+  }
+
+  update<T>(data: T) {
+    throw new Error(`Entity with ID "${this.id}" doesn't implement Base#update`);
   }
 }
