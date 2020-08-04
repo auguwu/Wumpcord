@@ -20,37 +20,26 @@
  * SOFTWARE.
  */
 
-import { Client, ClientOptions } from '../Client';
-import { GatewayVersion } from '../util/Constants';
-import { Collection } from '@augu/immutable';
-import { Shard } from './Shard';
+// Modeled Discord API Objects
+/* eslint-disable camelcase */
 
-export class ShardedClient extends Client {
-  /** Collection of shards to use */
-  public shards: Collection<Shard>;
+/**
+ * Modeled for endpoint /bot/gateway
+ */
+export interface BotGateway extends Gateway {
+  session_start_limit: SessionStartLimit;
+  shards: number;
+}
 
-  /**
-   * Creates a new ShardedClient
-   * @param opts The options to use
-   */
-  constructor(opts: ClientOptions) {
-    super(opts);
+interface SessionStartLimit {
+  reset_after: number;
+  remaining: number;
+  total: number;
+}
 
-    this.shards = new Collection();
-  }
-
-  async connect() {
-    const data = this.options.shardCount === 'auto' ? await this.getBotGateway() : await this.getNormalGateway();
-    if (!data.hasOwnProperty('url') || (this.options.shardCount === 'auto' && !data.hasOwnProperty('shards'))) throw new Error('Unable to fetch gateway URL');
-
-    if (data.url.includes('?')) data.url = data.url.substring(0, data.url.indexOf('?'));
-    this.gatewayUrl = `${data.url}/?v=${GatewayVersion}&encoding=etf`;
-
-    for (let i = 0; i < data.shards.count; i++) {
-      const shard = new Shard(this, i);
-      await shard.connect();
-    
-      this.shards.set(i, shard);
-    }
-  }
+/**
+ * Modeled for endpoint /gateway
+ */
+export interface Gateway {
+  url: string;
 }

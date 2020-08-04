@@ -38,15 +38,15 @@ client.start();
 There is two ways of sharding your bot:
 
 - Using the [Clustering](#clustering) API
-- Using the ShardedClient
+- Using the normal client
 
-### ShardedClient
-The sharded client is basically an extended client with more properties related to sharding.
+### Normal client
+Example bot:
 
 ```js
-const { ShardedClient, GatewayIntent, ActivityStatus } = require('wumpcord');
+const { Client, GatewayIntent, ActivityStatus } = require('wumpcord');
 
-const client = new ShardedClient({
+const client = new Client({
   token: '',
   ws: { intents: [GatewayIntent.GUILDS, GatewayIntent.GUILD_MESSAGES] },
   shardCount: 'auto'

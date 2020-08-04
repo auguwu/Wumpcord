@@ -20,6 +20,4 @@
  * SOFTWARE.
  */
 
-export * from './ShardedClient';
-export * from './ShardManager';
 export * from './Shard';

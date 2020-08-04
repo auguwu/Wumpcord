@@ -22,9 +22,10 @@
 
 /* eslint-disable camelcase */
 
-import type { ShardedClient } from './ShardedClient';
+import { getIntentBitmask } from '../util';
 import { pack, unpack } from 'erlpack';
 import { EventEmitter } from 'events';
+import type { Client } from '../Client';
 import * as Constants from '../util/Constants';
 import * as events from './events';
 import WebSocket from 'ws';
@@ -67,7 +68,7 @@ export class Shard extends EventEmitter {
    * @param client The sharded client
    * @param id The shard's ID
    */
-  constructor(private client: ShardedClient, public id: number) {
+  constructor(private client: Client, public id: number) {
     super();
 
     this._heartbeatInterval = undefined;
@@ -127,11 +128,11 @@ export class Shard extends EventEmitter {
     if (reconnect) {
       if (this.sessionID) {
         this.debug(`Now connecting to potentially resume | Attempt #${this.attempts}`);
-        this.client.shards.connect(this);
+        this.client.shards.get(this.id)!.connect();
       } else {
         this.debug(`Queueing a reconnect in ${this.reconnectTime}ms | Attempt #${this.attempts}`);
 
-        setTimeout(() => this.client.shards.connect(this), this.reconnectTime);
+        setTimeout(() => this.client.shards.get(this.id)!.connect(), this.reconnectTime);
         this.reconnectTime = Math.min(Math.round(this.reconnectTime * (Math.random() * 2 + 1)), 30000);
       }
     } else {
@@ -165,13 +166,13 @@ export class Shard extends EventEmitter {
       token: this.client.token,
       v: Constants.GatewayVersion,
       compress: Boolean(this.client.options.ws.compress),
-      large_threshold: Boolean(this.client.options.ws.largeThreshold),
+      large_threshold: this.client.options.ws.largeThreshold,
       guild_subscriptions: Boolean(this.client.options.ws.guildSubscriptions),
-      intents: this.client.options.ws.intents,
+      intents: getIntentBitmask(this.client.options.ws.intents),
       properties: {
-        'os': process.platform,
-        'browser': 'Wumpcord',
-        'device': 'Wumpcord'
+        '$os': process.platform,
+        '$browser': 'Wumpcord',
+        '$device': 'Wumpcord'
       }
     };
 
@@ -182,8 +183,7 @@ export class Shard extends EventEmitter {
   private async initialise() {
     this.debug('Now initialising...');
 
-    const uri = await this.client.getBotGateway();
-    this.socket = new WebSocket(uri, this.client.options.ws.clientOptions);
+    this.socket = new WebSocket(this.client.gatewayUrl!, this.client.options.ws.clientOptions);
 
     this.socket.on('open', this._onOpen.bind(this));
     this.socket.on('close', this._onClose.bind(this));

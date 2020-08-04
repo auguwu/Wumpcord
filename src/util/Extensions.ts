@@ -51,3 +51,11 @@ export function extend<T>(extendable: ExtendableClass, callback: (clazz: Class<a
 export function revert(extendable: ExtendableClass) {
   return void 0;
 }
+
+/**
+ * Resolves the extendable
+ * @param extendable The extendable to resolve
+ */
+export function resolve<T>(extendable: ExtendableClass) {
+  return Extenables[extendable] as T;
+}
