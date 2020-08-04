@@ -38,6 +38,9 @@ export const GatewayVersion = 6;
 /** the API version to use */
 export const RestVersion = 7;
 
+/** Close codes can't be recovered when reconnecting */
+export const UnrecoverableCodes = [1005, 4004, 4010, 4011, 4012, 4013, 4014];
+
 /** The list of activities to use (refer to `ClientUser#setStatus`) */
 export enum ActivityStatus {
   PLAYING,
@@ -45,6 +48,13 @@ export enum ActivityStatus {
   LISTENING,
   WATCHING,
   CUSTOM
+}
+
+export enum CacheType {
+  GUILDS = 1 << 1,
+  USERS = 1 << 2,
+  CHANNELS = 1 << 3,
+  PRESENCES = 1 << 4
 }
 
 export enum OPCodes {

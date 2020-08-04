@@ -23,29 +23,17 @@
 /* eslint-disable camelcase */
 
 import type { ShardedClient } from './ShardedClient';
+import { pack, unpack } from 'erlpack';
 import { EventEmitter } from 'events';
 import * as Constants from '../util/Constants';
 import * as events from './events';
 import WebSocket from 'ws';
 
-let zlib = null;
-try {
-  zlib = require('zlib-sync');
-} catch {
-  try {
-    zlib = require('pako');
-  } catch {
-    // ignore
-  }
-}
-
-// If we should use JSON instead of erlpack
-let useJSON = false;
-try {
-  require('erlpack');
-  useJSON = false;
-} catch {
-  useJSON = true;
+interface SendActivityOptions {
+  name: string;
+  type: Constants.ActivityStatus;
+  url?: string;
+  afk?: boolean;
 }
 
 export enum ShardStatus {
@@ -61,29 +49,18 @@ export enum ShardStatus {
  * Based on Eris' sharding API, so credits goes to abal!
  */
 export class Shard extends EventEmitter {
-  /** The heartbeat interval */
   private _heartbeatInterval?: NodeJS.Timer;
-
-  /** Time to reconnect */
+  public lastReceived: number = 0;
   private reconnectTime: number = 30000;
-
-  /** The status of the shard */
   public status: ShardStatus = ShardStatus.Unknown;
-
-  /** Number of attempts the shard had to be after connecting */
+  public lastSent: number = 0;
   public attempts: number;
-
-  /** The session ID */
   public sessionID: string | null;
-
-  /** The sequence number */
   public sequence: number;
-
-  /** The WebSocket itself */
+  public acked: boolean = false;
   public socket?: WebSocket;
-
-  /** List of guilds avaliable to this shard */
   public guilds: Set<string>;
+  public ping: number = Infinity;
 
   /**
    * Creates a new Shard
@@ -162,6 +139,14 @@ export class Shard extends EventEmitter {
     }
   }
 
+  send<T = unknown>(op: Constants.OPCodes, data?: T) {
+    if (this.socket && this.socket.readyState !== WebSocket.CLOSED) {
+      const packet = pack({ op, d: data });
+      this.socket.send(packet);
+      this.debug(`Sent to Discord: ${packet}`);
+    }
+  }
+
   private hardReset() {
     this.status = ShardStatus.Dead;
     this.sequence = 0;
@@ -176,11 +161,6 @@ export class Shard extends EventEmitter {
   }
 
   private identify() {
-    if (this.client.options.ws.compress && zlib === null) {
-      this.emit('error', this.id, new Error('Couldn\'t find zlib-sync/pako! Cannot compress data.'));
-      return;
-    }
-
     const identify: { [x: string]: any } = {
       token: this.client.token,
       v: Constants.GatewayVersion,
@@ -199,13 +179,194 @@ export class Shard extends EventEmitter {
     this.send(Constants.OPCodes.Identify, identify);
   }
 
-  private onPacket(event: any) {
-    this.debug(`Received packet "${event.t}"`);
-  }
-
-  private initialise() {
+  private async initialise() {
     this.debug('Now initialising...');
 
+    const uri = await this.client.getBotGateway();
+    this.socket = new WebSocket(uri, this.client.options.ws.clientOptions);
+
+    this.socket.on('open', this._onOpen.bind(this));
+    this.socket.on('close', this._onClose.bind(this));
+    this.socket.on('error', this._onError.bind(this));
+    this.socket.on('message', this._onMessage.bind(this));
+
+    setTimeout(() => {
+      if (this.status === ShardStatus.Throttling) this.disconnect(true);
+    }, this.client.options.ws.connectTimeout);
+  }
+
+  private _onOpen() {
+    this.debug('Opened a connection to Discord!');
+    this.emit('establish', this.id);
+  }
+
+  private _onClose(code: number, reason: string) {
+    const isRecoverable = Constants.UnrecoverableCodes.includes(code);
+    if (code) {
+      this.debug(`Received a ${code === 1000 ? 'clean' : 'unclean'} WebSocket close for ${reason === '' ? 'no reason' : reason} (code: ${code}, recoverable: ${isRecoverable ? 'yes' : 'no'})`);
+      
+      let error = new Error(`${code}: ${reason === '' ? 'None' : reason}`);
+      switch (code) {
+        case 4001: {
+          error = new Error('Gateway received an invalid OPCode');
+        } break;
+
+        case 4002: {
+          error = new Error('Gateway received an invalid message');
+        } break;
+
+        case 4003: {
+          error = new Error('Gateway wasn\'t authenicated');
+          this.sessionID = null;
+        } break;
+
+        case 4004: {
+          error = new Error('Authenication failed while logging in');
+          this.sessionID = null;
+          this.emit('error', new Error(`Invalid token "${this.client.token}"`));
+        } break;
+
+        case 4005: {
+          error = new Error('Gateway is already authenicated');
+        } break;
+
+        case 4006:
+        case 4009: {
+          error = new Error('Invalid session');
+          this.sessionID = null;
+        } break;
+
+        case 4007: {
+          error = new Error(`Invalid sequence number: ${this.sequence}`);
+          this.sequence = 0;
+        } break;
+
+        case 4008: {
+          error = new Error('Ratelimited while authenicating/sending packets');
+        } break;
+
+        case 4010: {
+          error = new Error('Invalid shard');
+          this.sessionID = null;
+        } break;
+
+        case 4011: {
+          error = new Error('Shard includes too many guilds (>2500)');
+          this.sessionID = null;
+        } break;
+
+        case 4013: {
+          error = new Error('Invalid intents were specified');
+          this.sessionID = null;
+        } break;
+
+        case 4014: {
+          error = new Error('Disallowed intents were specified');
+          this.sessionID = null;
+        } break;
+
+        case 1006: {
+          error = new Error('Connection was reset');
+        } break;
+      }
+
+      this.emit('error', this.id, error, isRecoverable);
+    } else {
+      this.debug(`Unknown WS code: ${code}`);
+    }
+
+    this.disconnect(isRecoverable);
+  }
+
+  private _onError(error: Error) {
+    this.emit('error', this.id, error);
+  }
+
+  private _onMessage(packet: any) {
+    const data = unpack(packet);
+    console.log(data);
+    if (data.includes('s')) {
+      this.debug(`Received new sequence number: ${data.s}`);
+      this.sequence = data.s;
+    }
+
+    switch (data.op) {
+      case Constants.OPCodes.Event: {
+        if (!this.client.options.disabledEvents.includes(data.t)) {
+          const event = events[data.t].apply(this);
+          event(data.d);
+        }
+      } break;
+
+      case Constants.OPCodes.Heartbeat: {
+        this.ackHeartbeat();
+      } break;
+
+      case Constants.OPCodes.InvalidSession: {
+        this.sequence = 0;
+        this.sessionID = null;
+        this.emit('warn', this.id, 'Invalid session has occured.');
+        this.identify();
+      } break;
+
+      case Constants.OPCodes.Reconnect: {
+        this.disconnect();
+      } break;
+
+      case Constants.OPCodes.Hello: {
+        if (data.d.heartbeat_interval > 0) {
+          if (this._heartbeatInterval) clearInterval(this._heartbeatInterval);
+          this._heartbeatInterval = setInterval(this.ackHeartbeat, data.d.heartbeat_interval);
+        }
+
+        this.status = ShardStatus.Connected;
+        if (this.sessionID) this.resume();
+        else {
+          this.identify();
+          this.ackHeartbeat();
+        }
+
+        this.debug(`Received "HELLO" packet!\n${data.d._trace}`);
+      } break;
+
+      case Constants.OPCodes.HeartbeatAck: {
+        this.acked = true;
+        this.lastReceived = new Date().getTime();
+        this.ping = (this.lastReceived - this.lastSent);
+      } break;
+
+      default: {
+        this.emit('unknown', data, this.id);
+      } break;
+    }
+  }
+
+  private ackHeartbeat() {
+    if (this.status === ShardStatus.Throttling) return;
     
+    this.lastSent = new Date().getTime();
+    this.send(Constants.OPCodes.Heartbeat, this.sequence);
+  }
+
+  private resume() {
+    this.send(Constants.OPCodes.Resume, {
+      session_id: this.sessionID,
+      token: `Bot ${this.client.token}`,
+      seq: this.sequence
+    });
+  }
+
+  setStatus(status: 'offline' | 'online' | 'idle' | 'dnd', opts: SendActivityOptions) {
+    this.debug(`Updating status to "${status}" (${JSON.stringify(opts)})`);
+    this.send(Constants.OPCodes.StatusUpdate, {
+      status,
+      since: status === 'idle' ? Date.now() : 0,
+      game: {
+        name: opts.name,
+        type: opts.type,
+        url: opts.url
+      },
+      afk: opts.hasOwnProperty('afk') ? Boolean(opts.afk!) : false
+    });
   }
 }

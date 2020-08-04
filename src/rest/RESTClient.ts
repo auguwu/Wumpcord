@@ -90,7 +90,8 @@ export class RESTClient {
           method: bucket.dispatch.method,
           headers: {
             'Authorization': `Bot ${this.token}`,
-            'User-Agent': USER_AGENT
+            'User-Agent': USER_AGENT,
+            'Accept': 'application/json'
           },
           data: bucket.dispatch.data,
           url: bucket.dispatch.endpoint
