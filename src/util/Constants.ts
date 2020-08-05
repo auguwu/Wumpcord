@@ -220,3 +220,40 @@ export enum GatewayIntents {
   DirectMessageReactions = 1 << 13,
   DirectMessageTyping    = 1 << 14
 }
+
+export enum EventType {
+  Ready                    = 'READY',
+  Resumed                  = 'RESUMED',
+  ChannelCreate            = 'CHANNEL_CREATE',
+  ChannelUpdate            = 'CHANNEL_UPDATE',
+  ChannelDelete            = 'CHANNEL_DELETE',
+  ChannelPinUpdate         = 'CHANNEL_PINS_UPDATE',
+  GuildCreate              = 'GUILD_CREATE',
+  GuildUpdate              = 'GUILD_UPDATE',
+  GuildDelete              = 'GUILD_DELETE',
+  GuildBanAdd              = 'GUILD_BAN_ADD',
+  GuildBanRemove           = 'GUILD_BAN_REMOVE',
+  GuildEmojisUpdate        = 'GUILD_EMOJIS_UPDATE',
+  GuildIntegrationUpdate   = 'GUILD_INTEGRATIONS_UPDATE',
+  GuildMemberAdd           = 'GUILD_MEMBER_ADD',
+  GuildMemberDelete        = 'GUILD_MEMBER_REMOVE',
+  GuildMemberUpdate        = 'GUILD_MEMBER_UPDATE',
+  GuildMemberChunk         = 'GUILD_MEMBERS_CHUNK',
+  GuildRoleCreate          = 'GUILD_ROLE_CREATE',
+  GuildRoleDelete          = 'GUILD_ROLE_DELETE',
+  GuildRoleUpdate          = 'GUILD_ROLE_UPDATE',
+  MessageCreated           = 'MESSAGE_CREATE',
+  MessageUpdate            = 'MESSAGE_UPDATE',
+  MessageDelete            = 'MESSAGE_DELETE',
+  MessageDeleteBulk        = 'MESSAGE_DELETE_BULK',
+  MessageReactionAdd       = 'MESSAGE_REACTION_ADD',
+  MessageReactionRemove    = 'MESSAGE_REACTION_REMOVE',
+  MessageReactionRemoveAll = 'MESSAGE_REACTION_REMOVE_ALL',
+  TypingStart              = 'TYPING_START', // why does this exist
+  UserUpdate               = 'USER_UPDATE',
+  VoiceStateUpdate         = 'VOICE_STATE_UPDATE',
+  VoiceServerUpdate        = 'VOICE_SERVER_UPDATE',
+  WebhookUpdate            = 'WEBHOOKS_UPDATE',
+  PresenceUpdate           = 'PRESENCE_UPDATE',
+  GiftCodeUpdate           = 'GIFT_CODE_UPDATE'
+}
