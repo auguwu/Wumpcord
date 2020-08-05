@@ -25,7 +25,7 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
-import type { OPCodes, EventType, AuditLogActions, ChannelTypes, MessageFlags, MessageTypes } from './Constants';
+import type { OPCodes, EventType, AuditLogActions, ChannelTypes, MessageTypes, ActivityFlags, Permissions } from './Constants';
 
 type ValueOf<V> = V[keyof V]; // typescript PLEASE add `valueof` im begging u im so ready to make a PR of it smh
 
@@ -53,12 +53,12 @@ export interface Gateway {
 // Credit: https://github.com/itslukej/discord.d.ts
 type ReceivableOpCode = OPCodes.Hello | OPCodes.Heartbeat | OPCodes.HeartbeatAck | OPCodes.InvalidSession | OPCodes.Reconnect;
 
-interface Event {
+export interface Event {
   op: ReceivableOpCode;
   d: unknown;
 }
 
-interface DispatchEvent {
+export interface DispatchEvent {
   op: OPCodes.Event;
   s: number;
   t: EventType;
@@ -78,6 +78,7 @@ export interface UserPacket {
   premium_type?: NitroType;
   discriminator: string;
   mfa_enabled: boolean;
+  verified?: boolean;
   username: string;
   avatar?: string;
   system?: boolean;
@@ -402,7 +403,7 @@ export interface GuildPacket extends UnavaliableGuildPacket {
   afk_channel_id: string;  
   widget_enabled: boolean;
   max_presences?: number;
-  permissions?: PermissionPacket;
+  permissions?: Permissions;
   max_members?: number;
   premium_tier: GuildPremiumTier;
   unavaliable: false;
@@ -520,6 +521,181 @@ interface BaseMessage {
   id: string;
 }
 
+export enum PermissionOverwriteType {
+  Member = 'member',
+  Role   = 'role'
+}
+
+export interface PermissionOverwritePacket {
+  allow: number;
+  deny: number;
+  type: PermissionOverwriteType;
+  id: string;
+}
+
+interface ClientStatus {
+  desktop?: string;
+  mobile?: string;
+  web?: string;
+}
+
+/**
+ * The activity options to add to the RPC instance
+ */
+export interface Activity {
+  /**
+   * The state of the RPC being used
+   * 
+   * **NOTE**: The state is on the bottom of the text
+   */
+  state?: string;
+
+  /**
+   * The details of the RPC being used
+   * 
+   * **NOTE**: The details is on the top of the text
+   */
+  details?: string;
+
+  /**
+   * If the RPC is an instance of something
+   */
+  instance?: boolean;
+
+  /**
+   * Timestamps object, to check on the `Elapsed`/`Ends At` text of the RPC
+   */
+  timestamps?: {
+    /**
+     * The start of the timestamp
+     */
+    start?: number;
+
+    /**
+     * The end of the timestamp
+     */
+    end?: number;
+  }
+
+  /**
+   * Any assets to use when a user is using the RPC
+   */
+  assets?: {
+    /**
+     * The image key to use
+     */
+    large_image?: string;
+
+    /**
+     * The text when the large image is hovered
+     */
+    large_text?: string;
+
+    /**
+     * The small image key
+     */
+    small_image?: string;
+
+    /**
+     * The text when the small image key is hovered
+     */
+    small_text?: string;
+  }
+
+  /**
+   * The party object, the ability to join/spectate on games
+   */
+  party?: {
+    /**
+     * The ID of the party
+     */
+    id?: any;
+
+    /**
+     * The size of the party
+     */
+    size?: number[];
+  }
+
+  /**
+   * Any secret keys to use when a user joins/spectates/matches on a game
+   */
+  secrets?: {
+    /**
+     * The join key, when a user can join the game
+     */
+    join?: string;
+
+    /**
+     * The spectate key, when a user can spectate on a user during a match
+     */
+    spectate?: string;
+
+    /**
+     * The match key, when a user can join the other user's match
+     */
+    match?: string;
+  }
+
+  /**
+   * Any emojis listed
+   */
+  emoji?: {
+    animated?: boolean;
+    name: string;
+    id?: string;
+  }
+}
+
+export interface PresencePacket {
+  premium_since?: string;
+  client_status: ClientStatus;
+  activities: Activity[];
+  guild_id: string;
+  status: 'offline' | 'online' | 'idle' | 'dnd';
+  nick?: string;
+  roles: string[];
+  game: Activity;
+  user: UserPacket | { id: string; } // object if the user isn't cached by Discord?
+}
+
+export interface MessageReactionPacket {
+  emoji: Partial<EmojiPacket>;
+  count: number;
+  me: boolean;
+}
+
+export interface RolePacket {
+  mentionable: boolean;
+  permissions: number;
+  position: number;
+  managed: boolean;
+  hoist: boolean;
+  color: number;
+  name: string;
+  id: string;
+}
+
+export interface VoiceStatePacket {
+  self_stream?: boolean;
+  channel_id: string;
+  session_id: string;
+  guild_id?: string;
+  self_mute: boolean;
+  self_deaf: boolean;
+  supress: boolean;
+  user_id: string;
+  member?: GuildMemberPacket;
+  deaf: boolean;
+  mute: boolean;
+}
+
+export interface WebhookPacket {
+  username: string;
+  avatar?: string;
+  id: string;
+}
+
 export interface HelloEvent extends Event {
   op: OPCodes.Hello;
   d: { heartbeat_interval: number | null; }
@@ -552,5 +728,260 @@ export interface ReadyEvent extends DispatchEvent {
     shard: [number, number]; // tuple being [shardID, numOfShards]
     user: UserPacket;
     v: 5 | 6 | 7;
+  }
+}
+
+export interface ResumedEvent extends DispatchEvent {
+  t: EventType.Resumed;
+}
+
+export interface ChannelCreatedEvent extends DispatchEvent {
+  t: EventType.ChannelCreate;
+  d: AnyChannel;
+}
+
+export interface ChannelUpdatedEvent extends DispatchEvent {
+  t: EventType.ChannelUpdate;
+  d: AnyChannel;
+}
+
+export interface ChannelDeletedEvent extends DispatchEvent{
+  t: EventType.ChannelDelete;
+  d: AnyChannel;
+}
+
+export interface ChannelPinsUpdate extends DispatchEvent {
+  t: EventType.ChannelPinUpdate;
+  d: AnyChannel;
+}
+
+export interface GuildCreatedEvent extends DispatchEvent {
+  t: EventType.GuildCreate;
+  d: GuildPacket & {
+    voice_states: Partial<VoiceStatePacket>[];
+    member_count: number;
+    unavaliable?: boolean;
+    joined_at?: string;
+    presences: Partial<PresencePacket>[];
+    channels: ChannelPacket[];
+    members: GuildMemberPacket[];
+    large?: boolean;
+  };
+}
+
+export interface GuildUpdatedEvent extends DispatchEvent {
+  t: EventType.GuildUpdate;
+  d: GuildPacket;
+}
+
+export interface GuildDeletedEvent extends DispatchEvent {
+  t: EventType.GuildDelete;
+  d: UnavaliableGuildPacket;
+}
+
+export interface GuildBanAddEvent extends DispatchEvent {
+  t: EventType.GuildBanAdd;
+  d: {
+    guild_id: string;
+    user: UserPacket;
+  }
+}
+
+export interface GuildBanRemovedEvent extends DispatchEvent {
+  t: EventType.GuildBanRemove;
+  d: {
+    guild_id: string;
+    user: UserPacket;
+  }
+}
+
+export interface GuildIntegrationsUpdatedEvent extends DispatchEvent {
+  t: EventType.GuildIntegrationUpdate;
+  d: { guild_id: string; }
+}
+
+export interface GuildMemberAddEvent extends DispatchEvent {
+  t: EventType.GuildMemberAdd;
+  d: GuildMemberPacket & { guild_id: string; }
+}
+
+export interface GuildMemberRemoveUpdate extends DispatchEvent {
+  t: EventType.GuildMemberDelete;
+  d: {
+    guild_id: string;
+    user: UserPacket;
+  }
+}
+
+export interface GuildMemberUpdatedEvent extends DispatchEvent {
+  t: EventType.GuildMemberUpdate;
+  d: {
+    guild_id: string;
+    roles: string[];
+    user: UserPacket;
+    nick: string;
+  }
+}
+
+export interface GuildMemberChunkEvent extends DispatchEvent {
+  t: EventType.GuildMemberChunk;
+  d: {
+    chunk_count: number;
+    chunk_index: number;
+    presences?: PresencePacket[];
+    not_found?: any[]; // debug this (if we can)
+    guild_id: string;
+    members: GuildMemberPacket[];
+    nonce?: string;
+  }
+}
+
+export interface GuildRoleCreatedEvent extends DispatchEvent {
+  t: EventType.GuildRoleCreate;
+  d: {
+    guild_id: string;
+    role: RolePacket;
+  }
+}
+
+export interface GuildRoleUpdatedEvent extends DispatchEvent {
+  t: EventType.GuildRoleUpdate;
+  d: {
+    guild_id: string;
+    role: RolePacket;
+  }
+}
+
+export interface GuildRoleDeletedEvent extends DispatchEvent {
+  t: EventType.GuildRoleUpdate;
+  d: {
+    guild_id: string;
+    role_id: string;
+  }
+}
+
+export interface MessageCreatedEvent extends DispatchEvent {
+  t: EventType.MessageCreated;
+  d: MessagePacket;
+}
+
+export interface MessageUpdatedEvent extends DispatchEvent {
+  t: EventType.MessageUpdate;
+  d: MessagePacket | Partial<MessagePacket>;
+}
+
+export interface MessageDeletedEvent extends DispatchEvent {
+  t: EventType.MessageDelete;
+  d: {
+    channel_id: string;
+    guild_id?: string;
+    id: string;
+  }
+}
+
+export interface MessageDeleteBulkEvent extends DispatchEvent {
+  t: EventType.MessageDeleteBulk;
+  d: {
+    channel_id: string;
+    guild_id?: string;
+    ids: string[];
+  }
+}
+
+export interface MessageReactionAddEvent extends DispatchEvent {
+  t: EventType.MessageReactionAdd;
+  d: {
+    message_id: string;
+    channel_id: string;
+    guild_id?: string;
+    user_id: string;
+    member?: GuildMemberPacket;
+    emoji: Partial<EmojiPacket>;
+  }
+}
+
+export interface MessageReactionRemoveEvent extends DispatchEvent {
+  t: EventType.MessageReactionRemove;
+  d: {
+    channel_id: string;
+    message_id: string;
+    guild_id?: string;
+    user_id: string;
+    emoji: Partial<EmojiPacket>;
+  }
+}
+
+export interface MessageReactionRemoveAllEvent extends DispatchEvent {
+  t: EventType.MessageReactionRemoveAll;
+  d: {
+    channel_id: string;
+    message_id: string;
+    guild_id?: string;
+  }
+}
+
+// discord why does this exist ur making me cringe help
+export interface MessageReactionRemoveEmojiEvent extends DispatchEvent {
+  t: EventType.MessageReactionRemoveEmoji;
+  d: {
+    channel_id: string;
+    message_id: string;
+    guild_id?: string;
+    emoji: Partial<EmojiPacket>;
+  }
+}
+
+export interface PresenceUpdateEvent extends DispatchEvent {
+  t: EventType.PresenceUpdate;
+  d: PresencePacket;
+}
+
+// again: why does this exist
+export interface TypingStartEvent extends DispatchEvent {
+  t: EventType.TypingStart;
+  d: {
+    channel_id: string;
+    guild_id?: string;
+    timestamp: string;
+    user_id: string;
+    member?: GuildMemberPacket;
+  }
+}
+
+export interface UserUpdateEvent extends DispatchEvent {
+  t: EventType.UserUpdate;
+  d: UserPacket;
+}
+
+export interface VoiceStateUpdateEvent extends DispatchEvent {
+  t: EventType.VoiceStateUpdate;
+  d: VoiceStatePacket & { guild_id: string }
+}
+
+export interface VoiceServerUpdateEvent extends DispatchEvent {
+  t: EventType.VoiceServerUpdate;
+  d: {
+    guild_id: string;
+    endpoint: string;
+    token: string;
+  }
+}
+
+export interface WebhooksUpdateEvent extends DispatchEvent {
+  t: EventType.WebhookUpdate;
+  d: {
+    channel_id: string;
+    guild_id: string;
+  }
+}
+
+export interface GiftCodeUpdateEvent extends DispatchEvent {
+  t: EventType.GiftCodeUpdate;
+  d: {
+    channel_id: string;
+    guild_id: string;
+    sku_id: string;
+    uses: number;
+    code: string;
   }
 }

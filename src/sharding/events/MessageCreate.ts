@@ -23,7 +23,7 @@
 import type * as models from '../../util/models';
 import type { Event } from './types';
 
-export const MessageCreate: Event<models.MessagePacket> = function onMessage(data) {
+export const MESSAGE_CREATE: Event<models.MessageCreatedEvent> = function onMessage(data) {
   // todo: this lol
   this.client.emit('message', data.d);
 };

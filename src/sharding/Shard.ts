@@ -22,6 +22,7 @@
 
 /* eslint-disable camelcase */
 
+import type { Event, DispatchEvent, HelloEvent } from '../util/models';
 import { getIntentBitmask } from '../util';
 import { pack, unpack } from 'erlpack';
 import { EventEmitter } from 'events';
@@ -283,11 +284,15 @@ export class Shard extends EventEmitter {
   }
 
   private _onMessage(packet: any) {
-    const data = unpack(packet);
+    const data: Event | DispatchEvent = unpack(packet);
     console.log(data);
-    if (data.includes('s')) {
-      this.debug(`Received new sequence number: ${data.s}`);
-      this.sequence = data.s;
+
+    if (data.hasOwnProperty('s')) {
+      // @ts-ignore
+      const { s } = data;
+
+      this.debug(`Received new sequence number: ${s}`);
+      this.sequence = s;
     }
 
     switch (data.op) {
@@ -311,9 +316,11 @@ export class Shard extends EventEmitter {
       } break;
 
       case Constants.OPCodes.Hello: {
-        if (data.d.heartbeat_interval > 0) {
+        const packet = data.d as HelloEvent;
+
+        if (packet.d.heartbeat_interval! > 0) {
           if (this._heartbeatInterval) clearInterval(this._heartbeatInterval);
-          this._heartbeatInterval = setInterval(this.ackHeartbeat, data.d.heartbeat_interval);
+          this._heartbeatInterval = setInterval(this.ackHeartbeat, packet.d.heartbeat_interval!);
         }
 
         this.status = ShardStatus.Connected;
@@ -323,7 +330,7 @@ export class Shard extends EventEmitter {
           this.ackHeartbeat();
         }
 
-        this.debug(`Received "HELLO" packet!\n${data.d._trace}`);
+        this.debug('Received "HELLO" packet!');
       } break;
 
       case Constants.OPCodes.HeartbeatAck: {

@@ -20,9 +20,23 @@
  * SOFTWARE.
  */
 
+import type { UserPacket } from '../util/models';
 import type { Client } from '../Client';
 import { User } from './User';
 
+// TODO: Implement the Extensions API
 export class ClientUser extends User {
-  
+  public mfaEnabled!: boolean;
+  public verified!: boolean;
+
+  constructor(client: Client, data: UserPacket) {
+    super(client, data);
+  }
+
+  update(data: UserPacket) {
+    super.update(data);
+
+    this.mfaEnabled = typeof data.mfa_enabled === 'boolean' && data.hasOwnProperty('mfa_enabled') ? data.mfa_enabled! : false;
+    this.verified = typeof data.verified === 'boolean' && data.hasOwnProperty('verified') ? data.verified! : false;
+  }
 }

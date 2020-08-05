@@ -20,20 +20,27 @@
  * SOFTWARE.
  */
 
-import { ClientUser, PrivateChannel, GroupChannel } from '../../structures';
-import { ChannelTypes } from '../../util/Constants';
+import type { CacheType, NonNulledClientOptions } from '../../Client';
 import type * as models from '../../util/models';
 import type { Event } from './types';
+import { Collection } from '@augu/immutable';
+import { ClientUser } from '../../structures';
+import { EventType } from '../../util/Constants';
 
-export const Ready: Event<models.ReadyPacket> = function (data) {
-  this.client.user = new ClientUser(this.client, data.user);
+const cached = (opts: NonNulledClientOptions, type: CacheType) => opts.cache === type || opts.cache.includes(type);
+
+export const READY: Event<models.ReadyEvent> = function (data) {
+  this.client.user = new ClientUser(this.client, data.d.user);
   this.sessionID = data.d.session_id;
 
-  if (data.t === 'RESUMED') {
+  if ((<any> data).t === EventType.Resumed) {
     this.ackHeartbeat();
     this.client.emit('resume');
+
+    return;
   }
 
+  // Populate the cache for guilds, channels, and users
   if (
     // If we shouldn't cache at all
     this.client.options.cache === 'none' || 
@@ -46,34 +53,29 @@ export const Ready: Event<models.ReadyPacket> = function (data) {
   ) {
     this.client.guilds = data.d.guilds.length;
   } else {
-    for (const guild of data.d.guilds) {
-      console.log(guild); // idk what this data is man!
-    }
+    this.client.guilds = new Collection();
   }
 
-  if (data.private_channels.length) {
-    data.private_channels.forEach(channel => {
-      const shouldCache = this.client.options.cache === 'none' || this.client.options.cache !== 'channel' || !this.client.options.cache.includes('channel');
-
-      if (!channel.type || channel.type === ChannelTypes.DM) {
-        if (shouldCache) {
-          this.client.channels.add(new PrivateChannel(this.client, channel));
-        } else {
-          this.client.channels++;
-        }
-      } else if (channel.type === ChannelTypes.Group) {
-        if (shouldCache) {
-          this.client.channels.add(new GroupChannel(this.client, channel));
-        } else {
-          this.client.channels++;
-        }
-      }
-    });
+  // TODO?: maybe refractor this?
+  if (this.client.options.cache === 'none') {
+    this.client.channels = 0;
+    this.client.guilds   = data.d.guilds.length;
+    this.client.users    = 1;
+  } else if (this.client.options.cache === 'all') {
+    this.client.channels = new Collection();
+    this.client.guilds   = new Collection();
+    this.client.users    = new Collection();
+  } else {
+    this.client.channels = cached(this.client.options, 'channel') ? new Collection() : 0;
+    this.client.guilds   = cached(this.client.options, 'guild')   ? new Collection() : data.d.guilds.length;
+    this.client.users    = cached(this.client.options, 'user')    ? new Collection() : 0;
   }
 
   if (data.d.guilds.length) {
     this.guilds = new Set(data.d.guilds.map(s => s.id));
   }
+
+  if (this.client.users instanceof Collection) this.client.users.set(this.client.user.id, this.client.user);
 
   this.client.emit('ready');
 };

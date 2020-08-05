@@ -51,7 +51,7 @@ export abstract class Base {
     return new Date(time);
   }
 
-  update<T>(data: T) {
+  update(data: unknown) {
     throw new Error(`Entity with ID "${this.id}" doesn't implement Base#update`);
   }
 }

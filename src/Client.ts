@@ -22,12 +22,11 @@
 
 import type { ClientOptions as WebSocketClientOptions } from 'ws';
 import { GatewayIntents, EventType, GatewayVersion } from './util/Constants';
+import { ClientUser, Channel, Guild, User } from './structures';
 import { EventEmitter } from 'events';
 import { Collection } from '@augu/immutable';
-import { ClientUser } from './structures';
 import { RESTClient } from './rest';
 import { getOption } from './util';
-import * as stores from './stores';
 import * as models from './util/models';
 import { Shard } from './sharding';
 
@@ -55,7 +54,7 @@ interface WebSocketOptions {
   tries?: number;
 }
 
-interface NonNulledClientOptions {
+export interface NonNulledClientOptions {
   allowedMentions: { [x in 'user' | 'role']: boolean };
   disabledEvents: EventType[];
   shardCount: number | 'auto';
@@ -87,13 +86,15 @@ export class Client extends EventEmitter {
    */
   public lastShardID: number;
 
-  /** The gateway URL */
+  /** 
+   * The gateway URL
+   */
   public gatewayUrl?: string;
 
   /**
    * Represents the amount of channels (or the channel store if [ClientOptions.cache.channels] is enabled)
    */
-  public channels: number | stores.ChannelStore;
+  public channels: number | Collection<Channel>;
 
   /**
    * The client's options
@@ -103,20 +104,22 @@ export class Client extends EventEmitter {
   /**
    * Represents the amount of guilds (or the guild store if [ClientOptions.cache.guilds] is enabled)
    */
-  public guilds: number | stores.GuildStore;
+  public guilds: number | Collection<Guild>;
 
   /**
    * If the bot is ready to execute anything!
    */
   public ready: boolean;
 
-  /** Collection of shards to use */
+  /** 
+   * Collection of shards to use 
+   */
   public shards: Collection<Shard>;
 
   /**
    * Represents the amount of users (or the user store if [ClientOptions.cache.users] is enabled)
    */
-  public users: number | stores.UserStore;
+  public users: number | Collection<User>;
 
   /**
    * The bot's token (can't be evaled)
