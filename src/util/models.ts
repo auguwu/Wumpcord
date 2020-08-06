@@ -391,6 +391,8 @@ export enum GuildRegion {
 export interface GuildPacket extends UnavaliableGuildPacket {
   default_message_notifications: MessageNotificationsLevel;
   premium_subscription_count?: number;
+  approximate_presence_count?: number;
+  approximate_member_count?: number;
   explicit_content_filter: ExplicitContentFilterLevel;
   widget_channel_id?: string;
   system_channel_id?: string;
@@ -412,7 +414,9 @@ export interface GuildPacket extends UnavaliableGuildPacket {
   mfa_level: MFALevel;
   features: GuildFeature[];
   owner_id: string;
+  channels: GuildChannelPacket[];
   splash?: string;
+  members: GuildMemberPacket[];
   emojis: EmojiPacket[];
   region: GuildRegion;
   banner: string;
@@ -448,6 +452,7 @@ export interface GuildMemberPacket {
   deaf: boolean;
   mute: boolean;
   user: UserPacket;
+  id: string;
 }
 
 export interface MessageChannelMentionPacket {
@@ -542,7 +547,7 @@ interface ClientStatus {
 /**
  * The activity options to add to the RPC instance
  */
-export interface Activity {
+export interface ActivityPacket {
   /**
    * The state of the RPC being used
    * 
@@ -650,12 +655,12 @@ export interface Activity {
 export interface PresencePacket {
   premium_since?: string;
   client_status: ClientStatus;
-  activities: Activity[];
+  activities: ActivityPacket[];
   guild_id: string;
   status: 'offline' | 'online' | 'idle' | 'dnd';
   nick?: string;
   roles: string[];
-  game: Activity;
+  game: ActivityPacket;
   user: UserPacket | { id: string; } // object if the user isn't cached by Discord?
 }
 

@@ -21,13 +21,11 @@
  */
 
 import type { CacheType, NonNulledClientOptions } from '../../Client';
+import { EventType, MAX_GUILDS_TO_CLUSTER } from '../../util/Constants';
 import type * as models from '../../util/models';
 import type { Event } from './types';
 import { Collection } from '@augu/immutable';
 import { ClientUser } from '../../structures';
-import { EventType } from '../../util/Constants';
-
-const cached = (opts: NonNulledClientOptions, type: CacheType) => opts.cache === type || opts.cache.includes(type);
 
 export const READY: Event<models.ReadyEvent> = function (data) {
   this.client.user = new ClientUser(this.client, data.d.user);
@@ -41,21 +39,6 @@ export const READY: Event<models.ReadyEvent> = function (data) {
   }
 
   // Populate the cache for guilds, channels, and users
-  if (
-    // If we shouldn't cache at all
-    this.client.options.cache === 'none' || 
-
-    // If we should ***only*** cache guilds
-    this.client.options.cache !== 'guild' ||
-    
-    // If we didn't include guilds to be cached
-    !this.client.options.cache.includes('guild')
-  ) {
-    this.client.guilds = data.d.guilds.length;
-  } else {
-    this.client.guilds = new Collection();
-  }
-
   // TODO?: maybe refractor this?
   if (this.client.options.cache === 'none') {
     this.client.channels = 0;
@@ -66,12 +49,13 @@ export const READY: Event<models.ReadyEvent> = function (data) {
     this.client.guilds   = new Collection();
     this.client.users    = new Collection();
   } else {
-    this.client.channels = cached(this.client.options, 'channel') ? new Collection() : 0;
-    this.client.guilds   = cached(this.client.options, 'guild')   ? new Collection() : data.d.guilds.length;
-    this.client.users    = cached(this.client.options, 'user')    ? new Collection() : 0;
+    this.client.channels = this.client.canCache('channel') ? new Collection() : 0;
+    this.client.guilds   = this.client.canCache('guild')   ? new Collection() : data.d.guilds.length;
+    this.client.users    = this.client.canCache('user')    ? new Collection() : 0;
   }
 
   if (data.d.guilds.length) {
+    if (data.d.guilds.length >= MAX_GUILDS_TO_CLUSTER) this.client.emit('warn', `You have reached the max amount of guilds to be required to cluster! (~${MAX_GUILDS_TO_CLUSTER} guilds)`);
     this.guilds = new Set(data.d.guilds.map(s => s.id));
   }
 

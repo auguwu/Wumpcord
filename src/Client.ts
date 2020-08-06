@@ -30,7 +30,10 @@ import { getOption } from './util';
 import * as models from './util/models';
 import { Shard } from './sharding';
 
-export type CacheType = 'guild' | 'user' | 'channel' | 'emoji' | 'member' | 'member:role' | 'message' | 'reaction' | 'presence';
+export type CacheType = 'guild' | 'user' | 'channel' 
+  | 'emoji' | 'member' | 'member:role' 
+  | 'message' | 'reaction' | 'presence' 
+  | 'voice' | 'roles';
 
 /** The options to customize */
 export interface ClientOptions {
@@ -217,5 +220,26 @@ export class Client extends EventEmitter {
    */
   getNormalGateway() {
     return this.rest.dispatch<models.Gateway>({ method: 'GET', endpoint: '/gateway' });
+  }
+
+  /**
+   * Checkers to see if `type` can be cachable
+   * @param type The type to check
+   */
+  canCache(type: CacheType) {
+    if (this.options.cache === 'all') return true;
+    else if (this.options.cache !== 'none') return true; 
+    else if (Array.isArray(this.options.cache) && this.options.cache.includes(type)) return true;
+    else if ((<any> this.options.cache) === type) return true;
+    else return false;
+  }
+
+  /**
+   * Function to get the shard ID by the guild ID
+   * @param guildID The guild's ID
+   */
+  getShardIdByGuild(guildID: string) {
+    const guild = BigInt(guildID);
+    return Number((guild >> BigInt(22)) % BigInt(this.shards.size));
   }
 }
