@@ -1,6 +1,6 @@
 {
   "name": "wumpcord",
-  "description": "🚣 Flexible and type-safe Discord API library",
+  "description": "🚣 Flexible, type-safe, and lightweight Discord API library",
   "version": "1.0.0",
   "main": "build/index.js",
   "license": "MIT",
@@ -14,22 +14,17 @@
     "node": ">=10"
   },
   "scripts": {
-    "build": "yarn lint && rm -fr build && yarn tsc",
-    "lint": "eslint src --ext .ts --fix"
+    "lint": "eslint src --ext .js --fix"
   },
   "dependencies": {
-    "@augu/immutable": "0.3.2",
-    "@augu/orchid": "1.3.1",
+    "@augu/immutable": "0.4.0",
+    "@augu/orchid": "1.4.0",
     "erlpack": "0.1.3",
     "ws": "7.3.1"
   },
   "devDependencies": {
     "@augu/eslint-config": "1.6.1",
-    "@types/node": "14.0.27",
-    "@types/ws": "7.2.6",
-    "@typescript-eslint/eslint-plugin": "3.8.0",
-    "@typescript-eslint/parser": "3.8.0",
-    "eslint": "7.6.0",
+    "eslint": "7.7.0",
     "typescript": "3.9.7",
     "veza": "1.1.0"
   }

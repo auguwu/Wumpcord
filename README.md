@@ -1,5 +1,5 @@
 # Wumpcord
-> :rowboat: **| Flexible and type-safe Discord API library made in TypeScript**
+> :rowboat: **| Flexible, type-safe, and lightweight Discord API library**
 
 ## Features
 - Not cached by default
@@ -8,6 +8,10 @@
   - You can combine both worlds of [discord.js](https://discord.js.org) and [Eris](https://abal.moe/Eris) with 1 simple library. Like discord.js' Structures API and Eris' simplistic sharding API.
 - Clustering out of the box
   - You can opt to using the Clustering API, so the library will do it for you without any external libraries.
+- Command handling out of the box
+  - Too lazy to code your own command handler? Wumpcord will supply you with an en-riching commands API!
+- Extra utilities
+  - Too lazy to make your own utilities (Reaction Menus, etc) or don't wanna add dependencies? Well, Wumpcord fully supports what other libraries does out of the box!
 
 ## Example Bot
 ```js
@@ -69,7 +73,7 @@ client.start();
 ```
 
 ## Clustering
-> Only use the API if your bot is over ~10k guilds or more since the ShardedClient will error if it's over the cap to use the Clustering API (may change in the future)
+> Only use the API if your bot is over ~10k guilds or more since the Client will error if it's over the cap to use the Clustering API (may change in the future)
 
 This is basically an extension to Wumpcord that allows the ability to cluster your bot without any external dependencies.
 
@@ -95,7 +99,6 @@ module.exports = class MyService extends ClusterService {
 This will tell the library to run this specific service when the ClusteringClient has finished readying up a worker.
 
 ### Example Bot
-
 ```js
 const { clustering: { ClusterClient }, GatewayIntent } = require('wumpcord');
 
