@@ -29,6 +29,7 @@ module.exports = {
   UnrecoverableCodes: [1005, 4004, 4010, 4011, 4012, 4013, 4014],
   MaxGuildsToCluster: 10000,
   GatewayVersion: 6,
+  CacheTypes: ['guild', 'user', 'channel', 'member', 'member:role', 'voice:state'],
   ImageFormats: ['png', 'jpg', 'gif', 'webp', 'jpeg'],
   RestVersion: 7,
   UserAgent: `DiscordBot (https://github.com/auguwu/Wumpcord, v${version})`,
@@ -330,3 +331,7 @@ module.exports = {
     Play:        1 << 5
   }
 };
+
+/**
+ * @typedef {'guild' | 'user' | 'channel' | 'member' | 'member:role' | 'voice:state'} CacheType The cache type
+ */
