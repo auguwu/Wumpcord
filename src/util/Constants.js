@@ -267,21 +267,21 @@ module.exports = {
   },
 
   GatewayIntents: {
-    Guilds:                 1 << 0,
-    GuildMembers:           1 << 1,
-    GuildBans:              1 << 2,
-    GuildEmojis:            1 << 3,
-    GuildIntegrations:      1 << 4,
-    GuildWebhooks:          1 << 5,
-    GuildInvites:           1 << 6,
-    GuildVoiceStates:       1 << 7,
-    GuildPresences:         1 << 8,
-    GuildMessages:          1 << 9,
-    GuildMessageReactions:  1 << 10,
-    GuildMessageTyping:     1 << 11,
-    DirectMessages:         1 << 12,
-    DirectMessageReactions: 1 << 13,
-    DirectMessageTyping:    1 << 14
+    guilds:                 1 << 0,
+    guildMembers:           1 << 1,
+    guildBans:              1 << 2,
+    guildEmojis:            1 << 3,
+    guildIntegrations:      1 << 4,
+    guildWebhooks:          1 << 5,
+    guildInvites:           1 << 6,
+    guildVoiceStates:       1 << 7,
+    guildPresences:         1 << 8,
+    guildMessages:          1 << 9,
+    guildMessageReactions:  1 << 10,
+    guildMessageTyping:     1 << 11,
+    directMessages:         1 << 12,
+    directMessageReactions: 1 << 13,
+    directMessageTyping:    1 << 14
   },
 
   GatewayEvents: {
@@ -329,9 +329,18 @@ module.exports = {
     JoinRequest: 1 << 3,
     Sync:        1 << 4,
     Play:        1 << 5
+  },
+
+  GuildBoostTier: {
+    0: 'None',
+    1: 'Tier1',
+    2: 'Tier2',
+    3: 'Tier3'
   }
 };
 
 /**
- * @typedef {'guild' | 'user' | 'channel' | 'member' | 'member:role' | 'voice:state'} CacheType The cache type
+ * @typedef {'guild' | 'user' | 'channel' | 'member' | 'member:role' | 'voice:state' | 'all' | 'none'} CacheType The cache type
+ * @typedef {'guilds' | 'guildMembers' | 'guildBans' | 'guildEmojis' | 'guildIntegrations' | 'guildInvites' | 'guildVoiceStates' | 'guildPresences' | 'guildMessages' | 'guildMessageReactions' | 'directMessages' | 'directMessageTyping' | 'directMessageReactions'} GatewayIntents
+ * @typedef {'READY' | 'RESUMED' | 'CHANNEL_CREATE' | 'CHANNEL_UPDATE' | 'CHANNEL_DELETE' | 'CHANNEL_PINS_UPDATE' | 'GUILD_CREATE' | 'GUILD_UPDATE' | 'GUILD_DELETE' | 'GUILD_BAN_ADD' | 'GUILD_BAN_REMOVE' | 'GUILD_EMOJIS_UPDATE' | 'GUILD_INTEGRATIONS_UPDATE' | 'GUILD_MEMBER_ADD' | 'GUILD_MEMBER_REMOVE' | 'GUILD_MEMBER_UPDATE' | 'GUILD_MEMBERS_CHUNK' | 'GUILD_ROLE_CREATE' | 'GUILD_ROLE_DELETE' | 'GUILD_ROLE_UPDATE' | 'MESSAGE_CREATE' | 'MESSAGE_UPDATE' | 'MESSAGE_DELETE' | 'MESSAGE_DELETE_BULK' | 'MESSAGE_REACTION_ADD' | 'MESSAGE_REACTION_REMOVE' | 'MESSAGE_REACTION_REMOVE_ALL' | 'MESSAGE_REACTION_REMOVE_EMOJI' | 'TYPING_START' | 'USER_UPDATE' | 'VOICE_STATE_UPDATE' | 'VOICE_SERVER_UPDATE' | 'WEBHOOKS_UPDATE' | 'PRESENCE_UPDATE' | 'GIFT_CODE_UPDATE'} Event
  */

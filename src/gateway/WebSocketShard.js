@@ -553,6 +553,8 @@ class WebSocketShard extends EventBus {
 module.exports = { WebSocketShard, Status };
 
 /**
+ * @typedef {WebSocketShard} Shard
+ * 
  * @typedef {object} ShardOptions
  * @prop {'json' | 'etf'} strategy The strategy to encode/decode packets
  * @prop {number} id The shard's ID

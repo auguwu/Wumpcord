@@ -4,8 +4,6 @@
 ## Features
 - Not cached by default
   - Everything is not cached by default (guilds, users, etc), you'll have to enable it with the stuff you want cached.
-- Flexibility
-  - You can combine both worlds of [discord.js](https://discord.js.org) and [Eris](https://abal.moe/Eris) with 1 simple library. Like discord.js' Structures API and Eris' simplistic sharding API.
 - Clustering out of the box
   - You can opt to using the Clustering API, so the library will do it for you without any external libraries.
 - Command handling out of the box
@@ -15,11 +13,10 @@
 
 ## Example Bot
 ```js
-const { Client, GatewayIntent, ActivityStatus } = require('wumpcord');
+const { Client, GatewayIntents, ActivityStatus } = require('wumpcord');
 
-const client = new Client({
-  token: '',
-  ws: { intents: [GatewayIntent.GUILDS, GatewayIntent.GUILD_MESSAGES] }
+const client = new Client('', {
+  ws: { intents: [GatewayIntents.GUILDS, GatewayIntents.GUILD_MESSAGES] }
 });
 
 client.on('ready', () => {
@@ -48,11 +45,10 @@ There is two ways of sharding your bot:
 Example bot:
 
 ```js
-const { Client, GatewayIntent, ActivityStatus } = require('wumpcord');
+const { Client, GatewayIntents, ActivityStatus } = require('wumpcord');
 
-const client = new Client({
-  token: '',
-  ws: { intents: [GatewayIntent.GUILDS, GatewayIntent.GUILD_MESSAGES] },
+const client = new Client('', {
+  ws: { intents: [GatewayIntents.GUILDS, GatewayIntents.GUILD_MESSAGES] },
   shardCount: 'auto'
 });
 
