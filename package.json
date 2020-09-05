@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@augu/immutable": "0.4.0",
-    "@augu/orchid": "1.4.0",
+    "@augu/orchid": "1.6.1",
     "erlpack": "0.1.3",
     "ws": "7.3.1"
   },
