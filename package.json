@@ -17,15 +17,13 @@
     "lint": "eslint src --ext .js --fix"
   },
   "dependencies": {
-    "@augu/immutable": "0.4.0",
-    "@augu/orchid": "1.4.0",
+    "@augu/immutable": "0.4.2",
+    "@augu/orchid": "1.6.1",
     "erlpack": "0.1.3",
     "ws": "7.3.1"
   },
   "devDependencies": {
-    "@augu/eslint-config": "1.6.1",
-    "eslint": "7.7.0",
-    "typescript": "3.9.7",
-    "veza": "1.1.0"
+    "@augu/eslint-config": "1.8.2",
+    "eslint": "7.8.1"
   }
 }
