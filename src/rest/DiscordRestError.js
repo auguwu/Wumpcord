@@ -21,34 +21,18 @@
  */
 
 /**
- * External utilities made for development purposes
+ * Error when the REST API has errored
  */
-module.exports = class Utilities {
-  constructor() {
-    throw new SyntaxError('Wumpcord.Utilities is not made to be a constructable-class; please refrain using `new`.');
-  }
-
+module.exports = class DiscordRESTError extends Error {
   /**
-   * Gets an option from an object
-   * @template T The object itself
-   * @template U The default value, if any
-   * @param {keyof T} prop The property to find
-   * @param {U} defaultValue The default value
-   * @param {T} [options] The options to use
-   * @returns {U} The value itself or the default value if not found
-   * @arity Wumpcord.Utilities.getOption/3
+   * Creates a new [DiscordRESTError] instance
+   * @param {number} statusCode The status code
+   * @param {string} message The message
    */
-  static get(prop, defaultValue, options) {
-    if (options === undefined || options === null) return defaultValue;
-    else if (options.hasOwnProperty(prop)) return options[prop];
-    else return defaultValue;
-  }
+  constructor(statusCode, message) {
+    super(message);
 
-  /**
-   * Halts the process asynchronously for an amount of time
-   * @param {number} ms The number of milliseconds to halt the process
-   */
-  static sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    this.status = statusCode;
+    this.name = `DiscordRestError [${statusCode}]`;
   }
 };

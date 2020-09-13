@@ -21,34 +21,11 @@
  */
 
 /**
- * External utilities made for development purposes
+ * Received when a message has been created
+ * @type {import('.').EventCallee}
  */
-module.exports = class Utilities {
-  constructor() {
-    throw new SyntaxError('Wumpcord.Utilities is not made to be a constructable-class; please refrain using `new`.');
-  }
-
-  /**
-   * Gets an option from an object
-   * @template T The object itself
-   * @template U The default value, if any
-   * @param {keyof T} prop The property to find
-   * @param {U} defaultValue The default value
-   * @param {T} [options] The options to use
-   * @returns {U} The value itself or the default value if not found
-   * @arity Wumpcord.Utilities.getOption/3
-   */
-  static get(prop, defaultValue, options) {
-    if (options === undefined || options === null) return defaultValue;
-    else if (options.hasOwnProperty(prop)) return options[prop];
-    else return defaultValue;
-  }
-
-  /**
-   * Halts the process asynchronously for an amount of time
-   * @param {number} ms The number of milliseconds to halt the process
-   */
-  static sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
+const onMessageCreate = function (data) {
+  this.client.emit('message', data);
 };
+
+module.exports = onMessageCreate;

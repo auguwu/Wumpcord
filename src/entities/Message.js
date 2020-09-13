@@ -1,50 +1,39 @@
 /*
 {
-  type: 0,
-  tts: false,
-  timestamp: '2020-09-12T12:32:15.458000+00:00',
-  pinned: false,
-  nonce: '754318460619587584',
-  mentions: [],
-  mention_roles: [],
-  mention_everyone: false,
-  member: {
-    roles: [
-      '476914701863747586', '528791083245764618',
-      '528792518830325765', '580802826331095061',
-      '593437945193824267', '605210216270921728',
-      '617840703791431713', '651225262138064923',
-      '652365854750539776', '652767897600524298',
-      '675410635093180454', '681097462013886478',
-      '681869789144416288', '682062114789261341',
-      '702684907352227880', '705067937513472070',
-      '715135350502195210', '721941260524322876',
-      '750601259999821834', '750601338253213720',
-      '750601389708935240', '750601421858144280',
-      '750601457329373204', '750601487570305124',
-      '750616692543062116', '750616748830752828'
-    ],
-    premium_since: null,
-    nick: 'Chris �',
-    mute: false,
-    joined_at: '2017-11-22T02:53:26.644000+00:00',
-    hoisted_role: '580802826331095061',
-    deaf: false
-  },
-  id: '754318460145893396',
-  flags: 0,
-  embeds: [],
-  edited_timestamp: null,
-  content: 'a',
-  channel_id: '518584300858507279',
-  author: {
-    username: 'August',
-    public_flags: 131840,
-    id: '280158289667555328',
-    discriminator: '5820',
-    avatar: 'ea39327dc2bb82d9326e055dfaed0b76'
-  },
-  attachments: [],
-  guild_id: '382725233695522816'
+  t: 'MESSAGE_CREATE',
+  op: 0,
+  d: {
+    type: 0,
+    tts: false,
+    timestamp: '2020-09-13T10:56:47.805000+00:00',
+    pinned: false,
+    mentions: [],
+    mention_roles: [],
+    mention_everyone: false,
+    member: {
+      roles: [Array],
+      premium_since: null,
+      nick: 'Chris �',
+      mute: false,
+      joined_at: '2017-11-22T02:53:26.644000+00:00',
+      hoisted_role: '580802826331095061',
+      deaf: false
+    },
+    id: '754656824493342722',
+    flags: 0,
+    embeds: [],
+    edited_timestamp: null,
+    content: 'h',
+    channel_id: '518584300858507279',
+    author: {
+      username: 'August',
+      public_flags: 131840,
+      id: '280158289667555328',
+      discriminator: '5820',
+      avatar: 'ea39327dc2bb82d9326e055dfaed0b76'
+    },
+    attachments: [ [Object] ],
+    guild_id: '382725233695522816'
+  }
 }
 */

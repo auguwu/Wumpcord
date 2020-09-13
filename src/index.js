@@ -24,12 +24,9 @@
  * Entrypoint of Wumpcord
  */
 module.exports = {
-  Bitfield: require('./util/Bitfield'),
   Constants: require('./Constants'),
   Client: require('./gateway/WebSocketClient'),
-  ClientUser: require('./entities/ClientUser'),
   Extensions: require('./util/Extensions'),
   Permissions: require('./util/Permissions'),
-  Snowflake: require('./util/Snowflake'),
   Util: require('./util/Util')
 };
