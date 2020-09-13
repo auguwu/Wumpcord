@@ -20,14 +20,55 @@
  * SOFTWARE.
  */
 
-const { Message } = require('../../entities');
+const Base = require('./Base');
 
-/**
- * Received when a message has been created
- * @type {import('.').EventCallee}
- */
-const onMessageCreate = function (data) {
-  this.client.emit('message', new Message(this.client, data.d));
+module.exports = class Attachment extends Base {
+  /**
+   * Creates a new [Attachment] class
+   * @param {AttachmentPacket} data The data
+   */
+  constructor(data) {
+    super(data.id);
+
+    /**
+     * The proxy URL
+     * @type {?string}
+     */
+    this.proxyUrl = data.proxy_url;
+
+    /**
+     * The size in bytes
+     * @type {number}
+     */
+    this.size = data.size;
+
+    /**
+     * The height of the image
+     * @type {number}
+     */
+    this.height = data.height;
+
+    /**
+     * The width of the image
+     * @type {number}
+     */
+    this.width = data.width;
+
+    /**
+     * The URL of the attachemtn
+     * @type {string}
+     */
+    this.url = data.url;
+  }
 };
 
-module.exports = onMessageCreate;
+/**
+ * @typedef {object} AttachmentPacket
+ * @prop {number} width
+ * @prop {string} url
+ * @prop {number} size
+ * @prop {string} proxy_url
+ * @prop {string} id
+ * @prop {number} height
+ * @prop {string} filename
+ */

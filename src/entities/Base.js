@@ -20,14 +20,25 @@
  * SOFTWARE.
  */
 
-const { Message } = require('../../entities');
+const EPOCH = 1420070400000;
+const DELTA = 4194304;
 
 /**
- * Received when a message has been created
- * @type {import('.').EventCallee}
+ * Represents a [Base] class
  */
-const onMessageCreate = function (data) {
-  this.client.emit('message', new Message(this.client, data.d));
-};
+module.exports = class Base {
+  /**
+   * Creates a new [Base] class
+   * @param {string} id The ID of the entity
+   */
+  constructor(id) {
+    this.id = id;
+  }
 
-module.exports = onMessageCreate;
+  /**
+   * Gets the date of when this entity was created
+   */
+  get createdAt() {
+    return new Date(Math.floor(Number(this.id) / DELTA) + EPOCH);
+  }
+};

@@ -1,39 +1,170 @@
-/*
-{
-  t: 'MESSAGE_CREATE',
-  op: 0,
-  d: {
-    type: 0,
-    tts: false,
-    timestamp: '2020-09-13T10:56:47.805000+00:00',
-    pinned: false,
-    mentions: [],
-    mention_roles: [],
-    mention_everyone: false,
-    member: {
-      roles: [Array],
-      premium_since: null,
-      nick: 'Chris �',
-      mute: false,
-      joined_at: '2017-11-22T02:53:26.644000+00:00',
-      hoisted_role: '580802826331095061',
-      deaf: false
-    },
-    id: '754656824493342722',
-    flags: 0,
-    embeds: [],
-    edited_timestamp: null,
-    content: 'h',
-    channel_id: '518584300858507279',
-    author: {
-      username: 'August',
-      public_flags: 131840,
-      id: '280158289667555328',
-      discriminator: '5820',
-      avatar: 'ea39327dc2bb82d9326e055dfaed0b76'
-    },
-    attachments: [ [Object] ],
-    guild_id: '382725233695522816'
+/**
+ * Copyright (c) 2020 August
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+const { Collection } = require('@augu/immutable');
+const Attachment = require('./Attachment');
+const Base = require('./Base');
+
+/**
+ * Represents a [Discord] message
+ */
+module.exports = class Message extends Base {
+  /**
+   * Creates a new [Message] instance
+   * @param {import('../gateway/WebSocketClient')} client The client
+   * @param {MessagePacket} data The data packet
+   */
+  constructor(client, data) {
+    super(data.id);
+
+    /**
+     * The client
+     * @private
+     * @type {import('../gateway/WebSocketClient')}
+     */
+    this.client = client;
+
+    this.patch(data);
   }
-}
-*/
+
+  /**
+   * Patches this [Message] instance
+   * @private
+   * @param {MessagePacket} data The message packet
+   * @arity Wumpcord.Entities.Message.patch/1
+   */
+  patch(data) {
+    /**
+     * If the message was used with TTS
+     * @type {boolean}
+     */
+    this.tts = data.tts;
+
+    /**
+     * If the message includes `@everyone` or `@here`
+     * @type {boolean}
+     */
+    this.mentionEveryone = data.mention_everyone;
+
+    /**
+     * The roles that were mentioned
+     * @type {Collection<Role> | number}
+     */
+    this.mentionRoles = this.client.canCache('member:role') ? new Collection() : 0;
+
+    /**
+     * The users that were mentioned
+     * @type {Collection<Role> | number}
+     */
+    this.mentions = this.client.canCache('user') ? new Collection() : 0;
+
+    /**
+     * The member instance
+     */
+    this.member = data.hasOwnProperty('member') ? data.member : null;
+
+    /**
+     * The message flags
+     */
+    this.flags = data.flags || 0;
+
+    /**
+     * The embeds included
+     */
+    this.embeds = data.embeds;
+
+    /**
+     * The edited timestamp, if wanted
+     */
+    this.editedTimestamp = data.edited_timestamp !== null ? new Date(data.edited_timestamp) : null;
+
+    /**
+     * The message content
+     */
+    this.content = data.content;
+
+    /**
+     * The channel or the ID
+     * @type {Collection<import('./BaseChannel')> | string}
+     */
+    this.channel = this.client.canCache('channel') ? this.client.channels.get(data.channel_id) : data.channel_id;
+
+    /**
+     * The author
+     */
+    this.author = data.author;
+
+    /**
+     * The guild or the it's ID
+     */
+    this.guild = this.client.canCache('guild') ? this.client.guilds.get(data.guild_id) : data.guild_id;
+
+    if (data.attachments) {
+      /**
+       * The list of attachments
+       * @type {Collection<Attachment>}
+       */
+      this.attachments = new Collection();
+
+      for (const packet of data.attachments) {
+        const attachment = new Attachment(packet);
+        this.attachments.set(attachment.id, attachment);
+      }
+    }
+  }
+};
+
+/**
+ * @typedef {object} MessagePacket
+ * @prop {number} type
+ * @prop {boolean} tts
+ * @prop {string} timestamp
+ * @prop {boolean} pinned
+ * @prop {string[]} mentions
+ * @prop {string[]} mention_roles
+ * @prop {boolean} mention_everyone
+ * @prop {GuildMemberPacket} member
+ * @prop {string} id
+ * @prop {MessageEmbedPacket[]} embeds
+ * @prop {string} [edited_timestamp]
+ * @prop {string} content
+ * @prop {string} channel_id
+ * @prop {UserPacket} author
+ * @prop {AttachmentPacket[]} attachments
+ * @prop {string} guild_id
+ * 
+ * @typedef {object} GuildMemberPacket
+ * @prop {string[]} roles
+ * @prop {string} premium_since 
+ * @prop {string} [nick]
+ * @prop {boolean} mute
+ * @prop {string} joined_at
+ * @prop {string} hoisted_role
+ * @prop {boolean} deaf
+ * 
+ * @typedef {object} UserPacket
+ * @prop {string} username
+ * @prop {number} public_flags
+ * @prop {string} id
+ * @prop {string} discriminator
+ * @prop {string} avatar
+ */

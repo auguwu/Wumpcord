@@ -57,7 +57,8 @@ module.exports = {
     'channel',
     'member',
     'roles',
-    'voice'
+    'voice',
+    'attachments'
   ],
 
   /**
@@ -396,7 +397,7 @@ module.exports = {
 };
 
 /**
- * @typedef {'guild' | 'user' | 'channel' | 'member' | 'member:role' | 'voice:state' | 'all' | 'none'} CacheType The cache type
+ * @typedef {'guild' | 'user' | 'channel' | 'member' | 'member:role' | 'voice:state' | 'all' | 'none' | 'attachment'} CacheType The cache type
  * @typedef {'guilds' | 'guildMembers' | 'guildBans' | 'guildEmojis' | 'guildIntegrations' | 'guildInvites' | 'guildVoiceStates' | 'guildPresences' | 'guildMessages' | 'guildMessageReactions' | 'directMessages' | 'directMessageTyping' | 'directMessageReactions'} GatewayIntents
  * @typedef {'READY' | 'RESUMED' | 'CHANNEL_CREATE' | 'CHANNEL_UPDATE' | 'CHANNEL_DELETE' | 'CHANNEL_PINS_UPDATE' | 'GUILD_CREATE' | 'GUILD_UPDATE' | 'GUILD_DELETE' | 'GUILD_BAN_ADD' | 'GUILD_BAN_REMOVE' | 'GUILD_EMOJIS_UPDATE' | 'GUILD_INTEGRATIONS_UPDATE' | 'GUILD_MEMBER_ADD' | 'GUILD_MEMBER_REMOVE' | 'GUILD_MEMBER_UPDATE' | 'GUILD_MEMBERS_CHUNK' | 'GUILD_ROLE_CREATE' | 'GUILD_ROLE_DELETE' | 'GUILD_ROLE_UPDATE' | 'MESSAGE_CREATE' | 'MESSAGE_UPDATE' | 'MESSAGE_DELETE' | 'MESSAGE_DELETE_BULK' | 'MESSAGE_REACTION_ADD' | 'MESSAGE_REACTION_REMOVE' | 'MESSAGE_REACTION_REMOVE_ALL' | 'MESSAGE_REACTION_REMOVE_EMOJI' | 'TYPING_START' | 'USER_UPDATE' | 'VOICE_STATE_UPDATE' | 'VOICE_SERVER_UPDATE' | 'WEBHOOKS_UPDATE' | 'PRESENCE_UPDATE' | 'GIFT_CODE_UPDATE'} Event
  */
