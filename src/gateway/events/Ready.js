@@ -1,3 +1,4 @@
+const Constants = require('../../Constants');
 /**
  * Copyright (c) 2020 August
  *
@@ -57,6 +58,8 @@ const onReady = function (data) {
     this.client.users    = this.client.canCache('user')        ? new Collection({ [this.client.user.id]: this.client.user }) : 1;
   }
 
+  this.unavailableGuilds = new Set(data.d.guilds.map(s => s.id));
+  this.status = Constants.ShardStatus.WaitingForGuilds;
   this.checkReady();
 };
 

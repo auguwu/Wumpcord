@@ -21,8 +21,10 @@
  */
 
 const { Collection } = require('@augu/immutable');
+const { Endpoints } = require('../Constants');
 const Attachment = require('./Attachment');
 const Base = require('./Base');
+const User = require('./User');
 
 /**
  * Represents a [Discord] message
@@ -103,20 +105,20 @@ module.exports = class Message extends Base {
     this.content = data.content;
 
     /**
-     * The channel or the ID
-     * @type {Collection<import('./BaseChannel')> | string}
+     * The channel's ID
+     * @type {string}
      */
-    this.channel = this.client.canCache('channel') ? this.client.channels.get(data.channel_id) : data.channel_id;
+    this.channelID = data.channel_id;
 
     /**
      * The author
      */
-    this.author = data.author;
+    this.author = this.client.insert('user', new User(data.author));
 
     /**
-     * The guild or the it's ID
+     * The guild's ID
      */
-    this.guild = this.client.canCache('guild') ? this.client.guilds.get(data.guild_id) : data.guild_id;
+    this.guild = data.guild_id;
 
     if (data.attachments) {
       /**
@@ -129,6 +131,22 @@ module.exports = class Message extends Base {
         const attachment = new Attachment(packet);
         this.attachments.set(attachment.id, attachment);
       }
+    }
+  }
+
+  /**
+   * Gets the guild
+   */
+  async getGuild() {
+    try {
+      const data = await this.client.rest.dispatch({
+        endpoint: Endpoints.guild(this.id),
+        method: 'get'
+      });
+
+      return data;
+    } catch(ex) {
+      return null;
     }
   }
 };

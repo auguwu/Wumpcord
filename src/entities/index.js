@@ -24,6 +24,8 @@
  * List of entities
  */
 module.exports = {
+  Attachment: require('./Attachment'),
   BotUser: require('./BotUser'),
-  Message: require('./Message')
+  Message: require('./Message'),
+  User: require('./User')
 };

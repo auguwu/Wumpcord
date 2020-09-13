@@ -188,6 +188,29 @@ module.exports = class WebSocketClient extends EventBus {
   setStatus(status, opts) {
     for (const shard of this.shards.values()) shard.setStatus(status, opts);
   }
+
+  /**
+   * Adds the entity to the cache
+   * @param {'guild' | 'user' | 'channel'} type The entity type
+   * @param {any} packet The data packet to add
+   */
+  insert(type, packet) {
+    switch (type) {
+      case 'channel':
+        this.canCache('channel') ? this.channels.set(packet.id, packet) : this.channels++;
+        return packet;
+
+      case 'guild':
+        this.canCache('guild') ? this.guilds.set(packet.id, packet) : this.guilds++;
+        return packet;
+
+      case 'user':
+        this.canCache('user') ? this.users.set(packet.id, packet) : this.users++;
+        return packet;
+
+      default: break;
+    }
+  }
 };
 
 /**

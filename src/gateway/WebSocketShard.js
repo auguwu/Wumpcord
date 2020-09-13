@@ -26,6 +26,7 @@ const Constants     = require('../Constants');
 const WebSocket     = require('ws');
 const EventBus      = require('../util/EventBus');
 const Util          = require('../util/Util');
+const { Collection } = require('@augu/immutable');
 
 /** @type {typeof import('erlpack') | undefined} */
 let Erlpack = undefined;
@@ -57,6 +58,12 @@ module.exports = class WebSocketShard extends EventBus {
     this.reconnectTime = Util.get('reconnectTimeout', 7000, options);
 
     /**
+     * List of unavailable guilds
+     * @type {Set<string>}
+     */
+    this.unavailableGuilds = new Set();
+
+    /**
      * The session ID
      * @type {?string}
      */
@@ -81,17 +88,16 @@ module.exports = class WebSocketShard extends EventBus {
     this.status = Constants.ShardStatus.Zombie;
 
     /**
-     * List of unavailable guilds
-     * @type {Set<string>}
-     */
-    this.guilds = new Set();
-
-    /**
      * The client
      * @private
      * @type {import('./WebSocketClient')}
      */
     this.client = client;
+
+    /**
+     * Collection or a number of the guilds for this shard 
+     */
+    this.guilds = client.canCache('guild') ? new Collection() : 0;
 
     /**
      * The sequence number
@@ -453,8 +459,16 @@ module.exports = class WebSocketShard extends EventBus {
       } break;
 
       default: {
-        if (this.status === Constants.Status.WaitingForGuilds && data.t === Constants.GatewayEvents.GuildCreate) {
-          this.guilds.delete(data.d.id);
+        if (this.status === Constants.ShardStatus.WaitingForGuilds && data.t === Constants.GatewayEvents.GuildCreate) {
+          this.unavailableGuilds.delete(data.d.id);
+          if (this.client.canCache('guild')) {
+            this.guilds.set(data.d.id, data.d);
+            this.client.insert('guild', data.d);
+          } else {
+            this.guilds++;
+            this.client.guilds++;
+          }
+
           this.checkReady();
         }
       } break;
@@ -505,23 +519,22 @@ module.exports = class WebSocketShard extends EventBus {
    * Checks the status of this [WebSocketShard] instance
    */
   checkReady() {
-    if (!this.guilds.size) {
+    if (this._readyTimeout) clearTimeout(this._readyTimeout);
+    if (!this.unavailableGuilds.size) {
       this.debug('Recieved all guilds from Discord, marking it as ready!');
 
-      if (this._readyTimeout) clearTimeout(this._readyTimeout);
       this.status = Constants.ShardStatus.Connected;
       this.emit('ready', this.id);
-      this.client.emit('ready');
 
       return;
     }
 
     this._readyTimeout = setTimeout(() => {
-      this.debug(`Didn't received any more guild packets in the last 15 seconds, ${this.guilds.size} unavailable guilds.`);
+      this.debug(`Didn't received any more guild packets in the last 15 seconds, ${this.unavailableGuilds.size} unavailable guilds.`);
       this._readyTimeout = undefined;
 
-      this.emit('ready', this.id, this.guilds);
-      this.client.emit('ready', this.guilds);
+      this.status = Constants.ShardStatus.Connected;
+      this.emit('ready', this.id, this.unavailableGuilds);
     }, 15000);
   }
 

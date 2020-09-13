@@ -82,6 +82,16 @@ module.exports = {
    */
   UserAgent: `DiscordBot (https://github.com/auguwu/Wumpcord, v${version})`,
 
+  /**
+   * The CDN url
+   */
+  CdnUrl: 'https://cdn.discordapp.com',
+
+  /**
+   * The REST API url
+   */
+  RestUrl: 'https://discord.com/api',
+
   Endpoints: {
     Channel: {
       bulkDelete: (channelID)                                       => `/channels/${channelID}/messages/bulk-delete`,
@@ -387,12 +397,13 @@ module.exports = {
   },
 
   ShardStatus: {
-    Connected:  0,
-    Connecting: 1,
-    Zombie:     2,
-    Nearly:     3,
-    Disposed:   4,
-    Dead:       5
+    Connected:        0,
+    Connecting:       1,
+    Zombie:           2,
+    Nearly:           3,
+    Disposed:         4,
+    Dead:             5,
+    WaitingForGuilds: 6
   }
 };
 
