@@ -20,14 +20,29 @@
  * SOFTWARE.
  */
 
+const Base = require('./Base');
+
 /**
- * List of entities
+ * Represents an API structure of an unavailable guild
  */
-module.exports = {
-  Attachment: require('./Attachment'),
-  BotUser: require('./BotUser'),
-  Guild: require('./Guild'),
-  Message: require('./Message'),
-  UnavailableGuild: require('./UnavailableGuild'),
-  User: require('./User')
+module.exports = class UnavailableGuild extends Base {
+  /**
+   * Creates a new [UnavailableGuild] instance
+   * @param {UnavailableGuildPacket} data The data
+   */
+  constructor(data) {
+    super(data.id);
+
+    /**
+     * If the guild is unavailable
+     * @type {boolean}
+     */
+    this.unavailable = Boolean(data.unavailable);
+  }
 };
+
+/**
+ * @typedef {object} UnavailableGuildPacket
+ * @prop {boolean} unavailable
+ * @prop {string} id
+ */

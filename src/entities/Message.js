@@ -23,6 +23,7 @@
 const { Collection } = require('@augu/immutable');
 const { Endpoints } = require('../Constants');
 const Attachment = require('./Attachment');
+const Guild = require('./Guild');
 const Base = require('./Base');
 const User = require('./User');
 
@@ -118,7 +119,7 @@ module.exports = class Message extends Base {
     /**
      * The guild's ID
      */
-    this.guild = data.guild_id;
+    this.guildID = data.guild_id;
 
     if (data.attachments) {
       /**
@@ -136,11 +137,37 @@ module.exports = class Message extends Base {
 
   /**
    * Gets the guild
+   * @returns {Promise<Guild | null>} Returns the Guild instance or `null` if a REST error occured
    */
   async getGuild() {
     try {
       const data = await this.client.rest.dispatch({
-        endpoint: Endpoints.guild(this.id),
+        endpoint: Endpoints.guild(this.guildID, true),
+        method: 'get'
+      });
+
+      const guild = new Guild(this.client, data);
+      this.client.insert('guild', guild);
+
+      /**
+       * The guild of this message
+       * @type {Guild}
+       */
+      this.guild = guild;
+
+      return guild;
+    } catch(ex) {
+      return null;
+    }
+  }
+
+  /**
+   * Gets the channel and possibly caches it and populates [Message.channel]
+   */
+  async getChannel() {
+    try {
+      const data = await this.client.rest.dispatch({
+        endpoint: Endpoints.channel(this.channelID),
         method: 'get'
       });
 

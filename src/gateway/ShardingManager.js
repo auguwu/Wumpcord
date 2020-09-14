@@ -49,6 +49,14 @@ module.exports = class ShardingManager extends Collection {
   }
 
   /**
+   * Returns the latency of all shards
+   */
+  get ping() {
+    const ping = this.reduce((a, b) => a + b.ping, 0);
+    return ping / this.size;
+  }
+
+  /**
    * Spawns a new shard
    * @param {number} id The shard's ID
    * @param {'etf' | 'json'} strategy The strategy to use when (en/de)coding packets
@@ -65,6 +73,7 @@ module.exports = class ShardingManager extends Collection {
       .on('debug', (id, message)            => this.client.emit('debug', `[Shard #${id}] ${message}`))
       .on('close', (id, error, recoverable) => this.client.emit('shardClose', id, error, recoverable))
       .on('ready', (id, guilds)             => this.client.emit('shardReady', id, guilds))
+      .on('event', (id, data)               => this.client.emit('shardEvent', id, data))
       .on('warn', (id, message)             => this.client.emit('shardWarning', id, message));
 
     this.set(id, shard);

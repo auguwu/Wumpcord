@@ -1,4 +1,3 @@
-const Constants = require('../../Constants');
 /**
  * Copyright (c) 2020 August
  *
@@ -21,7 +20,8 @@ const Constants = require('../../Constants');
  * SOFTWARE.
  */
 
-const { GatewayEvents } = require('../../Constants');
+const { GatewayEvents, ShardStatus } = require('../../Constants');
+const { Collection } = require('@augu/immutable');
 
 /**
  * Received when the dispatcher calls `READY`
@@ -32,15 +32,18 @@ const onReady = function (data) {
   this.sessionID = data.d.session_id;
 
   if (data.t === GatewayEvents.Resumed) {
+    this.debug(`Session "${this.sessionID}" has replayed ${this.seq === -1 ? 'no' : (data.s - this.seq).toLocaleString()} events`);
+
+    this.status = ShardStatus.Connected;
     this.sendHeartbeat();
-    this.client.emit('resume');
+    this.client.emit('resume', this.seq === -1 ? 0 : (data.s - this.seq));
     return;
   }
 
   // And now the hard part: caching
   // It works in 2 different ways:
-  //1. Collection-based cache (stores in memory)
-  //2. Sets the length of the cache (doesn't store in memory)
+  //   1. Collection-based cache (stores in memory)
+  //   2. Sets the length of the cache (doesn't store in memory)
   // If the cache type is 'none', we use #2
   // If the cache type is 'all', we use #1
   // If we specified the cache type (by string or array), we use #1 or #2
@@ -54,12 +57,12 @@ const onReady = function (data) {
     this.client.users    = new Collection({ [this.client.user.id]: this.client.user });
   } else {
     this.client.channels = this.client.canCache('channel') ? new Collection() : 0;
-    this.client.guilds   = this.client.canCache('guild')     ? new Collection() : 0;
-    this.client.users    = this.client.canCache('user')        ? new Collection({ [this.client.user.id]: this.client.user }) : 1;
+    this.client.guilds   = this.client.canCache('guild')   ? new Collection() : 0;
+    this.client.users    = this.client.canCache('user')    ? new Collection({ [this.client.user.id]: this.client.user }) : 1;
   }
 
   this.unavailableGuilds = new Set(data.d.guilds.map(s => s.id));
-  this.status = Constants.ShardStatus.WaitingForGuilds;
+  this.status = ShardStatus.WaitingForGuilds;
   this.checkReady();
 };
 

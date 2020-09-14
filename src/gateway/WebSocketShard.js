@@ -21,12 +21,13 @@
  */
 /* eslint-disable camelcase */
 
-const GatewayEvents = require('./events');
-const Constants     = require('../Constants');
-const WebSocket     = require('ws');
-const EventBus      = require('../util/EventBus');
-const Util          = require('../util/Util');
 const { Collection } = require('@augu/immutable');
+const GatewayEvents  = require('./events');
+const Constants      = require('../Constants');
+const WebSocket      = require('ws');
+const { Guild }      = require('../entities');
+const EventBus       = require('../util/EventBus');
+const Util           = require('../util/Util');
 
 /** @type {typeof import('erlpack') | undefined} */
 let Erlpack = undefined;
@@ -253,7 +254,6 @@ module.exports = class WebSocketShard extends EventBus {
     if (Array.isArray(this.client.options.ws.intents)) {
       for (const intent of this.client.options.ws.intents) {
         if (typeof intent === 'number') intents |= intent;
-        
         if (Constants.GatewayIntents[intent]) intents |= Constants.GatewayIntents[intent];
       }
     } else {
@@ -385,10 +385,10 @@ module.exports = class WebSocketShard extends EventBus {
 
     if (isRecoverable) this.disconnect(true);
     else {
-      this.debug('Close code is not recoverable, now exiting process in 5 seconds...');
+      this.debug('Close code is not recoverable, re-trying...');
       setTimeout(() => {
         this.hardReset();
-        process.exit(1);
+        this.disconnect(true);
       }, 5000);
     }
   }
@@ -420,9 +420,25 @@ module.exports = class WebSocketShard extends EventBus {
     }
 
     switch (data.op) {
-      case Constants.OPCodes.Event:
-        if (GatewayEvents.hasOwnProperty(data.t)) GatewayEvents[data.t].call(this, data);
-        break;
+      case Constants.OPCodes.Event: {
+        if (this.status === Constants.ShardStatus.WaitingForGuilds && data.t === Constants.GatewayEvents.GuildCreate) {
+          this.unavailableGuilds.delete(data.d.id);
+          if (this.client.canCache('guild')) {
+            const packet = new Guild(this.client, data.d);
+
+            this.guilds.set(packet.id, packet);
+            this.client.insert('guild', packet);
+          } else {
+            this.guilds++;
+            this.client.guilds++;
+          }
+
+          this.checkReady();
+        } else {
+          if (GatewayEvents.hasOwnProperty(data.t)) return GatewayEvents[data.t].call(this, data);
+          this.emit('event', this.id, data);
+        }
+      } break;
 
       case Constants.OPCodes.Heartbeat:
         this.sendHeartbeat();
@@ -470,6 +486,8 @@ module.exports = class WebSocketShard extends EventBus {
           }
 
           this.checkReady();
+        } else {
+          this.emit('event', this.id, data);
         }
       } break;
     }
@@ -526,7 +544,12 @@ module.exports = class WebSocketShard extends EventBus {
       this.status = Constants.ShardStatus.Connected;
       this.emit('ready', this.id);
 
-      return;
+      if (this.client.shards.size !== this.client.options.shardCount || this.client.shards.some(s => s.status !== Constants.ShardStatus.Connected)) {
+        return;
+      } else {
+        this.client.emit('ready');
+        return;
+      }
     }
 
     this._readyTimeout = setTimeout(() => {
