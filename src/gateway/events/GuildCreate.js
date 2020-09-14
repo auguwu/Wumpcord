@@ -20,17 +20,18 @@
  * SOFTWARE.
  */
 
-/**
- * List of gateway events
- * @type {{ [x in import('../../Constants').Event]: EventCallee }}
- */
-module.exports = {
-  MESSAGE_CREATE: require('./MessageCreate'),
-  GUILD_DELETE: require('./GuildDelete'),
-  GUILD_CREATE: require('./GuildCreate'),
-  READY: require('./Ready')
-};
+const Guild = require('../../entities/Guild');
 
 /**
- * @typedef {(this: import('../WebSocketShard'), data: any) => void} EventCallee The event caller
+ * Function to call when a guild has been created
+ * @type {import('.').EventCallee}
  */
+const onGuildCreate = function ({ d: data }) {
+  this.debug(`Received new guild: "${data.name}"`);
+
+  const guild = new Guild(this.client, data);
+  this.client.insert('guild', guild);
+  this.client.emit('guildCreate', guild);
+};
+
+module.exports = onGuildCreate;

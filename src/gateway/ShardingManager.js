@@ -72,6 +72,7 @@ module.exports = class ShardingManager extends Collection {
       .on('error', (id, error)              => this.client.emit('shardError', id, error))
       .on('debug', (id, message)            => this.client.emit('debug', `[Shard #${id}] ${message}`))
       .on('close', (id, error, recoverable) => this.client.emit('shardClose', id, error, recoverable))
+      .on('resume', (id, replayed)          => this.client.emit('shardResume', id, replayed))
       .on('ready', (id, guilds)             => this.client.emit('shardReady', id, guilds))
       .on('event', (id, data)               => this.client.emit('shardEvent', id, data))
       .on('warn', (id, message)             => this.client.emit('shardWarning', id, message));

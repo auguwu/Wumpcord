@@ -22,13 +22,14 @@
 
 const { GatewayEvents, ShardStatus } = require('../../Constants');
 const { Collection } = require('@augu/immutable');
+const { BotUser } = require('../../entities');
 
 /**
  * Received when the dispatcher calls `READY`
  * @type {import('.').EventCallee}
  */
 const onReady = function (data) {
-  this.client.user = data.d.user;
+  this.client.user = new BotUser(data.d.user);
   this.sessionID = data.d.session_id;
 
   if (data.t === GatewayEvents.Resumed) {
@@ -36,7 +37,7 @@ const onReady = function (data) {
 
     this.status = ShardStatus.Connected;
     this.sendHeartbeat();
-    this.client.emit('resume', this.seq === -1 ? 0 : (data.s - this.seq));
+    this.emit('resume', this.seq === -1 ? 0 : (data.s - this.seq));
     return;
   }
 

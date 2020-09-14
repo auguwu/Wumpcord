@@ -20,16 +20,26 @@
  * SOFTWARE.
  */
 
-/*
-  user: {
-    verified: true,
-    username: 'Aoba',
-    mfa_enabled: true,
-    id: '508842721545289731',
-    flags: 0,
-    email: null,
-    discriminator: '4890',
-    bot: true,
-    avatar: '5e51b30fa089f43678fe5536d2740812'
+const User = require('./User');
+
+module.exports = class BotUser extends User {
+  /**
+   * Creates a new [BotUser] instance
+   * @param {BotUserPacket} data The packet
+   */
+  constructor(data) {
+    super(data);
+
+    /**
+     * The bot is verified or not?
+     * @type {boolean}
+     */
+    this.verified = data.verified;
+
+    /**
+     * If the user has MFA enabled (why do bots have this)
+     * @type {boolean}
+     */
+    this.mfaEnabled = data.mfa_enabled;
   }
-*/
+};

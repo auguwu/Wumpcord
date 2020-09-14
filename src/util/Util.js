@@ -47,6 +47,7 @@ module.exports = class Utilities {
   /**
    * Halts the process asynchronously for an amount of time
    * @param {number} ms The number of milliseconds to halt the process
+   * @arity Wumpcord.Utilities.sleep/1
    */
   static sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

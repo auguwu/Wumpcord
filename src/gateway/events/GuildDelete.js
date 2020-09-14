@@ -21,16 +21,22 @@
  */
 
 /**
- * List of gateway events
- * @type {{ [x in import('../../Constants').Event]: EventCallee }}
+ * Function to call when the guild has been deleted
+ * @type {import('.').EventCallee}
  */
-module.exports = {
-  MESSAGE_CREATE: require('./MessageCreate'),
-  GUILD_DELETE: require('./GuildDelete'),
-  GUILD_CREATE: require('./GuildCreate'),
-  READY: require('./Ready')
+const onGuildDelete = function ({ d: data }) {
+  if (!data.hasOwnProperty('id')) {
+    this.debug('Deleted guild is missing "id", skipping');
+    return;
+  }
+
+  this.debug(`Received deleted guild: ${data.id}`);
+  if (this.client.canCache('guild')) {
+    const cached = this.client.guilds.get(data.id);
+    this.client.emit('guildDelete', cached || { id: data.id });
+  } else {
+    this.client.emit('guildDelete', null);
+  }
 };
 
-/**
- * @typedef {(this: import('../WebSocketShard'), data: any) => void} EventCallee The event caller
- */
+module.exports = onGuildDelete;

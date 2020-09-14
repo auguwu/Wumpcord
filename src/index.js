@@ -26,7 +26,6 @@
 module.exports = {
   Constants: require('./Constants'),
   Client: require('./gateway/WebSocketClient'),
-  Extensions: require('./util/Extensions'),
   Permissions: require('./util/Permissions'),
   Util: require('./util/Util')
 };

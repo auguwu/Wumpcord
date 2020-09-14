@@ -124,6 +124,24 @@ module.exports = class User extends Base {
   get avatarUrl() {
     return this.avatar === null ? this.defaultAvatarUrl : Endpoints.CDN.getUserAvatar(this.id, this.avatar);
   }
+
+  /**
+   * Returns the user's tag
+   */
+  get tag() {
+    return `${this.username}#${this.discriminator}`;
+  }
+
+  /**
+   * Gets the user's mention
+   */
+  get mention() {
+    return `<@${this.id}>`;
+  }
+
+  toString() {
+    return `[User ${this.tag} (${this.id})]`;
+  }
 };
 
 /**

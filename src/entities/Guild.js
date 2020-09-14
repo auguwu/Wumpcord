@@ -249,6 +249,12 @@ module.exports = class Guild extends UnavailableGuild {
      */
     this.embedChannelID = data.embed_channel_id;
 
+    /**
+     * The guild's name
+     * @type {string}
+     */
+    this.name = data.name;
+
     if (data.emojis) {
       if (this.client.canCache('emoji')) {
         for (let i = 0; i < data.emojis.length; i++) this.emojis.set(data.emojis[i].id, data.emojis[i]);
@@ -264,6 +270,40 @@ module.exports = class Guild extends UnavailableGuild {
         this.roles = data.roles.length;
       }
     }
+
+    if (data.channels) {
+      if (this.client.canCache('channel')) {
+        for (let i = 0; i < data.channels.length; i++) {
+          this.channels.set(data.channels[i].id, data.channels[i]);
+          this.client.insert('channel', data.channels[i]); // insert if not in the cache
+        }
+      } else {
+        this.channels++;
+        this.client.channels++;
+      }
+    }
+
+    if (data.members) {
+      if (this.client.canCache('member')) {
+        for (let i = 0; i < data.members.length; i++) {
+          this.members.set(data.members[i].id, data.members[i]);
+        }
+      } else {
+        this.members++;
+      }
+    }
+
+    if (data.voice_states) {
+      console.log(data.voice_states[0]);
+    }
+
+    if (data.presences) {
+      console.log(data.presences[0]);
+    }
+  }
+
+  toString() {
+    return `[Guild "${this.name}" (${this.id})]`;
   }
 };
 

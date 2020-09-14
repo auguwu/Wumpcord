@@ -67,7 +67,7 @@ module.exports = class Permissions {
    * Checks if the permission is allowed or not
    * @param {string} perm The permission to check for
    * @returns {boolean} Boolean value if it is allowed or not
-   * @arity Wumpcord.Permissions/1
+   * @arity Wumpcord.Permissions.has/1
    */
   has(perm) {
     if (!Constants.Permissions.hasOwnProperty(perm)) return false;

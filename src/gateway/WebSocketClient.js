@@ -67,7 +67,7 @@ module.exports = class WebSocketClient extends EventBus {
         connectTimeout: 30000,
         clientOptions: undefined,
         compress: false,
-        intents: 0,
+        intents: ['guilds', 'guildMessages'],
         tries: 5
       }, opts)
     };
@@ -197,15 +197,15 @@ module.exports = class WebSocketClient extends EventBus {
   insert(type, packet) {
     switch (type) {
       case 'channel':
-        this.canCache('channel') ? this.channels.set(packet.id, packet) : this.channels++;
+        if (!this.channels.has(packet.id)) this.canCache('channel') ? this.channels.set(packet.id, packet) : this.channels++;
         return packet;
 
       case 'guild':
-        this.canCache('guild') ? this.guilds.set(packet.id, packet) : this.guilds++;
+        if (!this.guilds.has(packet.id)) this.canCache('guild') ? this.guilds.set(packet.id, packet) : this.guilds++;
         return packet;
 
       case 'user':
-        this.canCache('user') ? this.users.set(packet.id, packet) : this.users++;
+        if (!this.users.has(packet.id)) this.canCache('user') ? this.users.set(packet.id, packet) : this.users++;
         return packet;
 
       default: break;
