@@ -176,6 +176,10 @@ module.exports = class Message extends Base {
       return null;
     }
   }
+
+  toString() {
+    return `[Message (${this.id})]`;
+  }
 };
 
 /**

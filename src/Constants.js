@@ -298,13 +298,13 @@ module.exports = {
   },
 
   ChannelTypes: {
-    Text:     0,
-    DM:       1,
-    Voice:    2,
-    Group:    3,
-    Category: 4,
-    News:     5,
-    Store:    6
+    0: 'text',
+    1: 'dm',
+    2: 'voice',
+    3: 'group',
+    4: 'category',
+    5: 'news',
+    6: 'store'
   },
 
   UserFlags: {

@@ -20,15 +20,40 @@
  * SOFTWARE.
  */
 
-/**
- * List of entities
- */
-module.exports = {
-  Attachment: require('./Attachment'),
-  BaseChannel: require('./BaseChannel'),
-  BotUser: require('./BotUser'),
-  Guild: require('./Guild'),
-  Message: require('./Message'),
-  UnavailableGuild: require('./UnavailableGuild'),
-  User: require('./User')
+const { ChannelTypes } = require('../Constants');
+const Base = require('./Base');
+
+module.exports = class BaseChannel extends Base {
+  /**
+   * Creates a new [BaseChannel] instance
+   * @param {any} data The data supplied from Discord 
+   */
+  constructor(data) {
+    super(data.id);
+
+    /**
+     * The type of the channel
+     * @type {string}
+     */
+    this.type = ChannelTypes[data.type];
+  }
+
+  /**
+   * Creates a new Channel by it's type
+   * @param {import('../gateway/WebSocketClient')} client The ws client to use
+   * @param {any} data The data
+   * @returns {BaseChannel} The channel
+   */
+  static from(client, data) {
+    switch (data.type) {
+      case 0: return new TextChannel(client, data);
+      case 1: return new DMChannel(client, data);
+      case 2: return new VoiceChannel(client, data);
+      case 3: return new GroupChannel(client, data);
+      case 4: return new CategoryChannel(client, data);
+      case 5: return new NewsChannel(client, data);
+      case 6: return new StoreChannel(client, data);
+      default: return new BaseChannel(client, data);
+    }
+  }
 };

@@ -582,6 +582,10 @@ module.exports = class WebSocketShard extends EventBus {
 
     return packet;
   }
+
+  toString() {
+    return `[WebSocketShard #${this.id}/${this.client.shards.size}]`;
+  }
 };
 
 /**

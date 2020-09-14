@@ -211,6 +211,11 @@ module.exports = class WebSocketClient extends EventBus {
       default: break;
     }
   }
+
+  toString() {
+    const user = this.user ? this.user.tag : 'Unknown Bot#0000';
+    return `[WebSocketClient ${user}]`;
+  }
 };
 
 /**

@@ -45,7 +45,7 @@ module.exports = class ShardingManager extends Collection {
   }
 
   toString() {
-    return `ShardManager [${this.size} shards]`;
+    return `[ShardManager (${this.size} shards)]`;
   }
 
   /**

@@ -20,15 +20,26 @@
  * SOFTWARE.
  */
 
-/**
- * List of entities
- */
-module.exports = {
-  Attachment: require('./Attachment'),
-  BaseChannel: require('./BaseChannel'),
-  BotUser: require('./BotUser'),
-  Guild: require('./Guild'),
-  Message: require('./Message'),
-  UnavailableGuild: require('./UnavailableGuild'),
-  User: require('./User')
+const { GuildChannel } = require('..');
+const { Collection }   = require('@augu/immutable');
+
+module.exports = class CategoryChannel extends GuildChannel {
+  /**
+   * Returns the children of this [CategoryChannel]
+   * @returns {Promise<Collection<import('./GuildChannel')> | number>}
+   */
+  async getChildren() {
+    if (this.client.canCache('guild')) {
+      const guild = await this.client.fetchGuild(this.guildID);
+      const children = new Collection();
+
+      for (const channel of guild.channels.values()) {
+        if (channel.parentID === this.id) children.set(this.id, channel);
+      }
+
+      return children;
+    } else {
+      return guild.channels;
+    }
+  }
 };
