@@ -25,10 +25,11 @@ const User = require('./User');
 module.exports = class BotUser extends User {
   /**
    * Creates a new [BotUser] instance
+   * @param {import('../gateway/WebSocketClient')} client The client
    * @param {BotUserPacket} data The packet
    */
-  constructor(data) {
-    super(data);
+  constructor(client, data) {
+    super(client, data);
 
     /**
      * The bot is verified or not?

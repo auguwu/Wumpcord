@@ -19,9 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+/* eslint-disable camelcase */
 
 const UnavailableGuild = require('./UnavailableGuild');
 const { Collection }   = require('@augu/immutable');
+const { OPCodes } = require('../Constants');
 
 /**
  * Represents a Discord guild
@@ -255,6 +257,18 @@ module.exports = class Guild extends UnavailableGuild {
      */
     this.name = data.name;
 
+    /**
+     * Full member count
+     * @type {number}
+     */
+    this.memberCount = data.member_count || this.memberCount;
+
+    /**
+     * The shard ID
+     * @type {number}
+     */
+    this.shardID = data.shard_id || 0;
+
     if (data.emojis) {
       if (this.client.canCache('emoji')) {
         for (let i = 0; i < data.emojis.length; i++) this.emojis.set(data.emojis[i].id, data.emojis[i]);
@@ -293,19 +307,117 @@ module.exports = class Guild extends UnavailableGuild {
       }
     }
 
-    if (data.voice_states) {
-      console.log(data.voice_states[0]);
-    }
+    //if (data.voice_states) {
+    //console.log(data.voice_states[0]);
+    //}
 
-    if (data.presences) {
-      console.log(data.presences[0]);
-    }
+    //if (data.presences) {
+    //console.log(data.presences[0]);
+    //}
+  }
+
+  /**
+   * Return the guild's [WebSocketShard]
+   * @returns {import('../gateway/WebSocketShard') | null} The shard or `null` if not found
+   */
+  get shard() {
+    return this.client.shards.get(this.shardID) || null;
+  }
+
+  /**
+   * Fetches the guild members and returns it, if any
+   * @param {FetchGuildMembersOptions} opts The options
+   * @arity Wumpcord.Entities.Guild.fetchMembers/1
+   */
+  async fetchMembers({ limit, presences, query, time, nonce, force, userIds } = {
+    limit: 0,
+    presences: false,
+    query: null,
+    time: 120e3,
+    nonce: Date.now().toString(16),
+    force: false,
+    userIds: []
+  }) {
+    return new Promise((resolve, reject) => {
+      if (this.memberCount === this.members.size && !limit && !presences && !query && !userIds && !force) return resolve(this.members);
+
+      if (nonce.length > 32) return reject(new RangeError('Nonce length was over 32.'));
+      if (!this.shard) return reject(new Error(`Shard #${this.shardID} doesn't exist`));
+
+      this.shard.send(OPCodes.GetGuildMembers, {
+        guild_id: this.id,
+        presences,
+        user_ids: userIds,
+        query: query || '',
+        nonce,
+        limit
+      });
+
+      const members = this.client.canCache('member') ? new Collection() : 0;
+      const option = query || limit || presences || userIds;
+      let i = 0;
+
+      const timeout = setTimeout(() => {
+        clearTimeout(timeout);
+        return reject(new Error(`Unable to fetch guild members in ${time}ms`));
+      }, time);
+
+      const handler = (all, _, chunk) => {
+        timeout.refresh();
+        if (chunk.nonce !== nonce) return;
+
+        i++;
+        for (const member of all.values()) {
+          if (option) {
+            if (this.client.canCache('member')) {
+              members.set(member.id, member);
+            } else {
+              members++;
+            }
+          }
+        }
+
+        if (this.client.canCache('member')) {
+          this.members.merge(members);
+        } else {
+          this.members += members;
+        }
+
+        if (
+          this.memberCount <= this.members.size || 
+          (option && typeof members === 'number' ? members < 1000 : members.size < 1000) ||
+          (limit && (typeof members === 'number' ? members >= limit : members.size >= limit)) ||
+          i === chunk.count
+        ) {
+          clearTimeout(timeout);
+          this.client.remove('guildMemberChunk', handler);
+
+          let fetched = option ? members : this.members;
+          if (userIds && !Array.isArray(userIds)) fetched = this.client.canCache('member') ? members.first() : null;
+
+          return resolve(fetched);
+        }
+      };
+
+      this.client.on('guildMemberChunk', handler);
+    });
   }
 
   toString() {
     return `[Guild "${this.name}" (${this.id})]`;
   }
 };
+
+/**
+ * @typedef {object} FetchGuildMembersOptions
+ * @prop {number} [limit=0] The limit
+ * @prop {boolean} [presences=false] If we should include presences
+ * @prop {any} [query] The query to use
+ * @prop {number} [time=120e3] The time to conclude
+ * @prop {string} [nonce] The nonce string
+ * @prop {boolean} [force=false] If should be forceful or not
+ * @prop {string[]} [userIds=[]] The user ID array
+ */
 
 /*
 Guild {

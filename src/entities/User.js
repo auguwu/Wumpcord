@@ -21,15 +21,24 @@
  */
 
 const { UserFlags, CdnUrl, Endpoints } = require('../Constants');
+const DMChannel = require('./channel/DMChannel');
 const Base = require('./Base');
 
 module.exports = class User extends Base {
   /**
    * Creates a new [User] instance
+   * @param {import('../gateway/WebSocketClient')} client The client
    * @param {UserPacket} data The data
    */
-  constructor(data) {
+  constructor(client, data) {
     super(data.id);
+
+    /**
+     * The client
+     * @private
+     * @type {import('../gateway/WebSocketClient')}
+     */
+    this.client = client;
 
     /**
      * The public flags the user has
@@ -137,6 +146,32 @@ module.exports = class User extends Base {
    */
   get mention() {
     return `<@${this.id}>`;
+  }
+
+  /**
+   * Gets the user's DM channel
+   * @returns {Promise<DMChannel | null>} The channel or `null` if an REST error occurs
+   */
+  async getDMChannel() {
+    try {
+      const data = await this.client.rest.dispatch({
+        endpoint: '/users/@me/channels',
+        method: 'post',
+        data: {
+          recipients: [this.id],
+          type: 1
+        }
+      });
+
+      const channel = new DMChannel(this.client, data);
+      console.log(channel);
+      this.client.insert('channel', channel);
+
+      return channel;
+    } catch(ex) {
+      console.error(ex);
+      return null;
+    }
   }
 
   toString() {

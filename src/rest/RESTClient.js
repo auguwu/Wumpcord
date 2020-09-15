@@ -63,7 +63,11 @@ module.exports = class RESTClient {
   dispatch(opts) {
     return new Promise((resolve, reject) => {
       /** @type {RatelimitBucket} */
-      const bucket = { resolve, reject, opts };
+      const bucket = { 
+        resolve, 
+        reject, 
+        opts
+      };
 
       this.cache.add(bucket);
       this.request(bucket)
@@ -86,7 +90,8 @@ module.exports = class RESTClient {
       this.http.request({
         method: bucket.opts.method,
         url: bucket.opts.endpoint,
-        data: bucket.opts.data
+        data: bucket.opts.data,
+        headers: bucket.opts.headers || {}
       }).then(resp => {
         const data = resp.json();
         const remaining = Number(resp.headers['x-ratelimit-remaining']);
@@ -97,7 +102,7 @@ module.exports = class RESTClient {
         }
 
         resolve(data);
-      }).catch(error => reject(new DiscordRESTError(error.statusCode, error.message || 'Unknown')));
+      }).catch(error => reject(new DiscordRESTError(error.statusCode || 500, error.message)));
     });
   }
 };
@@ -112,4 +117,5 @@ module.exports = class RESTClient {
  * @prop {string} endpoint The endpoint
  * @prop {import('@augu/orchid').HttpMethod} method The http method to use
  * @prop {any} [data] The data to use
+ * @prop {{ [x: string]: any }} [headers] The headers to append
  */

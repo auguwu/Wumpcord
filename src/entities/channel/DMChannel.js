@@ -20,10 +20,20 @@
  * SOFTWARE.
  */
 
-const { BaseChannel, User, Message } = require('..');
 const { Collection } = require('@augu/immutable');
 const { Endpoints } = require('../../Constants');
+const BaseChannel = require('../BaseChannel');
+const Multipart = require('../../util/Multipart');
+const Message = require('../Message');
 const Util = require('../../util/Util');
+const User = require('../User');
+
+/**
+ * Checks if an object is a [MessageFile] instance
+ * @param {unknown} obj The object
+ * @returns {obj is MessageFile} Returns a boolean value if it is or not 
+ */
+const isMessageFile = (obj) => typeof obj === 'object' && !Array.isArray(obj) && obj.hasOwnProperty('file');
 
 module.exports = class DMChannel extends BaseChannel {
   /**
@@ -102,10 +112,10 @@ module.exports = class DMChannel extends BaseChannel {
   }
 
   /**
-   * Leaves the channel and uncaches it
+   * Closes this [DMChannel] instance and un-caches it, if possible
    * @returns {Promise<boolean>} Truthy value if it was left or not
    */
-  async leave() {
+  async close() {
     try {
       await this.client.rest.dispatch({
         endpoints: Endpoints.channel(this.id),
@@ -152,6 +162,140 @@ module.exports = class DMChannel extends BaseChannel {
       return [];
     }
   }
+
+  /**
+   * Sends a message to a channel
+   * @param {string | CreateMessageOptions | Buffer} content The content to send
+   * @param {CreateMessageOptions | MessageFile[] | MessageFile} [options] Any additional options
+   */
+  async send(content, options) {
+    let send = {};
+    const headers = {};
+    let data;
+
+    if (typeof content === 'string') {
+      send = { content };
+    } else if (options) {
+      // It's a file!
+      if (Array.isArray(options)) {
+        if (options.some(value => typeof value !== 'object')) {
+          const items = options.filter(value => typeof value !== 'object');
+
+          throw new SyntaxError(`${items.length} items were not a Buffer or an object`);
+        }
+
+        data = new Multipart();
+        headers['Content-Type'] = `multipart/form-data; boundary=${data.boundary}`;
+
+        for (let i = 0; i < options.length; i++) {
+          const file = options[i];
+          if (!file.file) return;
+          if (!file.name) file.name = 'file.png';
+
+          data.append(file.name, file.file, file.name);
+        }
+
+        send = data.finish();
+      }
+
+      if (isMessageFile(options)) {
+        if (!options.file) throw new SyntaxError('Missing "file" property in [options] (DMChannel#send)');
+        if (!options.name) options.name = 'file.png';
+
+        data = new Multipart();
+        headers['Content-Type'] = `multipart/form-data; boundary=${data.boundary}`;
+
+        data.append(options.name, options.file, options.name);
+        send = data.finish();
+      } else {
+        if (!options.hasOwnProperty('content') || send.hasOwnProperty('content')) throw new SyntaxError('Missing "content" in [MessageOptions] or `content` is already populated');
+
+        // It's a normal object, let's just add it to `send`
+        if (!send.hasOwnProperty('content') && options.hasOwnProperty('content')) send.content = options.content;
+        if (options.hasOwnProperty('embed')) send.embed = options.embed;
+        if (options.hasOwnProperty('allowedMentions')) {
+          send.allowed_mentions = Util.formatAllowedMentions(client.options, options.allowedMentions); // eslint-disable-line camelcase
+        }
+      }
+    } else if (typeof content === 'object') {
+      // It's a file!
+      if (Array.isArray(options)) {
+        if (options.some(value => typeof value !== 'object')) {
+          const items = options.filter(value => typeof value !== 'object');
+
+          throw new SyntaxError(`${items.length} items were not a Buffer or an object`);
+        }
+
+        data = new Multipart();
+        headers['Content-Type'] = `multipart/form-data; boundary=${data.boundary}`;
+
+        for (let i = 0; i < options.length; i++) {
+          const file = options[i];
+          if (!file.file) return;
+          if (!file.name) file.name = 'file.png';
+
+          data.append(file.name, file.file, file.name);
+        }
+
+        send = data.finish();
+      }
+
+      if (isMessageFile(options)) {
+        if (!options.file) throw new SyntaxError('Missing "file" property in [options] (DMChannel#send)');
+        if (!options.name) options.name = 'file.png';
+
+        data = new Multipart();
+        headers['Content-Type'] = `multipart/form-data; boundary=${data.boundary}`;
+
+        data.append(options.name, options.file, options.name);
+        send = data.finish();
+      } else {
+        if (!options.hasOwnProperty('content') || send.hasOwnProperty('content')) throw new SyntaxError('Missing "content" in [MessageOptions] or `content` is already populated');
+
+        // It's a normal object, let's just add it to `send`
+        if (!send.hasOwnProperty('content') && options.hasOwnProperty('content')) send.content = options.content;
+        if (options.hasOwnProperty('embed')) send.embed = options.embed;
+        if (options.hasOwnProperty('allowedMentions')) {
+          send.allowed_mentions = Util.formatAllowedMentions(client.options, options.allowedMentions); // eslint-disable-line camelcase
+        }
+      }
+    } else {
+      throw new SyntaxError('Missing content, file, or embed to send');
+    }
+
+    try {
+      const data = await this.client.rest.dispatch({
+        endpoint: Endpoints.Channel.messages(this.id),
+        method: 'post',
+        data: send,
+        headers
+      });
+
+      console.log(data);
+      return true;
+    } catch(ex) {
+      return false;
+    }
+  }
+
+  /**
+   * Pins a message to this [DMChannel]
+   * @param {string} messageID The message ID
+   */
+  async pin(messageID) {
+    try {
+      const data = await this.client.rest.dispatch({
+        endpoint: Endpoints.Channel.pin(this.id, messageID),
+        method: 'PUT'
+      });
+
+      console.log(data);
+
+      return true;
+    } catch(ex) {
+      return false;
+    }
+  }
 };
 
 /**
@@ -159,4 +303,13 @@ module.exports = class DMChannel extends BaseChannel {
  * @prop {number} [before] The before limit
  * @prop {number} [after] The after limit
  * @prop {number} [around] The around limit
+ * 
+ * @typedef {object} CreateMessageOptions
+ * @prop {string} [content] The message content
+ * @prop {import('../message/MessageEmbed') | import('../message/MessageEmbed').Embed} [embed] The embed to send
+ * @prop {MessageFile} [file] The file to send
+ * 
+ * @typedef {object} MessageFile
+ * @prop {Buffer} file The file to send
+ * @prop {string} [name] The filename
  */

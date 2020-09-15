@@ -20,18 +20,37 @@
  * SOFTWARE.
  */
 
-const Guild = require('../../entities/Guild');
+const { Collection } = require('@augu/immutable');
 
 /**
- * Function to call when a guild has been created
+ * Function to call when we receive a chunk of members
  * @type {import('.').EventCallee}
  */
-const onGuildCreate = function ({ d: data }) {
-  this.debug(`Received new guild: "${data.name}"`);
+const onGuildMemberChunk = function ({ d: data }) {
+  if (!this.client.canCache('guild')) {
+    this.client.emit('warn', 'Cannot do member chunk because possibly uncaching');
+    return;
+  }
 
-  const guild = new Guild(this.client, { shard_id: this.id, ...data }); // eslint-disable-line camelcase
-  this.client.insert('guild', guild);
-  this.client.emit('guildCreate', guild);
+  const guild = this.client.guilds.get(data.guild_id);
+  if (!guild) {
+    this.client.emit('warn', `Guild "${data.guild_id}" is possibly uncached, skipping`);
+    return;
+  }
+
+  const members = new Collection();
+  for (const member of data.members) {
+    members.set(member.user.id, member);
+    guild.members.set(member.user.id, member);
+  }
+
+  if (data.presences) this.client.emit('warn', 'Received presences, this is a WIP.');
+
+  this.client.emit('guildMemberChunk', members, guild, {
+    count: data.chunk_count,
+    index: data.chunk_index,
+    nonce: data.nonce
+  });
 };
 
-module.exports = onGuildCreate;
+module.exports = onGuildMemberChunk;

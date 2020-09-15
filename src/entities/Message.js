@@ -114,7 +114,7 @@ module.exports = class Message extends Base {
     /**
      * The author
      */
-    this.author = this.client.insert('user', new User(data.author));
+    this.author = this.client.insert('user', new User(this.client, data.author));
 
     /**
      * The guild's ID

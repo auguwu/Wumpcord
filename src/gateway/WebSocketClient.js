@@ -57,7 +57,13 @@ module.exports = class WebSocketClient extends EventBus {
      * @type {ClientOptions}
      */
     this.options = {
+      allowedMentions: Util.get('allowedMentions', {
+        everyone: false,
+        roles: false,
+        users: false
+      }, opts),
       disabledEvents: Util.get('disabledEvents', [], opts),
+      getAllUsers: Util.get('getAllUsers', true, opts),
       shardCount: Util.get('shardCount', 'auto', opts),
       strategy: Util.get('strategy', 'json', opts),
       cache: Util.get('cache', 'none', opts),
@@ -112,6 +118,30 @@ module.exports = class WebSocketClient extends EventBus {
      * @type {import('../entities/BotUser')}
      */
     this.user = undefined;
+
+    this.once('ready', () => this.requestGuildMembers.call(this));
+  }
+
+  /**
+   * Returns the intents by it's numeric value
+   */
+  get intents() {
+    if (typeof this.options.ws.intents === 'undefined') return 0;
+    else if (typeof this.options.ws.intents === 'number') return this.options.ws.intents;
+    else {
+      let intents = 0;
+      for (let i = 0; i < this.options.ws.intents.length; i++) {
+        const intent = this.options.ws.intents[i];
+        if (typeof intent === 'number') {
+          intents |= intent;
+        } else {
+          if (!Constants.GatewayIntents.hasOwnProperty(intent)) continue;
+          intents |= Constants.GatewayIntents[intent];
+        }
+      }
+
+      return intents;
+    }
   }
 
   /**
@@ -119,8 +149,8 @@ module.exports = class WebSocketClient extends EventBus {
    */
   async connect() {
     const data = this.options.shardCount === 'auto' 
-      ? await this.getBotGateway().catch(error => this.emit('error', error)) 
-      : await this.getGateway().catch(error => this.emit('error', error));
+      ? await this.getBotGateway()
+      : await this.getGateway();
 
     if (!data.hasOwnProperty('url') || (this.options.shardCount === 'auto' && !data.hasOwnProperty('shards')))
       throw new SyntaxError('Unable to fetch data from Discord');
@@ -212,6 +242,30 @@ module.exports = class WebSocketClient extends EventBus {
     }
   }
 
+  /**
+   * Retrieves a list of requested guild members
+   */
+  async requestGuildMembers() {
+    this.emit('debug', 'Now requesting all guild members and possibly caching them...');
+        
+    if (typeof this.guilds === 'number') {
+      this.emit('debug', 'Guild cache is disabled, not populating user cache');
+      return;
+    }
+
+    if (!(this.intents & Constants.GatewayIntents.guildMembers)) {
+      this.emit('debug', 'Missing `guildMembers` intent, skipping');
+      return;
+    }
+
+    const promises = this.guilds.map(guild => {
+      if (!guild.unavailable) return guild.fetchMembers();
+      else return Promise.resolve();
+    });
+
+    await Promise.all(promises);
+  }
+
   toString() {
     const user = this.user ? this.user.tag : 'Unknown Bot#0000';
     return `[WebSocketClient ${user}]`;
@@ -220,6 +274,8 @@ module.exports = class WebSocketClient extends EventBus {
 
 /**
  * @typedef {object} ClientOptions
+ * @prop {boolean} [getAllUsers=true] If we should call WebSocketClient#requestGuildMembers on all guilds and populate cache
+ * @prop {AllowedMentions} [allowedMentions] Object of allowed mentions
  * @prop {import('./util/Constants').Event[]} [disabledEvents=[]] The disabled events
  * @prop {number | 'auto'} [shardCount='auto'] The shard count
  * @prop {'etf' | 'json'} [strategy='etf'] Strategy when (d)encoding packets
@@ -248,4 +304,9 @@ module.exports = class WebSocketClient extends EventBus {
  * @prop {number} reset_after
  * @prop {number} remaining
  * @prop {number} total
+ * 
+ * @typedef {object} AllowedMentions
+ * @prop {boolean} [everyone] If we should allow the bot to ping everyone
+ * @prop {boolean | string[]} [roles] Boolean value of `true` if we should parse every role as a mentionable ping or an Array of role ids
+ * @prop {boolean | string[]} [users] Boolean value of `true` if we should parse every user as a mentionable ping or an Array of user ids
  */

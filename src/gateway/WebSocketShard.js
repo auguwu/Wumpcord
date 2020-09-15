@@ -182,6 +182,7 @@ module.exports = class WebSocketShard extends EventBus {
       this.sessionID = undefined;
     }
 
+    console.log(`tries: ${this.attempts}`);
     if (reconnect && this.attempts < this.client.options.ws.tries) {
       if (this.sessionID) {
         this.debug(`Connecting to portentially resume zombified connection (${this.attempts}/${this.client.options.ws.tries})`);
@@ -380,15 +381,19 @@ module.exports = class WebSocketShard extends EventBus {
 
       this.emit('close', this.id, error, isRecoverable);
     } else {
-      this.debug(`* Unknown close code: ${code}`);
+      this.debug(`Unknown close code: ${code}`);
     }
 
-    if (isRecoverable) this.disconnect(true);
-    else {
-      this.debug('Close code is not recoverable, re-trying...');
+    if (!isRecoverable) {
+      this.debug('Code is re-coverable, restarting process');
+      this.disconnect(true);
+    } else {
+      this.debug('Close code is not recoverable, exiting process...');
       setTimeout(() => {
         this.hardReset();
-        this.disconnect(true);
+        this.disconnect(false);
+
+        process.exit(1);
       }, 5000);
     }
   }
@@ -478,8 +483,8 @@ module.exports = class WebSocketShard extends EventBus {
         if (this.status === Constants.ShardStatus.WaitingForGuilds && data.t === Constants.GatewayEvents.GuildCreate) {
           this.unavailableGuilds.delete(data.d.id);
           if (this.client.canCache('guild')) {
-            this.guilds.set(data.d.id, data.d);
-            this.client.insert('guild', data.d);
+            this.guilds.set(data.d.id, new Guild(this.client, { shard_id: this.id, ...data.d }));
+            this.client.insert('guild', new Guild(this.client, { shard_id: this.id, ...data.d }));
           } else {
             this.guilds++;
             this.client.guilds++;
@@ -547,7 +552,7 @@ module.exports = class WebSocketShard extends EventBus {
       if (this.client.shards.size !== this.client.options.shardCount || this.client.shards.some(s => s.status !== Constants.ShardStatus.Connected)) {
         return;
       } else {
-        this.client.emit('ready');
+        this.triggerReadyEvent();
         return;
       }
     }
@@ -558,6 +563,7 @@ module.exports = class WebSocketShard extends EventBus {
 
       this.status = Constants.ShardStatus.Connected;
       this.emit('ready', this.id, this.unavailableGuilds);
+      if (this.client.shards.size === this.client.options.shardCount) this.triggerReadyEvent();
     }, 15000);
   }
 
@@ -581,6 +587,16 @@ module.exports = class WebSocketShard extends EventBus {
     }
 
     return packet;
+  }
+
+  /**
+   * Triggers the ready event 
+   */
+  async triggerReadyEvent() {
+    if (this.client.shards.size !== this.client.options.shardCount || this.client.shards.some(s => s.status !== Constants.ShardStatus.Connected)) return;
+    if (this.client.options.getAllUsers) await this.client.requestGuildMembers();
+
+    this.client.emit('ready');
   }
 
   toString() {

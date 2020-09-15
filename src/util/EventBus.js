@@ -106,6 +106,14 @@ module.exports = class EventBus {
       return Object.keys(this.listeners).length;
     }
   }
+
+  /**
+   * Removes all of the listeners in this [EventBus]
+   */
+  removeAllListeners() {
+    this.listeners = {};
+    return this;
+  }
 };
 
 /**

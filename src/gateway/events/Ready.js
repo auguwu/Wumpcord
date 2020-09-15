@@ -28,11 +28,11 @@ const { BotUser } = require('../../entities');
  * Received when the dispatcher calls `READY`
  * @type {import('.').EventCallee}
  */
-const onReady = function (data) {
-  this.client.user = new BotUser(data.d.user);
-  this.sessionID = data.d.session_id;
+const onReady = function ({ t, d: data }) {
+  this.client.user = new BotUser(this.client, data.user);
+  this.sessionID = data.session_id;
 
-  if (data.t === GatewayEvents.Resumed) {
+  if (t === GatewayEvents.Resumed) {
     this.debug(`Session "${this.sessionID}" has replayed ${this.seq === -1 ? 'no' : (data.s - this.seq).toLocaleString()} events`);
 
     this.status = ShardStatus.Connected;
@@ -50,7 +50,7 @@ const onReady = function (data) {
   // If we specified the cache type (by string or array), we use #1 or #2
   if (this.client.options.cacheType === 'none') {
     this.client.channels = 0;
-    this.client.guilds   = data.d.guilds.length;
+    this.client.guilds   = 0;
     this.client.users    = 1;
   } else if (this.client.options.cacheType === 'all') {
     this.client.channels = new Collection();
@@ -62,7 +62,7 @@ const onReady = function (data) {
     this.client.users    = this.client.canCache('user')    ? new Collection({ [this.client.user.id]: this.client.user }) : 1;
   }
 
-  this.unavailableGuilds = new Set(data.d.guilds.map(s => s.id));
+  this.unavailableGuilds = new Set(data.guilds.map(s => s.id));
   this.status = ShardStatus.WaitingForGuilds;
   this.checkReady();
 };

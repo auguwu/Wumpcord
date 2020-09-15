@@ -25,6 +25,7 @@
  * @type {{ [x in import('../../Constants').Event]: EventCallee }}
  */
 module.exports = {
+  GUILD_MEMBERS_CHUNK: require('./GuildMemberChunk'),
   MESSAGE_CREATE: require('./MessageCreate'),
   GUILD_DELETE: require('./GuildDelete'),
   GUILD_CREATE: require('./GuildCreate'),

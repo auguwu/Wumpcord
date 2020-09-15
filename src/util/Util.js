@@ -52,4 +52,33 @@ module.exports = class Utilities {
   static sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
+
+  /**
+   * Formats the allowed mentions property
+   * @param {import('../gateway/WebSocketClient').ClientOptions} options The client options
+   * @param {import('../gateway/WebSocketClient').AllowedMentions} allowed The allowed options
+   * @arity Wumpcord.Utilities.formatAllowedMentions/2
+   */
+  static formatAllowedMentions(options, allowed) {
+    if (!allowed) return options.allowedMentions;
+
+    const result = { parse: [] };
+    if (allowed.everyone) result.parse.push('everyone');
+
+    if (allowed.roles === true) result.parse.push('roles');
+    else if (Array.isArray(allowed.roles)) {
+      if (allowed.roles.length > 100) throw new TypeError('Allowed role mentions can\'t go over 100');
+
+      result.roles = allowed.roles;
+    }
+
+    if (allowed.users === true) result.parse.push('users');
+    else if (Array.isArray(allowed.users)) {
+      if (allowed.users.length > 100) throw new TypeError('Allowed users mentions can\'t go over 100');
+
+      result.users = allowed.users;
+    }
+
+    return result;
+  }
 };
