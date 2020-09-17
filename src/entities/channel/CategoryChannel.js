@@ -21,25 +21,32 @@
  */
 
 const { Collection } = require('@augu/immutable');
-const GuildChannel = require('./GuildChannel');
+const BaseChannel = require('../BaseChannel');
 
-module.exports = class CategoryChannel extends GuildChannel {
-  /**
-   * Returns the children of this [CategoryChannel]
-   * @returns {Promise<Collection<import('./GuildChannel')> | number>}
-   */
-  async getChildren() {
-    if (this.client.canCache('guild')) {
-      const guild = await this.client.fetchGuild(this.guildID);
-      const children = new Collection();
+/**
+ * Represents a category channel in Discord
+ */
+module.exports = class CategoryChannel extends BaseChannel {
 
-      for (const channel of guild.channels.values()) {
-        if (channel.parentID === this.id) children.set(this.id, channel);
-      }
-
-      return children;
-    } else {
-      return guild.channels;
-    }
-  }
 };
+
+/*
+{
+  type: 4,
+  position: 0,
+  permission_overwrites: [
+    {
+      type: 'role',
+      id: '746084946409685182',
+      deny_new: '2048',
+      deny: 2048,
+      allow_new: '0',
+      allow: 0
+    }
+  ],
+  parent_id: null,
+  nsfw: false,
+  name: 'Voice Channels',
+  id: '743698927982739529'
+}
+*/

@@ -46,7 +46,7 @@ module.exports = class TextableChannel extends BaseChannel {
    * @param {any} data The data
    */
   constructor(client, data) {
-    super(data.id);
+    super(data);
 
     /**
      * The client itself

@@ -22,6 +22,7 @@
 
 const { Collection } = require('@augu/immutable');
 const { Endpoints } = require('../Constants');
+const BaseChannel = require('./BaseChannel');
 const Attachment = require('./Attachment');
 const Guild = require('./Guild');
 const Base = require('./Base');
@@ -173,7 +174,10 @@ module.exports = class Message extends Base {
         method: 'get'
       });
 
-      return data;
+      const channel = BaseChannel.from(this.client, data);
+      this.client.insert('channel', channel);
+
+      return channel;
     } catch(ex) {
       return null;
     }

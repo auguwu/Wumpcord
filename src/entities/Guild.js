@@ -25,6 +25,7 @@ const UnavailableGuild = require('./UnavailableGuild');
 const { Collection } = require('@augu/immutable');
 const { OPCodes } = require('../Constants');
 const VoiceState = require('./VoiceState');
+const BaseChannel = require('./BaseChannel');
 
 /**
  * Represents a Discord guild
@@ -298,9 +299,10 @@ module.exports = class Guild extends UnavailableGuild {
       if (this.client.canCache('channel')) {
         for (let i = 0; i < data.channels.length; i++) {
           const channel = data.channels[i];
+          const type = BaseChannel.from(this.client, channel);
 
-          this.channels.set(channel.id, channel);
-          this.client.insert('channel', channel); // insert if not in the cache
+          this.channels.set(type.id, type);
+          this.client.insert('channel', type); // insert if not in the cache
         }
       }
     }

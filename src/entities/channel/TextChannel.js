@@ -1,40 +1,141 @@
-/*
-{
-  type: 0,
-  topic: '',
-  rate_limit_per_user: 0,
-  position: 9,
-  permission_overwrites: [
-    {
-      type: 'role',
-      id: '497159726455455754',
-      deny_new: '16',
-      deny: 16,
-      allow_new: '0',
-      allow: 0
-    },
-    {
-      type: 'role',
-      id: '498321608289812480',
-      deny_new: '3072',
-      deny: 3072,
-      allow_new: '0',
-      allow: 0
-    },
-    {
-      type: 'member',
-      id: '378909180666314754',
-      deny_new: '0',
-      deny: 0,
-      allow_new: '0',
-      allow: 0
+/**
+ * Copyright (c) 2020 August
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+const PermissionOverwrite = require('../PermissionOverwrite');
+const TextableChannel = require('./TextableChannel');
+const { Collection } = require('@augu/immutable');
+const { Endpoints } = require('../../Constants');
+const Message = require('../Message');
+
+/**
+ * Represents a text channel on Discord
+ */
+module.exports = class TextChannel extends TextableChannel {
+  /**
+   * Creates a new [TextChannel] class
+   * @param {import('../../gateway/WebSocketClient')} client The client
+   * @param {TextChannelPacket} data The data
+   */
+  constructor(client, data) {
+    super(client, data);
+
+    /**
+     * List of permission overwrites in this channel or `null` if not cachable
+     * @type {Collection<PermissionOverwrite> | null}
+     */
+    this.permissionOverwrites = client.canCache('permission:overwrite') ? new Collection() : null;
+
+    this.patch(data);
+  }
+
+  /**
+   * Patches this [TextChannel] instance
+   * @param {TextChannelPacket} data The data
+   */
+  patch(data) {
+    /**
+     * The topic of the channel, if applied
+     * @type {?string}
+     */
+    this.topic = data.topic !== '' ? data.topic : null;
+
+    /**
+     * The ratelimit per user
+     * @type {number}
+     */
+    this.ratelimitPerUser = data.rate_limit_per_user;
+
+    /**
+     * The channel's position
+     * @type {number}
+     */
+    this.position = data.position;
+
+    /**
+     * The parent channel ID, if in a category channel
+     * @type {?string}
+     */
+    this.parentID = data.parent_id;
+
+    /**
+     * If the channel is NSFW or not
+     * @type {boolean}
+     */
+    this.nsfw = data.nsfw;
+
+    /**
+     * The name of the channel
+     * @type {string}
+     */
+    this.name = data.name;
+
+    /**
+     * The last pinned message's timestamp
+     * @type {Date}
+     */
+    this.lastPinTimestamp = data.last_pin_timestamp === undefined ? undefined : new Date(data.last_pin_timestamp);
+
+    /**
+     * The last message's ID
+     * @type {string}
+     */
+    this.lastMessageID = data.last_message_id;
+
+    if (data.permission_overwrites) {
+      if (this.client.canCache('overwrites')) {
+        for (let i = 0; i < data.permission_overwrites; i++) {
+          const overwrite = data.permission_overwrites[i];
+          this.permissionOverwrites.set(overwrite.id, new PermissionOverwrite(overwrite));
+        }
+      }
     }
-  ],
-  parent_id: '500434333811736576',
-  nsfw: false,
-  name: 'axel',
-  last_pin_timestamp: '2020-08-28T22:33:04.033396+00:00',
-  last_message_id: '756284213019279420',
-  id: '545991299400990720'
-}
-*/
+  }
+
+  /**
+   * Gets the last message, if specified
+   * @returns {Promise<Message>} The message or `null` if can't be fetched
+   */
+  getLastMessage() {
+    if (this.lastMessageID === null) return null;
+
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Channel.message(this.id, this.lastMessageID),
+      method: 'get'
+    })
+      .then((data) => new Message(this.client, data))
+      .catch(() => null);
+  }
+};
+
+/**
+ * @typedef {object} TextChannelPacket
+ * @prop {string} [topic]
+ * @prop {number} rate_limit_per_user
+ * @prop {number} position
+ * @prop {import('../PermissionOverwrite').PermissionOverwritePacket[]} permission_overwrites
+ * @prop {string} [parent_id]
+ * @prop {boolean} nsfw
+ * @prop {string} name
+ * @prop {string} last_pin_timestamp
+ * @prop {string} last_message_id
+ * @prop {string} id
+ */
