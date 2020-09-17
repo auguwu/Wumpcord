@@ -46,20 +46,22 @@ module.exports = class BaseChannel extends Base {
    */
   static from(client, data) {
     // lazy load them since js is a piece of shit lol
-    //const VoiceChannel = require('./channel/VoiceChannel');
-    const TextChannel = require('./channel/TextChannel');
-    const DMChannel = require('./channel/DMChannel');
 
-    if (data.type === 5) console.log(data); 
+    const CategoryChannel = require('./channel/CategoryChannel');
+    const StoreChannel = require('./channel/StoreChannel');
+    const VoiceChannel = require('./channel/VoiceChannel');
+    const TextChannel = require('./channel/TextChannel');
+    const NewsChannel = require('./channel/NewsChannel');
+    const DMChannel = require('./channel/DMChannel');
 
     switch (data.type) {
       case 0: return new TextChannel(client, data);
       case 1: return new DMChannel(client, data);
-      //case 2: return new VoiceChannel(client, data);
+      case 2: return new VoiceChannel(client, data);
       //case 3: return new GroupChannel(client, data);
-      //case 4: return new CategoryChannel(client, data);
-      //case 5: return new NewsChannel(client, data);
-      //case 6: return new StoreChannel(client, data);
+      case 4: return new CategoryChannel(client, data);
+      case 5: return new NewsChannel(client, data);
+      case 6: return new StoreChannel(client, data);
       default: return new BaseChannel(data);
     }
   }

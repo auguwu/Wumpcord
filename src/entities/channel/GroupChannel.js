@@ -20,80 +20,41 @@
  * SOFTWARE.
  */
 
-const PermissionOverwrite = require('../PermissionOverwrite');
-const TextableChannel = require('./TextableChannel');
 const { Collection } = require('@augu/immutable');
 const { Endpoints } = require('../../Constants');
+const TextableChannel = require('./TextableChannel');
 const Message = require('../Message');
 
 /**
- * Represents a news channel on Discord
+ * Represents a group channel
  */
-module.exports = class NewsChannel extends TextableChannel {
+module.exports = class GroupChannel extends TextableChannel {
   /**
-   * Creates a new [NewsChannel] class
+   * Creates a new [GroupChannel] instance
    * @param {import('../../gateway/WebSocketClient')} client The client
-   * @param {NewsChannelPacket} data The data
+   * @param {any} data The data to use
    */
   constructor(client, data) {
     super(client, data);
 
     /**
-     * List of permission overwrites in this channel or `null` if not cachable
-     * @type {Collection<PermissionOverwrite> | null}
-     */
-    this.permissionOverwrites = client.canCache('permission:overwrite') ? new Collection() : null;
-
-    this.patch(data);
-  }
-
-  /**
-   * Patches this [NewsChannel] instance
-   * @param {NewsChannelPacket} data The data
-   */
-  patch(data) {
-    /**
-     * The topic of the channel, if applied
+     * The last message ID
      * @type {?string}
-     */
-    this.topic = data.topic;
-    
-    /**
-     * The channel's position
-     * @type {number}
-     */
-    this.position = data.position;
-
-    /**
-     * The parent channel ID, if in a category channel
-     * @type {?string}
-     */
-    this.parentID = data.parent_id;
-
-    /**
-     * If the channel is NSFW or not
-     * @type {boolean}
-     */
-    this.nsfw = data.nsfw;
-
-    /**
-     * The name of the channel
-     * @type {string}
-     */
-    this.name = data.name;
-
-    /**
-     * The last message's ID
-     * @type {string}
      */
     this.lastMessageID = data.last_message_id;
 
-    if (data.permission_overwrites) {
-      if (this.client.canCache('overwrites')) {
-        for (let i = 0; i < data.permission_overwrites.length; i++) {
-          const overwrite = data.permission_overwrites[i];
-          this.permissionOverwrites.set(overwrite.id, new PermissionOverwrite(overwrite));
-        }
+    if (data.recipients) {
+      /**
+       * The recipients of this Group channel
+       * @type {Collection<import('../User')> | null}
+       */
+      this.recipients = client.canCache('user') ? new Collection() : null;
+
+      for (let i = 0; i < data.recipients.length; i++) {
+        const recipient = data.recipients[i];
+        const user = new (require('../User'))(this.client, recipient);
+
+        if (client.canCache('user')) this.recipients.set(user.id, user);
       }
     }
   }
@@ -113,15 +74,3 @@ module.exports = class NewsChannel extends TextableChannel {
       .catch(() => null);
   }
 };
-
-/**
- * @typedef {object} NewsChannelPacket
- * @prop {string} [topic]
- * @prop {number} position
- * @prop {import('../PermissionOverwrite').PermissionOverwritePacket[]} permission_overwrites
- * @prop {string} [parent_id]
- * @prop {boolean} nsfw
- * @prop {string} name
- * @prop {string} last_message_id
- * @prop {string} id
- */

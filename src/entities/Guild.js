@@ -319,9 +319,7 @@ module.exports = class Guild extends UnavailableGuild {
       if (this.client.canCache('voice:state')) {
         for (let i = 0; i < data.voice_states.length; i++) {
           const state = data.voice_states[i];
-          const id = state.channel_id === null ? state.user_id : `${state.channel_id}:${state.user_id}`;
-
-          this.voiceStates.set(id, new VoiceState(this.client, state));
+          this.voiceStates.set(state.id, new VoiceState(this.client, state));
         }
       }
     }

@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+const PermissionOverwrite = require('../PermissionOverwrite');
 const { Collection } = require('@augu/immutable');
 const BaseChannel = require('../BaseChannel');
 
@@ -27,26 +28,86 @@ const BaseChannel = require('../BaseChannel');
  * Represents a category channel in Discord
  */
 module.exports = class CategoryChannel extends BaseChannel {
+  /**
+   * Creates a new [CategoryChannel] instance
+   * @param {import('../../gateway/WebSocketClient')} client The client
+   * @param {CategoryChannelPacket} data The data
+   */
+  constructor(client, data) {
+    super(data);
 
+    /**
+     * The client itself
+     * @type {import('../../gateway/WebSocketClient')}
+     * @private
+     */
+    this.client = client;
+
+    /**
+     * The children
+     * @type {Collection<import('../BaseChannel')> | null}
+     */
+    this.children = client.canCache('channel') ? new Collection() : null;
+
+    /**
+     * List of permission overwrites
+     * @type {Collection<PermissionOverwrite> | null}
+     */
+    this.permissionOverwrites = client.canCache('overwrites') ? new Collection() : null;
+
+    this.patch(data);
+  }
+
+  /**
+   * Patches this [CategoryChannel]
+   * @param {CategoryChannelPacket} data The data
+   */
+  patch(data) {
+    /**
+     * The channel's position
+     * @type {number}
+     */
+    this.position = data.position;
+
+    /**
+     * If the channel is NSFW or not
+     * @type {boolean}
+     */
+    this.nsfw = data.nsfw;
+
+    /**
+     * The name of the category channel
+     * @type {string}
+     */
+    this.name = data.name;
+
+    if (this.client.canCache('channel')) {
+      const children = this.client.channels.filter(channel => channel.parentID !== null && channel.parentID === this.id);
+      if (children.length) {
+        for (let i = 0; i < children.length; i++) {
+          const child = children[i];
+          this.children.set(child.id, child);
+        }
+      }
+    }
+
+    if (data.permission_overwrites) {
+      if (this.client.canCache('overwrites')) {
+        for (let i = 0; i < data.permission_overwrites.length; i++) {
+          const overwrite = data.permission_overwrites[i];
+          this.permissionOverwrites.set(overwrite.id, new PermissionOverwrite(overwrite));
+        }
+      }
+    }
+  }
 };
 
-/*
-{
-  type: 4,
-  position: 0,
-  permission_overwrites: [
-    {
-      type: 'role',
-      id: '746084946409685182',
-      deny_new: '2048',
-      deny: 2048,
-      allow_new: '0',
-      allow: 0
-    }
-  ],
-  parent_id: null,
-  nsfw: false,
-  name: 'Voice Channels',
-  id: '743698927982739529'
-}
-*/
+/**
+ * @typedef {object} CategoryChannelPacket
+ * @prop {number} position
+ * @prop {import('../PermissionOverwrite').PermissionOverwritePacket} permission_overwrites
+ * @prop {string} [parent_id]
+ * @prop {boolean} nsfw
+ * @prop {string} name
+ * @prop {string} id
+ */

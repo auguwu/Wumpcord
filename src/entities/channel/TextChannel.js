@@ -102,7 +102,7 @@ module.exports = class TextChannel extends TextableChannel {
 
     if (data.permission_overwrites) {
       if (this.client.canCache('overwrites')) {
-        for (let i = 0; i < data.permission_overwrites; i++) {
+        for (let i = 0; i < data.permission_overwrites.length; i++) {
           const overwrite = data.permission_overwrites[i];
           this.permissionOverwrites.set(overwrite.id, new PermissionOverwrite(overwrite));
         }

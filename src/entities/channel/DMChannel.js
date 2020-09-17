@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-const { Collection } = require('@augu/immutable');
 const { Endpoints } = require('../../Constants');
 const TextableChannel = require('./TextableChannel');
 const Message = require('../Message');
@@ -43,20 +42,13 @@ module.exports = class DMChannel extends TextableChannel {
      */
     this.lastMessageID = data.last_message_id;
 
-    if (data.recipients) {
-      /**
-       * The recipients of this DM channel
-       * @type {Collection<import('../User')> | null}
-       */
-      this.recipients = client.canCache('user') ? new Collection() : null;
+    /**
+     * The user we are having a chat with
+     * @type {import('../User')}
+     */
+    this.recipient = new (require('../User'))(this.client, data.recipients[0]);
 
-      for (let i = 0; i < data.recipients.length; i++) {
-        const recipient = data.recipients[i];
-        const user = new (require('../User'))(this.client, recipient);
-
-        if (client.canCache('user')) this.recipients.set(user.id, user);
-      }
-    }
+    client.insert('user', this.recipient);
   }
 
   /**

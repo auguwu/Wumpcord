@@ -20,16 +20,20 @@
  * SOFTWARE.
  */
 
+const Base = require('./Base');
+
 /**
  * Represents a voice-state of a user in a Discord voice channel
  */
-module.exports = class VoiceState {
+module.exports = class VoiceState extends Base {
   /**
    * Creates a new [VoiceState] instance
    * @param {import('../gateway/WebSocketClient')} client The client
    * @param {VoiceStatePacket} data The data packet
    */
   constructor(client, data) {
+    super(data.id);
+
     /**
      * Object representing data of ourselves
      * @type {SelfVoiceState}
