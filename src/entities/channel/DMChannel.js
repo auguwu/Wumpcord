@@ -66,7 +66,7 @@ module.exports = class DMChannel extends BaseChannel {
 
       for (let i = 0; i < data.recipients.length; i++) {
         const recipient = data.recipients[i];
-        const user = new User(recipient);
+        const user = new (require('../User'))(this.client, recipient);
 
         if (client.canCache('user')) this.recipients.set(user.id, user);
         else this.recipients++;
@@ -250,13 +250,13 @@ module.exports = class DMChannel extends BaseChannel {
         data.append(options.name, options.file, options.name);
         send = data.finish();
       } else {
-        if (!options.hasOwnProperty('content') || send.hasOwnProperty('content')) throw new SyntaxError('Missing "content" in [MessageOptions] or `content` is already populated');
+        if (send.hasOwnProperty('content')) throw new SyntaxError('`content` is already populated');
 
         // It's a normal object, let's just add it to `send`
-        if (!send.hasOwnProperty('content') && options.hasOwnProperty('content')) send.content = options.content;
-        if (options.hasOwnProperty('embed')) send.embed = options.embed;
-        if (options.hasOwnProperty('allowedMentions')) {
-          send.allowed_mentions = Util.formatAllowedMentions(client.options, options.allowedMentions); // eslint-disable-line camelcase
+        if (!send.hasOwnProperty('content') && content.hasOwnProperty('content')) send.content = options.content;
+        if (content.hasOwnProperty('embed')) send.embed = content.embed;
+        if (content.hasOwnProperty('allowedMentions')) {
+          send.allowed_mentions = Util.formatAllowedMentions(client.options, content.allowedMentions); // eslint-disable-line camelcase
         }
       }
     } else {
@@ -264,14 +264,13 @@ module.exports = class DMChannel extends BaseChannel {
     }
 
     try {
-      const data = await this.client.rest.dispatch({
+      await this.client.rest.dispatch({
         endpoint: Endpoints.Channel.messages(this.id),
         method: 'post',
         data: send,
         headers
       });
 
-      console.log(data);
       return true;
     } catch(ex) {
       return false;
@@ -284,12 +283,10 @@ module.exports = class DMChannel extends BaseChannel {
    */
   async pin(messageID) {
     try {
-      const data = await this.client.rest.dispatch({
+      await this.client.rest.dispatch({
         endpoint: Endpoints.Channel.pin(this.id, messageID),
         method: 'PUT'
       });
-
-      console.log(data);
 
       return true;
     } catch(ex) {

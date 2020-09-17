@@ -25,7 +25,6 @@ const { Endpoints } = require('../Constants');
 const Attachment = require('./Attachment');
 const Guild = require('./Guild');
 const Base = require('./Base');
-const User = require('./User');
 
 /**
  * Represents a [Discord] message
@@ -114,7 +113,7 @@ module.exports = class Message extends Base {
     /**
      * The author
      */
-    this.author = this.client.insert('user', new User(this.client, data.author));
+    this.author = new (require('./User'))(this.client, data.author);
 
     /**
      * The guild's ID
@@ -133,6 +132,9 @@ module.exports = class Message extends Base {
         this.attachments.set(attachment.id, attachment);
       }
     }
+
+    // Insert if not in cache
+    this.client.insert('user', this.author);
   }
 
   /**

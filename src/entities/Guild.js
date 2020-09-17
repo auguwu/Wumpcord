@@ -38,28 +38,40 @@ module.exports = class Guild extends UnavailableGuild {
     super(data);
 
     /**
-     * The channels cache or a number representing the channel count
-     * @type {Collection<import('./BaseChannel')> | number}
+     * The channels cache or `null` if not cachable
+     * @type {Collection<import('./BaseChannel')> | null}
      */
-    this.channels = client.canCache('channel') ? new Collection() : 0;
+    this.channels = client.canCache('channel') ? new Collection() : null;
 
     /**
-     * The members cache or a number representing the member count
-     * @type {Collection<import('./GuildMember')> | number}
+     * The members cache or `null` if not cachable
+     * @type {Collection<import('./GuildMember')> | null}
      */
-    this.members = client.canCache('member') ? new Collection() : 0;
+    this.members = client.canCache('member') ? new Collection() : null;
 
     /**
-     * The role cache or a number representing the role count
-     * @type {Collection<import('./Role')> | number}
+     * The role cache or `null` if not cachable
+     * @type {Collection<import('./Role')> | null}
      */
-    this.roles = client.canCache('member:role') ? new Collection() : 0;
+    this.roles = client.canCache('member:role') ? new Collection() : null;
 
     /**
-     * The emoji cache or a number representing the emoji count
-     * @type {Collection<import('./Emoji')> | number}
+     * The emoji cache or `null` if not cachable
+     * @type {Collection<import('./Emoji')> | null}
      */
-    this.emojis = client.canCache('emoji') ? new Collection() : 0;
+    this.emojis = client.canCache('emoji') ? new Collection() : null;
+
+    /**
+     * The voice state cache or `null` if not cachable
+     * @type {Collection<import('./VoiceState')> | null}
+     */
+    this.voiceStates = client.canCache('voice:state') ? new Collection() : null;
+
+    /**
+     * The presence cache or `null` if not cachable
+     * @type {Collection<import('./Presence') | null>}
+     */
+    this.presences = client.canCache('presence') ? new Collection() : null;
     
     /**
      * The client instance
@@ -272,16 +284,12 @@ module.exports = class Guild extends UnavailableGuild {
     if (data.emojis) {
       if (this.client.canCache('emoji')) {
         for (let i = 0; i < data.emojis.length; i++) this.emojis.set(data.emojis[i].id, data.emojis[i]);
-      } else {
-        this.emojis = data.emojis.length;
       }
     }
 
     if (data.roles) {
       if (this.client.canCache('member:role')) {
         for (let i = 0; i < data.roles.length; i++) this.roles.set(data.roles[i].id, data.roles[i]);
-      } else {
-        this.roles = data.roles.length;
       }
     }
 
@@ -291,9 +299,6 @@ module.exports = class Guild extends UnavailableGuild {
           this.channels.set(data.channels[i].id, data.channels[i]);
           this.client.insert('channel', data.channels[i]); // insert if not in the cache
         }
-      } else {
-        this.channels++;
-        this.client.channels++;
       }
     }
 
@@ -302,8 +307,6 @@ module.exports = class Guild extends UnavailableGuild {
         for (let i = 0; i < data.members.length; i++) {
           this.members.set(data.members[i].id, data.members[i]);
         }
-      } else {
-        this.members++;
       }
     }
 
@@ -330,9 +333,9 @@ module.exports = class Guild extends UnavailableGuild {
    * @arity Wumpcord.Entities.Guild.fetchMembers/1
    */
   async fetchMembers({ limit, presences, query, time, nonce, force, userIds } = {
-    limit: 0,
+    limit: this.maxMembers,
     presences: false,
-    query: null,
+    query: '',
     time: 120e3,
     nonce: Date.now().toString(16),
     force: false,
@@ -350,13 +353,10 @@ module.exports = class Guild extends UnavailableGuild {
         user_ids: userIds,
         query: query || '',
         nonce,
-        limit
+        limit: limit || this.maxMembers
       });
 
-      const members = this.client.canCache('member') ? new Collection() : 0;
-      const option = query || limit || presences || userIds;
-      let i = 0;
-
+      const members = this.client.canCache('member') ? new Collection() : null;
       const timeout = setTimeout(() => {
         clearTimeout(timeout);
         return reject(new Error(`Unable to fetch guild members in ${time}ms`));
@@ -366,37 +366,27 @@ module.exports = class Guild extends UnavailableGuild {
         timeout.refresh();
         if (chunk.nonce !== nonce) return;
 
-        i++;
         for (const member of all.values()) {
-          if (option) {
-            if (this.client.canCache('member')) {
-              members.set(member.id, member);
-            } else {
-              members++;
-            }
+          if (this.client.canCache('member')) {
+            members.set(member.user.id, member);
           }
         }
 
         if (this.client.canCache('member')) {
           this.members.merge(members);
-        } else {
-          this.members += members;
         }
 
-        if (
-          this.memberCount <= this.members.size || 
-          (option && typeof members === 'number' ? members < 1000 : members.size < 1000) ||
-          (limit && (typeof members === 'number' ? members >= limit : members.size >= limit)) ||
-          i === chunk.count
-        ) {
+        if (limit && (members ? members.size >= limit : true)) {
           clearTimeout(timeout);
           this.client.remove('guildMemberChunk', handler);
 
-          let fetched = option ? members : this.members;
-          if (userIds && !Array.isArray(userIds)) fetched = this.client.canCache('member') ? members.first() : null;
-
-          return resolve(fetched);
+          return resolve(members);
         }
+
+        clearTimeout(timeout);
+        this.client.remove('guildMemberChunk', handler);
+
+        return resolve(members);
       };
 
       this.client.on('guildMemberChunk', handler);

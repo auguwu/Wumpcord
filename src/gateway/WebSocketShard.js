@@ -116,7 +116,7 @@ module.exports = class WebSocketShard extends EventBus {
    * Returns the shard's latency
    */
   get ping() {
-    return (this.lastReceived - this.lastSent);
+    return (this.lastReceived - this.lastSent) || -1;
   }
 
   /**
@@ -182,10 +182,9 @@ module.exports = class WebSocketShard extends EventBus {
       this.sessionID = undefined;
     }
 
-    console.log(`tries: ${this.attempts}`);
-    if (reconnect && this.attempts < this.client.options.ws.tries) {
+    if (reconnect && this.attempts <= this.client.options.ws.tries) {
       if (this.sessionID) {
-        this.debug(`Connecting to portentially resume zombified connection (${this.attempts}/${this.client.options.ws.tries})`);
+        this.debug(`Connecting to potentially resume zombified connection (${this.attempts}/${this.client.options.ws.tries})`);
         this.client.shards.connect(this.id);
       } else {
         this.debug(`Now attempting to un-zombify this connection (${this.attempts}/${this.client.options.ws.tries})`);
@@ -311,7 +310,6 @@ module.exports = class WebSocketShard extends EventBus {
    * @arity Wumpcord.Sharding.WebSocketShard.onClose/2
    */
   onClose(code, reason) {
-    const isRecoverable = Constants.UnrecoverableCodes.includes(code);
     if (code) {
       this.debug(`Connection has closed ${code === 1000 ? 'cleanly' : 'uncleanly'} for ${reason || 'no reason?'}`);
       let error = new Error(`${code}: ${reason === '' ? 'None' : reason}`);
@@ -379,22 +377,22 @@ module.exports = class WebSocketShard extends EventBus {
         } break;
       }
 
-      this.emit('close', this.id, error, isRecoverable);
+      this.emit('close', this.id, error, Constants.UnrecoverableCodes.includes(code));
     } else {
       this.debug(`Unknown close code: ${code}`);
     }
 
-    if (!isRecoverable) {
-      this.debug('Code is re-coverable, restarting process');
-      this.disconnect(true);
-    } else {
-      this.debug('Close code is not recoverable, exiting process...');
+    if (Constants.UnrecoverableCodes.includes(code)) {
+      this.debug(`Code "${code}" is un-recoverable, exiting process`);
       setTimeout(() => {
         this.hardReset();
         this.disconnect(false);
 
         process.exit(1);
-      }, 5000);
+      });
+    } else {
+      this.debug(`Code "${code}" is recoverable, restarting shard`);
+      this.disconnect(true);
     }
   }
 

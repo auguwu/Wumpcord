@@ -44,13 +44,13 @@ module.exports = class WebSocketClient extends EventBus {
     this.lastShardID = 1;
 
     /**
-     * The channels cache or a number representing the number of channels
+     * The channels cache or `null` if it's not cachable
      * the bot can see, use `Client#fetchChannel` to get the channel
      * and possibly cache it
      * 
-     * @type {Collection<import('../entities/BaseChannel')> | number}
+     * @type {Collection<import('../entities/BaseChannel')> | null}
      */
-    this.channels = 0;
+    this.channels = null;
 
     /**
      * The options that the user defined
@@ -79,13 +79,13 @@ module.exports = class WebSocketClient extends EventBus {
     };
 
     /**
-     * The guilds cache or a number representing the number of guilds
+     * The guilds cache or `null` if it's not cachable
      * the bot is currently in, use `Client#fetchGuild` to get the guild
      * and possibly cache it
      * 
-     * @type {Collection<import('../entities/Guild')> | number}
+     * @type {Collection<import('../entities/Guild')> | null}
      */
-    this.guilds = 0;
+    this.guilds = null;
 
     /**
      * The shard manager
@@ -99,13 +99,13 @@ module.exports = class WebSocketClient extends EventBus {
     this.token = opts.token;
 
     /**
-     * The user cache or the number of users the bot can see,
+     * The user cache or or `null` if it's not cachable,
      * if you wanna retrieve information and possibly cache it,
      * you must use `Client#fetchUser/1` function
      * 
-     * @type {Collection<import('../entities/User')> | number}
+     * @type {Collection<import('../entities/User')> | null}
      */
-    this.users = 0;
+    this.users = null;
 
     /**
      * The REST client to use
@@ -126,7 +126,7 @@ module.exports = class WebSocketClient extends EventBus {
    * Returns the intents by it's numeric value
    */
   get intents() {
-    if (typeof this.options.ws.intents === 'undefined') return 0;
+    if (typeof this.options.ws.intents === 'undefined') return Constants.GatewayIntents.guilds | Constants.GatewayIntents.guildMessages | Constants.GatewayIntents.guildMembers;
     else if (typeof this.options.ws.intents === 'number') return this.options.ws.intents;
     else {
       let intents = 0;
@@ -227,16 +227,16 @@ module.exports = class WebSocketClient extends EventBus {
   insert(type, packet) {
     switch (type) {
       case 'channel':
-        if (!this.channels.has(packet.id)) this.canCache('channel') ? this.channels.set(packet.id, packet) : this.channels++;
-        return packet;
+        if (!this.channels.has(packet.id)) this.canCache('channel') ? this.channels.set(packet.id, packet) : void 0;
+        break;
 
       case 'guild':
-        if (!this.guilds.has(packet.id)) this.canCache('guild') ? this.guilds.set(packet.id, packet) : this.guilds++;
-        return packet;
+        if (!this.guilds.has(packet.id)) this.canCache('guild') ? this.guilds.set(packet.id, packet) : void 0;
+        break;
 
       case 'user':
-        if (!this.users.has(packet.id)) this.canCache('user') ? this.users.set(packet.id, packet) : this.users++;
-        return packet;
+        if (!this.users.has(packet.id)) this.canCache('user') ? this.users.set(packet.id, packet) : void 0;
+        break;
 
       default: break;
     }
@@ -248,7 +248,7 @@ module.exports = class WebSocketClient extends EventBus {
   async requestGuildMembers() {
     this.emit('debug', 'Now requesting all guild members and possibly caching them...');
         
-    if (typeof this.guilds === 'number') {
+    if (!this.canCache('guild') || !this.canCache('member')) {
       this.emit('debug', 'Guild cache is disabled, not populating user cache');
       return;
     }
@@ -263,11 +263,28 @@ module.exports = class WebSocketClient extends EventBus {
       else return Promise.resolve();
     });
 
-    await Promise.all(promises);
+    await Promise
+      .all(promises)
+      .then(members => members.map(collection => {
+        if (collection.some(member => !this.users.has(member.user.id))) {
+          const uncached = collection.filter(member => !this.users.has(member.user.id));
+          this.emit('debug', `Received ${uncached.length} uncached members`);
+
+          if (this.canCache('member')) {
+            this.emit('debug', 'We can cache members, now populating...');
+            for (let i = 0; i < uncached.length; i++) {
+              const member = uncached[i];
+              const user = new (require('../entities/User'))(this, member.user);
+
+              this.insert('user', user);
+            }
+          }
+        }
+      }));
   }
 
   toString() {
-    const user = this.user ? this.user.tag : 'Unknown Bot#0000';
+    const user = this.user ? this.user.tag : '<unknown>';
     return `[WebSocketClient ${user}]`;
   }
 };
