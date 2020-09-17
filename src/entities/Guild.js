@@ -22,8 +22,9 @@
 /* eslint-disable camelcase */
 
 const UnavailableGuild = require('./UnavailableGuild');
-const { Collection }   = require('@augu/immutable');
+const { Collection } = require('@augu/immutable');
 const { OPCodes } = require('../Constants');
+const VoiceState = require('./VoiceState');
 
 /**
  * Represents a Discord guild
@@ -296,8 +297,10 @@ module.exports = class Guild extends UnavailableGuild {
     if (data.channels) {
       if (this.client.canCache('channel')) {
         for (let i = 0; i < data.channels.length; i++) {
-          this.channels.set(data.channels[i].id, data.channels[i]);
-          this.client.insert('channel', data.channels[i]); // insert if not in the cache
+          const channel = data.channels[i];
+
+          this.channels.set(channel.id, channel);
+          this.client.insert('channel', channel); // insert if not in the cache
         }
       }
     }
@@ -310,13 +313,18 @@ module.exports = class Guild extends UnavailableGuild {
       }
     }
 
-    //if (data.voice_states) {
-    //console.log(data.voice_states[0]);
-    //}
+    if (data.voice_states) {
+      if (this.client.canCache('voice:state')) {
+        for (let i = 0; i < data.voice_states.length; i++) {
+          const state = data.voice_states[i];
+          const id = state.channel_id === null ? state.user_id : `${state.channel_id}:${state.user_id}`;
 
-    //if (data.presences) {
-    //console.log(data.presences[0]);
-    //}
+          this.voiceStates.set(id, new VoiceState(this.client, state));
+        }
+      }
+    }
+
+    // TODO: figure out what Guild.presences are
   }
 
   /**

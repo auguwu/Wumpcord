@@ -20,8 +20,8 @@
  * SOFTWARE.
  */
 
-const { GuildChannel } = require('..');
-const { Collection }   = require('@augu/immutable');
+const { Collection } = require('@augu/immutable');
+const GuildChannel = require('./GuildChannel');
 
 module.exports = class CategoryChannel extends GuildChannel {
   /**
