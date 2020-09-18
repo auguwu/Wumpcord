@@ -164,12 +164,10 @@ module.exports = class User extends Base {
       });
 
       const channel = new DMChannel(this.client, data);
-      console.log(channel);
       this.client.insert('channel', channel);
 
       return channel;
     } catch(ex) {
-      console.error(ex);
       return null;
     }
   }

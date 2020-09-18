@@ -27,6 +27,8 @@
 module.exports = {
   GUILD_MEMBERS_CHUNK: require('./GuildMemberChunk'),
   MESSAGE_CREATE: require('./MessageCreate'),
+  MESSAGE_DELETE: require('./MessageDelete'),
+  MESSAGE_UPDATE: require('./MessageUpdate'),
   GUILD_DELETE: require('./GuildDelete'),
   GUILD_CREATE: require('./GuildCreate'),
   READY: require('./Ready')

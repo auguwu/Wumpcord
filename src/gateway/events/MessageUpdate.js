@@ -20,24 +20,12 @@
  * SOFTWARE.
  */
 
-const { Message } = require('../../entities');
-
 /**
- * Received when a message has been created
+ * Function to call when a message is deleted
  * @type {import('.').EventCallee}
  */
-const onMessageCreate = async function ({ d: data }) {
-  const message = new Message(this.client, data);
-  const channel = await message.getChannel();
+const onMessageUpdate = function ({ d: data }) {
 
-  if (channel !== null && channel.type === 'text') {
-    if (this.client.canCache('message')) {
-      channel.messages.set(message.id, message);
-      this.client.channels.set(channel.id, channel);
-    }
-  }
-
-  this.client.emit('message', message);
 };
 
-module.exports = onMessageCreate;
+module.exports = onMessageUpdate;

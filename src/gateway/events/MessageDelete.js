@@ -20,24 +20,37 @@
  * SOFTWARE.
  */
 
-const { Message } = require('../../entities');
-
 /**
- * Received when a message has been created
+ * Function to call when a message is deleted
  * @type {import('.').EventCallee}
  */
-const onMessageCreate = async function ({ d: data }) {
-  const message = new Message(this.client, data);
-  const channel = await message.getChannel();
-
-  if (channel !== null && channel.type === 'text') {
-    if (this.client.canCache('message')) {
-      channel.messages.set(message.id, message);
-      this.client.channels.set(channel.id, channel);
-    }
+const onMessageDelete = function ({ d: data }) {
+  if (!this.client.canCache('channel')) {
+    this.debug('Can\'t cache channels, will emit `messageDelete` with it\'s ID');
+    this.client.emit('messageDelete', { id: data.id });
+    return;
   }
 
-  this.client.emit('message', message);
+  if (!this.client.canCache('message')) {
+    this.debug('Can\'t cache messages, will emit `messageDelete` with it\'s ID');
+    this.client.emit('messageDelete', { id: data.id });
+    return;
+  }
+
+  const channel = this.client.channels.get(data.channel_id);
+  if (!channel || channel.type !== 'text') {
+    this.debug('Channel is possibly uncached or it\'s not a text channel, skipping');
+    return;
+  }
+
+  const message = channel.messages.get(data.id);
+  if (!message) {
+    this.debug('Message wasn\'t cached, will emit `messageDelete` with it\'s ID');
+    this.client.emit('messageDelete', { id: data.id });
+    return;
+  }
+
+  this.client.emit('messageDelete', message);
 };
 
-module.exports = onMessageCreate;
+module.exports = onMessageDelete;

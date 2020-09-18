@@ -44,6 +44,12 @@ module.exports = class TextChannel extends TextableChannel {
      */
     this.permissionOverwrites = client.canCache('permission:overwrite') ? new Collection() : null;
 
+    /**
+     * List of messages to cache for this [TextChannel]
+     * @type {Collection<import('../Message')> | null}
+     */
+    this.messages = client.canCache('message') ? new Collection() : null;
+
     this.patch(data);
   }
 

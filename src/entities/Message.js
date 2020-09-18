@@ -168,6 +168,8 @@ module.exports = class Message extends Base {
    * Gets the channel and possibly caches it and populates [Message.channel]
    */
   async getChannel() {
+    if (this.channel) return this.channel;
+
     try {
       const data = await this.client.rest.dispatch({
         endpoint: Endpoints.channel(this.channelID),
@@ -176,6 +178,12 @@ module.exports = class Message extends Base {
 
       const channel = BaseChannel.from(this.client, data);
       this.client.insert('channel', channel);
+
+      /**
+       * The current channel of this [Message]
+       * @type {BaseChannel}
+       */
+      this.channel = channel;
 
       return channel;
     } catch(ex) {
