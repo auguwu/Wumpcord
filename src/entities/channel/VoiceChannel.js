@@ -95,6 +95,8 @@ module.exports = class VoiceChannel extends BaseChannel {
         }
       }
     }
+
+    return this;
   }
 };
 

@@ -41,7 +41,12 @@ module.exports = class EventBus {
     if (!(event in this.listeners)) return false;
 
     const listeners = this.listeners[event];
-    for (const listen of listeners) listen(...args);
+    if (!listeners.length) return false;
+
+    for (let i = 0; i < listeners.length; i++) {
+      const listen = listeners[i];
+      listen(...args);
+    }
 
     return true;
   }
@@ -67,12 +72,10 @@ module.exports = class EventBus {
    * @param {Listener} listener The listener
    */
   once(event, listener) {
-    const listen = (...args) => {
+    return this.on(event, (...args) => {
       listener(...args);
-      this.remove(event, listen);
-    };
-
-    return this.on(event, listen);
+      this.remove(event, listener);
+    });
   }
 
   /**
@@ -89,9 +92,7 @@ module.exports = class EventBus {
     const index = listeners.indexOf(listener);
     if (index !== -1) listeners.splice(index, 1);
 
-    if (!listeners.length) delete this.listeners[event];
-    else this.listeners[event] = listeners;
-
+    this.listeners[event] = listeners;
     return true;
   }
 

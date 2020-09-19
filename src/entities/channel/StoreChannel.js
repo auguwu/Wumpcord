@@ -88,6 +88,8 @@ module.exports = class StoreChannel extends TextableChannel {
         }
       }
     }
+
+    return this;
   }
 };
 

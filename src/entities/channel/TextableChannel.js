@@ -125,7 +125,7 @@ module.exports = class TextableChannel extends BaseChannel {
 
     if (typeof content === 'string') {
       send = { content };
-    } else if (options) {
+    } else if (typeof options === 'object') {
       // It's a file!
       if (Array.isArray(options)) {
         if (options.some(value => typeof value !== 'object')) {
@@ -164,7 +164,7 @@ module.exports = class TextableChannel extends BaseChannel {
         if (!send.hasOwnProperty('content') && options.hasOwnProperty('content')) send.content = options.content;
         if (options.hasOwnProperty('embed')) send.embed = options.embed;
         if (options.hasOwnProperty('allowedMentions')) {
-          send.allowed_mentions = Util.formatAllowedMentions(client.options, options.allowedMentions); // eslint-disable-line camelcase
+          send.allowed_mentions = Util.formatAllowedMentions(this.client.options, options.allowedMentions); // eslint-disable-line camelcase
         }
       }
     } else if (typeof content === 'object') {
@@ -191,7 +191,7 @@ module.exports = class TextableChannel extends BaseChannel {
       }
 
       if (isMessageFile(options)) {
-        if (!options.file) throw new SyntaxError('Missing "file" property in [options] (DMChannel#send)');
+        if (!options.file) throw new SyntaxError('Missing "file" property in [options] (TextableChannel#send)');
         if (!options.name) options.name = 'file.png';
 
         data = new Multipart();
@@ -203,7 +203,7 @@ module.exports = class TextableChannel extends BaseChannel {
         if (send.hasOwnProperty('content')) throw new SyntaxError('`content` is already populated');
 
         // It's a normal object, let's just add it to `send`
-        if (!send.hasOwnProperty('content') && content.hasOwnProperty('content')) send.content = options.content;
+        if (!send.hasOwnProperty('content') && content.hasOwnProperty('content')) send.content = content.content;
         if (content.hasOwnProperty('embed')) send.embed = content.embed;
         if (content.hasOwnProperty('allowedMentions')) {
           send.allowed_mentions = Util.formatAllowedMentions(client.options, content.allowedMentions); // eslint-disable-line camelcase

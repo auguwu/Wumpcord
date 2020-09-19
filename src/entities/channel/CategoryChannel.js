@@ -99,6 +99,8 @@ module.exports = class CategoryChannel extends BaseChannel {
         }
       }
     }
+
+    return this;
   }
 };
 

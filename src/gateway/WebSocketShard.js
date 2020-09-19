@@ -182,7 +182,7 @@ module.exports = class WebSocketShard extends EventBus {
       this.sessionID = undefined;
     }
 
-    if (reconnect && this.attempts <= this.client.options.ws.tries) {
+    if (reconnect) {
       if (this.sessionID) {
         this.debug(`Connecting to potentially resume zombified connection (${this.attempts}/${this.client.options.ws.tries})`);
         this.client.shards.connect(this.id);
@@ -196,7 +196,7 @@ module.exports = class WebSocketShard extends EventBus {
         this.reconnectTime = Math.min(Math.round(this.reconnectTime * (Math.random() * 2 + 1)), 30000);
       }
     } else {
-      this.debug('Unable to re-connect due to making this dead or max tries has been set');
+      this.debug('Shard has reached it\'s life, resetting');
       this.hardReset();
     }
   }
@@ -550,7 +550,7 @@ module.exports = class WebSocketShard extends EventBus {
       if (this.client.shards.size !== this.client.options.shardCount || this.client.shards.some(s => s.status !== Constants.ShardStatus.Connected)) {
         return;
       } else {
-        this.triggerReadyEvent();
+        this.client.emit('ready');
         return;
       }
     }
@@ -585,16 +585,6 @@ module.exports = class WebSocketShard extends EventBus {
     }
 
     return packet;
-  }
-
-  /**
-   * Triggers the ready event 
-   */
-  async triggerReadyEvent() {
-    if (this.client.shards.size !== this.client.options.shardCount || this.client.shards.some(s => s.status !== Constants.ShardStatus.Connected)) return;
-    if (this.client.options.getAllUsers) await this.client.requestGuildMembers();
-
-    this.client.emit('ready');
   }
 
   toString() {

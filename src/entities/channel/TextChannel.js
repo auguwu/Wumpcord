@@ -114,6 +114,8 @@ module.exports = class TextChannel extends TextableChannel {
         }
       }
     }
+
+    return this;
   }
 
   /**

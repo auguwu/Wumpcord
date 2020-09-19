@@ -37,6 +37,7 @@ const onMessageCreate = async function ({ d: data }) {
     }
   }
 
+  message.patch(data);
   this.client.emit('message', message);
 };
 

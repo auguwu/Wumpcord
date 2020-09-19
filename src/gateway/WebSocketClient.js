@@ -57,6 +57,7 @@ module.exports = class WebSocketClient extends EventBus {
      * @type {ClientOptions}
      */
     this.options = {
+      populatePresences: Util.get('populatePresences', false, opts),
       allowedMentions: Util.get('allowedMentions', {
         everyone: false,
         roles: false,
@@ -119,7 +120,10 @@ module.exports = class WebSocketClient extends EventBus {
      */
     this.user = undefined;
 
-    this.once('ready', () => this.requestGuildMembers.call(this));
+    this.once('ready', () => {
+      this.emit('debug', 'Now requesting all guild members and possibly caching them...');
+      this.requestGuildMembers();
+    });
   }
 
   /**
@@ -245,9 +249,7 @@ module.exports = class WebSocketClient extends EventBus {
   /**
    * Retrieves a list of requested guild members
    */
-  async requestGuildMembers() {
-    this.emit('debug', 'Now requesting all guild members and possibly caching them...');
-        
+  async requestGuildMembers() {    
     if (!this.canCache('guild') || !this.canCache('member')) {
       this.emit('debug', 'Guild cache is disabled, not populating user cache');
       return;
@@ -258,9 +260,23 @@ module.exports = class WebSocketClient extends EventBus {
       return;
     }
 
+    /** @type {Promise<Array<Collection<import('../entities/GuildMember')>>>} */
     const promises = this.guilds.map(guild => {
-      if (!guild.unavailable) return guild.fetchMembers();
-      else return Promise.resolve();
+      if (!guild.unavailable) {
+        if (this.options.populatePresences && !(this.intents & Constants.GatewayIntents.guildPresences)) this.emit('debug', 'Missing `guildPresences` intent');
+
+        return guild.fetchMembers({
+          limit: guild.maxMembers,
+          presences: this.options.populatePresences && (this.intents & Constants.GatewayIntents.guildPresences),
+          query: '',
+          time: 120e3,
+          nonce: Date.now().toString(16),
+          force: false,
+          userIds: []
+        });
+      } else {
+        return Promise.resolve(); // resolve it
+      }
     });
 
     await Promise
@@ -271,7 +287,6 @@ module.exports = class WebSocketClient extends EventBus {
           this.emit('debug', `Received ${uncached.length} uncached members`);
 
           if (this.canCache('member')) {
-            this.emit('debug', 'We can cache members, now populating...');
             for (let i = 0; i < uncached.length; i++) {
               const member = uncached[i];
               const user = new (require('../entities/User'))(this, member.user);
@@ -283,6 +298,20 @@ module.exports = class WebSocketClient extends EventBus {
       }));
   }
 
+  /**
+   * Disposes this [WebSocketClient]
+   */
+  dispose() {
+    this.emit('debug', 'Reaching EOL status, closing...');
+    
+    if (this.channels !== null) this.channels.clear();
+    if (this.guilds !== null) this.guilds.clear();
+    if (this.users !== null) this.users.clear();
+
+    for (const shard of this.shards.values()) shard.disconnect(false);
+    this.emit('debug', 'Disposed, goodbye.');
+  }
+
   toString() {
     const user = this.user ? this.user.tag : '<unknown>';
     return `[WebSocketClient ${user}]`;
@@ -291,6 +320,7 @@ module.exports = class WebSocketClient extends EventBus {
 
 /**
  * @typedef {object} ClientOptions
+ * @prop {boolean} [populatePresences=false] If we should add `presences` when requesting guild members
  * @prop {boolean} [getAllUsers=true] If we should call WebSocketClient#requestGuildMembers on all guilds and populate cache
  * @prop {AllowedMentions} [allowedMentions] Object of allowed mentions
  * @prop {import('./util/Constants').Event[]} [disabledEvents=[]] The disabled events

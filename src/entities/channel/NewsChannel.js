@@ -96,6 +96,8 @@ module.exports = class NewsChannel extends TextableChannel {
         }
       }
     }
+
+    return this;
   }
 
   /**

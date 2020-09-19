@@ -26,6 +26,8 @@ const { Collection } = require('@augu/immutable');
 const { OPCodes } = require('../Constants');
 const VoiceState = require('./VoiceState');
 const BaseChannel = require('./BaseChannel');
+const Presence = require('./Presence');
+const Member = require('./GuildMember');
 
 /**
  * Represents a Discord guild
@@ -310,7 +312,8 @@ module.exports = class Guild extends UnavailableGuild {
     if (data.members) {
       if (this.client.canCache('member')) {
         for (let i = 0; i < data.members.length; i++) {
-          this.members.set(data.members[i].id, data.members[i]);
+          const member = data.members[i];
+          this.members.set(member.id, new Member(this.client, { guild_id: this.id, ...member }));
         }
       }
     }
@@ -324,7 +327,14 @@ module.exports = class Guild extends UnavailableGuild {
       }
     }
 
-    // TODO: figure out what Guild.presences are
+    if (data.presences) {
+      if (this.client.canCache('presence')) {
+        for (let i = 0; i < data.presences.length; i++) {
+          const presence = data.presences[i];
+          this.presences.set(presence.id, new Presence(this.client, presence));
+        }
+      }
+    }
   }
 
   /**
@@ -364,7 +374,8 @@ module.exports = class Guild extends UnavailableGuild {
         limit: limit || this.maxMembers
       });
 
-      const members = this.client.canCache('member') ? new Collection() : null;
+      const guildMembers = this.client.canCache('member') ? new Collection() : null; // this gets merged
+      const members = new Collection(); // this gets resolved
       const timeout = setTimeout(() => {
         clearTimeout(timeout);
         return reject(new Error(`Unable to fetch guild members in ${time}ms`));
@@ -377,11 +388,12 @@ module.exports = class Guild extends UnavailableGuild {
         for (const member of all.values()) {
           if (this.client.canCache('member')) {
             members.set(member.user.id, member);
+            guildMembers.set(member.user.id, new Member(this.client, { guild_id: this.id, ...member }));
           }
         }
 
         if (this.client.canCache('member')) {
-          this.members.merge(members);
+          this.members = guildMembers;
         }
 
         if (limit && (members ? members.size >= limit : true)) {

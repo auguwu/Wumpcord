@@ -26,6 +26,15 @@ const BaseChannel = require('./BaseChannel');
 const Attachment = require('./Attachment');
 const Guild = require('./Guild');
 const Base = require('./Base');
+const Utilities = require('../util/Util');
+const Constants = require('../Constants');
+
+/**
+ * Checks if an object is a [MessageFile] instance
+ * @param {unknown} obj The object
+ * @returns {obj is import('./channel/DMChannel').MessageFile} Returns a boolean value if it is or not 
+ */
+const isMessageFile = (obj) => typeof obj === 'object' && !Array.isArray(obj) && obj.hasOwnProperty('file');
 
 /**
  * Represents a [Discord] message
@@ -81,9 +90,9 @@ module.exports = class Message extends Base {
     this.mentions = this.client.canCache('user') ? new Collection() : 0;
 
     /**
-     * The member instance
+     * The member instance, call [Message.getGuild] to populate it
      */
-    this.member = data.hasOwnProperty('member') ? data.member : null;
+    this.member = null;
 
     /**
      * The message flags
@@ -121,6 +130,12 @@ module.exports = class Message extends Base {
      */
     this.guildID = data.guild_id;
 
+    /**
+     * The edited messages made
+     * @type {Collection<Message>}
+     */
+    this.edits = new Collection();
+
     if (data.attachments) {
       /**
        * The list of attachments
@@ -136,10 +151,20 @@ module.exports = class Message extends Base {
 
     // Insert if not in cache
     this.client.insert('user', this.author);
+
+    // add this message to `edits`
+    this.edits.set(this.id, this);
   }
 
   /**
-   * Gets the guild
+   * Returns the edited message, if any
+   */
+  get edited() {
+    return this.edits.last();
+  }
+
+  /**
+   * Gets the guild and populates `member` and `guild`
    * @returns {Promise<Guild | null>} Returns the Guild instance or `null` if a REST error occured
    */
   async getGuild() {
@@ -158,6 +183,31 @@ module.exports = class Message extends Base {
        */
       this.guild = guild;
 
+      if (this.client.options.getAllUsers) {
+        if (
+          this.client.options.populatePresences && 
+          !(this.client.intents & Constants.GatewayIntents.guildPresences)
+        ) {
+          this.client.emit('debug', 'Missing `guildPresences` intent');
+          return guild;
+        }
+
+        const members = await this.guild.fetchMembers({
+          limit: guild.maxMembers,
+          presences: this.client.options.populatePresences && (this.client.intents & Constants.GatewayIntents.guildPresences),
+          query: '',
+          time: 120e3,
+          nonce: Date.now().toString(16),
+          force: false,
+          userIds: []
+        });
+
+        if (!members) {
+          this.client.emit('debug', 'Couldn\'t fetch member list, skipping...');
+          return guild;
+        }
+      }
+      
       return guild;
     } catch(ex) {
       return null;
@@ -166,6 +216,7 @@ module.exports = class Message extends Base {
 
   /**
    * Gets the channel and possibly caches it and populates [Message.channel]
+   * @returns {Promise<import('./channel/TextChannel') | null>}
    */
   async getChannel() {
     if (this.channel) return this.channel;
@@ -181,7 +232,7 @@ module.exports = class Message extends Base {
 
       /**
        * The current channel of this [Message]
-       * @type {BaseChannel}
+       * @type {import('./channel/TextChannel')}
        */
       this.channel = channel;
 
@@ -189,6 +240,66 @@ module.exports = class Message extends Base {
     } catch(ex) {
       return null;
     }
+  }
+
+  /**
+   * Deletes this message
+   * @returns {Promise<boolean>} Boolean value if it was deleted or not
+   */
+  delete() {
+    const channelID = this.channel ? this.channel.id : this.channelID;
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Channel.message(channelID, this.id),
+      method: 'delete'
+    })
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  /**
+   * Edits the message
+   * @param {string | import('./channel/DMChannel').CreateMessageOptions} content The content to send
+   * @param {import('./channel/DMChannel').CreateMessageOptions} [options] Any additional options
+   * @returns {Promise<Message>} Returns a message instance of the edited message or `null` if can't be patched
+   */
+  async edit(content, options) {
+    let send;
+
+    if (typeof content === 'string') {
+      send = { content };
+    } else if (typeof content === 'object') {
+      if (Array.isArray(content)) 
+        throw new Error('Cannot edit message with file(s).');
+      else if (isMessageFile(content)) 
+        throw new Error('Cannot edit message with file.');
+      else {
+        if (send.hasOwnProperty('content')) throw new SyntaxError('`content` is already populated');
+        if (!send.hasOwnProperty('content') && content.hasOwnProperty('content')) send.content = content.content;
+        if (content.hasOwnProperty('embed')) send.embed = content.embed;
+        if (content.hasOwnProperty('allowedMentions')) send.allowed_mentions = Utilities.formatAllowedMentions(this.client, content.allowedMentions); // eslint-disable-line camelcase
+      }
+    } else if (typeof options === 'object') {
+      if (Array.isArray(content)) 
+        throw new Error('Cannot edit message with file(s).');
+      else if (isMessageFile(content)) 
+        throw new Error('Cannot edit message with file.');
+      else {
+        if (send.hasOwnProperty('content')) throw new SyntaxError('`content` is already populated');
+        if (!send.hasOwnProperty('content') && options.hasOwnProperty('content')) send.content = options.content;
+        if (options.hasOwnProperty('embed')) send.embed = options.embed;
+        if (options.hasOwnProperty('allowedMentions')) send.allowed_mentions = Utilities.formatAllowedMentions(this.client, options.allowedMentions); // eslint-disable-line camelcase
+      }
+    } else {
+      throw new SyntaxError('No content, file, or embed was specified.');
+    }
+
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Channel.message(this.channel ? this.channel.id : this.channelID, this.id),
+      method: 'patch',
+      data: send
+    })
+      .then(data => new Message(this.client, data))
+      .catch(() => null);
   }
 
   toString() {
