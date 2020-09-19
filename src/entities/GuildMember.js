@@ -21,7 +21,6 @@
  */
 
 const { Collection } = require('@augu/immutable');
-// const Role = require('./Role');
 const Base = require('./Base');
 
 /**

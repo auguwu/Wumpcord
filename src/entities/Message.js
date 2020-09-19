@@ -123,7 +123,7 @@ module.exports = class Message extends Base {
     /**
      * The author
      */
-    this.author = new (require('./User'))(this.client, data.author);
+    this.author = data.author ? new (require('./User'))(this.client, data.author) : null;
 
     /**
      * The guild's ID
@@ -303,7 +303,7 @@ module.exports = class Message extends Base {
   }
 
   toString() {
-    return `[Message (${this.id})]`;
+    return `[Message "${this.content}" (${this.id})]`;
   }
 };
 

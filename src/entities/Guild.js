@@ -28,6 +28,8 @@ const VoiceState = require('./VoiceState');
 const BaseChannel = require('./BaseChannel');
 const Presence = require('./Presence');
 const Member = require('./GuildMember');
+const Role = require('./Role');
+const Emoji = require('./Emoji');
 
 /**
  * Represents a Discord guild
@@ -287,13 +289,19 @@ module.exports = class Guild extends UnavailableGuild {
 
     if (data.emojis) {
       if (this.client.canCache('emoji')) {
-        for (let i = 0; i < data.emojis.length; i++) this.emojis.set(data.emojis[i].id, data.emojis[i]);
+        for (let i = 0; i < data.emojis.length; i++) {
+          const emoji = data.emojis[i];
+          this.emojis.set(emoji.id, new Emoji(this.client, { guild_id: this.id, ...emoji }));
+        }
       }
     }
 
     if (data.roles) {
       if (this.client.canCache('member:role')) {
-        for (let i = 0; i < data.roles.length; i++) this.roles.set(data.roles[i].id, data.roles[i]);
+        for (let i = 0; i < data.roles.length; i++) {
+          const role = data.roles[i];
+          this.roles.set(role.id, new Role(this.client, { guild_id: this.id, ...role }));
+        }
       }
     }
 

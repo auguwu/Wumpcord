@@ -51,7 +51,7 @@ const onMessageUpdate = function ({ d: data }) {
   }
 
   message.patch(data);
-  this.client.emit('messageUpdate', message, message.edits[0]);
+  this.client.emit('messageUpdate', message, message.edited);
 };
 
 module.exports = onMessageUpdate;
