@@ -26,7 +26,8 @@ const Constants       = require('../Constants');
 const RESTClient      = require('../rest/RESTClient');
 const EventBus        = require('../util/EventBus');
 const Util            = require('../util/Util');
-const { merge } = require('../util/Util');
+const { merge }       = require('../util/Util');
+const VoiceRegion     = require('../entities/VoiceRegion');
 
 /**
  * Represents a client for handling all WebSocket shard connections
@@ -325,6 +326,19 @@ module.exports = class WebSocketClient extends EventBus {
 
     for (const shard of this.shards.values()) shard.disconnect(false);
     this.emit('debug', 'Disposed, goodbye.');
+  }
+
+  /**
+   * Gets the list of voice regions
+   * @returns {Promise<VoiceRegion[]>} Returns an Array of voice regions
+   */
+  getVoiceRegions() {
+    return this.rest.dispatch({
+      endpoint: '/voice/regions',
+      method: 'get'
+    })
+      .then((data) => data.map(region => new VoiceRegion(region)))
+      .catch(() => []);
   }
 
   toString() {

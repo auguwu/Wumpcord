@@ -21,27 +21,18 @@
  */
 
 /**
- * List of gateway events
- * @type {{ [x in import('../../Constants').Event]: EventCallee }}
+ * Error when the API has given us the `code` and `message` props
  */
-module.exports = {
-  GUILD_MEMBER_REMOVE: require('./GuildMemberRemove'),
-  GUILD_MEMBERS_CHUNK: require('./GuildMemberChunk'),
-  GUILD_MEMBER_UPDATE: require('./GuildMemberUpdate'),
-  GUILD_BAN_REMOVE: require('./GuildBanRemove'),
-  GUILD_MEMBER_ADD: require('./GuildMemberAdd'),
-  PRESENCE_UPDATE: require('./PresenceUpdate'),
-  MESSAGE_CREATE: require('./MessageCreate'),
-  MESSAGE_DELETE: require('./MessageDelete'),
-  MESSAGE_UPDATE: require('./MessageUpdate'),
-  GUILD_BAN_ADD: require('./GuildBanAdd'),
-  GUILD_DELETE: require('./GuildDelete'),
-  GUILD_CREATE: require('./GuildCreate'),
-  GUILD_UPDATE: require('./GuildUpdate'),
-  RESUMED: require('./Ready'),
-  READY: require('./Ready')
-};
+module.exports = class DiscordAPIError extends Error {
+  /**
+   * Creates a new [DiscordAPIError] instance
+   * @param {number} code The status code
+   * @param {string} message The message
+   */
+  constructor(code, message) {
+    super(message);
 
-/**
- * @typedef {(this: import('../WebSocketShard'), data: any) => void} EventCallee The event caller
- */
+    this.code = code;
+    this.name = `DiscordRestError [${code}]`;
+  }
+};

@@ -22,8 +22,10 @@
 
 const { RestVersion, UserAgent } = require('../Constants');
 const DiscordRESTError = require('./DiscordRestError');
+const DiscordAPIError = require('./DiscordAPIError');
 const { HttpClient } = require('@augu/orchid');
 const { Queue } = require('@augu/immutable');
+const Utilities = require('../util/Util');
 
 /**
  * Represents a client for executing calls to Discord's REST API
@@ -34,6 +36,13 @@ module.exports = class RESTClient {
    * @param {import('../gateway/WebSocketClient')} client The client
    */
   constructor(client) {
+    /**
+     * The client
+     * @private
+     * @type {import('../gateway/WebSocketClient')}
+     */
+    this.client = client;
+
     /**
      * The cache of the requests
      * @type {Queue<RatelimitBucket>}
@@ -91,17 +100,33 @@ module.exports = class RESTClient {
         method: bucket.opts.method,
         url: bucket.opts.endpoint,
         data: bucket.opts.data,
-        headers: bucket.opts.headers || {}
+        headers: Utilities.merge(bucket.headers, {
+          'X-RateLimit-Precision': 'millisecond'
+        })
       }).then(resp => {
         const data = resp.json();
-        const remaining = Number(resp.headers['x-ratelimit-remaining']);
 
-        if (!remaining) {
-          this.cache.addFirst(bucket);
-          setTimeout(() => this.request(bucket), Number(resp.headers['x-ratelimit-reset-after']) * 1000);
+        if (resp.statusCode === 429) {
+          /**
+           * Emitted when the REST client has reached a ratelimited state
+           * @fires restRatelimit
+           */
+          this.client.emit('restRatelimit', {
+            retryAfter: Number(resp.headers['retry-after']),
+            reset: Number(Math.floor(resp.headers['x-ratelimit-reset']))
+          });
+
+          // todo: make this as a seperate class owo?
+          const error = new Error(`Ratelimited on endpoint "${bucket.opts.method.toUpperCase()} ${bucket.opts.endpoint}"`);
+          error.name = 'DiscordRatelimitError';
+          error.retryAfter = Number(resp.headers['retry-after']);
+          error.resetTime = Number(Math.floor(resp.headers['x-ratelimit-reset']));
+
+          return reject(error);
         }
 
-        resolve(data);
+        if (data.hasOwnProperty('message')) return reject(new DiscordAPIError(data.code, data.message));
+        return resolve(data);
       }).catch(error => reject(new DiscordRESTError(error.statusCode || 500, error.message)));
     });
   }

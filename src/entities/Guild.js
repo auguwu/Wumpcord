@@ -21,15 +21,16 @@
  */
 /* eslint-disable camelcase */
 
+const { OPCodes, Endpoints } = require('../Constants');
 const UnavailableGuild = require('./UnavailableGuild');
 const { Collection } = require('@augu/immutable');
-const { OPCodes } = require('../Constants');
 const VoiceState = require('./VoiceState');
 const BaseChannel = require('./BaseChannel');
 const Presence = require('./Presence');
 const Member = require('./GuildMember');
 const Role = require('./Role');
 const Emoji = require('./Emoji');
+const Util = require('../util/Util');
 
 /**
  * Represents a Discord guild
@@ -356,6 +357,14 @@ module.exports = class Guild extends UnavailableGuild {
   }
 
   /**
+   * Returns the owner of this [Guild]
+   * @returns {import('./User') | null}
+   */
+  get owner() {
+    return this.client.users.get(this.ownerID) || null;
+  }
+
+  /**
    * Fetches the guild members and returns it, if any
    * @param {FetchGuildMembersOptions} opts The options
    * @arity Wumpcord.Entities.Guild.fetchMembers/1
@@ -423,6 +432,117 @@ module.exports = class Guild extends UnavailableGuild {
     });
   }
 
+  /**
+   * Deletes this guild if this bot is the owner
+   * @returns {Promise<boolean>} Truthy value if it deleted or not
+   */
+  delete() {
+    if (this.ownerID !== this.client.user.id) throw new Error(`Bot isn't owner of ${this.toString()}`);
+
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.guild(this.id),
+      method: 'DELETE'
+    }).then(() => true)
+      .catch(() => false);
+  }
+
+  /**
+   * Bans a member from this [Guild]
+   * @param {string} userID The user's ID
+   * @param {BanOptions} [opts] The options to use
+   */
+  ban(userID, opts = {}) {
+    /** @type {BanOptions} */
+    const options = Util.merge(opts, { 
+      days: 7 
+    });
+
+    if (options.days > 7) throw new TypeError('Message deletion days must range from 0-7 (default: 7)');
+    if (options.reason) {
+      if (typeof options.reason !== 'string') throw new TypeError('`reason` has to be a string');
+      if (options.reason === '') throw new TypeError('`reason` can\'t be an empty string');
+    }
+
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.ban(this.id, userID),
+      method: 'PUT',
+      data: {
+        delete_message_days: options.days,
+        reason: options.reason
+      }
+    })
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  /**
+   * Unbans a member from this [Guild]
+   * @param {string} userID The user's ID
+   */
+  unban(userID) {
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.ban(this.id, userID),
+      method: 'DELETE'
+    })
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  /**
+   * Creates a channel in Discord
+   * @param {CreateChannelOptions} opts The channel options
+   */
+  createChannel(opts) {
+    if (typeof opts === 'undefined' || typeof opts !== 'object') throw new TypeError('`opts` is not defiend or it\'s not an object');
+    if (!opts.hasOwnProperty('name') || !opts.hasOwnProperty('type')) throw new TypeError('Missing `opts.name` and `opts.type` in Guild#createChannel');
+
+    // type-checking for text channels
+    if (opts.type === 0) {
+      if (opts.topic) {
+        if (typeof opts.topic !== 'string') throw new TypeError('`opts.topic` was not a string');
+        if (opts.topic === '' || opts.topic < 2 || opts.topic > 1024) throw new TypeError('`opts.topic` is empty, or the length is under 2 / over 1024 chars');
+      }
+
+      if (opts.ratelimitPerUser) {
+        if (typeof opts.ratelimitPerUser !== 'number') throw new TypeError('`opts.ratelimitPerUser` was not a number');
+        if (Number.isNaN(opts.ratelimitPerUser)) throw new TypeError('`opts.ratelimitPerUser` was not a number');
+        if (opts < 0 || opts > 21600) throw new TypeError('`opts.ratelimitPerUser` is under 0 / over 21600');
+      }
+    } else if (opts.type === 2) { // type checking for voice channels
+      if (opts.bitrate) {
+        if (typeof opts.bitrate !== 'number') throw new TypeError('`opts.bitrate` was not a number');
+        if (Number.isNaN(opts.bitrate)) throw new TypeError('`opts.bitrate` was not a number');
+        if (opts.bitrate < 8000 || opts.bitrate > 96000) throw new TypeError('`opts.bitrate` was under 8kbps / over 96kbps');
+      }
+
+      if (opts.userLimit) {
+        if (typeof opts.userLimit !== 'number') throw new TypeError('`opts.userLimit` was not a number');
+        if (Number.isNaN(opts.userLimit)) throw new TypeError('`opts.userLimit` was not a number');
+        if (opts.userLimit < 0 || opts.userLimit > 100) throw new TypeError('`opts.userLimit` was under 0 / over 100 users');
+      }
+    }
+
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.channels(this.id),
+      method: 'POST',
+      data: {
+        name: opts.name,
+        type: opts.type,
+        topic: opts.topic,
+        bitrate: opts.bitrate,
+        user_limit: opts.userLimit,
+        ratelimit_per_user: opts.ratelimitPerUser,
+        position: opts.position,
+        permission_overwrites: opts.permissionOverwrites,
+        parent_id: opts.parentID,
+        nsfw: opts.nsfw || false
+      }
+    }).then((data) => {
+      console.log(require('util').inspect(data, { depth: 5 }));
+      return true;
+    }).catch(() => null);
+  }
+
   toString() {
     return `[Guild "${this.name}" (${this.id})]`;
   }
@@ -437,33 +557,20 @@ module.exports = class Guild extends UnavailableGuild {
  * @prop {string} [nonce] The nonce string
  * @prop {boolean} [force=false] If should be forceful or not
  * @prop {string[]} [userIds=[]] The user ID array
+ * 
+ * @typedef {object} BanOptions
+ * @prop {string} [reason=''] The reason to set in audit logs
+ * @prop {number} [days=7] The amount of days to delete messages (max: 7, min: 0)
+ * 
+ * @typedef {object} CreateChannelOptions
+ * @prop {string} name The name of the channel
+ * @prop {number} type The type to use
+ * @prop {string} [topic=undefined] The topic, if it's a text channel
+ * @prop {number} [bitrate=undefined] The bitrate of the voice channel
+ * @prop {number} [userLimit=undefined] The user limit for a voice channel
+ * @prop {number} [ratelimitPerUser=undefined] The number of seconds a user before have to send a message
+ * @prop {number} [position=undefined] The position to set
+ * @prop {Array<{ allow: number; deny: number; type: 'role' | 'member'; id: string }>} [permissionOverwrites=undefined] List of overwrites, must match the overwrite object
+ * @prop {string} [parentID=undefined] The parent category's channel ID
+ * @prop {boolean} [nsfw=false] If the channel is NSFW or not
  */
-
-/*
-Guild {
-  emojis: [
-    {
-      name: 'getaloadofthisguy',
-      roles: [],
-      id: '662923155119145001',
-      require_colons: true,
-      managed: false,
-      animated: false,
-      available: true
-    }
-  ],
-  roles: [
-    {
-      id: '743698927039283201',
-      name: '@everyone',
-      permissions: 104320577,
-      position: 0,
-      color: 0,
-      hoist: false,
-      managed: false,
-      mentionable: false,
-      permissions_new: '104320577'
-    }
-  ]
-}
-*/

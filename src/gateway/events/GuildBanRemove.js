@@ -20,28 +20,34 @@
  * SOFTWARE.
  */
 
-/**
- * List of gateway events
- * @type {{ [x in import('../../Constants').Event]: EventCallee }}
- */
-module.exports = {
-  GUILD_MEMBER_REMOVE: require('./GuildMemberRemove'),
-  GUILD_MEMBERS_CHUNK: require('./GuildMemberChunk'),
-  GUILD_MEMBER_UPDATE: require('./GuildMemberUpdate'),
-  GUILD_BAN_REMOVE: require('./GuildBanRemove'),
-  GUILD_MEMBER_ADD: require('./GuildMemberAdd'),
-  PRESENCE_UPDATE: require('./PresenceUpdate'),
-  MESSAGE_CREATE: require('./MessageCreate'),
-  MESSAGE_DELETE: require('./MessageDelete'),
-  MESSAGE_UPDATE: require('./MessageUpdate'),
-  GUILD_BAN_ADD: require('./GuildBanAdd'),
-  GUILD_DELETE: require('./GuildDelete'),
-  GUILD_CREATE: require('./GuildCreate'),
-  GUILD_UPDATE: require('./GuildUpdate'),
-  RESUMED: require('./Ready'),
-  READY: require('./Ready')
-};
+const { User } = require('../../entities');
 
 /**
- * @typedef {(this: import('../WebSocketShard'), data: any) => void} EventCallee The event caller
+ * Function to call when a ban has been removed from the guild
+ * @type {import('.').EventCallee}
  */
+const onGuildBanRemove = function ({ d: data }) {
+  if (!this.client.canCache('user')) {
+    this.debug('Can\'t cache users, sending data anyway');
+    this.client.emit('guildBanRemove', { id: data.guild_id }, new User(this.client, data.user));
+    return;
+  }
+
+  if (!this.client.canCache('guild')) {
+    this.debug('Can\'t cache guilds, sending partial data anyway');
+    this.client.emit('guildBanRemove', { id: data.guild_id }, new User(this.client, data.user));
+    return;
+  }
+
+  const guild = this.client.guilds.get(data.guild_id);
+  if (!guild) {
+    this.debug(`Guild "${data.guild_id}" is possibly uncached, sending partial data anyway`);
+    this.client.emit('guildBanRemove', { id: data.guild_id }, new User(this.client, data.user));
+    return;
+  }
+
+  const user = new User(this.client, data.user);
+  this.client.emit('guildBanRemove', guild, user);
+};
+
+module.exports = onGuildBanRemove;

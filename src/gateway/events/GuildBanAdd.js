@@ -20,12 +20,34 @@
  * SOFTWARE.
  */
 
+const { User } = require('../../entities');
+
 /**
  * Function to call when a ban has been placed in a guild
  * @type {import('.').EventCallee}
  */
 const onGuildBanAdd = function ({ d: data }) {
-  console.log(data);
+  if (!this.client.canCache('user')) {
+    this.debug('Can\'t cache users, sending data anyway');
+    this.client.emit('guildBanAdd', { id: data.guild_id }, new User(this.client, data.user));
+    return;
+  }
+
+  if (!this.client.canCache('guild')) {
+    this.debug('Can\'t cache guilds, sending partial data anyway');
+    this.client.emit('guildBanAdd', { id: data.guild_id }, new User(this.client, data.user));
+    return;
+  }
+
+  const guild = this.client.guilds.get(data.guild_id);
+  if (!guild) {
+    this.debug(`Guild "${data.guild_id}" is possibly uncached, sending partial data anyway`);
+    this.client.emit('guildBanAdd', { id: data.guild_id }, new User(this.client, data.user));
+    return;
+  }
+
+  const user = new User(this.client, data.user);
+  this.client.emit('guildBanAdd', guild, user);
 };
 
 module.exports = onGuildBanAdd;
