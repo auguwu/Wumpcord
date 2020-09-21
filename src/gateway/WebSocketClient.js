@@ -275,7 +275,10 @@ module.exports = class WebSocketClient extends EventBus {
     /** @type {Promise<Array<Collection<import('../entities/GuildMember')>>>} */
     const promises = this.guilds.map(guild => {
       if (!guild.unavailable) {
-        if (this.options.populatePresences && !(this.intents & Constants.GatewayIntents.guildPresences)) this.emit('debug', 'Missing `guildPresences` intent');
+        if (this.options.populatePresences && !(this.intents & Constants.GatewayIntents.guildPresences)) {
+          this.emit('debug', 'Missing `guildPresences` intent');
+          this.options.populatePresences = false;
+        }
 
         return guild.fetchMembers({
           limit: guild.maxMembers,

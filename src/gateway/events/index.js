@@ -26,6 +26,7 @@
  */
 module.exports = {
   GUILD_MEMBERS_CHUNK: require('./GuildMemberChunk'),
+  GUILD_MEMBER_UPDATE: require('./GuildMemberUpdate'),
   PRESENCE_UPDATE: require('./PresenceUpdate'),
   MESSAGE_CREATE: require('./MessageCreate'),
   MESSAGE_DELETE: require('./MessageDelete'),
@@ -33,6 +34,7 @@ module.exports = {
   GUILD_DELETE: require('./GuildDelete'),
   GUILD_CREATE: require('./GuildCreate'),
   GUILD_UPDATE: require('./GuildUpdate'),
+  RESUMED: require('./Ready'),
   READY: require('./Ready')
 };
 
