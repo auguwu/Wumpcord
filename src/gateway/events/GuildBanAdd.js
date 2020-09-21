@@ -21,26 +21,11 @@
  */
 
 /**
- * List of gateway events
- * @type {{ [x in import('../../Constants').Event]: EventCallee }}
+ * Function to call when a ban has been placed in a guild
+ * @type {import('.').EventCallee}
  */
-module.exports = {
-  GUILD_MEMBER_REMOVE: require('./GuildMemberRemove'),
-  GUILD_MEMBERS_CHUNK: require('./GuildMemberChunk'),
-  GUILD_MEMBER_UPDATE: require('./GuildMemberUpdate'),
-  GUILD_MEMBER_ADD: require('./GuildMemberAdd'),
-  PRESENCE_UPDATE: require('./PresenceUpdate'),
-  MESSAGE_CREATE: require('./MessageCreate'),
-  MESSAGE_DELETE: require('./MessageDelete'),
-  MESSAGE_UPDATE: require('./MessageUpdate'),
-  GUILD_BAN_ADD: require('./GuildBanAdd'),
-  GUILD_DELETE: require('./GuildDelete'),
-  GUILD_CREATE: require('./GuildCreate'),
-  GUILD_UPDATE: require('./GuildUpdate'),
-  RESUMED: require('./Ready'),
-  READY: require('./Ready')
+const onGuildBanAdd = function ({ d: data }) {
+  console.log(data);
 };
 
-/**
- * @typedef {(this: import('../WebSocketShard'), data: any) => void} EventCallee The event caller
- */
+module.exports = onGuildBanAdd;

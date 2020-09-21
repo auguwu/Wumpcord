@@ -20,27 +20,35 @@
  * SOFTWARE.
  */
 
-/**
- * List of gateway events
- * @type {{ [x in import('../../Constants').Event]: EventCallee }}
- */
-module.exports = {
-  GUILD_MEMBER_REMOVE: require('./GuildMemberRemove'),
-  GUILD_MEMBERS_CHUNK: require('./GuildMemberChunk'),
-  GUILD_MEMBER_UPDATE: require('./GuildMemberUpdate'),
-  GUILD_MEMBER_ADD: require('./GuildMemberAdd'),
-  PRESENCE_UPDATE: require('./PresenceUpdate'),
-  MESSAGE_CREATE: require('./MessageCreate'),
-  MESSAGE_DELETE: require('./MessageDelete'),
-  MESSAGE_UPDATE: require('./MessageUpdate'),
-  GUILD_BAN_ADD: require('./GuildBanAdd'),
-  GUILD_DELETE: require('./GuildDelete'),
-  GUILD_CREATE: require('./GuildCreate'),
-  GUILD_UPDATE: require('./GuildUpdate'),
-  RESUMED: require('./Ready'),
-  READY: require('./Ready')
-};
+const GuildMember = require('../../entities/GuildMember');
 
 /**
- * @typedef {(this: import('../WebSocketShard'), data: any) => void} EventCallee The event caller
+ * Function to call when a member has joined a guild
+ * @type {import('.').EventCallee}
  */
+const onGuildMemberAdd = function ({ d: data }) {
+  if (!this.client.canCache('guild')) {
+    this.debug('Can\'t cache guilds, sending member data anyway');
+    this.client.emit('guildMemberAdd', new GuildMember(this.client, data));
+    return;
+  }
+
+  if (!this.client.canCache('member')) {
+    this.debug('Can\'t cache members, sending member data anyway');
+    this.client.emit('guildMemberAdd', new GuildMember(this.client, data));
+    return;
+  }
+
+  const guild = this.client.guilds.get(data.guild_id);
+  if (!guild) {
+    this.debug(`Guild "${data.guild_id}" is possibly uncached, sending member data anyway`);
+    this.client.emit('guildMemberAdd', new GuildMember(this.client, data));
+    return;
+  }
+
+  const member = new GuildMember(this.client, data);
+  guild.members.set(member.id, member);
+  this.client.emit('guildMemberAdd', member);
+};
+
+module.exports = onGuildMemberAdd;
