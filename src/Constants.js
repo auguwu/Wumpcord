@@ -410,6 +410,13 @@ module.exports = {
     Disposed:         4,
     Dead:             5,
     WaitingForGuilds: 6
+  },
+
+  ActivityTypes: {
+    0: 'Playing',
+    1: 'Streaming',
+    2: 'Listening To',
+    3: 'Watching'
   }
 };
 

@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 
+const Message = require('../../entities/Message');
+
 /**
  * Function to call when a message is deleted
  * @type {import('.').EventCallee}
@@ -51,8 +53,11 @@ const onMessageUpdate = function ({ d: data }) {
     return;
   }
 
-  message.patch(data);
-  this.client.emit('messageUpdate', message, message.edited);
+  const msg = new Message(this.client, data);
+  channel.messages.remove(message.id);
+  channel.messages.add(msg);
+
+  this.client.emit('messageUpdate', message, msg);
 };
 
 module.exports = onMessageUpdate;

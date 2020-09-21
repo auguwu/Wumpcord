@@ -339,7 +339,7 @@ module.exports = class Guild extends UnavailableGuild {
       if (this.client.canCache('presence')) {
         for (let i = 0; i < data.presences.length; i++) {
           const presence = data.presences[i];
-          this.presences.set(presence.id, new Presence(this.client, presence));
+          this.presences.set(presence.user.id, new Presence(this.client, presence));
         }
       }
     }

@@ -243,15 +243,15 @@ module.exports = class WebSocketClient extends EventBus {
   insert(type, packet) {
     switch (type) {
       case 'channel':
-        if (!this.channels.has(packet.id)) this.canCache('channel') ? this.channels.set(packet.id, packet) : void 0;
+        if (this.canCache('channel')) this.channels.set(packet.id, packet);
         break;
 
       case 'guild':
-        if (!this.guilds.has(packet.id)) this.canCache('guild') ? this.guilds.set(packet.id, packet) : void 0;
+        if (this.canCache('guild')) this.guilds.set(packet.id, packet);
         break;
 
       case 'user':
-        if (!this.users.has(packet.id)) this.canCache('user') ? this.users.set(packet.id, packet) : void 0;
+        if (this.canCache('user')) this.users.set(packet.id, packet);
         break;
 
       default: break;
@@ -279,7 +279,7 @@ module.exports = class WebSocketClient extends EventBus {
 
         return guild.fetchMembers({
           limit: guild.maxMembers,
-          presences: this.options.populatePresences && (this.intents & Constants.GatewayIntents.guildPresences),
+          presences: this.options.populatePresences,
           query: '',
           time: 120e3,
           nonce: Date.now().toString(16),

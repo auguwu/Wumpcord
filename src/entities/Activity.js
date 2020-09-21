@@ -20,6 +20,9 @@
  * SOFTWARE.
  */
 
+const { ActivityTypes } = require('../Constants');
+const PartialEmoji = require('./partial/Emoji');
+
 /**
  * Represents a presence activity
  */
@@ -33,7 +36,7 @@ module.exports = class Activity {
      * The type of the activity
      * @type {number}
      */
-    this.type = data.type;
+    this.type = ActivityTypes[data.type] || '';
 
     /**
      * The name of the activity
@@ -65,6 +68,14 @@ module.exports = class Activity {
      * @type {boolean}
      */
     this.rpc = data.hasOwnProperty('details') && data.hasOwnProperty('state');
+
+    if (data.emoji !== undefined) {
+      /**
+       * The emoji of the custom status
+       * @type {?Emoji}
+       */
+      this.emoji = new PartialEmoji(data.emoji);
+    }
 
     // this is a RPC
     if (data.hasOwnProperty('details') && data.hasOwnProperty('state')) {

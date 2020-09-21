@@ -41,7 +41,7 @@ const onPresenceUpdate = function ({ d: data }) {
   }
 
   const guild = this.client.guilds.get(data.guild_id);
-  const oldPresence = guild.presences.get(data.user.id);
+  const oldPresence = guild.presences.get(data.user.id) || null;
   let user = this.client.users.get(data.user.id);
 
   if (!user) return this.debug('User isn\'t cached, not emitting.');
@@ -52,14 +52,14 @@ const onPresenceUpdate = function ({ d: data }) {
     user = u;
   }
 
-  if (user.id !== data.user.id) this.debug();
-
-  if (!oldPresence) {
+  if (user.id !== data.user.id) this.debug('nothing to see here owo');
+  if (oldPresence === null) {
     this.debug(`Presence wasn't cached for user "${data.user.id}", sending partial data`);
     this.client.emit('presenceUpdate', null, new Presence(this.client, data));
     return;
   }
 
+  guild.presences.set(data.user.id, new Presence(this.client, data));
   this.client.emit('presenceUpdate', oldPresence, new Presence(this.client, data));
 };
 

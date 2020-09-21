@@ -20,28 +20,58 @@
  * SOFTWARE.
  */
 
-const { Guild } = require('../../entities');
-
-/**
- * Function to call when a guild has updated
- * @type {import('.').EventCallee}
- */
-const onGuildUpdate = function ({ d: data }) {
-  if (!this.client.canCache('guild')) {
-    this.debug('Can\'t get old guild data due to not being cachable, sending partial id...');
-    this.client.emit('guildUpdate', { id: data.id });
-    return;
+module.exports = class PartialEmoji {
+  /**
+   * Creates a new [Emoji] instance
+   * @param {import('../gateway/WebSocketClient')} client The WebSocket client
+   * @param {EmojiPacket} data The data
+   */
+  constructor(data) {
+    this.patch(data);
   }
 
-  const guild = this.client.guilds.get(data.id);
-  if (!guild) {
-    this.debug(`Guild "${data.id}" is possibly un-cached, sending partial ID...`);
-    this.client.emit('guildUpdate', { id: data.id });
-    return;
+  /**
+   * Patches this [Emoji] instance
+   * @param {PartialEmojiPacket} data The data
+   */
+  patch(data) {
+    /**
+     * The name of the emoji
+     * @type {string}
+     */
+    this.name = data.name;
+
+    /**
+     * If the emoji is animated or not
+     * @type {boolean}
+     */
+    this.animated = data.animated || false;
+
+    /**
+     * The ID of the emoji
+     * @type {string}
+     */
+    this.id = data.id || null;
   }
 
-  this.client.insert('guild', new Guild(data));
-  this.client.emit('guildUpdate', guild, new Guild(this.client, data));
+  /**
+   * Returns the string representation of the Emoji
+   */
+  get mention() {
+    if (this.id === null) return this.name;
+
+    const prefix = this.animated ? 'a:' : ':';
+    return `<${prefix}${this.name}:${this.id}>`;
+  }
+
+  toString() {
+    return `[PartialEmoji "${this.mention}"]`;
+  }
 };
 
-module.exports = onGuildUpdate;
+/**
+ * @typedef {object} PartialEmojiPacket
+ * @prop {string} name
+ * @prop {string} id
+ * @prop {boolean} animated
+ */
