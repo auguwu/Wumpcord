@@ -37,19 +37,21 @@ const onMessageDelete = function ({ d: data }) {
     return;
   }
 
+  /** @type {import('../../entities/channel/TextChannel')} */
   const channel = this.client.channels.get(data.channel_id);
   if (!channel || channel.type !== 'text') {
     this.debug('Channel is possibly uncached or it\'s not a text channel, skipping');
     return;
   }
 
-  const message = channel.messages.get(data.id);
+  const message = channel.messages.find(m => m.id === data.id);
   if (!message) {
     this.debug('Message wasn\'t cached, will emit `messageDelete` with it\'s ID');
     this.client.emit('messageDelete', { id: data.id });
     return;
   }
 
+  channel.messages.remove(message);
   this.client.emit('messageDelete', message);
 };
 

@@ -20,9 +20,9 @@
  * SOFTWARE.
  */
 
+const { Queue, Collection } = require('@augu/immutable');
 const PermissionOverwrite = require('../PermissionOverwrite');
 const TextableChannel = require('./TextableChannel');
-const { Collection } = require('@augu/immutable');
 const { Endpoints } = require('../../Constants');
 const Message = require('../Message');
 
@@ -46,9 +46,9 @@ module.exports = class TextChannel extends TextableChannel {
 
     /**
      * List of messages to cache for this [TextChannel]
-     * @type {Collection<import('../Message')> | null}
+     * @type {Queue<import('../Message')> | null}
      */
-    this.messages = client.canCache('message') ? new Collection() : null;
+    this.messages = client.canCache('message') ? new Queue() : null;
 
     this.patch(data);
   }

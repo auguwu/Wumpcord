@@ -31,13 +31,13 @@ const onMessageCreate = async function ({ d: data }) {
   const channel = await message.getChannel();
 
   if (channel !== null && channel.type === 'text') {
-    if (this.client.canCache('message')) {
-      channel.messages.set(message.id, message);
-      this.client.channels.set(channel.id, channel);
-    }
+    if (!this.client.canCache('message')) this.debug('Can\'t cache messages, `messageDelete` and `messageUpdate` will only emit partial IDs');
+    if (!this.client.canCache('channel')) this.debug('Can\'t cache channels, `messageDelete` and `messageUpdate` will only emit partial IDs');
+    if (this.client.canCache('message')) channel.messages.addFirst(message);
+
+    message.patch(data);
   }
 
-  message.patch(data);
   this.client.emit('message', message);
 };
 

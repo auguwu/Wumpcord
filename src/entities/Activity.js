@@ -45,7 +45,7 @@ module.exports = class Activity {
      * The date when it was created at
      * @type {Date}
      */
-    this.createdAt = new Date(Math.floor(Number(this.id) / 4194304) + 1420070400000);
+    this.createdAt = new Date(data.created_at);
 
     /**
      * The activity's ID, this is not a normal snowflake

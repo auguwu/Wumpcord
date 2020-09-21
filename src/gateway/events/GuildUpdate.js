@@ -21,21 +21,25 @@
  */
 
 /**
- * List of gateway events
- * @type {{ [x in import('../../Constants').Event]: EventCallee }}
+ * Function to call when a guild has updated
+ * @type {import('.').EventCallee}
  */
-module.exports = {
-  GUILD_MEMBERS_CHUNK: require('./GuildMemberChunk'),
-  PRESENCE_UPDATE: require('./PresenceUpdate'),
-  MESSAGE_CREATE: require('./MessageCreate'),
-  MESSAGE_DELETE: require('./MessageDelete'),
-  MESSAGE_UPDATE: require('./MessageUpdate'),
-  GUILD_DELETE: require('./GuildDelete'),
-  GUILD_CREATE: require('./GuildCreate'),
-  GUILD_UPDATE: require('./GuildUpdate'),
-  READY: require('./Ready')
+const onGuildUpdate = function ({ d: data }) {
+  if (!this.client.canCache('guild')) {
+    this.debug('Can\'t get old guild data due to not being cachable, sending partial id...');
+    this.client.emit('guildUpdate', { id: data.id });
+    return;
+  }
+
+  const guild = this.client.guilds.get(data.id);
+  if (!guild) {
+    this.debug(`Guild "${data.id}" is possibly un-cached, sending partial ID...`);
+    this.client.emit('guildUpdate', { id: data.id });
+    return;
+  }
+
+  const updated = guild.patch(data);
+  this.client.emit('guildUpdate', guild, updated);
 };
 
-/**
- * @typedef {(this: import('../WebSocketShard'), data: any) => void} EventCallee The event caller
- */
+module.exports = onGuildUpdate;

@@ -102,7 +102,6 @@ module.exports = class ShardingManager extends Collection {
 
     const shard = this.get(id);
     shard.removeAllListeners();
-    this.delete(id);
 
     return this.spawn(shard.id, shard.strategy);
   }

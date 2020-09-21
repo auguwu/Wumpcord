@@ -177,13 +177,13 @@ module.exports = class WebSocketShard extends EventBus {
     this.socket = undefined;
     this.emit('disconnect', this.id);
     
-    if (this.sessionID && this.client.options.ws.tries >= this.attempts) {
+    if (this.sessionID !== undefined && this.client.options.ws.tries < this.attempts) {
       this.debug(`Reached the max threshold (${this.client.options.ws.tries}) to validate session`);
       this.sessionID = undefined;
     }
 
     if (reconnect) {
-      if (this.sessionID) {
+      if (this.sessionID !== undefined) {
         this.debug(`Connecting to potentially resume zombified connection (${this.attempts}/${this.client.options.ws.tries})`);
         this.client.shards.connect(this.id);
       } else {

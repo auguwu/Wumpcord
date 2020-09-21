@@ -343,6 +343,8 @@ module.exports = class Guild extends UnavailableGuild {
         }
       }
     }
+
+    return this;
   }
 
   /**

@@ -84,9 +84,7 @@ module.exports = class Presence extends Base {
      * The current user or `null` if not cached
      * @type {import('./User') | null}
      */
-    this.user = this.client.canCache('user') && this.client.users.has(data.user.id) 
-      ? this.client.users.get(data.user.id) 
-      : null;
+    this.user = this.client.users ? this.client.users.get(data.user.id) : null;
 
     if (data.activities) {
       if (this.client.canCache('presence:activity')) {

@@ -41,25 +41,14 @@ const onReady = function ({ t, d: data }) {
     return;
   }
 
-  // And now the hard part: caching
-  // It works in 2 different ways:
-  //   1. Collection-based cache (stores in memory)
-  //   2. Sets the length of the cache (doesn't store in memory)
-  // If the cache type is 'none', we use #2
-  // If the cache type is 'all', we use #1
-  // If we specified the cache type (by string or array), we use #1 or #2
-  if (this.client.options.cacheType === 'none') {
-    this.client.channels = 0;
-    this.client.guilds   = 0;
-    this.client.users    = 1;
-  } else if (this.client.options.cacheType === 'all') {
+  if (this.client.options.cacheType === 'all') {
     this.client.channels = new Collection();
     this.client.guilds   = new Collection();
     this.client.users    = new Collection({ [this.client.user.id]: this.client.user });
   } else {
-    this.client.channels = this.client.canCache('channel') ? new Collection() : 0;
-    this.client.guilds   = this.client.canCache('guild')   ? new Collection() : 0;
-    this.client.users    = this.client.canCache('user')    ? new Collection({ [this.client.user.id]: this.client.user }) : 1;
+    this.client.channels = this.client.canCache('channel') ? new Collection() : null;
+    this.client.guilds   = this.client.canCache('guild')   ? new Collection() : null;
+    this.client.users    = this.client.canCache('user')    ? new Collection({ [this.client.user.id]: this.client.user }) : null;
   }
 
   this.unavailableGuilds = new Set(data.guilds.map(s => s.id));

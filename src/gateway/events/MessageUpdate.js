@@ -37,13 +37,14 @@ const onMessageUpdate = function ({ d: data }) {
     return;
   }
 
+  /** @type {import('../../entities/channel/TextChannel')} */
   const channel = this.client.channels.get(data.channel_id);
   if (!channel || channel.type !== 'text') {
     this.debug('Channel is possibly uncached or it\'s not a text channel, skipping');
     return;
   }
 
-  const message = channel.messages.get(data.id);
+  const message = channel.messages.find(message => message.id === data.id);
   if (!message) {
     this.debug('Message is possibly not cached, emitting with partial ID');
     this.client.emit('messageUpdate', null, { id: data.id });

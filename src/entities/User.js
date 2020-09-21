@@ -44,7 +44,7 @@ module.exports = class User extends Base {
      * The public flags the user has
      * @type {number}
      */
-    this.flags = data.public_flags;
+    this.flags = data.public_flags || 0;
 
     /**
      * The user's username

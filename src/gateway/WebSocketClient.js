@@ -26,6 +26,7 @@ const Constants       = require('../Constants');
 const RESTClient      = require('../rest/RESTClient');
 const EventBus        = require('../util/EventBus');
 const Util            = require('../util/Util');
+const { merge } = require('../util/Util');
 
 /**
  * Represents a client for handling all WebSocket shard connections
@@ -56,28 +57,28 @@ module.exports = class WebSocketClient extends EventBus {
      * The options that the user defined
      * @type {ClientOptions}
      */
-    this.options = {
-      populatePresences: Util.get('populatePresences', false, opts),
-      allowedMentions: Util.get('allowedMentions', {
+    this.options = merge(opts, {
+      populatePresences: false,
+      allowedMentions: {
         everyone: false,
         roles: false,
         users: false
-      }, opts),
-      disabledEvents: Util.get('disabledEvents', [], opts),
-      getAllUsers: Util.get('getAllUsers', true, opts),
-      shardCount: Util.get('shardCount', 'auto', opts),
-      strategy: Util.get('strategy', 'json', opts),
-      cache: Util.get('cache', 'none', opts),
-      ws: Util.get('ws', {
+      },
+      disabledEvents: [],
+      getAllUsers: true,
+      shardCount: 'auto',
+      strategy: 'json',
+      cache: 'none',
+      ws: {
         guildSubscriptions: false,
         largeThreshold: 250,
         connectTimeout: 30000,
         clientOptions: undefined,
         compress: false,
-        intents: ['guilds', 'guildMessages'],
+        intents: ['guild', 'guildMessages'],
         tries: 5
-      }, opts)
-    };
+      }
+    });
 
     /**
      * The guilds cache or `null` if it's not cachable
@@ -160,6 +161,17 @@ module.exports = class WebSocketClient extends EventBus {
       throw new SyntaxError('Unable to fetch data from Discord');
 
     if (data.url.includes('?')) data.url = data.url.substring(0, data.url.indexOf('?'));
+
+    /** @type {SessionStartLimit | null} */
+    const session = data.hasOwnProperty('session_start_limit') ? data.session_start_limit : null;
+
+    if (session !== null && session.remaining <= 0) {
+      const error = new Error('You have exceeded the amount of tries to connect to the gateway');
+      error.resetAfter = session.reset_after;
+      
+      this.emit('error', error);
+      return Promise.reject(error);
+    }
 
     /**
      * The gateway URL
