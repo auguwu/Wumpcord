@@ -24,7 +24,7 @@ const Message = require('../../../entities/Message');
 
 /**
  * Function to call when a message is deleted
- * @type {import('.').EventCallee}
+ * @type {import('..').EventCallee}
  */
 const onMessageUpdate = function ({ d: data }) {
   if (!this.client.canCache('channel')) {

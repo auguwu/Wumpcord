@@ -24,7 +24,7 @@ const Guild = require('../../../entities/Guild');
 
 /**
  * Function to call when a guild has been created
- * @type {import('.').EventCallee}
+ * @type {import('..').EventCallee}
  */
 const onGuildCreate = function ({ d: data }) {
   this.debug(`Received new guild: "${data.name}"`);

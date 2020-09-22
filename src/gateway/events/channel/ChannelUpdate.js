@@ -24,7 +24,7 @@ const { BaseChannel } = require('../../../entities');
 
 /**
  * Function to call when a channel has been updated in a guild
- * @type {import('.').EventCallee}
+ * @type {import('..').EventCallee}
  */
 const onChannelUpdate = function ({ d: data }) {
   if (!this.client.canCache('guild')) {

@@ -24,7 +24,7 @@ const { Message } = require('../../../entities');
 
 /**
  * Received when a message has been created
- * @type {import('.').EventCallee}
+ * @type {import('..').EventCallee}
  */
 const onMessageCreate = async function ({ d: data }) {
   const message = new Message(this.client, data);

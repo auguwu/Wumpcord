@@ -22,7 +22,7 @@
 
 /**
  * Function to call when the guild has been deleted
- * @type {import('.').EventCallee}
+ * @type {import('..').EventCallee}
  */
 const onGuildDelete = function ({ d: data }) {
   if (!data.hasOwnProperty('id')) {

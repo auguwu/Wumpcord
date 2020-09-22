@@ -22,7 +22,7 @@
 
 /**
  * Function to call when a message is deleted
- * @type {import('.').EventCallee}
+ * @type {import('..').EventCallee}
  */
 const onMessageDelete = function ({ d: data }) {
   if (!this.client.canCache('channel')) {

@@ -24,7 +24,7 @@ const { User } = require('../../../../entities');
 
 /**
  * Function to call when a ban has been removed from the guild
- * @type {import('.').EventCallee}
+ * @type {import('../..').EventCallee}
  */
 const onGuildBanRemove = function ({ d: data }) {
   if (!this.client.canCache('user')) {

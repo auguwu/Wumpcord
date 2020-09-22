@@ -28,6 +28,7 @@ module.exports = {
   GUILD_MEMBER_REMOVE: require('./guild/member/GuildMemberRemove'),
   GUILD_MEMBERS_CHUNK: require('./guild/member/GuildMemberChunk'),
   GUILD_MEMBER_UPDATE: require('./guild/member/GuildMemberUpdate'),
+  GUILD_EMOJIS_UPDATE: require('./guild/emoji/GuildEmojisUpdate'),
   CHANNEL_PINS_UPDATE: require('./channel/ChannelPinsUpdate'),
   GUILD_BAN_REMOVE: require('./guild/bans/GuildBanRemove'),
   GUILD_MEMBER_ADD: require('./guild/member/GuildMemberAdd'),

@@ -20,38 +20,40 @@
  * SOFTWARE.
  */
 
+const { Collection } = require('@augu/immutable');
+const GuildEmoji = require('../../../../entities/Emoji');
+
 /**
- * Function to call when a channel has uploaded/deleted a pin
- * @type {import('..').EventCallee}
+ * Called when a guild has updated the emoji list
+ * @type {import('../..').EventCallee}
  */
-const onChannelPinsUpdate = function ({ d: data }) {
+const onGuildEmojisUpdate = function ({ d: data }) {
   if (!this.client.canCache('guild')) {
-    this.debug('Can\'t cache guilds, not emitting anything');
+    this.debug('Can\'t cache guilds, emitting partial data anyway');
+    this.client.emit('guildEmojisUpdate', null, data.emojis.map(emoji => new GuildEmoji(this.client, emoji)));
     return;
   }
 
-  if (!this.client.canCache('channel')) {
-    this.debug('Can\'t cache channels, not emitting anything');
+  if (!this.client.canCache('emoji')) {
+    this.debug('Can\'t cache emojis, emitting partial data anyway');
+    this.client.emit('guildEmojisUpdate', null, data.emojis.map(emoji => new GuildEmoji(this.client, emoji)));
     return;
   }
 
   const guild = this.client.guilds.get(data.guild_id);
   if (!guild) {
-    this.debug(`Guild "${data.guild_id}" is possibly uncached, not emitting anything`);
+    this.debug(`Guild "${data.guild_id}" is possibly uncached, emitting partial data anyway`);
+    this.client.emit('guildEmojisUpdate', null, data.emojis.map(emoji => new GuildEmoji(this.client, emoji)));
     return;
   }
 
-  /** @type {import('../../entities/channel/TextChannel')} */
-  const channel = guild.channels.get(data.channel_id);
-  if (!channel || channel.type !== 'text') {
-    this.debug(`Channel "${data.channel_id}" is not cached or it's not a text channel, not emitting anything`);
-    return;
-  }
+  const oldEmojis = guild.emojis;
+  const collection = new Collection();
 
-  const oldTimestamp = channel.lastPinTimestamp;
-  channel.lastPinTimestamp = data.last_pin_timestamp === null ? null : new Date(data.last_pin_timestamp);
+  data.emojis.map(emoji => collection.set(emoji.id, new GuildEmoji(this.client, emoji)));
+  guild.emojis.merge(collection);
 
-  this.client.emit('channelPinsUpdate', channel, oldTimestamp, channel.lastPinTimestamp);
+  this.client.emit('guildEmojisUpdate', Array.from(oldEmojis.values()), data.emojis.map(emoji => new GuildEmoji(this.client, emoji)));
 };
 
-module.exports = onChannelPinsUpdate;
+module.exports = onGuildEmojisUpdate;

@@ -24,7 +24,7 @@ const { User } = require('../../../../entities');
 
 /**
  * Function to call when a ban has been placed in a guild
- * @type {import('.').EventCallee}
+ * @type {import('../..').EventCallee}
  */
 const onGuildBanAdd = function ({ d: data }) {
   if (!this.client.canCache('user')) {

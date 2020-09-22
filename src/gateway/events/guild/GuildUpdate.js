@@ -24,7 +24,7 @@ const { Guild } = require('../../../entities');
 
 /**
  * Function to call when a guild has updated
- * @type {import('.').EventCallee}
+ * @type {import('..').EventCallee}
  */
 const onGuildUpdate = function ({ d: data }) {
   if (!this.client.canCache('guild')) {
