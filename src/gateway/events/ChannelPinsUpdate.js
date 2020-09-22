@@ -20,36 +20,38 @@
  * SOFTWARE.
  */
 
-const BaseChannel = require('../../entities/BaseChannel');
-
 /**
- * Function to call when a channel has been created in a guild
+ * Function to call when a channel has uploaded/deleted a pin
  * @type {import('.').EventCallee}
  */
-const onChannelDelete = function ({ d: data }) {
+const onChannelPinsUpdate = function ({ d: data }) {
   if (!this.client.canCache('guild')) {
-    this.debug('Can\'t cache guilds, emitting partial data anyway');
-    this.client.emit('channelDelete', BaseChannel.from(this.client, data));
+    this.debug('Can\'t cache guilds, not emitting anything');
     return;
   }
 
   if (!this.client.canCache('channel')) {
-    this.debug('Can\'t cache channels, emitting partial data anyway');
-    this.client.emit('channelDelete', BaseChannel.from(this.client, data));
+    this.debug('Can\'t cache channels, not emitting anything');
     return;
   }
 
   const guild = this.client.guilds.get(data.guild_id);
   if (!guild) {
-    this.debug(`Guild "${data.guild_id}" is possibly uncached, emitting data anyway`);
-    this.client.emit('channelDelete', BaseChannel.from(this.client, data));
+    this.debug(`Guild "${data.guild_id}" is possibly uncached, not emitting anything`);
     return;
   }
 
-  const channel = BaseChannel.from(this.client, data);
-  if (guild.channels.has(channel.id)) guild.channels.delete(channel.id);
+  /** @type {import('../../entities/channel/TextChannel')} */
+  const channel = guild.channels.get(data.channel_id);
+  if (!channel || channel.type !== 'text') {
+    this.debug(`Channel "${data.channel_id}" is not cached or it's not a text channel, not emitting anything`);
+    return;
+  }
 
-  this.client.emit('channelDelete', channel);
+  const oldTimestamp = channel.lastPinTimestamp;
+  channel.lastPinTimestamp = data.last_pin_timestamp === null ? null : new Date(data.last_pin_timestamp);
+
+  this.client.emit('channelPinsUpdate', channel, oldTimestamp, channel.lastPinTimestamp);
 };
 
-module.exports = onChannelDelete;
+module.exports = onChannelPinsUpdate;
