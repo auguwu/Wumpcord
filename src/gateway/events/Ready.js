@@ -38,6 +38,7 @@ const onReady = function ({ d: data }) {
     this.client.users    = new Collection({ [this.client.user.id]: this.client.user });
   } else {
     this.client.channels = this.client.canCache('channel') ? new Collection() : null;
+    this.client.typings  = this.client.canCache('typing')  ? new Collection() : null;
     this.client.guilds   = this.client.canCache('guild')   ? new Collection() : null;
     this.client.users    = this.client.canCache('user')    ? new Collection({ [this.client.user.id]: this.client.user }) : null;
   }

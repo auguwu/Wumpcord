@@ -91,6 +91,12 @@ module.exports = class WebSocketClient extends EventBus {
     this.guilds = null;
 
     /**
+     * Any users typing in a channel
+     * @type {Collection<UserTyping> | null}
+     */
+    this.typings = null;
+
+    /**
      * The shard manager
      * @type {ShardingManager}
      */
@@ -385,4 +391,12 @@ module.exports = class WebSocketClient extends EventBus {
  * @prop {boolean} [everyone] If we should allow the bot to ping everyone
  * @prop {boolean | string[]} [roles] Boolean value of `true` if we should parse every role as a mentionable ping or an Array of role ids
  * @prop {boolean | string[]} [users] Boolean value of `true` if we should parse every user as a mentionable ping or an Array of user ids
+ *
+ * @typedef {object} UserTyping
+ * @prop {string | import('../entities/User')} user The user's ID or the user instance if cached
+ * @prop {string | import('../entities/channel/TextableChannel')} channel The channel's ID or the channel if cached
+ * @prop {number} elapsedTime How much time a user typed in this specific channel
+ * @prop {Date} lastTimestamp The last timestamp the user has typed in this specific channel
+ * @prop {NodeJS.Timeout} timeout The timeout to clear this [UserTyping] instance 
+ * @prop {Date} since Since the `typingStart` event has been emitted
  */

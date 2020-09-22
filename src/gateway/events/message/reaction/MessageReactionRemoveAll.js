@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+const { Queue } = require('@augu/immutable');
 const Emoji = require('../../../../entities/Emoji');
 
 /**
@@ -36,19 +37,8 @@ const onMessageReactionRemoveAll = function ({ d: data }) {
   }
 
   /** @type {import('../../../../entities/channel/TextChannel')} */
-  let channel = this.client.channels.get(data.channel_id);
-  let message = null;
-
-  if (!channel) {
-    this.debug(`Channel "${data.channel_id}" was not cached, skipping`);
-    return;
-  }
-
-  message = channel.messages.find(msg => msg.id === data.message_id);
-  if (!message) {
-    this.debug(`Message "${data.message_id}" was not cached, skipping`);
-    return;
-  }
+  let channel = this.client.channels.get(data.channel_id) || { id: data.channel_id, messages: new Queue() };
+  let message = channel.messages.find(msg => msg.id === data.message_id) || { id: data.message_id };
 
   this.client.emit('messageReactionRemoveAll', message, new Emoji(this.client, data.emoji));
 };
