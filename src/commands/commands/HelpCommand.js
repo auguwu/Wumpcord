@@ -20,15 +20,6 @@
  * SOFTWARE.
  */
 
-/**
- * Entrypoint of Wumpcord
- */
-module.exports = {
-  Constants: require('./Constants'),
-  Client: require('./gateway/WebSocketClient'),
-  Permissions: require('./util/Permissions'),
-  Util: require('./util/Util'),
-  commands: require('./commands'),
-  clustering: require('./clustering'),
-  version: require('../package.json').version
-};
+const { Command } = require('..');
+
+module.exports = class HelpCommand extends Command {};

@@ -20,15 +20,25 @@
  * SOFTWARE.
  */
 
+const { Collection } = require('@augu/immutable');
+const { Command } = require('..');
+const Context = require('../CommandContext');
+const util = require('util');
+
+/** @type {typeof import('fs').promises} */
+let fs = undefined;
+try {
+  fs = require('fs').promises;
+} catch(ex) {
+  fs = {
+    readdir: util.promisify(require('fs').readdirSync),
+    lstat: util.promisify(require('fs').lstatSync)
+  };
+}
+
 /**
- * Entrypoint of Wumpcord
+ * Represents the [CommandHandler], to add & run commands
+ * 
+ * @extends {Collection<Command>}
  */
-module.exports = {
-  Constants: require('./Constants'),
-  Client: require('./gateway/WebSocketClient'),
-  Permissions: require('./util/Permissions'),
-  Util: require('./util/Util'),
-  commands: require('./commands'),
-  clustering: require('./clustering'),
-  version: require('../package.json').version
-};
+module.exports = class CommandHandler extends Collection {};

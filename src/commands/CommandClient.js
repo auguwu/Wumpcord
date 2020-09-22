@@ -20,15 +20,9 @@
  * SOFTWARE.
  */
 
+const WebSocketClient = require('../gateway/WebSocketClient');
+
 /**
- * Entrypoint of Wumpcord
+ * Represents the entrypoint class of the commands API
  */
-module.exports = {
-  Constants: require('./Constants'),
-  Client: require('./gateway/WebSocketClient'),
-  Permissions: require('./util/Permissions'),
-  Util: require('./util/Util'),
-  commands: require('./commands'),
-  clustering: require('./clustering'),
-  version: require('../package.json').version
-};
+module.exports = class CommandClient {};

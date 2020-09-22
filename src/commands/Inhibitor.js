@@ -21,14 +21,8 @@
  */
 
 /**
- * Entrypoint of Wumpcord
+ * Represents a [Inhibitor], which represents a "structure"
+ * of a condition statement, like if the command needs
+ * to be ran in a guild
  */
-module.exports = {
-  Constants: require('./Constants'),
-  Client: require('./gateway/WebSocketClient'),
-  Permissions: require('./util/Permissions'),
-  Util: require('./util/Util'),
-  commands: require('./commands'),
-  clustering: require('./clustering'),
-  version: require('../package.json').version
-};
+module.exports = class Inhibitor {};

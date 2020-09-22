@@ -125,5 +125,23 @@ client.on('message', (message) => {
 client.start();
 ```
 
+## Caching
+Caching in Wumpcord is easy to understand until you actually implement it, there are many stuff you can cache but they must be opt using `ClientOptions.cacheType`. If the cache type is disabled or set to `none`, everything under that will be considered `null` or a Collection of key-value pairs of that specific cache
+
+- Guilds
+- Users
+- Channels
+- Members
+- Member Roles
+- Voice State
+- Attachments
+- Permission Overwrites
+- Emojis
+- Messages
+- Presences
+- Presence Activity
+- User Typings
+- Guild Invites
+
 ## License
 **Wumpcord** is released under the MIT License. Read [here](/LICENSE) for more information.

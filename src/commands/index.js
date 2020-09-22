@@ -21,14 +21,11 @@
  */
 
 /**
- * Entrypoint of Wumpcord
+ * Represents the actual entry-point of the commands API
  */
 module.exports = {
-  Constants: require('./Constants'),
-  Client: require('./gateway/WebSocketClient'),
-  Permissions: require('./util/Permissions'),
-  Util: require('./util/Util'),
-  commands: require('./commands'),
-  clustering: require('./clustering'),
-  version: require('../package.json').version
+  CommandClient: require('./CommandClient'),
+  Inhibitor: require('./Inhibitor'),
+  Command: require('./Command'),
+  Job: require('./Job')
 };

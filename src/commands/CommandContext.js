@@ -21,14 +21,7 @@
  */
 
 /**
- * Entrypoint of Wumpcord
+ * Represents the command's message class, that has external
+ * options to use
  */
-module.exports = {
-  Constants: require('./Constants'),
-  Client: require('./gateway/WebSocketClient'),
-  Permissions: require('./util/Permissions'),
-  Util: require('./util/Util'),
-  commands: require('./commands'),
-  clustering: require('./clustering'),
-  version: require('../package.json').version
-};
+module.exports = class CommandContext {};

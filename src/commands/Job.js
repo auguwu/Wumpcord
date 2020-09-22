@@ -20,15 +20,18 @@
  * SOFTWARE.
  */
 
+/** @type {typeof import('node-cron')} */
+let Cron = undefined;
+
+try {
+  Cron = require('node-cron');
+} catch(ex) {
+  throw new SyntaxError('`node-cron` must be installed in this project');
+}
+
 /**
- * Entrypoint of Wumpcord
+ * Represents a [Job] class, which runs a specific script in a time-frame
+ * 
+ * This uses the Cron Job ref, so refer to [here]() for more information
  */
-module.exports = {
-  Constants: require('./Constants'),
-  Client: require('./gateway/WebSocketClient'),
-  Permissions: require('./util/Permissions'),
-  Util: require('./util/Util'),
-  commands: require('./commands'),
-  clustering: require('./clustering'),
-  version: require('../package.json').version
-};
+module.exports = class Job {};

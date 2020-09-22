@@ -20,15 +20,24 @@
  * SOFTWARE.
  */
 
+const { Collection } = require('@augu/immutable');
+const { Inhibitor } = require('..');
+const util = require('util');
+
+/** @type {typeof import('fs').promises} */
+let fs = undefined;
+try {
+  fs = require('fs').promises;
+} catch(ex) {
+  fs = {
+    readdir: util.promisify(require('fs').readdirSync),
+    lstat: util.promisify(require('fs').lstatSync)
+  };
+}
+
 /**
- * Entrypoint of Wumpcord
+ * Represents the [InhibitorHandler], to add & run inhibitors
+ * 
+ * @extends {Collection<Inhibitor>}
  */
-module.exports = {
-  Constants: require('./Constants'),
-  Client: require('./gateway/WebSocketClient'),
-  Permissions: require('./util/Permissions'),
-  Util: require('./util/Util'),
-  commands: require('./commands'),
-  clustering: require('./clustering'),
-  version: require('../package.json').version
-};
+module.exports = class InhibitorHandler extends Collection {};

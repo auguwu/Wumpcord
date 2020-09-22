@@ -21,14 +21,6 @@
  */
 
 /**
- * Entrypoint of Wumpcord
+ * Represents a [Command] to execute when a user has typed out a command
  */
-module.exports = {
-  Constants: require('./Constants'),
-  Client: require('./gateway/WebSocketClient'),
-  Permissions: require('./util/Permissions'),
-  Util: require('./util/Util'),
-  commands: require('./commands'),
-  clustering: require('./clustering'),
-  version: require('../package.json').version
-};
+module.exports = class Command {};
