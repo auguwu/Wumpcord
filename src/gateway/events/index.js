@@ -25,14 +25,25 @@
  * @type {{ [x in import('../../Constants').Event]: EventCallee }}
  */
 module.exports = {
+  MESSAGE_REACTION_REMOVE_EMOJI: require('./message/reaction/MessageReactionRemoveEmoji'),
+  MESSAGE_REACTION_REMOVE_ALL: require('./message/reaction/MessageReactionRemoveAll'),
+  MESSAGE_REACTION_REMOVE: require('./message/reaction/MessageReactionRemove'),
+  MESSAGE_REACTION_ADD: require('./message/reaction/MessageReactionAdd'),
+  MESSAGE_DELETE_BULK: require('./message/MessageDeleteBulk'),
+  VOICE_SERVER_UPDATE: require('./VoiceServerUpdate'),
   GUILD_MEMBER_REMOVE: require('./guild/member/GuildMemberRemove'),
   GUILD_MEMBERS_CHUNK: require('./guild/member/GuildMemberChunk'),
   GUILD_MEMBER_UPDATE: require('./guild/member/GuildMemberUpdate'),
   GUILD_EMOJIS_UPDATE: require('./guild/emoji/GuildEmojisUpdate'),
   CHANNEL_PINS_UPDATE: require('./channel/ChannelPinsUpdate'),
+  VOICE_STATE_UPDATE: require('./VoiceStateUpdate'),
+  GUILD_ROLE_CREATE: require('./guild/role/GuildRoleCreate'),
+  GUILD_ROLE_UPDATE: require('./guild/role/GuildRoleUpdate'),
+  GUILD_ROLE_DELETE: require('./guild/role/GuildRoleDelete'),
   GUILD_BAN_REMOVE: require('./guild/bans/GuildBanRemove'),
   GUILD_MEMBER_ADD: require('./guild/member/GuildMemberAdd'),
   PRESENCE_UPDATE: require('./PresenceUpdate'),
+  WEBHOOKS_UPDATE: require('./WebhooksUpdate'),
   MESSAGE_CREATE: require('./message/MessageCreate'),
   MESSAGE_DELETE: require('./message/MessageDelete'),
   MESSAGE_UPDATE: require('./message/MessageUpdate'),
@@ -43,6 +54,8 @@ module.exports = {
   GUILD_DELETE: require('./guild/GuildDelete'),
   GUILD_CREATE: require('./guild/GuildCreate'),
   GUILD_UPDATE: require('./guild/GuildUpdate'),
+  TYPING_START: require('./TypingStart'),
+  USER_UPDATE: require('./UserUpdate'),
   RESUMED: require('./Resumed'),
   READY: require('./Ready')
 };
