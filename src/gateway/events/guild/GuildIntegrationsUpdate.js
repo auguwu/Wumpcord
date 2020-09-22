@@ -22,10 +22,16 @@
 
 /**
  * Function to call when a guild has updated their integrations
- * @type {import('.').EventCallee}
+ * @type {import('..').EventCallee}
  */
 const onGuildIntegrationUpdate = function ({ d: data }) {
-  console.log(data);
+  if (!this.client.canCache('guild')) {
+    this.debug('Unable to emit guildIntegrationsUpdate: Guild cache is missing');
+    return;
+  }
+
+  const guild = this.client.guilds.get(data.guild_id) || { id: data.guild_id };
+  this.client.emit('guildIntegrationsUpdate', guild);
 };
 
 module.exports = onGuildIntegrationUpdate;
