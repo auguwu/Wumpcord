@@ -20,36 +20,34 @@
  * SOFTWARE.
  */
 
-const BaseChannel = require('../../entities/BaseChannel');
+const { User } = require('../../../../entities');
 
 /**
- * Function to call when a channel has been created in a guild
+ * Function to call when a ban has been placed in a guild
  * @type {import('.').EventCallee}
  */
-const onChannelCreate = function ({ d: data }) {
-  if (!this.client.canCache('guild')) {
-    this.debug('Can\'t cache guilds, emitting partial data anyway');
-    this.client.emit('channelCreate', BaseChannel.from(this.client, data));
+const onGuildBanAdd = function ({ d: data }) {
+  if (!this.client.canCache('user')) {
+    this.debug('Can\'t cache users, sending data anyway');
+    this.client.emit('guildBanAdd', { id: data.guild_id }, new User(this.client, data.user));
     return;
   }
 
-  if (!this.client.canCache('channel')) {
-    this.debug('Can\'t cache channels, emitting partial data anyway');
-    this.client.emit('channelCreate', BaseChannel.from(this.client, data));
+  if (!this.client.canCache('guild')) {
+    this.debug('Can\'t cache guilds, sending partial data anyway');
+    this.client.emit('guildBanAdd', { id: data.guild_id }, new User(this.client, data.user));
     return;
   }
 
   const guild = this.client.guilds.get(data.guild_id);
   if (!guild) {
-    this.debug(`Guild "${data.guild_id}" is possibly uncached, emitting data anyway`);
-    this.client.emit('channelCreate', BaseChannel.from(this.client, data));
+    this.debug(`Guild "${data.guild_id}" is possibly uncached, sending partial data anyway`);
+    this.client.emit('guildBanAdd', { id: data.guild_id }, new User(this.client, data.user));
     return;
   }
 
-  const channel = BaseChannel.from(this.client, data);
-  guild.channels.set(channel.id, channel);
-
-  this.client.emit('channelCreate', channel);
+  const user = new User(this.client, data.user);
+  this.client.emit('guildBanAdd', guild, user);
 };
 
-module.exports = onChannelCreate;
+module.exports = onGuildBanAdd;

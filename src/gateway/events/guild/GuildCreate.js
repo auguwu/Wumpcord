@@ -20,31 +20,18 @@
  * SOFTWARE.
  */
 
-const { ShardStatus } = require('../../Constants');
-const { Collection } = require('@augu/immutable');
-const { BotUser } = require('../../entities');
+const Guild = require('../../../entities/Guild');
 
 /**
- * Received when the dispatcher calls `READY`
+ * Function to call when a guild has been created
  * @type {import('.').EventCallee}
  */
-const onReady = function ({ d: data }) {
-  this.client.user = new BotUser(this.client, data.user);
-  this.sessionID = data.session_id;
+const onGuildCreate = function ({ d: data }) {
+  this.debug(`Received new guild: "${data.name}"`);
 
-  if (this.client.options.cacheType === 'all') {
-    this.client.channels = new Collection();
-    this.client.guilds   = new Collection();
-    this.client.users    = new Collection({ [this.client.user.id]: this.client.user });
-  } else {
-    this.client.channels = this.client.canCache('channel') ? new Collection() : null;
-    this.client.guilds   = this.client.canCache('guild')   ? new Collection() : null;
-    this.client.users    = this.client.canCache('user')    ? new Collection({ [this.client.user.id]: this.client.user }) : null;
-  }
-
-  this.unavailableGuilds = new Set(data.guilds.map(s => s.id));
-  this.status = ShardStatus.WaitingForGuilds;
-  this.checkReady();
+  const guild = new Guild(this.client, { shard_id: this.id, ...data }); // eslint-disable-line camelcase
+  this.client.insert('guild', guild);
+  this.client.emit('guildCreate', guild);
 };
 
-module.exports = onReady;
+module.exports = onGuildCreate;

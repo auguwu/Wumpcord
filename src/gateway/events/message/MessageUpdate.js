@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-const Message = require('../../entities/Message');
+const Message = require('../../../entities/Message');
 
 /**
  * Function to call when a message is deleted

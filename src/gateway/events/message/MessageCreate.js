@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-const { Message } = require('../../entities');
+const { Message } = require('../../../entities');
 
 /**
  * Received when a message has been created

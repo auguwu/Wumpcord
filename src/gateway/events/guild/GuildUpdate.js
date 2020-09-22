@@ -20,36 +20,28 @@
  * SOFTWARE.
  */
 
-const BaseChannel = require('../../entities/BaseChannel');
+const { Guild } = require('../../../entities');
 
 /**
- * Function to call when a channel has been created in a guild
+ * Function to call when a guild has updated
  * @type {import('.').EventCallee}
  */
-const onChannelDelete = function ({ d: data }) {
+const onGuildUpdate = function ({ d: data }) {
   if (!this.client.canCache('guild')) {
-    this.debug('Can\'t cache guilds, emitting partial data anyway');
-    this.client.emit('channelDelete', BaseChannel.from(this.client, data));
+    this.debug('Can\'t get old guild data due to not being cachable, sending partial id...');
+    this.client.emit('guildUpdate', { id: data.id });
     return;
   }
 
-  if (!this.client.canCache('channel')) {
-    this.debug('Can\'t cache channels, emitting partial data anyway');
-    this.client.emit('channelDelete', BaseChannel.from(this.client, data));
-    return;
-  }
-
-  const guild = this.client.guilds.get(data.guild_id);
+  const guild = this.client.guilds.get(data.id);
   if (!guild) {
-    this.debug(`Guild "${data.guild_id}" is possibly uncached, emitting data anyway`);
-    this.client.emit('channelDelete', BaseChannel.from(this.client, data));
+    this.debug(`Guild "${data.id}" is possibly un-cached, sending partial ID...`);
+    this.client.emit('guildUpdate', { id: data.id });
     return;
   }
 
-  const channel = BaseChannel.from(this.client, data);
-  if (guild.channels.has(channel.id)) guild.channels.delete(channel.id);
-
-  this.client.emit('channelDelete', channel);
+  this.client.insert('guild', new Guild(data));
+  this.client.emit('guildUpdate', guild, new Guild(this.client, data));
 };
 
-module.exports = onChannelDelete;
+module.exports = onGuildUpdate;

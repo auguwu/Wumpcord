@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-const { User } = require('../../entities');
+const { User } = require('../../../../entities');
 
 /**
  * Function to call when a ban has been removed from the guild

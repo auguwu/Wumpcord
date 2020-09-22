@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-const GuildMember = require('../../entities/GuildMember');
+const GuildMember = require('../../../../entities/GuildMember');
 
 /**
  * Function to call when a guild member has updated anything about them

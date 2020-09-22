@@ -20,34 +20,18 @@
  * SOFTWARE.
  */
 
-const { User } = require('../../entities');
+const { ShardStatus } = require('../../Constants');
 
 /**
- * Function to call when a ban has been placed in a guild
+ * Received when the dispatcher calls `READY`
  * @type {import('.').EventCallee}
  */
-const onGuildBanAdd = function ({ d: data }) {
-  if (!this.client.canCache('user')) {
-    this.debug('Can\'t cache users, sending data anyway');
-    this.client.emit('guildBanAdd', { id: data.guild_id }, new User(this.client, data.user));
-    return;
-  }
+const onResumed = function ({ d: data }) {
+  this.debug(`Session "${this.sessionID}" has replayed ${this.seq === -1 ? 'no' : (data.s - this.seq).toLocaleString()} events`);
 
-  if (!this.client.canCache('guild')) {
-    this.debug('Can\'t cache guilds, sending partial data anyway');
-    this.client.emit('guildBanAdd', { id: data.guild_id }, new User(this.client, data.user));
-    return;
-  }
-
-  const guild = this.client.guilds.get(data.guild_id);
-  if (!guild) {
-    this.debug(`Guild "${data.guild_id}" is possibly uncached, sending partial data anyway`);
-    this.client.emit('guildBanAdd', { id: data.guild_id }, new User(this.client, data.user));
-    return;
-  }
-
-  const user = new User(this.client, data.user);
-  this.client.emit('guildBanAdd', guild, user);
+  this.status = ShardStatus.Connected;
+  this.sendHeartbeat();
+  this.emit('resume', this.seq === -1 ? 0 : (data.s - this.seq));
 };
 
-module.exports = onGuildBanAdd;
+module.exports = onResumed;

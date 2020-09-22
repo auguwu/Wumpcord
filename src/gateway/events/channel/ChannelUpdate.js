@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-const { BaseChannel } = require('../../entities');
+const { BaseChannel } = require('../../../entities');
 
 /**
  * Function to call when a channel has been updated in a guild
