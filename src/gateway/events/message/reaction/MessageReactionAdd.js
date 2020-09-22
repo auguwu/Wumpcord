@@ -27,7 +27,6 @@ const GuildEmoji = require('../../../../entities/Emoji');
  * @type {import('../..').EventCallee}
  */
 const onMessageReactionAdd = function ({ d: data }) {
-  console.log(data);
   if (
     !this.client.canCache('user') || 
     !this.client.canCache('message') ||

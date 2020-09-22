@@ -50,6 +50,12 @@ module.exports = class TextChannel extends TextableChannel {
      */
     this.messages = client.canCache('message') ? new Queue() : null;
 
+    /**
+     * List of invites to cache for this [TextChannel]
+     * @type {Collection<import('../GuildInvite')> | null}
+     */
+    this.invites = client.canCache('invite') ? new Collection() : null;
+
     this.patch(data);
   }
 

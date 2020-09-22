@@ -27,6 +27,7 @@
 module.exports = {
   MESSAGE_REACTION_REMOVE_EMOJI: require('./message/reaction/MessageReactionRemoveEmoji'),
   MESSAGE_REACTION_REMOVE_ALL: require('./message/reaction/MessageReactionRemoveAll'),
+  GUILD_INTEGRATIONS_UPDATE: require('./guild/GuildIntegrationsUpdate'),
   MESSAGE_REACTION_REMOVE: require('./message/reaction/MessageReactionRemove'),
   MESSAGE_REACTION_ADD: require('./message/reaction/MessageReactionAdd'),
   MESSAGE_DELETE_BULK: require('./message/MessageDeleteBulk'),
@@ -50,6 +51,8 @@ module.exports = {
   CHANNEL_CREATE: require('./channel/ChannelCreate'),
   CHANNEL_DELETE: require('./channel/ChannelDelete'),
   CHANNEL_UPDATE: require('./channel/ChannelUpdate'),
+  INVITE_CREATE: require('./guild/invites/GuildInviteCreate'),
+  INVITE_DELETE: require('./guild/invites/GuildInviteDelete'),
   GUILD_BAN_ADD: require('./guild/bans/GuildBanAdd'),
   GUILD_DELETE: require('./guild/GuildDelete'),
   GUILD_CREATE: require('./guild/GuildCreate'),

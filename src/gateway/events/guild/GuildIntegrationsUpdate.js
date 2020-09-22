@@ -20,25 +20,12 @@
  * SOFTWARE.
  */
 
-const User = require('../../entities/User');
-
 /**
- * Function to call when a user has updated any information
+ * Function to call when a guild has updated their integrations
  * @type {import('.').EventCallee}
  */
-const onUserUpdate = function ({ d: data }) {
-  if (!this.client.canCache('user')) {
-    this.debug('Unable to emit userUpdate: Users can\'t be cached, skipping');
-    return;
-  }
-
-  const user = this.client.users.get(data.id);
-  if (!user) {
-    this.debug(`Unable to emit userUpdate: User "${user.id}" is possibly uncached`);
-    return;
-  }
-
-  this.client.emit('userUpdate', user, new User(this.client, data));
+const onGuildIntegrationUpdate = function ({ d: data }) {
+  console.log(data);
 };
 
-module.exports = onUserUpdate;
+module.exports = onGuildIntegrationUpdate;

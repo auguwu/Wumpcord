@@ -25,7 +25,15 @@
  * @type {import('.').EventCallee}
  */
 const onWebhookUpdate = function ({ d: data }) {
-  console.log(data);
+  if (!this.client.canCache('channel') || !this.client.canCache('guild')) {
+    this.debug('Unable to emit webhooksUpdate: Channel and guild cache are not enabled');
+    return;
+  }
+
+  const guild = this.client.guilds.get(data.guild_id) || { id: data.guild_id };
+  const channel = this.client.channels.get(data.channel_id) || { id: data.channel_id };
+
+  this.client.emit('webhooksUpdate', guild, channel);
 };
 
 module.exports = onWebhookUpdate;

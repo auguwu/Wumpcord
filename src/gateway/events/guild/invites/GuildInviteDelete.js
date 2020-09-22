@@ -20,25 +20,34 @@
  * SOFTWARE.
  */
 
-const User = require('../../entities/User');
-
 /**
- * Function to call when a user has updated any information
- * @type {import('.').EventCallee}
+ * Function to call when a invite has created in a guild
+ * @type {import('../..').EventCallee}
  */
-const onUserUpdate = function ({ d: data }) {
-  if (!this.client.canCache('user')) {
-    this.debug('Unable to emit userUpdate: Users can\'t be cached, skipping');
+const onInviteDelete = function ({ d: data }) {
+  if (!this.client.canCache('channel') || !this.client.canCache('invite')) {
+    this.debug('Unable to emit inviteCreate: Channel and invite cache is not enabled');
     return;
   }
 
-  const user = this.client.users.get(data.id);
-  if (!user) {
-    this.debug(`Unable to emit userUpdate: User "${user.id}" is possibly uncached`);
-    return;
+  /** @type {import('../../../../entities/channel/TextChannel')} */
+  const channel = this.client.channels.get(data.channel_id) || { id: data.channel_id };
+  if (channel.hasOwnProperty('type')) {
+    if (channel.type !== 'text') {
+      this.debug(`Unable to emit inviteCreate: Channel "${channel.id}" was not a text channel`);
+      return;
+    }
   }
 
-  this.client.emit('userUpdate', user, new User(this.client, data));
+  let invite = { code: data.code };
+  if (channel.invites.has(data.code)) {
+    const old = channel.invites.get(data.code);
+    invite = old;
+
+    channel.invites.delete(data.code);
+  }
+
+  this.client.emit('inviteDelete', channel, invite);
 };
 
-module.exports = onUserUpdate;
+module.exports = onInviteDelete;
