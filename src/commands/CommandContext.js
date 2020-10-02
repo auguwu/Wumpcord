@@ -43,4 +43,39 @@ module.exports = class CommandContext {
      */
     this.client = client;
   }
+
+  /**
+   * Creates a new message in a channel
+   * @param {string | CreateMessageOptions | Buffer | MessageFile} content The content to send
+   * @param {CreateMessageOptions | Buffer | MessageFile} [options] Any additional options
+   */
+  send(content, options) {
+    return this.message.channel.send(content, options);
+  }
+  
+  /**
+   * Gets the guild or `null` if can't be cached
+   */
+  get guild() {
+    return this.message.guild;
+  }
+
+  /**
+   * Gets the channel
+   */
+  get channel() {
+    return this.message.channel;
+  }
+
+  /**
+   * Gets the author of the message
+   */
+  get author() {
+    return this.message.author;
+  }
 };
+
+/**
+ * @typedef {import('../entities/channel/TextableChannel').CreateMessageOptions} CreateMessageOptions
+ * @typedef {import('../entities/channel/TextableChannel').MessageFile} MessageFile
+ */

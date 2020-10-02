@@ -25,4 +25,41 @@
  * of a condition statement, like if the command needs
  * to be ran in a guild
  */
-module.exports = class Inhibitor {};
+module.exports = class Inhibitor {
+  /**
+   * Creates a new [Inhibitor] instance
+   * @param {string} name The name of the inhibitor
+   */
+  constructor(name) {
+    if (!name) throw new TypeError('Missing `name` in [Wumpcord.commands.Inhibitor]');
+    if (typeof name !== 'string') throw new TypeError(`Expected \`string\`, gotten ${typeof name}`);
+
+    /**
+     * The name of the inhibitor
+     * @type {string}
+     */
+    this.name = name;
+  }
+
+  /**
+   * Initialises this [Inhibitor] with the client
+   * @param {import('./CommandClient')} client The command's client
+   */
+  init(client) {
+    /**
+     * The client instance
+     * @type {import('./CommandClient')}
+     */
+    this.client = client;
+
+    return this;
+  }
+
+  /**
+   * Abstract function to run when this [Inhibitor] is called
+   * @param {import('./CommandContext')} ctx The command's context
+   */
+  async run(ctx) {
+    throw new TypeError(`Missing "run" function in Inhibitor "${this.name}"`);
+  }
+};

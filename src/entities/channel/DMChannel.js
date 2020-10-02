@@ -66,19 +66,3 @@ module.exports = class DMChannel extends TextableChannel {
       .catch(() => null);
   }
 };
-
-/**
- * @typedef {object} GetMessagesOptions
- * @prop {number} [before] The before limit
- * @prop {number} [after] The after limit
- * @prop {number} [around] The around limit
- * 
- * @typedef {object} CreateMessageOptions
- * @prop {string} [content] The message content
- * @prop {import('../message/MessageEmbed') | import('../message/MessageEmbed').Embed} [embed] The embed to send
- * @prop {MessageFile} [file] The file to send
- * 
- * @typedef {object} MessageFile
- * @prop {Buffer} file The file to send
- * @prop {string} [name] The filename
- */

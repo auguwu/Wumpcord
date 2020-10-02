@@ -32,6 +32,57 @@ try {
 /**
  * Represents a [Job] class, which runs a specific script in a time-frame
  * 
- * This uses the Cron Job ref, so refer to [here]() for more information
+ * This uses the Cron Job ref, so refer to [here](https://crontab.guru/) for more information
  */
-module.exports = class Job {};
+module.exports = class Job {
+  /**
+   * Creates a new [Job] instance
+   * @param {string} name The name of the job
+   * @param {string} interval The interval (refer to [here](https://crontab.guru/)) for more info
+   */
+  constructor(name, interval) {
+    if (!name || !interval) throw new TypeError('Missing `name` and `interval` in [Wumpcord.commands.Job]');
+    if (typeof name !== 'string') throw new TypeError(`Expecting 'string' but gotten ${typeof name}`);
+    if (typeof interval !== 'string') throw new TypeError(`Expecting 'string' but gotten ${typeof interval}`);
+    if (!Cron.validate(interval)) {
+      const error = new Error(`Invalid syntax in "${interval}"`);
+      error.name = 'CronValidationError';
+      error.syntax = interval;
+
+      throw error;
+    }
+
+    /**
+     * The interval to run
+     * @type {string}
+     */
+    this.interval = interval;
+
+    /**
+     * The name of the job
+     * @type {string}
+     */
+    this.name = name;
+  }
+
+  /**
+   * Initialises this [Inhibitor] with the client
+   * @param {import('./CommandClient')} client The command's client
+   */
+  init(client) {
+    /**
+     * The client instance
+     * @type {import('./CommandClient')}
+     */
+    this.client = client;
+
+    return this;
+  }
+
+  /**
+   * Abstract function to run when this [Job] is called
+   */
+  async run() {
+    throw new TypeError(`Missing "run" function in Job "${this.name}"`);
+  }
+};
