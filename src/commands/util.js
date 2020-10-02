@@ -20,5 +20,33 @@
  * SOFTWARE.
  */
 
-// used to polyfill `fs.readdir`
-const { fs } = require('../util');
+/**
+ * Utilities used in the [commands] API
+ */
+module.exports = {
+  /**
+   * Returns a polyfilled version of [fs.promises] if only:
+   * 
+   * - User is running Node v10 or lower (it'll used the polyfilled version)
+   * - User is running Node v10 or higher (it'll uses the `promises` API)
+   * @type {typeof import('fs/promises')}
+   */
+  fs: (() => {
+    try {
+      return (require('fs')).promises;
+    } catch(ex) {
+      const { lstat, readdir } = require('fs');
+
+      return {
+        lstat: (path) => new Promise((resolve, reject) => lstat(path, (error, stats) => {
+          if (error) return reject(error);
+          return resolve(stats);
+        })),
+        readdir: (path, options) => new Promise((resolve, reject) => readdir(path, options, (error, files) => {
+          if (error) return reject(error);
+          return resolve(files);
+        }))
+      };
+    }
+  })()
+};
