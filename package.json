@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@augu/eslint-config": "1.8.2",
-    "eslint": "7.9.0"
+    "eslint": "7.10.0"
   },
   "optionalDependencies": {
     "erlpack": "0.1.3",
