@@ -250,15 +250,15 @@ module.exports = class WebSocketClient extends EventBus {
   insert(type, packet) {
     switch (type) {
       case 'channel':
-        if (this.canCache('channel')) this.channels.set(packet.id, packet);
+        if (this.canCache('channel') && this.channels) this.channels.set(packet.id, packet);
         break;
 
       case 'guild':
-        if (this.canCache('guild')) this.guilds.set(packet.id, packet);
+        if (this.canCache('guild') && this.guilds) this.guilds.set(packet.id, packet);
         break;
 
       case 'user':
-        if (this.canCache('user')) this.users.set(packet.id, packet);
+        if (this.canCache('user') && this.users) this.users.set(packet.id, packet);
         break;
 
       default: break;

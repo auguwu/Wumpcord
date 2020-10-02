@@ -28,7 +28,7 @@ module.exports = {
   Client: require('./gateway/WebSocketClient'),
   Permissions: require('./util/Permissions'),
   Util: require('./util/Util'),
-  commands: require('./commands'),
-  clustering: require('./clustering'),
+  //commands: require('./commands'),
+  //clustering: require('./clustering'),
   version: require('../package.json').version
 };

@@ -22,6 +22,25 @@
 
 /**
  * Represents the command's message class, that has external
- * options to use
+ * options to use when running a command
  */
-module.exports = class CommandContext {};
+module.exports = class CommandContext {
+  /**
+   * Creates a new [CommandContext] instance
+   * @param {import('./CommandClient')} client The client
+   * @param {import('../entities/Message')} msg The message
+   */
+  constructor(client, msg) {
+    /**
+     * The message
+     * @type {import('../entities/Message')}
+     */
+    this.message = msg;
+
+    /**
+     * The client itself
+     * @type {import('./CommandClient')}
+     */
+    this.client = client;
+  }
+};
