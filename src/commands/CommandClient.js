@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-const ArugmentTypeReaderHandler = require('./handlers/ArgumentTypeReaderHandler');
+const ArgumentTypeReaderHandler = require('./handlers/ArgumentTypeReaderHandler');
 const InhibitorHandler = require('./handlers/InhibitorHander');
 const WebSocketClient = require('../gateway/WebSocketClient');
 const CommandHandler = require('./handlers/CommandHandler');
@@ -43,15 +43,13 @@ module.exports = class CommandClient extends WebSocketClient {
      * The type readers for all arguments
      * @type {import('./handlers/ArgumentTypeReaderHandler')}
      */
-    this.types = new ArgumentTypeReaderHandler(this);
+    this.types = new ArgumentTypeReaderHandler();
 
     /**
      * The inhibitor handler
      * @type {import('./handlers/InhibitorHandler') | null}
      */
-    this.inhibitors = options.inhibitors !== undefined
-      ? new InhibitorHandler(this, options.inhibitors)
-      : null;
+    this.inhibitors = new InhibitorHandler(this, options.inhibitors);
 
     /**
      * The commands handler
@@ -89,7 +87,7 @@ module.exports = class CommandClient extends WebSocketClient {
     const canEdit = options.editedMessage !== undefined ? !!options.editedMessage : false;
     if (canEdit) this.on('messageUpdate', (old, msg) => this.commands.handleEditedMessage(old, msg));
 
-    this.on('message', msg => this.commands.handleMessage(msg));
+    this.on('message', msg => this.commands.handle(msg));
   }
 
   /**
@@ -104,9 +102,10 @@ module.exports = class CommandClient extends WebSocketClient {
       '-=- Debug Information -=-'
     ].join('\n'));
 
+    this.types.registerDefaults();
     await this.commands.load();
-
-    if (this.inhibitors) await this.inhibitors.load();
+    await this.inhibitors.load();
+    
     if (this.jobs) await this.jobs.load();
 
     this.emit('debug', 'Connecting to Discord...');

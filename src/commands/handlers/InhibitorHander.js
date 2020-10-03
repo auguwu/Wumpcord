@@ -21,23 +21,76 @@
  */
 
 const { Collection } = require('@augu/immutable');
-const { Inhibitor } = require('..');
-const util = require('util');
 
-/** @type {typeof import('fs').promises} */
-let fs = undefined;
-try {
-  fs = require('fs').promises;
-} catch(ex) {
-  fs = {
-    readdir: util.promisify(require('fs').readdirSync),
-    lstat: util.promisify(require('fs').lstatSync)
-  };
-}
+const { 
+  posix: { join } 
+} = require('path');
+
+const { 
+  fs: { 
+    readdir, 
+    lstat 
+  } 
+} = require('../util');
 
 /**
  * Represents the [InhibitorHandler], to add & run inhibitors
  * 
- * @extends {Collection<Inhibitor>}
+ * @extends {Collection<import('../Inhibitor')>}
  */
-module.exports = class InhibitorHandler extends Collection {};
+module.exports = class InhibitorHandler extends Collection {
+  /**
+   * Creates a new [InhibitorHandler] instance
+   * @param {import('../CommandClient')} client The command client
+   * @param {string | Array<import('../CommandClient').Class<import('../Inhibitor')>>} directory The directory or the inhibitors to load at runtime
+   */
+  constructor(client, directory) {
+    super(Array.isArray(directory) ? directory.map(inhibitor => new inhibitor()) : undefined);
+
+    /**
+     * The directory or `null` if it's not a string
+     * @type {?string}
+     */
+    this.directory = typeof directory !== 'string' 
+      ? directory 
+      : null;
+
+    /**
+     * The command client
+     * @private
+     * @type {import('../CommandClient')}
+     */
+    this.client = client;
+  }
+
+  /**
+   * Asynchronously loads the commands if it's in a directory
+   */
+  async load() {
+    if (this.directory === null) {
+      this.client.emit('error', new Error('No `directory` was set, did you dynamically load commands? (https://docs.augu.dev/Wumpcord/errors#dynamic-commands)'));
+      return;
+    }
+
+    const stats = await lstat(this.directory);
+    if (!stats.isDirectory()) {
+      this.client.emit('error', new Error(`Directory "${this.directory}" was not a directory (https://docs.augu.dev/Wumpcord/errors#not-a-directory)`));
+      return;
+    }
+
+    const files = await readdir(this.directory);
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const cls = require(join(this.directory, file));
+      
+      /** @type {import('../Inhibitor')} */
+      const inhibitor = cls.default ? new cls.default() : new cls();
+      inhibitor.init(this.client);
+
+      this.set(inhibitor.name, inhibitor);
+      this.client.emit('inhibitor.registered', inhibitor);
+    }
+
+    this.client.emit('debug', `Loaded ${this.size} inhibitors!`);
+  }
+};

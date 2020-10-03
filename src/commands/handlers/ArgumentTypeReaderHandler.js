@@ -20,5 +20,23 @@
  * SOFTWARE.
  */
 
-// used to polyfill `fs.readdir`
-const { fs } = require('../util');
+const { Collection } = require('@augu/immutable');
+const readers = require('../arguments/types');
+
+/**
+ * Represents the handler for parsing type readers
+ * @extends {Collection<import('../arguments/ArgumentTypeReader')>}
+ */
+module.exports = class ArgumentTypeReaderHandler extends Collection {
+  /**
+   * Registers all default type readers
+   */
+  registerDefaults() {
+    for (let i = 0; i < readers.length; i++) {
+      const TypeReader = readers[i];
+      const reader = new TypeReader();
+
+      this.set(reader.id, reader);
+    }
+  }
+};

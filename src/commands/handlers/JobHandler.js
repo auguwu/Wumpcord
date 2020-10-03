@@ -21,23 +21,89 @@
  */
 
 const { Collection } = require('@augu/immutable');
-const { Job } = require('..');
-const util = require('util');
 
-/** @type {typeof import('fs').promises} */
-let fs = undefined;
+const { 
+  posix: { join } 
+} = require('path');
+
+const { 
+  fs: { 
+    readdir, 
+    lstat 
+  } 
+} = require('../util');
+
+/** @type {typeof import('node-cron')} */
+let cron = undefined;
+
 try {
-  fs = require('fs').promises;
+  cron = require('node-cron');
 } catch(ex) {
-  fs = {
-    readdir: util.promisify(require('fs').readdirSync),
-    lstat: util.promisify(require('fs').lstatSync)
-  };
+  throw new SyntaxError('`node-cron` must be installed in this project');
 }
 
 /**
  * Represents the [JobHandler], to add & run jobs
  * 
- * @extends {Collection<Job>}
+ * @extends {Collection<import('../Job')>}
  */
-module.exports = class JobHandler extends Collection {};
+module.exports = class JobHandler extends Collection {
+  /**
+   * Creates a new [JobHandler] instance
+   * @param {import('../CommandClient')} client The command client
+   * @param {string | Array<import('../CommandClient').Class<import('../Job')>>} directory The directory or the jobs to load at runtime
+   */
+  constructor(client, directory) {
+    super(Array.isArray(directory) ? directory.map(job => new job()) : undefined);
+
+    /**
+     * The directory or `null` if it's not a string
+     * @type {?string}
+     */
+    this.directory = typeof directory !== 'string' 
+      ? directory 
+      : null;
+
+    /**
+     * The command client
+     * @private
+     * @type {import('../CommandClient')}
+     */
+    this.client = client;
+
+    // if they were dynamically loaded, let's add `bot` to it!
+    this.map(i => i.init(this));
+  }
+
+  /**
+   * Asynchronously loads the commands if it's in a directory
+   */
+  async load() {
+    if (this.directory === null) {
+      this.client.emit('error', new Error('No `directory` was set, did you dynamically load commands? (https://docs.augu.dev/Wumpcord/errors#dynamic-commands)'));
+      return;
+    }
+
+    const stats = await lstat(this.directory);
+    if (!stats.isDirectory()) {
+      this.client.emit('error', new Error(`Directory "${this.directory}" was not a directory (https://docs.augu.dev/Wumpcord/errors#not-a-directory)`));
+      return;
+    }
+
+    const files = await readdir(this.directory);
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const cls = require(join(this.directory, file));
+      
+      /** @type {import('../Job')} */
+      const job = cls.default ? new cls.default() : new cls();
+      job.init(this.client);
+
+      this.set(job.name, job);
+      this.client.emit('job.registered', job);
+      cron.schedule(job.interval, job.run.bind(job));
+    }
+
+    this.client.emit('debug', `Loaded ${this.size} cron jobs!`);
+  }
+};
