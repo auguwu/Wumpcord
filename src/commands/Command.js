@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 
+const Argument = require('./arguments/Argument');
+
 /**
  * Represents a [Command] to execute when a user has typed out a command
  */
@@ -63,9 +65,11 @@ module.exports = class Command {
 
     /**
      * The argument list to traverse from
-     * @type {Array<(import('./arguments/Argument').ArgumentInfo)>}
+     * @type {Array<import('./arguments/Argument')>}
      */
-    this.args = info.args || [];
+    this.args = info.args !== undefined
+      ? info.args.map(argument => new Argument(argument))
+      : [];
   }
 
   /**
@@ -154,17 +158,7 @@ module.exports = class Command {
    */
   format() {
     const prefix = this.bot.getDefaultPrefix(); // returns the first element in the `prefix` array
-    const args = this.args.map(arg => {
-      const argument = new Argument(arg);
-      let prefix = argument.required ? '<' : '[';
-      const suffix = argument.required ? '>' : ']';
-
-      prefix += arg.label;
-      if (arg.infinite) prefix += '...';
-      prefix += suffix;
-
-      return prefix;
-    }).join(' ');
+    const args = this.args.map(arg => arg.format()).join(' ');
 
     return `${prefix}${this.name} ${args}`;
   }

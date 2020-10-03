@@ -20,52 +20,48 @@
  * SOFTWARE.
  */
 
+const ArgumentTypeReader = require('../ArgumentTypeReader');
+
 /**
- * Represents a structure class to parse a [ArgumentTypeReader]
- * @template T: The argument value
+ * Represents a union type reader
+ * @template T: The union types
+ * @extends {ArgumentTypeReader<T>}
  */
-module.exports = class ArgumentTypeReader {
+module.exports = class UnionTypeReader extends ArgumentTypeReader {
   /**
-   * Creates a new [ArgumentTypeReader] instance
-   * @param {string} id The reader's ID
-   * @param {string[]} [aliases=[]] Any additional aliases to find this [ArgumentTypeReader]
+   * Creates a new [UnionTypeReader] instance
+   * @param {import('../../CommandClient')} client The client
+   * @param {string} type The types
    */
-  constructor(id, aliases = []) {
-    /**
-     * Any aliases to find this [ArgumentTypeReader]
-     * @type {string[]}
-     */
-    this.aliases = aliases;
+  constructor(client, type) {
+    super(type);
 
     /**
-     * The reader's ID
-     * @type {string}
+     * The types
+     * @type {(import('../ArgumentTypeReader')<any>)[]}
      */
-    this.id = id;
+    this.types = [];
+
+    const ids = type.split('|');
+    for (let i = 0; i < ids.length; i++) {
+      const id = ids[i];
+      if (!client.types.has(id)) throw new TypeError(`Type "${id}" doesn't exist`);
+
+      this.types.push(client.types.get(id));
+    }
   }
 
   /**
-   * Abstract function to implement to validate this [ArgumentTypeReader]
-   * @param {import('../CommandContext')} ctx The command's context
+   * @param {import('../../CommandContext')} ctx The command's context
    * @param {string} arg The raw value
    * @returns {MaybePromise<boolean>}
    */
   validate(ctx, arg) {
-    throw new SyntaxError(`Method \`validate\` must be overrided in reader ${this.id}`);
-  }
-
-  /**
-   * Abstract function to parse this [ArgumentTypeReader]
-   * @param {import('../CommandContext')} ctx The command's context
-   * @param {string} arg The raw value
-   * @returns {MaybePromise<T>}
-   */
-  parse(ctx, arg) {
-    throw new SyntaxError(`Method \`parse\` must be overrided in reader ${this.id}`);
+    const results = this.types.filter(type => !type.validate(ctx, arg));
+    return results.length === 0;
   }
 };
 
 /**
- * @typedef {Promise<T> | T} MaybePromise
- * @template T
+ * @typedef {import('../ArgumentTypeReader').MaybePromise} MaybePromise
  */
