@@ -22,7 +22,7 @@
 
 /**
  * The default readers as an object
- * @type {{ [x: string]: import('../ArgumentTypeReader')<any> }}
+ * @type {{ [x: string]: import('../arguments/ArgumentTypeReader')<any> }}
  */
 module.exports = {
   

@@ -27,15 +27,22 @@
 module.exports = class ArgumentTypeReader {
   /**
    * Creates a new [ArgumentTypeReader] instance
+   * @param {import('../CommandClient')} client The client
    * @param {string} id The reader's ID
    * @param {string[]} [aliases=[]] Any additional aliases to find this [ArgumentTypeReader]
    */
-  constructor(id, aliases = []) {
+  constructor(client, id, aliases = []) {
     /**
      * Any aliases to find this [ArgumentTypeReader]
      * @type {string[]}
      */
     this.aliases = aliases;
+
+    /**
+     * The cleitn
+     * @type {import('../CommandClient')}
+     */
+    this.client = client;
 
     /**
      * The reader's ID

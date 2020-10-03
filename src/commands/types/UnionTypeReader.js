@@ -34,7 +34,7 @@ module.exports = class UnionTypeReader extends ArgumentTypeReader {
    * @param {string} type The types
    */
   constructor(client, type) {
-    super(type);
+    super(client, type);
 
     /**
      * The types
@@ -57,11 +57,26 @@ module.exports = class UnionTypeReader extends ArgumentTypeReader {
    * @returns {MaybePromise<boolean>}
    */
   validate(ctx, arg) {
-    const results = this.types.filter(type => !type.validate(ctx, arg));
-    return results.length === 0;
+    const results = this.types.map(type => type.validate(ctx, arg));
+    return results.some(Boolean);
+  }
+
+  /**
+   * @param {import('../../CommandContext')} ctx The command's context
+   * @param {string} arg The raw value
+   * @returns {MaybePromise<T>}
+   */
+  parse(ctx, arg) {
+    const results = this.types.map(type => type.parse(ctx, arg));
+    for (let i = 0; i < results.length; i++) {
+      if (results[i]) return this.types[i].parse(ctx, arg);
+    }
+
+    throw new TypeError(`Unable to parse "${arg}" with union ${this.id}`);
   }
 };
 
 /**
- * @typedef {import('../ArgumentTypeReader').MaybePromise} MaybePromise
+ * @typedef {import('../arguments/ArgumentTypeReader').MaybePromise<T>} MaybePromise
+ * @template T
  */
