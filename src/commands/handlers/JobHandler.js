@@ -22,15 +22,15 @@
 
 const { Collection } = require('@augu/immutable');
 
-const { 
-  posix: { join } 
+const {
+  posix: { join }
 } = require('path');
 
-const { 
-  fs: { 
-    readdir, 
-    lstat 
-  } 
+const {
+  fs: {
+    readdir,
+    lstat
+  }
 } = require('../util');
 
 /** @type {typeof import('node-cron')} */
@@ -44,7 +44,7 @@ try {
 
 /**
  * Represents the [JobHandler], to add & run jobs
- * 
+ *
  * @extends {Collection<import('../Job')>}
  */
 module.exports = class JobHandler extends Collection {
@@ -60,8 +60,8 @@ module.exports = class JobHandler extends Collection {
      * The directory or `null` if it's not a string
      * @type {?string}
      */
-    this.directory = typeof directory !== 'string' 
-      ? directory 
+    this.directory = typeof directory !== 'string'
+      ? directory
       : null;
 
     /**
@@ -94,7 +94,7 @@ module.exports = class JobHandler extends Collection {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const cls = require(join(this.directory, file));
-      
+
       /** @type {import('../Job')} */
       const job = cls.default ? new cls.default() : new cls();
       job.init(this.client);

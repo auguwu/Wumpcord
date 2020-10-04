@@ -29,7 +29,7 @@ module.exports = class GuildInhibitor extends Inhibitor {
 
   /**
    * Runs this [GuildInhibitor]
-   * @param {import('../CommandContext')} ctx The command's context 
+   * @param {import('../CommandContext')} ctx The command's context
    */
   run(ctx) {
     return ctx.guild !== null;

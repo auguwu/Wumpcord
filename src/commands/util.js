@@ -26,7 +26,7 @@
 module.exports = {
   /**
    * Returns a polyfilled version of [fs.promises] if only:
-   * 
+   *
    * - User is running Node v10 or lower (it'll used the polyfilled version)
    * - User is running Node v10 or higher (it'll uses the `promises` API)
    * @type {typeof import('fs/promises')}

@@ -22,20 +22,20 @@
 
 const { Collection } = require('@augu/immutable');
 
-const { 
-  posix: { join } 
+const {
+  posix: { join }
 } = require('path');
 
-const { 
-  fs: { 
-    readdir, 
-    lstat 
-  } 
+const {
+  fs: {
+    readdir,
+    lstat
+  }
 } = require('../util');
 
 /**
  * Represents the [InhibitorHandler], to add & run inhibitors
- * 
+ *
  * @extends {Collection<import('../Inhibitor')>}
  */
 module.exports = class InhibitorHandler extends Collection {
@@ -51,8 +51,8 @@ module.exports = class InhibitorHandler extends Collection {
      * The directory or `null` if it's not a string
      * @type {?string}
      */
-    this.directory = typeof directory !== 'string' 
-      ? directory 
+    this.directory = typeof directory !== 'string'
+      ? directory
       : null;
 
     /**
@@ -82,7 +82,7 @@ module.exports = class InhibitorHandler extends Collection {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const cls = require(join(this.directory, file));
-      
+
       /** @type {import('../Inhibitor')} */
       const inhibitor = cls.default ? new cls.default() : new cls();
       inhibitor.init(this.client);

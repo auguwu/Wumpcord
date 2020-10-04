@@ -23,21 +23,21 @@
 const { Collection } = require('@augu/immutable');
 const Context = require('../CommandContext');
 
-const { 
-  posix: { join } 
+const {
+  posix: { join }
 } = require('path');
 
-const { 
-  fs: { 
-    readdir, 
-    lstat 
-  } 
+const {
+  fs: {
+    readdir,
+    lstat
+  }
 } = require('../util');
 
 
 /**
  * Represents the [CommandHandler], to add & run commands
- * 
+ *
  * @extends {Collection<import('../Command')>}
  */
 module.exports = class CommandHandler extends Collection {
@@ -53,8 +53,8 @@ module.exports = class CommandHandler extends Collection {
      * The directory or `null` if it's not a string
      * @type {?string}
      */
-    this.directory = typeof directory !== 'string' 
-      ? directory 
+    this.directory = typeof directory !== 'string'
+      ? directory
       : null;
 
     /**
@@ -104,7 +104,7 @@ module.exports = class CommandHandler extends Collection {
       for (let j = 0; j < files.length; i++) {
         const Command = files[j];
         const cls = require(join(this.directory, module, Command));
-        
+
         /** @type {import('../Command')} */
         const command = cls.default ? new cls.default() : new cls();
         const list = this.modules.emplace(module, new Collection());
@@ -173,7 +173,7 @@ module.exports = class CommandHandler extends Collection {
     const args = msg.content.slice(prefix.length).split(/ +/g);
     const name = args.shift();
     const commands = this.filter(cmd =>
-      cmd.name === name || (cmd.aliases || []).includes(cmd)  
+      cmd.name === name || (cmd.aliases || []).includes(cmd)
     );
 
     // Check if the command is `null`

@@ -144,12 +144,12 @@ module.exports = class VoiceState extends Base {
  * @prop {boolean} mute
  * @prop {boolean} deaf
  * @prop {string} channel_id
- * 
+ *
  * @typedef {object} SelfVoiceState
  * @prop {boolean} muted
  * @prop {boolean} deafend
  * @prop {boolean} video
- * 
+ *
  * @typedef {object} ServerVoiceState
  * @prop {boolean} muted
  * @prop {boolean} deafend

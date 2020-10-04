@@ -105,7 +105,7 @@ module.exports = class CommandClient extends WebSocketClient {
     this.types.registerDefaults();
     await this.commands.load();
     await this.inhibitors.load();
-    
+
     if (this.jobs) await this.jobs.load();
 
     this.emit('debug', 'Connecting to Discord...');
@@ -155,10 +155,10 @@ module.exports = class CommandClient extends WebSocketClient {
  * @prop {string | Class<import('./Inhibitor')>} [inhibitors] List of inhibitors to run at runtime,
  * or a directory to automatically load them in when [CommandClient.load/0] starts, or `undefined`
  * if you don't wanna enable them and loads the defaults
- * 
+ *
  * @prop {string | Class<import('./Command')>} commands List of commands to load at runtime
  * or the directory to automatically load them in when [CommandClient.load/0] starts at
- * 
+ *
  * @prop {string | Class<import('./Job')>} [jobs] List of jobs to load at runtime
  * or a directory to automatically load them in when [CommandClient.load/0] starts, or `undefined`
  * if you don't wanna enable the [Wumpcord.commands.handlers.JobHandler (job handler)].

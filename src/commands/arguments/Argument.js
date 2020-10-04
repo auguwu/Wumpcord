@@ -24,11 +24,11 @@ const UnionTypeReader = require('../types/UnionTypeReader');
 
 /**
  * Represents a structure class of an [Argument] class.
- * 
+ *
  * An argument in the API is basically a value can be
  * represented into a value, so let's say we run `!help help`,
  * the raw representation would look like: ["help"]
- * 
+ *
  * It's just a string value, this base class is
  * to parse that value into a channel, message,
  * etc using the [ArgumentTypeReader] class
@@ -51,7 +51,7 @@ module.exports = class Argument {
     this.validator = info.validate !== undefined
       ? info.validate
       : undefined;
-    
+
     /**
      * If the argument is required or not
      * @type {boolean}
@@ -160,8 +160,8 @@ module.exports = class Argument {
 /**
  * @typedef {(ctx: import('../CommandContext'), arg: string) => boolean} ValidateFunction
  * @typedef {<T>(ctx: import('../CommandContext'), arg: string) => T} ParserFunction
- * 
- * @typedef {object} ArgumentInfo 
+ *
+ * @typedef {object} ArgumentInfo
  * @prop {ValidateFunction} [validate] Custom function to validate this [Argument]
  * @prop {boolean} [required=false] If the argument is required or not
  * @prop {any} [default] A default value if the argument isn't presented
@@ -169,6 +169,6 @@ module.exports = class Argument {
  * @prop {any[]} [oneOf=[]] An array of items to represent what it should be
  * @prop {string} label The argument's label
  * @prop {number} [min=0] The minimum number to use (type must be `int` or `double`)
- * @prop {number} [max=1] The maximum number to use (type must be `int` or `double`) 
+ * @prop {number} [max=1] The maximum number to use (type must be `int` or `double`)
  * @prop {string} type The type or a union literal type using the pipe syntax
  */

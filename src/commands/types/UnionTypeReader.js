@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-const ArgumentTypeReader = require('../ArgumentTypeReader');
+const ArgumentTypeReader = require('../arguments/ArgumentTypeReader');
 
 /**
  * Represents a union type reader

@@ -31,7 +31,7 @@ try {
 
 /**
  * Represents a [Job] class, which runs a specific script in a time-frame
- * 
+ *
  * This uses the Cron Job ref, so refer to [here](https://crontab.guru/) for more information
  */
 module.exports = class Job {

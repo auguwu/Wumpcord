@@ -36,7 +36,7 @@ module.exports = class Presence extends Base {
    */
   constructor(client, data) {
     super(data.user.id);
- 
+
     /**
      * The client
      * @private
@@ -99,22 +99,22 @@ module.exports = class Presence extends Base {
 
 /**
  * @typedef {object} PresencePacket
- * @prop {PartialUser} user 
+ * @prop {PartialUser} user
  * @prop {'online' | 'offline' | 'dnd' | 'away'} status
  * @prop {GamePresence} game
  * @prop {RawClientStatus} client_status
  * @prop {PartialActivity[]} activities
- * 
+ *
  * @typedef {object} GamePresence
  * @prop {number} type
  * @prop {string} name
  * @prop {string} id
  * @prop {PartialEmoji} emoji
  * @prop {number} created_at
- * 
+ *
  * @typedef {object} PartialUser
  * @prop {string} id
- * 
+ *
  * @typedef {object} PartialActivity
  * @prop {number} type
  * @prop {string} name
@@ -128,30 +128,30 @@ module.exports = class Presence extends Base {
  * @prop {string} [details]
  * @prop {PartialParty} [party]
  * @prop {PartialAssets} [assets]
- * 
+ *
  * @typedef {object} PartialEmoji
  * @prop {string} name
  * @prop {string} id
  * @prop {boolean} animated
- * 
+ *
  * @typedef {object} PartialTimestamp
  * @prop {number} start
  * @prop {number} end
- * 
+ *
  * @typedef {object} PartialParty
  * @prop {string} id
- * 
+ *
  * @typedef {object} PartialAssets
  * @prop {string} [large_text]
  * @prop {string} [large_image]
  * @prop {string} [small_text]
  * @prop {string} [small_image]
- * 
+ *
  * @typedef {object} RawClientStatus
  * @prop {boolean} [desktop]
  * @prop {boolean} [mobile]
  * @prop {boolean} [web]
- * 
+ *
  * @typedef {object} ClientStatus
  * @prop {boolean} desktop
  * @prop {boolean} mobile

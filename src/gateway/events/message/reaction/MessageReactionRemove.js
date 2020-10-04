@@ -29,7 +29,7 @@ const Emoji = require('../../../../entities/Emoji');
  */
 const onMessageReactionRemoved = function ({ d: data }) {
   if (
-    !this.client.canCache('user') || 
+    !this.client.canCache('user') ||
     !this.client.canCache('message') ||
     !this.client.canCache('channel')
   ) {
@@ -41,7 +41,7 @@ const onMessageReactionRemoved = function ({ d: data }) {
   const channel = this.client.channels.get(data.channel_id) || { id: data.channel_id, messages: new Queue() };
   const message = channel.messages.find(msg => msg.id === data.message_id) || { id: data.message_id };
   const user = this.client.users.get(data.user_id) || { id: data.user_id };
-  
+
   this.client.emit('messageReactionRemove', message, user, new Emoji(this.client, data.emoji));
 };
 

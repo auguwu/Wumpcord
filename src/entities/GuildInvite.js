@@ -86,7 +86,7 @@ module.exports = class GuildInvite {
      * @type {?import('./Guild')}
      */
     this.guild = this.client.canCache('guild') ? this.client.guilds.get(data.guild_id) || { id: data.guild_id } : null;
-  
+
     /**
      * The code of the invite
      * @type {string}

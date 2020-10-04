@@ -35,7 +35,7 @@ module.exports = class VoiceRegion {
      * @type {string}
      */
     this.name = data.name;
-    
+
     /**
      * The region's ID
      * @type {string}
@@ -70,7 +70,7 @@ module.exports = class VoiceRegion {
 
 /**
  * @typedef {object} VoiceRegionPacket
- * @prop {string} id 
+ * @prop {string} id
  * @prop {string} name
  * @prop {boolean} vip
  * @prop {boolean} custom

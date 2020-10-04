@@ -71,7 +71,7 @@ module.exports = class Permissions {
    */
   has(perm) {
     if (!Constants.Permissions.hasOwnProperty(perm)) return false;
-    
+
     return !!(this.allowed & Constants.Permissions[perm]);
   }
 };

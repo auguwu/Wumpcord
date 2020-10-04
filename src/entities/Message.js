@@ -32,7 +32,7 @@ const Constants = require('../Constants');
 /**
  * Checks if an object is a [MessageFile] instance
  * @param {unknown} obj The object
- * @returns {obj is import('./channel/DMChannel').MessageFile} Returns a boolean value if it is or not 
+ * @returns {obj is import('./channel/DMChannel').MessageFile} Returns a boolean value if it is or not
  */
 const isMessageFile = (obj) => typeof obj === 'object' && !Array.isArray(obj) && obj.hasOwnProperty('file');
 
@@ -185,7 +185,7 @@ module.exports = class Message extends Base {
 
       if (this.client.options.getAllUsers) {
         if (
-          this.client.options.populatePresences && 
+          this.client.options.populatePresences &&
           !(this.client.intents & Constants.GatewayIntents.guildPresences)
         ) {
           this.client.emit('debug', 'Missing `guildPresences` intent');
@@ -207,7 +207,7 @@ module.exports = class Message extends Base {
           return guild;
         }
       }
-      
+
       return guild;
     } catch(ex) {
       return null;
@@ -268,9 +268,9 @@ module.exports = class Message extends Base {
     if (typeof content === 'string') {
       send = { content };
     } else if (typeof content === 'object') {
-      if (Array.isArray(content)) 
+      if (Array.isArray(content))
         throw new Error('Cannot edit message with file(s).');
-      else if (isMessageFile(content)) 
+      else if (isMessageFile(content))
         throw new Error('Cannot edit message with file.');
       else {
         if (send.hasOwnProperty('content')) throw new SyntaxError('`content` is already populated');
@@ -279,9 +279,9 @@ module.exports = class Message extends Base {
         if (content.hasOwnProperty('allowedMentions')) send.allowed_mentions = Utilities.formatAllowedMentions(this.client, content.allowedMentions); // eslint-disable-line camelcase
       }
     } else if (typeof options === 'object') {
-      if (Array.isArray(content)) 
+      if (Array.isArray(content))
         throw new Error('Cannot edit message with file(s).');
-      else if (isMessageFile(content)) 
+      else if (isMessageFile(content))
         throw new Error('Cannot edit message with file.');
       else {
         if (send.hasOwnProperty('content')) throw new SyntaxError('`content` is already populated');
@@ -325,16 +325,16 @@ module.exports = class Message extends Base {
  * @prop {UserPacket} author
  * @prop {AttachmentPacket[]} attachments
  * @prop {string} guild_id
- * 
+ *
  * @typedef {object} GuildMemberPacket
  * @prop {string[]} roles
- * @prop {string} premium_since 
+ * @prop {string} premium_since
  * @prop {string} [nick]
  * @prop {boolean} mute
  * @prop {string} joined_at
  * @prop {string} hoisted_role
  * @prop {boolean} deaf
- * 
+ *
  * @typedef {object} UserPacket
  * @prop {string} username
  * @prop {number} public_flags

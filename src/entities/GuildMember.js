@@ -142,7 +142,7 @@ module.exports = class GuildMember extends Base {
  * @prop {string} [hoisted_role]
  * @prop {boolean} deaf
  * @prop {string} guild_id
- * 
+ *
  * @typedef {object} PartialUser
  * @prop {string} username
  * @prop {number} public_flags

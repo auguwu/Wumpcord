@@ -52,7 +52,7 @@ module.exports = class CommandContext {
   send(content, options) {
     return this.message.channel.send(content, options);
   }
-  
+
   /**
    * Gets the guild or `null` if can't be cached
    */

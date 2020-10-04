@@ -79,7 +79,7 @@ module.exports = class Guild extends UnavailableGuild {
      * @type {Collection<import('./Presence') | null>}
      */
     this.presences = client.canCache('presence') ? new Collection() : null;
-    
+
     /**
      * The client instance
      * @private
@@ -453,8 +453,8 @@ module.exports = class Guild extends UnavailableGuild {
    */
   ban(userID, opts = {}) {
     /** @type {BanOptions} */
-    const options = Util.merge(opts, { 
-      days: 7 
+    const options = Util.merge(opts, {
+      days: 7
     });
 
     if (options.days > 7) throw new TypeError('Message deletion days must range from 0-7 (default: 7)');
@@ -557,11 +557,11 @@ module.exports = class Guild extends UnavailableGuild {
  * @prop {string} [nonce] The nonce string
  * @prop {boolean} [force=false] If should be forceful or not
  * @prop {string[]} [userIds=[]] The user ID array
- * 
+ *
  * @typedef {object} BanOptions
  * @prop {string} [reason=''] The reason to set in audit logs
  * @prop {number} [days=7] The amount of days to delete messages (max: 7, min: 0)
- * 
+ *
  * @typedef {object} CreateChannelOptions
  * @prop {string} name The name of the channel
  * @prop {number} type The type to use

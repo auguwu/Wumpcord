@@ -28,7 +28,7 @@ const GuildEmoji = require('../../../../entities/Emoji');
  */
 const onMessageReactionAdd = function ({ d: data }) {
   if (
-    !this.client.canCache('user') || 
+    !this.client.canCache('user') ||
     !this.client.canCache('message') ||
     !this.client.canCache('channel')
   ) {

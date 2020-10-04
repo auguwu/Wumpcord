@@ -72,9 +72,9 @@ module.exports = class RESTClient {
   dispatch(opts) {
     return new Promise((resolve, reject) => {
       /** @type {RatelimitBucket} */
-      const bucket = { 
-        resolve, 
-        reject, 
+      const bucket = {
+        resolve,
+        reject,
         opts
       };
 
@@ -137,7 +137,7 @@ module.exports = class RESTClient {
  * @prop {(value?: any | PromiseLike<any>) => void} resolve The callback function
  * @prop {(error: DiscordRESTError) => void} reject Called when the HTTP client couldn't sustain a request
  * @prop {DispatchOptions} opts The dispatched options
- * 
+ *
  * @typedef {object} DispatchOptions
  * @prop {string} endpoint The endpoint
  * @prop {import('@augu/orchid').HttpMethod} method The http method to use

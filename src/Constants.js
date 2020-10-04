@@ -286,7 +286,7 @@ module.exports = {
     SourceMessageDeleted: 1 << 3,
     Urgent:               1 << 4
   },
-  
+
   MessageTypes: {
     Default:                           0,
     RecipientAdd:                      1,

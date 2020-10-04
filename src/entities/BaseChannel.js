@@ -26,7 +26,7 @@ const Base = require('./Base');
 module.exports = class BaseChannel extends Base {
   /**
    * Creates a new [BaseChannel] instance
-   * @param {any} data The data supplied from Discord 
+   * @param {any} data The data supplied from Discord
    */
   constructor(data) {
     super(data.id);

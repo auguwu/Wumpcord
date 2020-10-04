@@ -28,6 +28,9 @@ const EventBus        = require('../util/EventBus');
 const Util            = require('../util/Util');
 const { merge }       = require('../util/Util');
 const VoiceRegion     = require('../entities/VoiceRegion');
+const { Endpoints } = require('../Constants');
+const { User, Guild, BaseChannel } = require('../entities');
+const GuildMember = require('../entities/GuildMember');
 
 /**
  * Represents a client for handling all WebSocket shard connections
@@ -49,7 +52,7 @@ module.exports = class WebSocketClient extends EventBus {
      * The channels cache or `null` if it's not cachable
      * the bot can see, use `Client#fetchChannel` to get the channel
      * and possibly cache it
-     * 
+     *
      * @type {Collection<import('../entities/BaseChannel')> | null}
      */
     this.channels = null;
@@ -85,7 +88,7 @@ module.exports = class WebSocketClient extends EventBus {
      * The guilds cache or `null` if it's not cachable
      * the bot is currently in, use `Client#fetchGuild` to get the guild
      * and possibly cache it
-     * 
+     *
      * @type {Collection<import('../entities/Guild')> | null}
      */
     this.guilds = null;
@@ -111,7 +114,7 @@ module.exports = class WebSocketClient extends EventBus {
      * The user cache or or `null` if it's not cachable,
      * if you wanna retrieve information and possibly cache it,
      * you must use `Client#fetchUser/1` function
-     * 
+     *
      * @type {Collection<import('../entities/User')> | null}
      */
     this.users = null;
@@ -160,7 +163,7 @@ module.exports = class WebSocketClient extends EventBus {
    * Connects to the WebSocket service
    */
   async connect() {
-    const data = this.options.shardCount === 'auto' 
+    const data = this.options.shardCount === 'auto'
       ? await this.getBotGateway()
       : await this.getGateway();
 
@@ -175,7 +178,7 @@ module.exports = class WebSocketClient extends EventBus {
     if (session !== null && session.remaining <= 0) {
       const error = new Error('You have exceeded the amount of tries to connect to the gateway');
       error.resetAfter = session.reset_after;
-      
+
       this.emit('error', error);
       return Promise.reject(error);
     }
@@ -268,7 +271,7 @@ module.exports = class WebSocketClient extends EventBus {
   /**
    * Retrieves a list of requested guild members
    */
-  async requestGuildMembers() {    
+  async requestGuildMembers() {
     if (!this.canCache('guild') || !this.canCache('member')) {
       this.emit('debug', 'Guild cache is disabled, not populating user cache');
       return;
@@ -325,7 +328,7 @@ module.exports = class WebSocketClient extends EventBus {
    */
   dispose() {
     this.emit('debug', 'Reaching EOL status, closing...');
-    
+
     if (this.channels !== null) this.channels.clear();
     if (this.guilds !== null) this.guilds.clear();
     if (this.users !== null) this.users.clear();
@@ -347,6 +350,86 @@ module.exports = class WebSocketClient extends EventBus {
       .catch(() => []);
   }
 
+  /**
+   * Fetches a user from Discord and caches them, if we can
+   * @param {string} id The user's ID
+   * @returns {Promise<import('../entities/User')>} The user or `null` if couldn't be fetched
+   */
+  getUser(id) {
+    return this.rest.dispatch({
+      endpoint: Endpoints.user(id),
+      method: 'GET'
+    })
+      .then((data) => {
+        const user = new User(this, data);
+
+        this.insert('user', user);
+        return user;
+      })
+      .catch(() => null);
+  }
+
+  /**
+   * Fetches a guild and possibly caches it
+   * @param {string} id The user's ID
+   * @returns {Promise<import('../entities/Guild')>} The guild or `null` if it couldn't be fetched
+   */
+  getGuild(id) {
+    return this.rest.dispatch({
+      endpoint: Endpoints.guild(id, true),
+      method: 'GET'
+    })
+      .then((data) => {
+        const guild = new Guild(this, data);
+
+        this.insert('guild', guild);
+        return guild;
+      })
+      .catch(() => null);
+  }
+
+  /**
+   * Fetches a channel and possibly caches it
+   * @param {string} id The channel's ID
+   * @returns {Promise<import('../entities/BaseChannel')>} The channel or `null` if it couldn't be fetched
+   */
+  getChannel(id) {
+    return this.rest.dispatch({
+      endpoint: Endpoints.channel(id),
+      method: 'GET'
+    })
+      .then((data) => {
+        const channel = BaseChannel.from(this, data);
+
+        this.insert('channel', channel);
+        return channel;
+      })
+      .catch(() => null);
+  }
+
+  /**
+   * Gets a guild member and possibly caches it in the guild
+   * @param {string} guildID The guild's ID
+   * @param {string} memberID The member's ID
+   * @returns {Promise<import('../entities/GuildMember')>} The member or `null` if not found
+   */
+  getGuildMember(guildID, memberID) {
+    return this.rest.dispatch({
+      endpoint: Endpoints.Guild.member(guildID, memberID),
+      method: 'GET'
+    })
+      .then((data) => {
+        const member = new GuildMember(this, data);
+        if (this.canCache('guild')) {
+          const guild = this.guilds.get(guildID);
+          if (guild && this.canCache('member')) guild.members.set(member.id, member);
+        }
+
+        return member;
+      })
+      .catch(() => null);
+  }
+
   toString() {
     const user = this.user ? this.user.tag : '<unknown>';
     return `[WebSocketClient ${user}]`;
@@ -364,7 +447,7 @@ module.exports = class WebSocketClient extends EventBus {
  * @prop {import('../Constants').CacheType | import('../Constants').CacheType[]} [cache='none'] The cache type
  * @prop {WebSocketOptions} [ws=null] The WS options
  * @prop {string} token The token to use
- * 
+ *
  * @typedef {object} WebSocketOptions
  * @prop {boolean} [guildSubscriptions=false]
  * @prop {number} [largeThreshold=250]
@@ -373,20 +456,20 @@ module.exports = class WebSocketClient extends EventBus {
  * @prop {boolean} [compress]
  * @prop {number[] | number} [intents]
  * @prop {number} [tries=5]
- * 
+ *
  * @typedef {object} Gateway
  * @prop {string} url The URL
- * 
+ *
  * @typedef {object} BotGateway
  * @prop {SessionStartLimit} session_start_limit The start limit
  * @prop {number} shards The number of shards
  * @prop {string} url The URL
- * 
+ *
  * @typedef {object} SessionStartLimit
  * @prop {number} reset_after
  * @prop {number} remaining
  * @prop {number} total
- * 
+ *
  * @typedef {object} AllowedMentions
  * @prop {boolean} [everyone] If we should allow the bot to ping everyone
  * @prop {boolean | string[]} [roles] Boolean value of `true` if we should parse every role as a mentionable ping or an Array of role ids
@@ -397,6 +480,6 @@ module.exports = class WebSocketClient extends EventBus {
  * @prop {string | import('../entities/channel/TextableChannel')} channel The channel's ID or the channel if cached
  * @prop {number} elapsedTime How much time a user typed in this specific channel
  * @prop {Date} lastTimestamp The last timestamp the user has typed in this specific channel
- * @prop {NodeJS.Timeout} timeout The timeout to clear this [UserTyping] instance 
+ * @prop {NodeJS.Timeout} timeout The timeout to clear this [UserTyping] instance
  * @prop {Date} since Since the `typingStart` event has been emitted
  */

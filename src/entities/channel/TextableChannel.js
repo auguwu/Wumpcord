@@ -29,14 +29,14 @@ const Util = require('../../util/Util');
 /**
  * Checks if an object is a [MessageFile] instance
  * @param {unknown} obj The object
- * @returns {obj is MessageFile} Returns a boolean value if it is or not 
+ * @returns {obj is MessageFile} Returns a boolean value if it is or not
  */
 const isMessageFile = (obj) => typeof obj === 'object' && !Array.isArray(obj) && obj.hasOwnProperty('file');
 
 /**
  * Represents a "textable" channel, where this adds methods to
  * edit, send, delete, [un]pin messages in a Channel
- * 
+ *
  * @template T The channel that it signifies as
  */
 module.exports = class TextableChannel extends BaseChannel {
@@ -90,7 +90,7 @@ module.exports = class TextableChannel extends BaseChannel {
   }
 
   /**
-   * Get an Array of messages 
+   * Get an Array of messages
    * @param {number} amount The amount of messages to receive
    * @param {GetMessagesOptions} [options] The options to use
    * @returns {Promise<Message[]>} Returns an Array of messages or an empty array if an REST error occured
@@ -98,7 +98,7 @@ module.exports = class TextableChannel extends BaseChannel {
   getMessages(amount, options) {
     if (isNaN(amount)) throw new TypeError(`Amount "${amount}" was not a number`);
     if (amount < 2 || amount > 100) throw new TypeError('The amount must be lower/equal to 2 or higher/equal to 100');
-    
+
     return this.client.rest.dispatch({
       endpoint: Endpoints.Channel.messages(this.id),
       method: 'get',
@@ -271,12 +271,12 @@ module.exports = class TextableChannel extends BaseChannel {
  * @prop {number} [before] The before limit
  * @prop {number} [after] The after limit
  * @prop {number} [around] The around limit
- * 
+ *
  * @typedef {object} CreateMessageOptions
  * @prop {string} [content] The message content
  * @prop {import('../message/MessageEmbed') | import('../message/MessageEmbed').Embed} [embed] The embed to send
  * @prop {MessageFile} [file] The file to send
- * 
+ *
  * @typedef {object} MessageFile
  * @prop {Buffer} file The file to send
  * @prop {string} [name] The filename

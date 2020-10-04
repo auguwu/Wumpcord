@@ -29,7 +29,7 @@ module.exports = class OwnerInhibitor extends Inhibitor {
 
   /**
    * Runs this [OwnerInhibitor]
-   * @param {import('../CommandContext')} ctx The command's context 
+   * @param {import('../CommandContext')} ctx The command's context
    */
   run(ctx) {
     return this.client.isOwner(ctx.author.id);

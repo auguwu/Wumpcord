@@ -50,9 +50,9 @@ module.exports = class Command {
      * @type {string[]}
      */
     this.aliases = info.aliases || [];
-    
+
     /**
-     * The command's category 
+     * The command's category
      * @type {?string}
      */
     this.category = info.category || 'None';
@@ -98,7 +98,7 @@ module.exports = class Command {
       if (!Array.isArray(info.inhibitors)) throw new TypeError(`Expecting \`array\`, gotten ${typeof info.inhibitors}`);
       if (info.inhibitors.some(s => typeof s !== 'string')) {
         const items = info.inhibitors.filter(inhibitor =>
-          typeof inhibitor !== 'string'  
+          typeof inhibitor !== 'string'
         );
 
         throw new TypeError(`${items.length} inhibitors we're not a string`);
@@ -171,5 +171,5 @@ module.exports = class Command {
  * @prop {string[]} [inhibitors=[]] List of inhibitors to run
  * @prop {string[]} [aliases=[]] Any additional aliases to set this command as
  * @prop {string} [category='none'] The category of the command, will default to `'none'`
- * @prop {import('./arguments/Argument').ArgumentInfo[]} [args=[]] List of arguments that the command has 
+ * @prop {import('./arguments/Argument').ArgumentInfo[]} [args=[]] List of arguments that the command has
  */

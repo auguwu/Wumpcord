@@ -57,7 +57,7 @@ module.exports = class NewsChannel extends TextableChannel {
      * @type {?string}
      */
     this.topic = data.topic;
-    
+
     /**
      * The channel's position
      * @type {number}

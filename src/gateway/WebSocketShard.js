@@ -96,7 +96,7 @@ module.exports = class WebSocketShard extends EventBus {
     this.client = client;
 
     /**
-     * Collection or a number of the guilds for this shard 
+     * Collection or a number of the guilds for this shard
      */
     this.guilds = client.canCache('guild') ? new Collection() : 0;
 
@@ -176,7 +176,7 @@ module.exports = class WebSocketShard extends EventBus {
     this.status = Constants.ShardStatus.Zombie;
     this.socket = undefined;
     this.emit('disconnect', this.id);
-    
+
     if (this.sessionID !== undefined && this.client.options.ws.tries < this.attempts) {
       this.debug(`Reached the max threshold (${this.client.options.ws.tries}) to validate session`);
       this.sessionID = undefined;
@@ -305,7 +305,7 @@ module.exports = class WebSocketShard extends EventBus {
 
   /**
    * Received when the shard has closed it's connection
-   * @param {number} code The code 
+   * @param {number} code The code
    * @param {string} reason The reason
    * @arity Wumpcord.Sharding.WebSocketShard.onClose/2
    */
@@ -573,7 +573,7 @@ module.exports = class WebSocketShard extends EventBus {
     let packet;
     try {
       if (data instanceof ArrayBuffer) {
-        if (Erlpack) packet = Buffer.from(data); 
+        if (Erlpack) packet = Buffer.from(data);
       } else if (Array.isArray(data)) {
         packet = Buffer.concat(data);
       }
@@ -596,7 +596,7 @@ module.exports = class WebSocketShard extends EventBus {
  * @typedef {object} WebSocketShardOptions
  * @prop {'json' | 'etf'} strategy The strategy to encode/decode packets
  * @prop {number} id The shard's ID
- * 
+ *
  * @typedef {object} SendActivityOptions
  * @prop {string} name The name
  * @prop {number} type The type
