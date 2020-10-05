@@ -185,6 +185,8 @@ module.exports = class WebSocketClient extends EventBus {
       return Promise.reject(error);
     }
 
+    const auto = this.options.shardCount === 'auto' ? 'yes' : 'no';
+
     /**
      * The gateway URL
      * @type {string}
@@ -196,6 +198,13 @@ module.exports = class WebSocketClient extends EventBus {
     } else {
       this.lastShardID = this.options.shardCount;
     }
+
+    this.emit('debug', [
+      '-=- Session Information -=-',
+      `[Auto Sharding]:    ${auto}`,
+      `[Connection Times]: ${session ? `${session.remaining}/${session.total}` : 'Not auto sharding'}`,
+      '-=- Session Information -=-'
+    ].join('\n'));
 
     for (let i = 0; i < this.lastShardID; i++) {
       this.shards.spawn(i, this.options.strategy);
