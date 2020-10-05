@@ -22,6 +22,7 @@
 
 const { Collection } = require('@augu/immutable');
 const Context = require('../CommandContext');
+const Module = require('../Module');
 
 const {
   posix: { join }
@@ -47,15 +48,13 @@ module.exports = class CommandHandler extends Collection {
    * @param {string | Array<import('../CommandClient').Class<import('../Command')>>} directory The directory or the commands to load at runtime
    */
   constructor(client, directory) {
-    super(Array.isArray(directory) ? directory.map(command => new command()) : undefined);
+    super();
 
     /**
      * The directory or `null` if it's not a string
-     * @type {?string}
+     * @type {string | Array<import('../CommandClient').Class<import('../Command')>>}
      */
-    this.directory = typeof directory !== 'string'
-      ? directory
-      : null;
+    this.directory = directory;
 
     /**
      * The modules available
@@ -75,8 +74,21 @@ module.exports = class CommandHandler extends Collection {
    * Asynchronously loads the commands if it's in a directory
    */
   async load() {
-    if (this.directory === null) {
-      this.client.emit('error', new Error('No `directory` was set, did you dynamically load commands? (https://docs.augu.dev/Wumpcord/errors#dynamic-commands)'));
+    if (Array.isArray(this.directory)) {
+      this.client.emit('debug', `Now initialising ${this.directory.length} commands...`);
+      for (let i = 0; i < this.directory.length; i++) {
+        const cls = this.directory[i];
+        const command = new cls();
+
+        const mod = this.modules.emplace(command.category, new Module(command.category));
+        const c = command.init(this.client);
+
+        mod.commands.set(c.name, c);
+        this.set(c.name, c);
+        this.client.emit('command.registered', c);
+      }
+
+      this.client.emit('debug', `Loaded ${this.size} inhibitors!`);
       return;
     }
 
@@ -207,7 +219,7 @@ module.exports = class CommandHandler extends Collection {
       error.name = 'CommandError';
       error.stack = ex.stack;
 
-      this.client.emit('command.error', error);
+      this.client.emit('command.error', context, command, error);
     }
   }
 

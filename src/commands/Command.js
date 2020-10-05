@@ -65,11 +65,9 @@ module.exports = class Command {
 
     /**
      * The argument list to traverse from
-     * @type {Array<import('./arguments/Argument')>}
+     * @type {Array<import('./arguments/Argument').ArgumentInfo>}
      */
-    this.args = info.args !== undefined
-      ? info.args.map(argument => new Argument(argument))
-      : [];
+    this.args = info.args || [];
   }
 
   /**
@@ -78,11 +76,9 @@ module.exports = class Command {
    */
   static _validate(info) {
     if (typeof info !== 'object' && !Array.isArray(info)) throw new TypeError(`Expecting \`object\`, received ${typeof info}`);
-    if (!info.name) throw new TypeError('Missing `name` in `info`');
+    if (!info.name || !info.description) throw new TypeError('Missing `name` or `description` in `info`');
 
-    if (info.description && (typeof info.description !== 'string' || typeof info.description !== 'function'))
-      throw new TypeError(`Expecting \`string\` or \`Function\`, received ${typeof info.description}`);
-
+    if (info.description && typeof info.description !== 'string') throw new TypeError(`Expected \`string\` or \`Function\`, gotten ${typeof info.description}`);
     if (info.aliases) {
       if (!Array.isArray(info.aliases)) throw new TypeError(`Expecting \`array\`, gotten ${typeof info.description}`);
       if (info.aliases.some(s => typeof s !== 'string')) {
@@ -108,15 +104,6 @@ module.exports = class Command {
     if (info.category && typeof info.category !== 'string') throw new TypeError(`Expected \`string\`, gotten ${typeof info.category}`);
     if (info.args) {
       if (!Array.isArray(info.args)) throw new TypeError(`Expecting \`array\`, gotten ${typeof info.args}`);
-      if (info.args.some(s => !Argument._validate(s))) {
-        const items = info.args.filter(arg => !Argument._validate(arg));
-
-        const error = new Error(`${items.length} argument didn't pass the validation`);
-        error.name = 'ArgumentValidationError';
-        error.docs = items.map((arg, index) => `[${index + 1}/${items.length}] "${arg.documentation}"`);
-
-        throw error;
-      }
     }
   }
 
@@ -141,6 +128,15 @@ module.exports = class Command {
      * @type {import('./CommandClient')}
      */
     this.bot = bot;
+    this.args = this.args.map((arg, index) => {
+      try {
+        return new Argument(bot, arg);
+      } catch(ex) {
+        bot.emit('error', ex);
+        this.args.splice(index, 1);
+        return null;
+      }
+    }).filter(Boolean);
 
     return this;
   }

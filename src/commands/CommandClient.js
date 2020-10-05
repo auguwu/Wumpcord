@@ -25,7 +25,6 @@ const InhibitorHandler = require('./handlers/InhibitorHander');
 const WebSocketClient = require('../gateway/WebSocketClient');
 const CommandHandler = require('./handlers/CommandHandler');
 const JobHandler = require('./handlers/JobHandler');
-const wumpcord = require('..');
 const { User } = require('../entities');
 
 /**
@@ -94,14 +93,6 @@ module.exports = class CommandClient extends WebSocketClient {
    * Loads the bot, this function must be called to run it!
    */
   async load() {
-    this.emit('debug', [
-      '-=- Debug Information -=-',
-      `Wumpcord Version: ${wumpcord.version}`,
-      `Gateway Version : ${wumpcord.Constants.GatewayVersion}`,
-      `Rest Version    : ${wumpcord.Constants.RestVersion}`,
-      '-=- Debug Information -=-'
-    ].join('\n'));
-
     this.types.registerDefaults();
     await this.commands.load();
     await this.inhibitors.load();

@@ -45,15 +45,13 @@ module.exports = class InhibitorHandler extends Collection {
    * @param {string | Array<import('../CommandClient').Class<import('../Inhibitor')>>} directory The directory or the inhibitors to load at runtime
    */
   constructor(client, directory) {
-    super(Array.isArray(directory) ? directory.map(inhibitor => new inhibitor()) : undefined);
+    super();
 
     /**
      * The directory or `null` if it's not a string
-     * @type {?string}
+     * @type {string | Array<import('../CommandClient').Class<import('../Inhibitor')>>}
      */
-    this.directory = typeof directory !== 'string'
-      ? directory
-      : null;
+    this.directory = directory;
 
     /**
      * The command client
@@ -67,8 +65,19 @@ module.exports = class InhibitorHandler extends Collection {
    * Asynchronously loads the commands if it's in a directory
    */
   async load() {
-    if (this.directory === null) {
-      this.client.emit('error', new Error('No `directory` was set, did you dynamically load commands? (https://docs.augu.dev/Wumpcord/errors#dynamic-commands)'));
+    if (this.directory === undefined || this.directory === null) return;
+    if (Array.isArray(this.directory)) {
+      this.client.emit('debug', `Now initialising ${this.directory.length} inhibitors...`);
+      for (let i = 0; i < this.directory.length; i++) {
+        const cls = this.directory[i];
+        const inhibitor = new cls();
+        const i = inhibitor.init(this.client);
+
+        this.set(i.name, i);
+        this.client.emit('inhibitor.registered', i);
+      }
+
+      this.client.emit('debug', `Loaded ${this.size} inhibitors!`);
       return;
     }
 

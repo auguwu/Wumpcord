@@ -107,7 +107,7 @@ module.exports = class Argument {
    * @param {string} type The argument's type
    */
   static determineType(client, type) {
-    return client.types.find(type);
+    return client.types.find(client, type);
   }
 
   /**

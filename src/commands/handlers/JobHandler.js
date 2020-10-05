@@ -54,13 +54,18 @@ module.exports = class JobHandler extends Collection {
    * @param {string | Array<import('../CommandClient').Class<import('../Job')>>} directory The directory or the jobs to load at runtime
    */
   constructor(client, directory) {
-    super(Array.isArray(directory) ? directory.map(job => new job()) : undefined);
+    super(Array.isArray(directory) ? directory.map(command => {
+      const c = new command();
+      c.init(client);
+
+      return c;
+    }) : undefined);
 
     /**
      * The directory or `null` if it's not a string
      * @type {?string}
      */
-    this.directory = typeof directory !== 'string'
+    this.directory = typeof directory === 'string'
       ? directory
       : null;
 
@@ -72,17 +77,14 @@ module.exports = class JobHandler extends Collection {
     this.client = client;
 
     // if they were dynamically loaded, let's add `bot` to it!
-    this.map(i => i.init(this));
+    this.map(i => i.init(client));
   }
 
   /**
    * Asynchronously loads the commands if it's in a directory
    */
   async load() {
-    if (this.directory === null) {
-      this.client.emit('error', new Error('No `directory` was set, did you dynamically load commands? (https://docs.augu.dev/Wumpcord/errors#dynamic-commands)'));
-      return;
-    }
+    if (this.directory === undefined || this.directory === null) return;
 
     const stats = await lstat(this.directory);
     if (!stats.isDirectory()) {

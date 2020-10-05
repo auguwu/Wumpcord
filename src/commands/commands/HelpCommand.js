@@ -22,4 +22,29 @@
 
 const { Command } = require('..');
 
-module.exports = class HelpCommand extends Command {};
+module.exports = class HelpCommand extends Command {
+  constructor() {
+    super({
+      description: 'Grabs a list of Aoba\'s commands or gives documentation of a specific command or module',
+      category: 'None',
+      aliases: ['halp', 'h', 'cmds', 'commands', '?'],
+      args: [
+        {
+          required: false,
+          label: 'cmdOrMod',
+          type: 'command|module'
+        }
+      ],
+      name: 'help'
+    });
+  }
+
+  /**
+   * Runs this command
+   * @param {import('../CommandContext')} ctx The command's context
+   * @param {{ cmdOrMod: string; }} args The command's arguments
+   */
+  async run(ctx, { cmdOrMod }) {
+    return ctx.send(`Found command or module "${cmdOrMod || 'none'}"`);
+  }
+};

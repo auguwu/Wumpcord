@@ -132,8 +132,10 @@ module.exports = class WebSocketClient extends EventBus {
     this.user = undefined;
 
     this.once('ready', () => {
-      this.emit('debug', 'Now requesting all guild members and possibly caching them...');
-      this.requestGuildMembers();
+      if (this.options.getAllUsers) {
+        this.emit('debug', 'Now requesting all guild members and possibly caching them...');
+        this.requestGuildMembers();
+      }
     });
   }
 

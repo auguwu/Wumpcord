@@ -34,6 +34,8 @@ module.exports = class ArgumentTypeReaderHandler extends Collection {
    * @param {import('../CommandClient')} client The command's client
    */
   constructor(client) {
+    super();
+
     this.client = client;
   }
 
@@ -53,13 +55,13 @@ module.exports = class ArgumentTypeReaderHandler extends Collection {
    * Find a reader by it's ID
    * @param {string} type The ID of the type
    */
-  find(type) {
+  find(client, type) {
     if (!type) return undefined;
     if (!type.includes('|')) return this.get(type);
 
     let cls = this.get(type);
     if (cls) return cls;
 
-    return this.emplace(type, new UnionTypeReader(this.client, type));
+    return this.emplace(type, new UnionTypeReader(client, type));
   }
 };
