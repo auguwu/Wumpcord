@@ -21,11 +21,11 @@
  */
 
 const ValidationError = require('./ValidationError');
-const { Collection } = require('@augu/immutable');
 const EventBus = require('../../util/EventBus');
 
 /**
  * Represents a [Driver] class to handle concurrent database sessions
+ * @template T The connection class to use
  *
  * ### Built-in Drivers
  * - MongoDB
@@ -42,10 +42,10 @@ module.exports = class Driver extends EventBus {
     this.constructor._validate(opts);
 
     /**
-     * Collection of documents
-     * @type {Collection<import('./Document')>}
+     * The current connection of the driver, must populate in [Driver.connect/0]
+     * @type {?T}
      */
-    this.documents = new Collection();
+    this.connection = undefined;
 
     /**
      * Socket path if we are using a Unix socket
@@ -160,6 +160,17 @@ module.exports = class Driver extends EventBus {
    */
   abide(document) {
     // logic here
+  }
+
+  /**
+   * Fetches all the documents in a collection
+   * @template T Typed-value of the document(s)
+   * @param {string} collection The collection
+   * @returns {Promise<T[]>}
+   * @abstract
+   */
+  all(collection) {
+    throw new SyntaxError('Missing over-ride function for [Driver.all]');
   }
 };
 
