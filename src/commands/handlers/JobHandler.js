@@ -101,6 +101,7 @@ module.exports = class JobHandler extends Collection {
 
       this.set(job.name, job);
       this.client.emit('job.registered', job);
+
       cron.schedule(job.interval, job.run.bind(job));
     }
 

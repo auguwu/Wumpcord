@@ -13,16 +13,17 @@
 
 ## Example Bot
 ```js
-const { Client, GatewayIntents, ActivityStatus } = require('wumpcord');
+const { Client } = require('wumpcord');
 
 const client = new Client('', {
-  ws: { intents: [GatewayIntents.GUILDS, GatewayIntents.GUILD_MESSAGES] }
+  ws: { intents: ['guilds', 'guildMessages'] },
+  shardCount: 'auto'
 });
 
 client.on('ready', () => {
   client.user.setStatus('online', {
     name: 'something',
-    type: ActivityStatus.PLAYING
+    type: 0
   });
 
   console.log(`Bot ${client.user.tag} is ready!`);
@@ -45,17 +46,17 @@ There is two ways of sharding your bot:
 Example bot:
 
 ```js
-const { Client, GatewayIntents, ActivityStatus } = require('wumpcord');
+const { Client } = require('wumpcord');
 
 const client = new Client('', {
-  ws: { intents: [GatewayIntents.GUILDS, GatewayIntents.GUILD_MESSAGES] },
+  ws: { intents: ['guilds', 'guildMessages'] },
   shardCount: 'auto'
 });
 
 client.on('ready', () => {
   client.user.setStatus('online', {
     name: 'something',
-    type: ActivityStatus.PLAYING
+    type: 0
   });
 
   console.log(`Bot ${client.user.tag} is ready!`);
@@ -142,6 +143,11 @@ Caching in Wumpcord is easy to understand until you actually implement it, there
 - Presence Activity
 - User Typings
 - Guild Invites
+
+## Commands
+This is the documentation of the Commands API, provided by Wumpcord.
+
+Inspiration of this framework; courtesy to [discord.js-commando](https://github.com/discordjs/Commando).
 
 ## License
 **Wumpcord** is released under the MIT License. Read [here](/LICENSE) for more information.

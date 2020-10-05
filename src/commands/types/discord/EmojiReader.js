@@ -24,7 +24,6 @@ const ArgumentTypeReader = require('../../arguments/ArgumentTypeReader');
 const Regex = /^(?:<a?:([a-zA-Z0-9_]+):)?([0-9]+)>?$/;
 
 /**
- * Represents a union type reader
  * @extends {ArgumentTypeReader<import('../../../entities/Emoji')>}
  */
 module.exports = class EmojiTypeReader extends ArgumentTypeReader {
@@ -34,25 +33,26 @@ module.exports = class EmojiTypeReader extends ArgumentTypeReader {
 
   /**
    * @param {import('../../CommandContext')} ctx The command's context
-   * @param {string} arg The raw value
+   * @param {string} val The raw value
+   * @param {import('../../arguments/Argument')} arg The argument
    * @returns {MaybePromise<boolean>}
    */
-  validate(ctx, arg) {
+  validate(ctx, val, arg) {
     // If we are in a guild
     if (!ctx.guild) return false;
 
     // If we can cache emojis
     if (!this.client.canCache('emoji')) return false;
 
-    const matches = arg.match(Regex);
+    const matches = val.match(Regex);
     if (matches && ctx.guild.emojis.has(matches[2])) return true;
 
     // Let's find it by name (if it's included)
-    const match = ctx.guild.emojis.filter(emote => emote.name.toLowerCase().includes(arg.toLowerCase()));
+    const match = ctx.guild.emojis.filter(emote => emote.name.toLowerCase().includes(val.toLowerCase()));
     if (match.length) return true;
 
     // Let's find it by exact match
-    const match2 = ctx.guild.emojis.filter(emote => emote.name.toLowerCase() === arg.toLowerCase());
+    const match2 = ctx.guild.emojis.filter(emote => emote.name.toLowerCase() === val.toLowerCase());
     if (match2.length) return true;
 
     // No matches found, let's just not :pensive:
@@ -61,21 +61,22 @@ module.exports = class EmojiTypeReader extends ArgumentTypeReader {
 
   /**
    * @param {import('../../CommandContext')} ctx The command's context
-   * @param {string} arg The raw value
+   * @param {string} val The raw value
+   * @param {import('../../arguments/Argument')} arg The argument
    * @returns {MaybePromise<import('../../../entities/Emoji')>}
    */
-  parse(ctx, arg) {
+  parse(ctx, val, arg) {
     // Find it by RegExp
-    const matches = arg.match(Regex);
+    const matches = val.match(Regex);
     if (matches && ctx.guild.emojis.has(matches[2])) return ctx.guild.emojis.get(matches[2]) || null;
 
     // Let's find it by name (if it's included)
-    const match = ctx.guild.emojis.filter(emote => emote.name.toLowerCase().includes(arg.toLowerCase()));
+    const match = ctx.guild.emojis.filter(emote => emote.name.toLowerCase().includes(val.toLowerCase()));
     if (match.length) return match[0];
 
     // Let's find it by exact match
-    const match2 = ctx.guild.emojis.filter(emote => emote.name.toLowerCase() === arg.toLowerCase());
-    if (match2.length) return match[2];
+    const match2 = ctx.guild.emojis.filter(emote => emote.name.toLowerCase() === val.toLowerCase());
+    if (match2.length) return match2[0];
 
     // Let's not do anything if not found
     return null;

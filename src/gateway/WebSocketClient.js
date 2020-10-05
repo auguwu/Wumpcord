@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+const { User, Guild, BaseChannel, Message } = require('../entities');
 const ShardingManager = require('./ShardingManager');
 const { Collection }  = require('@augu/immutable');
 const Constants       = require('../Constants');
@@ -28,9 +29,8 @@ const EventBus        = require('../util/EventBus');
 const Util            = require('../util/Util');
 const { merge }       = require('../util/Util');
 const VoiceRegion     = require('../entities/VoiceRegion');
-const { Endpoints } = require('../Constants');
-const { User, Guild, BaseChannel } = require('../entities');
-const GuildMember = require('../entities/GuildMember');
+const { Endpoints }   = require('../Constants');
+const GuildMember     = require('../entities/GuildMember');
 
 /**
  * Represents a client for handling all WebSocket shard connections
@@ -427,6 +427,19 @@ module.exports = class WebSocketClient extends EventBus {
 
         return member;
       })
+      .catch(() => null);
+  }
+
+  /**
+   * Restfully gets a message
+   * @param {string} messageID The message's ID
+   * @returns {Promise<import('../entities/Message') | null>} The message or `null` if not found
+   */
+  getMessage(messageID) {
+    return this.rest.dispatch({
+      endpoint: Endpoints.Channel.message(messageID),
+      method: 'get'
+    }).then((data) => new Message(this, data))
       .catch(() => null);
   }
 

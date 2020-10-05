@@ -59,7 +59,7 @@ module.exports = class CommandHandler extends Collection {
 
     /**
      * The modules available
-     * @type {Collection<Collection<import('../Command')>>}
+     * @type {Collection<import('../Module')>}
      */
     this.modules = new Collection();
 
@@ -107,10 +107,10 @@ module.exports = class CommandHandler extends Collection {
 
         /** @type {import('../Command')} */
         const command = cls.default ? new cls.default() : new cls();
-        const list = this.modules.emplace(module, new Collection());
+        const list = this.modules.emplace(module, new Module(module));
         command.init(this.client);
 
-        list.set(command.name, command);
+        list.commands.set(command.name, command);
         this.set(command.name, command);
 
         this.client.emit('command.registered', command);
@@ -151,11 +151,10 @@ module.exports = class CommandHandler extends Collection {
 
     // Let's get the prefixes
     const mention = new RegExp(`<@!${this.client.user.id}> `).exec(msg.content);
-    const prefixes = this.client.prefixes; // cache them
+    const prefixes = this.client.prefixes.filter(Boolean);
     let prefix = null;
 
     // Let's filter out any `undefined` stuff
-    prefixes.filter(Boolean);
     if (mention !== null) prefixes.push(`${mention}`); // add the mention as a prefix if was added to the message
 
     // Let's traverse through it and check
@@ -210,5 +209,65 @@ module.exports = class CommandHandler extends Collection {
 
       this.client.emit('command.error', error);
     }
+  }
+
+  /**
+   * Finds a list of commands by a filter
+   * @param {'exact' | 'inexact'} type The type to traverse from
+   * @param {string} name The name or alias of the command
+   * @returns {Array<import('../Command')>} Array of commands found
+   */
+  findCommands(type, name) {
+    if (!['exact', 'inexact'].includes(type)) throw new TypeError(`Invalid filter "${type}"`);
+
+    /** @type {((command: import('../Command')) => boolean)} */
+    let filter;
+
+    switch (type) {
+      case 'inexact':
+        filter = (command) => command.name.toLowerCase().includes(name.toLowerCase()) || command.aliases.map(toLower).includes(name.toLowerCase());
+        break;
+
+      case 'exact':
+        filter = (command) => command.name.toLowerCase() === name || command.aliases.some(alias => alias.toLowerCase() === name);
+        break;
+
+      default:
+        filter = undefined;
+        break;
+    }
+
+    if (filter === undefined) return [];
+    else return this.filter(filter);
+  }
+
+  /**
+   * Finds a list of modules by the filter
+   * @param {'exact' | 'inexact'} type The type to traverse from
+   * @param {string} name The name or alias of the command
+   * @returns {Array<import('../Module')>} Array of commands found
+   */
+  findModules(type, name) {
+    if (!['exact', 'inexact'].includes(type)) throw new TypeError(`Invalid filter "${type}"`);
+
+    /** @type {((mod: import('../Module')) => boolean)} */
+    let filter;
+
+    switch (type) {
+      case 'inexact':
+        filter = (mod) => mod.name.toLowerCase().includes(name.toLowerCase());
+        break;
+
+      case 'exact':
+        filter = (mod) => mod.name.toLowerCase() === name;
+        break;
+
+      default:
+        filter = undefined;
+        break;
+    }
+
+    if (filter === undefined) return [];
+    else return this.modules.filter(filter);
   }
 };

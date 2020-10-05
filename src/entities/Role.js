@@ -88,6 +88,12 @@ module.exports = class Role extends Base {
      * @type {number}
      */
     this.color = data.color || 0;
+
+    /**
+     * The name of the role
+     * @type {string}
+     */
+    this.name = data.name;
   }
 
   /**
@@ -109,9 +115,7 @@ module.exports = class Role extends Base {
 
     let items = [];
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(this.hexColor);
-    if (result) {
-      items = [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)];
-    }
+    if (result) items.concat([parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)]);
 
     return items;
   }

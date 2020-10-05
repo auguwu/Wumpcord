@@ -24,35 +24,113 @@ const ArgumentTypeReader = require('../../arguments/ArgumentTypeReader');
 const Regex = /^(?:<@!?)?([0-9]+)>?$/;
 
 /**
- * Represents a union type reader
  * @extends {ArgumentTypeReader<import('../../../entities/GuildMember')>}
  */
-module.exports = class EmojiTypeReader extends ArgumentTypeReader {
+module.exports = class MemberTypeReader extends ArgumentTypeReader {
   constructor(client) {
     super(client, 'member');
   }
 
   /**
    * @param {import('../../CommandContext')} ctx The command's context
-   * @param {string} arg The raw value
+   * @param {string} val The raw value
+   * @param {import('../../arguments/Argument')} arg The argument
    * @returns {MaybePromise<boolean>}
    */
-  async validate(ctx, arg) {
-    const matches = arg.match(Regex);
+  async validate(ctx, val, arg) {
+    // If we aren't in a guild
+    if (!ctx.guild) return false;
+
+    // If we can't cache guild members
+    if (!this.client.canCache('member')) return false;
+
+    // Find it by regex (<@!{id}>)
+    const matches = val.match(Regex);
     if (matches) {
       try {
-        const member = await this.client.fetchMember(await this.client.fetchUser(matches[1]));
+        const member = await this.client.getGuildMember(ctx.guild.id, await this.client.getUser(matches[1]));
+        if (!member) return false;
+        if (!arg.oneOf.includes(member.id)) return false;
+
+        return true;
+      } catch(ex) {
+        return false;
       }
     }
+
+    // Find it by nick/user#discrim (not exactly)
+    const match1 = ctx.guild.members.filter(member =>
+      member.nick
+        ? member.nick.toLowerCase().includes(val.toLowerCase())
+        : `${member.user.username.toLowerCase()}#${member.user.discriminator}`.includes(val.toLowerCase())
+    );
+
+    if (match1.length) {
+      if (arg.oneOf.length && !arg.oneOf.includes(match1[0].id)) return false;
+      return true;
+    }
+
+    // Find it by nick/user#discrim (exactly)
+    const match2 = ctx.guild.members.filter(member =>
+      member.nick
+        ? member.nick.toLowerCase() === val.toLowerCase()
+        : `${member.user.username.toLowerCase()}#${member.user.discriminator}` === val.toLowerCase()
+    );
+
+    if (match2.length) {
+      if (arg.oneOf.length && !arg.oneOf.includes(match2[0].id)) return false;
+      return true;
+    }
+
+    return false;
   }
 
   /**
    * @param {import('../../CommandContext')} ctx The command's context
-   * @param {string} arg The raw value
-   * @returns {MaybePromise<import('../../../entities/Emoji')>}
+   * @param {string} val The raw value
+   * @param {import('../../arguments/Argument')} arg The argument
+   * @returns {MaybePromise<import('../../../entities/GuildMember')>}
    */
-  parse(ctx, arg) {
+  async parse(ctx, val, arg) {
+    // If we aren't in a guild
+    if (!ctx.guild) return false;
 
+    // If we can't cache guild members
+    if (!this.client.canCache('member')) return false;
+
+    // Find it by regex (<@!{id}>)
+    const matches = val.match(Regex);
+    if (matches) {
+      try {
+        const member = await this.client.getGuildMember(ctx.guild.id, await this.client.getUser(matches[1]));
+        if (!member) return null;
+        if (!arg.oneOf.includes(member.id)) return null;
+
+        return member;
+      } catch(ex) {
+        return null;
+      }
+    }
+
+    // Find it by nick/user#discrim (not exactly)
+    const match1 = ctx.guild.members.filter(member =>
+      member.nick
+        ? member.nick.toLowerCase().includes(val.toLowerCase())
+        : `${member.user.username.toLowerCase()}#${member.user.discriminator}`.includes(val.toLowerCase())
+    );
+
+    if (match1.length) return match1[0];
+
+    // Find it by nick/user#discrim (exactly)
+    const match2 = ctx.guild.members.filter(member =>
+      member.nick
+        ? member.nick.toLowerCase() === val.toLowerCase()
+        : `${member.user.username.toLowerCase()}#${member.user.discriminator}` === val.toLowerCase()
+    );
+
+    if (match2.length) return match2[0];
+
+    return null;
   }
 };
 

@@ -57,7 +57,7 @@ module.exports = class ArgumentTypeReader {
    * @param {string} arg The raw value
    * @returns {MaybePromise<boolean>}
    */
-  validate(ctx, arg) {
+  validate(ctx, val, arg) {
     throw new SyntaxError(`Method \`validate\` must be overrided in reader ${this.id}`);
   }
 
@@ -67,7 +67,7 @@ module.exports = class ArgumentTypeReader {
    * @param {string} arg The raw value
    * @returns {MaybePromise<T>}
    */
-  parse(ctx, arg) {
+  parse(ctx, val, arg) {
     throw new SyntaxError(`Method \`parse\` must be overrided in reader ${this.id}`);
   }
 };

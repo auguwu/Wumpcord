@@ -21,7 +21,8 @@
  */
 
 const { Collection } = require('@augu/immutable');
-const readers = require('../arguments/types');
+const UnionTypeReader = require('../types/UnionTypeReader');
+const readers = require('../types');
 
 /**
  * Represents the handler for parsing type readers
@@ -29,14 +30,36 @@ const readers = require('../arguments/types');
  */
 module.exports = class ArgumentTypeReaderHandler extends Collection {
   /**
+   * Creates a new [ArgumentTypeReaderHandler] instance
+   * @param {import('../CommandClient')} client The command's client
+   */
+  constructor(client) {
+    this.client = client;
+  }
+
+  /**
    * Registers all default type readers
    */
   registerDefaults() {
     for (let i = 0; i < readers.length; i++) {
       const TypeReader = readers[i];
-      const reader = new TypeReader();
+      const reader = new TypeReader(this.client);
 
       this.set(reader.id, reader);
     }
+  }
+
+  /**
+   * Find a reader by it's ID
+   * @param {string} type The ID of the type
+   */
+  find(type) {
+    if (!type) return undefined;
+    if (!type.includes('|')) return this.get(type);
+
+    let cls = this.get(type);
+    if (cls) return cls;
+
+    return this.emplace(type, new UnionTypeReader(this.client, type));
   }
 };

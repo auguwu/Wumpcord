@@ -20,8 +20,6 @@
  * SOFTWARE.
  */
 
-const UnionTypeReader = require('../types/UnionTypeReader');
-
 /**
  * Represents a structure class of an [Argument] class.
  *
@@ -109,12 +107,7 @@ module.exports = class Argument {
    * @param {string} type The argument's type
    */
   static determineType(client, type) {
-    if (!type) return undefined;
-
-    let cls = client.types.get(type);
-    if (cls) return cls;
-
-    return client.types.emplace(type, new UnionTypeReader(client, type));
+    return client.types.find(type);
   }
 
   /**

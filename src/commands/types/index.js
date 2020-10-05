@@ -22,8 +22,25 @@
 
 /**
  * The default readers as an object
- * @type {{ [x: string]: import('../arguments/ArgumentTypeReader')<any> }}
+ * @type {Array<import('../CommandClient').Class<import('../arguments/ArgumentTypeReader')<any>>>}
  */
-module.exports = {
+module.exports = [
+  // Discord Objects
+  require('./discord/EmojiReader'),
+  require('./discord/MemberReader'),
+  require('./discord/MessageReader'),
+  require('./discord/RoleReader'),
+  require('./discord/TextChannelReader'),
+  require('./discord/UserReader'),
+  require('./discord/VoiceChannelReader'),
 
-};
+  // Framework Objects
+  require('./framework/CommandReader'),
+  require('./framework/ModuleReader'),
+
+  // JavaScript Objects
+  require('./objects/BooleanReader'),
+  require('./objects/DoubleReader'),
+  require('./objects/IntegerReader'),
+  require('./objects/StringReader')
+];
