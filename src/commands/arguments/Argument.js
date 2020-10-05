@@ -107,7 +107,7 @@ module.exports = class Argument {
    * @param {string} type The argument's type
    */
   static determineType(client, type) {
-    return client.types.find(client, type);
+    return client.types.find(type);
   }
 
   /**
@@ -130,23 +130,23 @@ module.exports = class Argument {
   }
 
   /**
-   * Formats this [Argument] instance
+   * Validates this [Argument]
+   * @param {import('../CommandContext')} ctx The command's context
+   * @param {string} val The raw value
    */
-  format() {
-    const [prefix, suffix] = [this.required ? '<' : '[', this.required ? '>' : ']'];
-    let text = prefix;
+  validate(ctx, val) {
+    if (this.validator) return this.validator(ctx, val, this);
+    return this.type.validate(ctx, val, this);
+  }
 
-    if (this.oneOf) {
-      const items = this.oneOf.map(item => item.toString());
-      text += `${items.map(i => `"${i}"`).join(' | ')}${suffix}`;
-
-      return text;
-    }
-
-    text += this.label;
-    text += suffix;
-
-    return text;
+  /**
+   * Parses this [Argument]
+   * @param {import('../CommandContext')} ctx The command's context
+   * @param {string} val The raw value
+   */
+  parse(ctx, val) {
+    if (this.parser) return this.parser(ctx, val, this);
+    return this.type.parse(ctx, val, this);
   }
 };
 

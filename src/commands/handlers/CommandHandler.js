@@ -23,12 +23,14 @@
 const { Collection } = require('@augu/immutable');
 const Context = require('../CommandContext');
 const Module = require('../Module');
+const toLower = s => s.toLowerCase();
 
 const {
   posix: { join }
 } = require('path');
 
 const {
+  isPromise,
   fs: {
     readdir,
     lstat
@@ -120,7 +122,9 @@ module.exports = class CommandHandler extends Collection {
         /** @type {import('../Command')} */
         const command = cls.default ? new cls.default() : new cls();
         const list = this.modules.emplace(module, new Module(module));
+
         command.init(this.client);
+        command.category = module;
 
         list.commands.set(command.name, command);
         this.set(command.name, command);
@@ -207,9 +211,22 @@ module.exports = class CommandHandler extends Collection {
 
     // Now we check for args!
     const allArgs = {};
-    for (let i = 0; i < command.args.length; i++) {
-      // Put them in an Object (for now)
-      allArgs[command.args[i].label] = args[i];
+    for (let i = 0; i < args.length; i++) {
+      /** @type {import('../arguments/Argument')} */
+      const arg = command.args[i];
+      try {
+        let result;
+        if (isPromise(arg.validate)) result = await arg.validate(context, args[i]);
+        else result = arg.validate(context, args[i]);
+
+        allArgs[arg.label] = arg.parse(context, args[i]) || arg.default;
+      } catch(ex) {
+        if (!arg.default) return context.send(`${ex.name}: ${ex.message}\n> Usage: **${command.format()}**`);
+        else {
+          allArgs[arg.label] = arg.default;
+          continue;
+        }
+      }
     }
 
     try {

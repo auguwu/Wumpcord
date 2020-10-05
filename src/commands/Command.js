@@ -154,7 +154,21 @@ module.exports = class Command {
    */
   format() {
     const prefix = this.bot.getDefaultPrefix(); // returns the first element in the `prefix` array
-    const args = this.args.map(arg => arg.format()).join(' ');
+    const args = this.args.map(arg => {
+      const [prefix, suffix] = [arg.required ? '<' : '[', arg.required ? '>' : ']'];
+      let text = prefix;
+
+      if (arg.oneOf.length) {
+        const items = arg.oneOf.map(item => item.toString());
+        text += `${items.map(i => `"${i}"`).join(' | ')}${suffix}`;
+
+        return text;
+      }
+
+      text += `${arg.label || 'none'}:${arg.type.id}${suffix}`;
+
+      return text;
+    }).join(' ');
 
     return `${prefix}${this.name} ${args}`;
   }

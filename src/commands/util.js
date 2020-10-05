@@ -48,5 +48,12 @@ module.exports = {
         }))
       };
     }
-  })()
+  })(),
+
+  /**
+   * Checks if `value` is a Promise
+   * @param {unknown} value The value
+   * @returns {value is Promise<any>}
+   */
+  isPromise: (value) => value instanceof Promise && typeof value.then === 'function'
 };

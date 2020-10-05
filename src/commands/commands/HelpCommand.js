@@ -21,6 +21,7 @@
  */
 
 const { Command } = require('..');
+const { isPromise } = require('../util');
 
 module.exports = class HelpCommand extends Command {
   constructor() {
@@ -42,9 +43,74 @@ module.exports = class HelpCommand extends Command {
   /**
    * Runs this command
    * @param {import('../CommandContext')} ctx The command's context
-   * @param {{ cmdOrMod: string; }} args The command's arguments
+   * @param {{ cmdOrMod: import('../Command') | import('../Module') }} args The command's arguments
    */
   async run(ctx, { cmdOrMod }) {
-    return ctx.send(`Found command or module "${cmdOrMod || 'none'}"`);
+    if (!cmdOrMod) {
+      const commands = this.bot.commands.filter(async command => {
+        let result;
+        for (let i = 0; i < command.inhibitors.length; i++) {
+          const inhibitor = this.bot.inhibitors.get(command.inhibitors[i]);
+          result = isPromise(inhibitor.run) ? await inhibitor.run(ctx) : inhibitor.run(ctx);
+        }
+
+        return result;
+      });
+
+      const embed = {
+        title: `${this.bot.user.tag} | Commands List`,
+        description: `View a command or module's documentation using **${this.bot.getDefaultPrefix()}help <command>**, where \`<command>\` is the command you wanna execute from the list`,
+        fields: [],
+        color: 0x470B4D
+      };
+
+      const categories = {};
+      for (const command of commands) {
+        if (!categories.hasOwnProperty(command.category)) categories[command.category] = [];
+        categories[command.category].push(command.name);
+      }
+
+      for (const cat in categories) {
+        embed.fields.push({
+          name: `${cat} [${categories[cat].length}]`,
+          value: categories[cat].map(s => `\`${s}\``).join(', ') || 'None',
+          inline: false
+        });
+      }
+
+      return ctx.send({ embed });
+    } else {
+      const isModule = cmdOrMod.commands !== undefined;
+      if (isModule) {
+        const embed = {
+          title: `[ Module ${cmdOrMod.name} ]`,
+          description: []
+        };
+
+        for (const command of cmdOrMod.commands.values()) embed.description.push(`-> **${command.format()}: ${command.description}**`);
+
+        return ctx.send({
+          embed: {
+            title: embed.title,
+            description: embed.description.join('\n'),
+            color: 0x470B4D
+          }
+        });
+      } else {
+        return ctx.send({
+          embed: {
+            title: `[ Command ${cmdOrMod.name} ]`,
+            description: [
+              `> :pencil2: **| ${cmdOrMod.description}**`,
+              '',
+              '```apache',
+              `Usage: ${cmdOrMod.format()}`,
+              '```'
+            ].join('\n'),
+            color: 0x470B4D
+          }
+        });
+      }
+    }
   }
 };
