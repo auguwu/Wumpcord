@@ -149,5 +149,130 @@ This is the documentation of the Commands API, provided by Wumpcord.
 
 Inspiration of this framework; courtesy to [discord.js-commando](https://github.com/discordjs/Commando).
 
+### Type Readers
+A "type reader" is a class to handle any argument-specific stuff, like reading a string or something. List shows what is built-in and will be injected when the bot starts:
+
+- API-related
+  - `command`
+  - `module`
+- Discord-related
+  - `emoji`
+  - `member`
+  - `role`
+  - `text`
+  - `voice`
+  - `user`
+- Normal
+  - `boolean`
+  - `double`
+  - `integer`
+  - `string`
+
+You can combine readers into a **Union Literal** reader, which will filter/parse all arguments in that literal, using the pipe syntax. (i.e: `string|user` -> String | Wumpcord.Entities.User)
+
+You can create your own and inject it using the `readers` option in [CommandClientOptions], example is below:
+
+```js
+// reader.js
+const { commands: { TypeReader } } = require('wumpcord');
+
+module.exports = class MyTypeReader extends TypeReader {
+  constructor(client) {
+    super(client, 'name', ['alias1', 'alias2']);
+  }
+
+  validate(ctx, val, arg) {
+    // valiation logic here, must return a boolean
+  }
+
+  parse(ctx, val, arg) {
+    // parse logic here, async/await is supported
+  }
+};
+
+// index.js
+const { commands: { CommandClient } } = require('wumpcord');
+const MyTypeReader = require('path/to/reader');
+
+new CommandClient({
+  readers: [MyTypeReader] // or a string that has to be a relative path!
+}).load();
+```
+
+### Drivers
+Wumpcord's Commands API provides an en-riching library to bring in a database, using the Drivers API!
+
+#### Built-in Drivers
+> :pencil2: **Wanna add a driver here, submit a pull request!**
+
+- MongoDB
+- PostgreSQL
+
+#### Example Driver
+```js
+// driver.js
+const { commands: { Driver } } = require('wumpcord');
+const logic = require('library'); // replace this line with your database logic
+
+module.exports = class Database extends Driver {
+  constructor() {
+    super({
+      port: 6379, // the port
+      host: 'host', // the host
+      socket: '', // path to unix socket, if it's supports it
+      tls: false, // if the driver supports TLS connections
+      name: 'database',
+      auth: {
+        // authenication here
+      },
+      schema: {
+        // schema to follow for documents, does validation with updating/creating documents
+      }
+    });
+  }
+
+  async connect() {
+    // do connection logic here, you can get the options from `this.options`!
+  }
+
+  dispose() {
+    // do disconnecting logic here!
+  }
+};
+
+// index.js
+const { commands: { CommandClient } } = require('wumpcord');
+const MyDriver = require('path/to/driver');
+
+new CommandClient({
+  driver: MyDriver // must be a class instance of a Driver
+}).load();
+```
+
+### Documents
+The API uses a "Document" class to read/set/fetch data from the driver, we can fetch a document from [Driver.get/1], depending on the context of the driver. It'll return a Collection of key-value pairs that we can update and pass-in real-time.
+
+Below is an example on how we can update in real-time:
+
+```js
+// Documents are cached by default so we don't create
+// a lot of calls 
+const document = await this.client.driver.get({
+  guildID: 'id' // example
+});
+
+document.key; // undefined
+
+// `errors` is an array of validation errors by the schema
+// `doc` is the new documenet cached
+const { errors, doc } = await document.update({
+  set: {
+    'key': 'value'
+  }
+});
+
+doc.key; // 'value'
+```
+
 ## License
 **Wumpcord** is released under the MIT License. Read [here](/LICENSE) for more information.

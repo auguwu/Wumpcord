@@ -21,16 +21,6 @@
  */
 
 /**
- * Represents the actual entry-point of the commands API
+ * Represents a "document", or an entry in the database
  */
-module.exports = {
-  CommandClient: require('./CommandClient'),
-  Inhibitor: require('./Inhibitor'),
-  Command: require('./Command'),
-  drivers: {
-    PostgreSQL: require('./drivers/types/PostgreSQL'),
-    MongoDB: require('./drivers/types/MongoDB')
-  },
-  Driver: require('./drivers/Driver'),
-  Job: require('./Job')
-};
+module.exports = class Document {};
