@@ -55,13 +55,13 @@ module.exports = class ArgumentTypeReaderHandler extends Collection {
    * Find a reader by it's ID
    * @param {string} type The ID of the type
    */
-  find(client, type) {
+  find(type) {
     if (!type) return undefined;
     if (!type.includes('|')) return this.get(type);
 
     let cls = this.get(type);
     if (cls) return cls;
 
-    return this.emplace(type, new UnionTypeReader(client, type));
+    return this.emplace(type, new UnionTypeReader(this.client, type));
   }
 };

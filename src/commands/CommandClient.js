@@ -42,7 +42,7 @@ module.exports = class CommandClient extends WebSocketClient {
      * The type readers for all arguments
      * @type {import('./handlers/ArgumentTypeReaderHandler')}
      */
-    this.types = new ArgumentTypeReaderHandler();
+    this.types = new ArgumentTypeReaderHandler(this);
 
     /**
      * The inhibitor handler
