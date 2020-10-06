@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-const ValidationError = require('./ValidationError');
 const EventBus = require('../../util/EventBus');
 
 /**
@@ -54,6 +53,12 @@ module.exports = class Driver extends EventBus {
     this.socket = opts.socket;
 
     /**
+     * The provider's name, will return `null` if it's [Driver]
+     * @type {string}
+     */
+    this.provider = null;
+
+    /**
      * Schema to abide when creating or updating documents for safer validation
      * @type {?DriverSchema}
      */
@@ -70,6 +75,12 @@ module.exports = class Driver extends EventBus {
      * @type {number}
      */
     this.port = opts.port;
+
+    /**
+     * The name of the database
+     * @type {string}
+     */
+    this.name = name;
 
     /**
      * Authenication details for the service
@@ -89,7 +100,21 @@ module.exports = class Driver extends EventBus {
    * @param {DriverOptions} opts The driver's options
    */
   static _validate(opts) {
-    // do validation here
+    if (!opts) throw new SyntaxError('Missing `opts` object');
+    if (typeof opts !== 'object' && !Array.isArray(opts)) throw new SyntaxError(`Expected \`object\`, received ${typeof opts}`);
+    if (!opts.name) throw new TypeError('Missing `name` in `options`');
+
+    const isUnixSocket = opts.socket !== undefined;
+    if (isUnixSocket && (opts.host !== undefined || opts.port !== undefined)) throw new TypeError('`socket` was provided but also a `host` and `port`? (https://docs.augu.dev/Wumpcord/errors#socket-but-host-port)');
+    else if (!opts.host || !opts.port) throw new TypeError('Missing `host` and `port` in `options`');
+
+    if (typeof opts.name !== 'string') throw new TypeError(`Expected \`string\` but gotten ${typeof opts.name}`);
+    if (opts.tls !== undefined && typeof opts.tls !== 'boolean') throw new TypeError(`Expected \`boolean\`, but received ${typeof opts.tls}`);
+    if (typeof opts.port !== 'number' || Number.isNaN(opts.port)) throw new TypeError('`port` was not a number or isn\'t specified');
+    if (typeof opts.host !== 'string') throw new TypeError(`Expected \`string\`, received ${typeof opts.host}`);
+    if (opts.auth && (typeof opts.auth !== 'object' && !Array.isArray(opts.auth))) throw new TypeError(`Expected \`object\`, received ${typeof opts.auth}`);
+    if (opts.schema && (typeof opts.schema !== 'object' && !Array.isArray(opts.schema))) throw new TypeError(`Expected \`object\`, received ${typeof opts.schema}`);
+    if (opts.socket && typeof opts.socket !== 'string') throw new TypeError(`Expected \`string\`, received ${typeof opts.socket}`);
   }
 
   /**
@@ -109,9 +134,10 @@ module.exports = class Driver extends EventBus {
 
   /**
    * Returns a document or `null` if not provided
-   * @template T Typed-value of a document
-   * @param {{ [x in keyof T]?: T[x]; }} query The query
-   * @returns {Promise<T | null>} Returns the document or `null` if it doesn't exist
+   * @template U Typed-value of a document
+   * @param {string} collection The collection
+   * @param {{ [x in keyof U]?: U[x]; }} query The query
+   * @returns {Promise<U | null>} Returns the document or `null` if it doesn't exist
    */
   get(query) {
     throw new TypeError('Missing over-ride function for [Driver.get]');
@@ -120,10 +146,10 @@ module.exports = class Driver extends EventBus {
   /**
    * Updates the document in real-time
    * @template T Typed-value of a document
+   * @param {string} collection The collection
    * @param {{ [x in keyof T]?: T[x]; }} filter The filter to find a document
    * @param {{ [x in UpdateFilters]?: { [P in keyof T]?: T[P]; } }} query The query
-   * @returns {Promise<UpdateResult | null>} Returns the result of the updated values
-   * or `null` if the document's doesn't exist
+   * @returns {Promise<T>} Returns the result of the updated values or a error thrown
    */
   update(filter, query) {
     throw new TypeError('Missing over-ride function for [Driver.update]');
@@ -134,9 +160,9 @@ module.exports = class Driver extends EventBus {
    * and inserts it to the database
    *
    * @template T Typed-value of a document
-   * @param {{ [x in keyof T]: T[x]; }} document The document
-   * @returns {Promise<InsertResult | null>} Returns the result of the inserted document
-   * or `null` if the document's doesn't exist
+   * @param {string} collection The collection
+   * @param {{ [x in keyof T]: T[x]; }} document The document to insert
+   * @returns {Promise<T>} Returns the result of the inserted document or a error thrown
    */
   insert(document) {
     throw new TypeError('Missing over-ride function for [Driver.insert]');
@@ -145,21 +171,12 @@ module.exports = class Driver extends EventBus {
   /**
    * Deletes a document and removes it from cache
    * @template T Typed-value of a document
+   * @param {string} collection The collection
    * @param {{ [Q in keyof T]?: T[Q]; }} filter The filter
    * @returns {Promise<boolean>} Returns a boolean value if it was deleted or not
    */
   delete(filter) {
     throw new TypeError('Missing over-ride function for [Driver.delete]');
-  }
-
-  /**
-   * Checks if a document follows the schema
-   * @template T Typed-value of a document
-   * @param {T} document The document
-   * @returns {ValidationError[]} Returns an Array of validation errors, if there is any
-   */
-  abide(document) {
-    // logic here
   }
 
   /**
@@ -169,7 +186,7 @@ module.exports = class Driver extends EventBus {
    * @returns {Promise<T[]>}
    * @abstract
    */
-  all(collection) {
+  all() {
     throw new SyntaxError('Missing over-ride function for [Driver.all]');
   }
 };
@@ -180,34 +197,17 @@ module.exports = class Driver extends EventBus {
  */
 
 /**
- * @typedef {'string' | 'number' | 'boolean' | 'date' | 'object'} SupportedTypes
  * @typedef {'set' | 'push' | 'pull' | 'inc' | 'dec'} UpdateFilters
  *
- * @typedef {{ [collection: string]: CollectionSchema }} DriverSchema
- *
- * @typedef {object} CollectionSchema
- * @prop {{ [table: string]: { [key: string]: SupportedTypes | DocumentSchema } }} tables The schema for all tables
- * @prop {string} column The column to use (if using SQL)
- *
- * @typedef {object} DocumentSchema
- * @prop {boolean} [nullable=false] If this key is nullable or not (can pass in `null`/`undefined`)
- * @prop {any} [default=undefined] The default value if the key wasn't passed in using [Driver.create/2] or [Driver.update/1]
- * @prop {boolean} [size=0] The size of an Array or String (only supported in SQL drivers, not NoSQL)
- * @prop {SupportedTypes} type The type to use
- *
  * @typedef {object} DriverOptions
- * @prop {DriverSchema} [schema=undefined] Proper schema to validate creating & updating documents
  * @prop {string} [socket=undefined] Path to use to connect to a database, using a Unix socket
  * @prop {AuthenticationDetails} [auth=undefined] The authentication details
+ * @prop {string} name The database name
  * @prop {string} host The host to use
  * @prop {number} port The port to use
  * @prop {boolean} [tls=false] If we should use a TLS connection, default is `false`
  *
- * @typedef {object} Result
- * @prop {import('./ValidationError').Code} [code] The code, if there is one
- * @prop {import('./ValidationError')[]} errors Any errors from validating
- * @prop {import('./Document')} [document] The document updated
- *
- * @typedef {Result} InsertResult
- * @typedef {Result} UpdateResult
+ * @typedef {object} AuthenticationDetails
+ * @prop {string} [username] The username
+ * @prop {string} [password] The password to use
  */
