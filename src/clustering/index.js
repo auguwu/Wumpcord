@@ -21,11 +21,11 @@
  */
 
 /**
- * Represents the actual entry-point of the commands API
+ * Represents the entry-point of the [clustering] API
+ * @see [Wumpcord.Clustering](https://docs.augu.dev/Wumpcord/Clustering)
  */
 module.exports = {
-  CommandClient: require('./CommandClient'),
-  Inhibitor: require('./Inhibitor'),
-  Command: require('./Command'),
-  Job: require('./Job')
+  ClusterCommandClient: require('./ClusterCommandClient'),
+  ClusterClient: require('./ClusterClient'),
+  Service: require('./Service')
 };

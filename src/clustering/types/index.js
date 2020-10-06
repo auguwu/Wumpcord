@@ -21,11 +21,14 @@
  */
 
 /**
- * Represents the actual entry-point of the commands API
+ * Represents the types to use
  */
 module.exports = {
-  CommandClient: require('./CommandClient'),
-  Inhibitor: require('./Inhibitor'),
-  Command: require('./Command'),
-  Job: require('./Job')
+  ServiceType: {
+    Spawned: 'spawn',
+    Ready: 'ready',
+    Error: 'error',
+    Debug: 'debug',
+    IPC: 'ipc'
+  }
 };

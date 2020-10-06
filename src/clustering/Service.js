@@ -20,12 +20,6 @@
  * SOFTWARE.
  */
 
-/**
- * Represents the actual entry-point of the commands API
- */
-module.exports = {
-  CommandClient: require('./CommandClient'),
-  Inhibitor: require('./Inhibitor'),
-  Command: require('./Command'),
-  Job: require('./Job')
-};
+const { ServiceType } = require('./types');
+
+module.exports = class Service {};
