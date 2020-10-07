@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 
+const { Status, ServiceType, OPCodes } = require('./types');
+
 /**
  * Represents the entry-point of the [clustering] API
  * @see [Wumpcord.Clustering](https://docs.augu.dev/Wumpcord/Clustering)
@@ -27,5 +29,8 @@
 module.exports = {
   ClusterCommandClient: require('./ClusterCommandClient'),
   ClusterClient: require('./ClusterClient'),
-  Service: require('./Service')
+  Service: require('./Service'),
+  ServiceType,
+  Status,
+  OPCodes
 };

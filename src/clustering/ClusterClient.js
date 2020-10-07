@@ -22,4 +22,11 @@
 
 const { Client } = require('..');
 
-module.exports = class ClusterClient extends Client {};
+module.exports = class ClusterClient extends Client {
+
+};
+
+/**
+ * @typedef {object} ClusterClientOptions
+ * @prop {number} [workerCount] Number of workers to spawn, defaults to the current CPU count
+ */

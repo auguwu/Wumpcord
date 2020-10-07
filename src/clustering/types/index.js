@@ -26,12 +26,29 @@
 module.exports = {
   ServiceType: {
     Spawned: 'spawn',
+    Message: 'message',
     Ready: 'ready',
     Error: 'error',
     Debug: 'debug',
     IPC: 'ipc'
   },
   OPCodes: {
-    
+    EvalAtWorker: 'eval.worker',
+    EvalAtMaster: 'eval.master',
+    Command: 'command',
+    Restart: 'restart',
+    Stats: 'stats',
+    Ready: 'ready'
+  },
+  Status: {
+    Offline: 0,
+    Online: 1,
+    Zombied: 2,
+    Nearly: 3,
+    Dead: 4
   }
 };
+
+/**
+ * @typedef {{ [x in 'Spawned' | 'Message' | 'Ready' | 'Error' | 'Debug' | 'IPC']: string }} ServiceType
+ */

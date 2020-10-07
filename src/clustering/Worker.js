@@ -20,7 +20,80 @@
  * SOFTWARE.
  */
 
+const { Status, OPCodes } = require('./types');
+const EventBus = require('../util/EventBus');
+
 /**
  * Represents a class that is a [Worker] to accept IPC requests and other stuff
  */
-module.exports = class Worker {};
+module.exports = class Worker extends EventBus {
+  /**
+   * Creates a new [Worker] instance
+   * @param {import('./ClusterClient') | import('./ClusterCommandClient')} client The client instance
+   * @param {import('cluster').Worker} worker The base worker
+   * @param {number} id The worker ID
+   * @param {number[]} shards Tuple of shards available for this [Worker] instance
+   */
+  constructor(client, worker, id, shards) {
+    super();
+
+    /**
+     * The client instance
+     * @private
+     * @type {import('./ClusterClient') | import('./ClusterCommandClient')}
+     */
+    this.client = client;
+
+    /**
+     * Tuple of shards available for this [Worker]
+     * @type {number[]}
+     */
+    this.shards = shards;
+
+    /**
+     * The worker status
+     * @type {number}
+     */
+    this.status = Status.Offline;
+
+    /**
+     * The base worker
+     * @type {import('cluster').Worker}
+     */
+    this.base = worker;
+
+    /**
+     * The ID of the worker
+     * @type {number}
+     */
+    this.id = id;
+
+    process
+      .on('unhandledRejection', (reason, promise) => this.emit('unhandledRejection', reason, promise))
+      .on('uncaughtException', (error) => this.emit('uncaughtException', error))
+      .on('message', this.onMessage.bind(this));
+  }
+
+  /**
+   * Sends a message and pushes it to master to evaluate
+   * @template T The data
+   * @template U The returned data
+   * @param {number} op The OPCode
+   * @param {T} [data] The data supplied
+   * @param {number} [priority] The priority of the message (`0` = no, `1` = yes)
+   * @returns {Promise<U>} Promise of resolved data
+   */
+  send(op, data, priority = 0) {
+    if (this.status !== Status.Online) return;
+
+    return this.client.messaging.push(op, data, priority);
+  }
+
+  /**
+   * Received when a message has been passed
+   * @param {any} message The message
+   */
+  onMessage(message) {
+    // todo: message stuff here uwu
+  }
+};

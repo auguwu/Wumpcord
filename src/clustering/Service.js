@@ -22,4 +22,42 @@
 
 const { ServiceType } = require('./types');
 
-module.exports = class Service {};
+/**
+ * Represents a service to run when we receive something
+ */
+module.exports = class Service {
+  /**
+   * Creates a new [Service] instance
+   * @param {string} type The service type to use
+   */
+  constructor(type) {
+    /**
+     * The service type
+     * @type {import('./types').ServiceType[keyof import('./types').ServiceType]}
+     */
+    this.type = ServiceType[type];
+  }
+
+  /**
+   * Initialises this [Service]
+   * @param {import('./ClusterClient') | import('./ClusterCommandClient')} client The client
+   */
+  init(client) {
+    /**
+     * The clustered client
+     * @type {import('./ClusterClient') | import('./ClusterCommandClient')}
+     */
+    this.client = client;
+
+    return this;
+  }
+
+  /**
+   * Abstract function to run this [Service]
+   * @param {...any} args The arguments to run this [Service]
+   * @returns {void | Promise<void>}
+   */
+  run(...args) {
+    throw new SyntaxError(`Missing over-ride function in [Service.run] (${this.type})`);
+  }
+};
