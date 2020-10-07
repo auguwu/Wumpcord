@@ -30,5 +30,6 @@ module.exports = {
   Util: require('./util/Util'),
   commands: require('./commands'),
   //clustering: require('./clustering'),
-  version: require('../package.json').version
+  version: require('../package.json').version,
+  WebhookClient: require('./gateway/WebhookClient') // i know it doesn't belong the `gateway` folder but i dont care about where files go
 };

@@ -10,8 +10,6 @@
   - Too lazy to code your own command handler? Wumpcord will supply you with an en-riching commands API!
 - Extra utilities
   - Too lazy to make your own utilities (Reaction Menus, etc) or don't wanna add dependencies? Well, Wumpcord fully supports any utility you desire that other libraries don't, out of the box!
-- CLI utility to build a template with the desired results!
-  - Tired of copying/pasting stuff and breaking it? Wumpcord has a powerful Command Line Interface to do so!
 
 ## Example Bot
 ```js

@@ -20,4 +20,7 @@
  * SOFTWARE.
  */
 
+/**
+ * Represents a class that is a [Worker] to accept IPC requests and other stuff
+ */
 module.exports = class Worker {};

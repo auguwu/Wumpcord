@@ -30,5 +30,8 @@ module.exports = {
     Error: 'error',
     Debug: 'debug',
     IPC: 'ipc'
+  },
+  OPCodes: {
+    
   }
 };

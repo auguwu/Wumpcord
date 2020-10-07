@@ -419,7 +419,14 @@ module.exports = {
     1: 'Streaming',
     2: 'Listening To',
     3: 'Watching'
-  }
+  },
+
+  WebhookTypes: [
+    // they index at 1 for some reason lol
+    null,
+    'Incoming',
+    'Channel Following'
+  ]
 };
 
 /**

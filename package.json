@@ -25,7 +25,7 @@
     "@augu/eslint-config": "1.8.3",
     "eslint": "7.10.0"
   },
-  "optionalDependencies": {
+  "peerDependencies": {
     "erlpack": "0.1.3",
     "mongodb": "3.6.2",
     "node-cron": "2.0.3",

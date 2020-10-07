@@ -21,6 +21,7 @@
  */
 
 const { RestVersion, UserAgent } = require('../Constants');
+const DiscordRatelimitError = require('./DiscordRatelimitedError');
 const DiscordRESTError = require('./DiscordRestError');
 const DiscordAPIError = require('./DiscordAPIError');
 const { HttpClient } = require('@augu/orchid');
@@ -36,6 +37,12 @@ module.exports = class RESTClient {
    * @param {import('../gateway/WebSocketClient')} client The client
    */
   constructor(client) {
+    /**
+     * If we have been ratelimited
+     * @type {boolean}
+     */
+    this.ratelimited = false;
+
     /**
      * The client
      * @private
@@ -57,11 +64,12 @@ module.exports = class RESTClient {
       defaults: {
         baseUrl: `https://discord.com/api/v${RestVersion}`,
         headers: {
-          'Authorization': `Bot ${client.token}`,
           'User-Agent': UserAgent
         }
       }
     });
+
+    if (client) this.http.defaults.headers.Authorization = `Bot ${client.token}`;
   }
 
   /**
@@ -113,20 +121,59 @@ module.exports = class RESTClient {
            */
           this.client.emit('restRatelimit', {
             retryAfter: Number(resp.headers['retry-after']),
+            global: Boolean(resp.headers['x-ratelimit-global']),
             reset: Number(Math.floor(resp.headers['x-ratelimit-reset']))
           });
 
-          // todo: make this as a seperate class owo?
-          const error = new Error(`Ratelimited on endpoint "${bucket.opts.method.toUpperCase()} ${bucket.opts.endpoint}"`);
-          error.name = 'DiscordRatelimitError';
-          error.retryAfter = Number(resp.headers['retry-after']);
-          error.resetTime = Number(Math.floor(resp.headers['x-ratelimit-reset']));
+          const error = new DiscordRatelimitError({
+            retryAfter: Number(resp.headers['retry-after']),
+            resetTime: Number(Math.floor(resp.headers['x-ratelimit-reset'])),
+            endpoint: bucket.opts.endpoint,
+            global: Boolean(resp.headers['x-ratelimit-global']),
+            method: bucket.opts.method
+          });
+
+          // Clear it if we already have one running
+          if (this._ratelimitTimeout) clearTimeout(this._ratelimitTimeout);
+
+          this.ratelimited = true;
+          this._ratelimitTimeout = setTimeout(() => {
+            this.ratelimited = false;
+
+            /**
+             * Emitted when we are now un-ratelimited
+             * @fires restUnratelimit
+             */
+            this.client.emit('restUnratelimit');
+          }, Date.now() - (Number(resp.headers['retry-after'])));
 
           return reject(error);
         }
 
-        if (data.hasOwnProperty('message')) return reject(new DiscordAPIError(data.code, data.message));
-        return resolve(data);
+        // Check for 502 errors because Cloudflare is amazing!
+        if (resp.statusCode === 502) {
+          this.client.emit('debug', '[RestClient] Received a 502, thanks CloudFlare!');
+          setTimeout(() => {
+            this.client.emit('debug', '[RestClient] Attempting to make a request again...');
+            this.request(bucket);
+          }, Math.floor(Math.random() * 1900 + 100)); // timeout number is from abal <3
+
+          return;
+        }
+
+        /**
+         * Fired when we made a request successfully or not
+         * @fires restCall
+         * @param {RestCallProperties} props The properties
+         */
+        this.client.emit('restCall', {
+          successful: resp.successful,
+          endpoint: bucket.opts.endpoint,
+          method: bucket.opts.method,
+          status: resp.status
+        });
+
+        return data.hasOwnProperty('message') ? reject(new DiscordAPIError(data.code, data.message)) : resolve(data);
       }).catch(error => reject(new DiscordRESTError(error.statusCode || 500, error.message)));
     });
   }
@@ -143,4 +190,10 @@ module.exports = class RESTClient {
  * @prop {import('@augu/orchid').HttpMethod} method The http method to use
  * @prop {any} [data] The data to use
  * @prop {{ [x: string]: any }} [headers] The headers to append
+ *
+ * @typedef {object} RestCallProperties
+ * @prop {string} endpoint The endpoint
+ * @prop {import('@augu/orchid').HttpMethod} method The method used
+ * @prop {string} status The status (i.e: `200 OK`)
+ * @prop {boolean} successful If we did it successfully
  */
