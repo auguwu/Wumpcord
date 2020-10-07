@@ -103,6 +103,8 @@ module.exports = class RESTClient {
    * @param {RatelimitBucket} bucket The bucket to use
    */
   request(bucket) {
+    if (this.ratelimited) throw new Error('Currently ratelimited, paused execution');
+
     return new Promise((resolve, reject) => {
       this.http.request({
         method: bucket.opts.method,
