@@ -22,6 +22,7 @@
 
 const { Status, OPCodes } = require('./types');
 const EventBus = require('../util/EventBus');
+const cluster = require('cluster');
 
 /**
  * Represents a class that is a [Worker] to accept IPC requests and other stuff
@@ -103,6 +104,16 @@ module.exports = class Worker extends EventBus {
       });
 
       this.base.on('message', this.client.onWorkerMessage.bind(this.client));
+      this.base.on('disconnect', async (code, signal) => {
+        this.client.emit('close', this.id, code, signal || 'none');
+        this.client.emit('debug', `Worker #${this.id} has died with code ${code}`);
+
+        const w = cluster.fork();
+        const worker = new this.constructor(this.client, w, w.id, this.shards);
+
+        this.client.workers.delete(worker.id);
+        await worker.spawn();
+      });
 
       /**
        * The timeout
@@ -117,6 +128,6 @@ module.exports = class Worker extends EventBus {
    * @param {import('./ClusterClient').AnyMessage} message The message
    */
   onMessage(message) {
-    console.log(message);
+    console.log(`Worker: ${JSON.stringify(message)}`);
   }
 };

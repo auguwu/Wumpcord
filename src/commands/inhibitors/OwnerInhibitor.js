@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-const { Inhibitor } = require('..');
+const Inhibitor = require('../Inhibitor');
 
 module.exports = class OwnerInhibitor extends Inhibitor {
   constructor() {

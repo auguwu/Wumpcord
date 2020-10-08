@@ -198,12 +198,14 @@ module.exports = class CommandHandler extends Collection {
     const context = new Context(this.client, msg);
 
     // Now we check for any conditional logic with Inhibitors
-    for (const inhibitor of this.client.inhibitors.values()) {
-      const ran = await inhibitor.run(context);
+    for (const inhibitor of command.inhibitors) {
+      const i = this.client.inhibitors.get(inhibitor);
+      if (!i) continue;
 
+      const ran = await i.run(context);
       if (!ran) {
         this.client.emit('inhibitor.failed', context, inhibitor);
-        break;
+        continue;
       } else {
         continue;
       }
@@ -211,6 +213,8 @@ module.exports = class CommandHandler extends Collection {
 
     // Now we check for args!
     const allArgs = {};
+    console.log(args);
+
     for (let i = 0; i < args.length; i++) {
       /** @type {import('../arguments/Argument')} */
       const arg = command.args[i];
@@ -219,6 +223,7 @@ module.exports = class CommandHandler extends Collection {
         if (isPromise(arg.validate)) result = await arg.validate(context, args[i]);
         else result = arg.validate(context, args[i]);
 
+        if (!result) return context.send(`Validation failed for arg "${arg.label || 'none?'}"`);
         allArgs[arg.label] = arg.parse(context, args[i]) || arg.default;
       } catch(ex) {
         if (!arg.default) return context.send(`${ex.name}: ${ex.message}\n> Usage: **${command.format()}**`);

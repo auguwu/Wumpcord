@@ -26,15 +26,7 @@ const MessagingBroker = require('./bucket/Broker');
 const { cpus } = require('os');
 const cluster = require('cluster');
 const Worker = require('./Worker');
-
-const {
-  version,
-  Constants: {
-    GatewayVersion,
-    RestVersion
-  },
-  Util
-} = require('..');
+const Util = require('../util/Util');
 
 module.exports = class ClusterClient extends CommandClient {
   /**
@@ -42,8 +34,9 @@ module.exports = class ClusterClient extends CommandClient {
    * @param {import('../commands/CommandClient').CommandClientOptions & ClusterClientOptions} options The options to use
    */
   constructor(options) {
-    this.constructor._validate(options);
     super(options);
+
+    this.constructor._validate(options);
 
     /**
      * The number of workers to spawn, if nothing was specified, it'll use your CPU core count
@@ -128,9 +121,6 @@ module.exports = class ClusterClient extends CommandClient {
   async load() {
     this.emit('debug', [
       '-=- Booting up bot... -=-',
-      `Wumpcord Version:   v${version}`,
-      `Gateway Version:    v${GatewayVersion}`,
-      `Rest API Version:   v${RestVersion}`,
       `Workers:            ${this.workerCount}`,
       `Stats Enabled:      ${this.options.stats ? 'yes' : 'no'}`,
       `Evaluation Timeout: ${this.evalTimeout}ms`,

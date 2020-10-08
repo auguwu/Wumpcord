@@ -21,6 +21,8 @@
  */
 
 const { Collection } = require('@augu/immutable');
+const GuildInhibitor = require('../inhibitors/GuildInhibitor');
+const OwnerInhibitor = require('../inhibitors/OwnerInhibitor');
 
 const {
   posix: { join }
@@ -59,6 +61,9 @@ module.exports = class InhibitorHandler extends Collection {
      * @type {import('../CommandClient')}
      */
     this.client = client;
+
+    this.set('owner', new OwnerInhibitor().init(client));
+    this.set('guild', new GuildInhibitor().init(client));
   }
 
   /**

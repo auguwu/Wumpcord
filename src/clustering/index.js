@@ -21,14 +21,16 @@
  */
 
 const { Status, OPCodes } = require('./types');
+const ClusterCommandClient = require('./ClusterCommandClient');
+const ClusterClient = require('./ClusterClient');
 
 /**
  * Represents the entry-point of the [clustering] API
  * @see [Wumpcord.Clustering](https://docs.augu.dev/Wumpcord/Clustering)
  */
 module.exports = {
-  ClusterCommandClient: require('./ClusterCommandClient'),
-  ClusterClient: require('./ClusterClient'),
+  ClusterCommandClient,
+  ClusterClient,
   Status,
   OPCodes
 };
