@@ -24,14 +24,6 @@
  * Represents the types to use
  */
 module.exports = {
-  ServiceType: {
-    Spawned: 'spawn',
-    Message: 'message',
-    Ready: 'ready',
-    Error: 'error',
-    Debug: 'debug',
-    IPC: 'ipc'
-  },
   OPCodes: {
     EvalAtWorker: 'eval.worker',
     EvalAtMaster: 'eval.master',

@@ -100,4 +100,23 @@ module.exports = class Utilities {
 
     return obj;
   }
+
+  /**
+   * @template T: Data representation
+   * @param {T[]} entries
+   * @param {number} chunkSize
+   * @arity Wumpcord.Utilities.chunk/2
+   * @returns {Array<Array<T>>}
+   * @credit https://github.com/DevYukine/Kurasuta/blob/master/src/Util/Util.ts#L9
+   */
+  static chunk(entries, chunkSize) {
+    const result = [];
+    const amount = Math.floor(entries.length / chunkSize);
+    const mod = entries.length % chunkSize;
+
+    for (let i = 0; i < chunkSize; i++)
+      result[i] = entries.splice(0, i < mod ? amount + 1 : amount);
+
+    return result;
+  }
 };

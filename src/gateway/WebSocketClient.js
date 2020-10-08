@@ -200,10 +200,8 @@ module.exports = class WebSocketClient extends EventBus {
     }
 
     this.emit('debug', [
-      '-=- Session Information -=-',
-      `[Auto Sharding]:    ${auto}`,
-      `[Connection Times]: ${session ? `${session.remaining}/${session.total}` : 'Not auto sharding'}`,
-      '-=- Session Information -=-'
+      `[Debug => Auto Sharding]: ${auto}`,
+      `[Debug => Session Limit]: ${session ? `${session.remaining}/${session.total}` : 'Not auto sharding'}`,
     ].join('\n'));
 
     for (let i = 0; i < this.lastShardID; i++) {

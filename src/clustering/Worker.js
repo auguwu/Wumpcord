@@ -90,10 +90,33 @@ module.exports = class Worker extends EventBus {
   }
 
   /**
-   * Received when a message has been passed
-   * @param {any} message The message
+   * Spawns the worker
+   */
+  spawn() {
+    return new Promise((resolve, reject) => {
+      this.base.on('online', () => {
+        this.client.emit('spawned', this.id);
+        this.status = Status.Online;
+
+        clearTimeout(this.readyTimeout);
+        resolve();
+      });
+
+      this.base.on('message', this.client.onWorkerMessage.bind(this.client));
+
+      /**
+       * The timeout
+       * @type {NodeJS.Timeout}
+       */
+      this.readyTimeout = setTimeout(() => reject(new Error(`Worker #${this.id} took too long to get ready`)), 30000);
+    });
+  }
+
+  /**
+   * Message handler from Master -> Worker
+   * @param {import('./ClusterClient').AnyMessage} message The message
    */
   onMessage(message) {
-    // todo: message stuff here uwu
+    console.log(message);
   }
 };

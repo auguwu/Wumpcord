@@ -76,41 +76,16 @@ client.start();
 
 This is basically an extension to Wumpcord that allows the ability to cluster your bot without any external dependencies.
 
-### Services
-Services are basically "jobs" when the API emits when a certain task is done (i.e: worker #1 is finished readying up)
-
-An example service would be like:
-
-```js
-const { clustering: { ClusterService, ServiceType } } = require('wumpcord');
-
-module.exports = class MyService extends ClusterService {
-  constructor() {
-    super(ServiceType.WORKER_READY);
-  }
-
-  run(workerID) {
-    console.log(`Worker #${workerID} has readyed up!`);
-  }
-}
-```
-
-This will tell the library to run this specific service when the ClusteringClient has finished readying up a worker.
-
 ### Example Bot
 ```js
-const { clustering: { ClusterClient }, GatewayIntent } = require('wumpcord');
+const { clustering: { ClusterClient } } = require('wumpcord');
 
 const client = new ClusterClient({
   workerCount: 1, // How many workers to spawn (default: your CPU core count)
   shardCount: 'auto', // How many shards to spawn (default: fetched from Discord)
   token: '', // Your bot's token
-  intents: [GatewayIntent.GUILDS, GatewayIntents.GUILD_MESSAGES], // The intents to use
-  services: [MyService] // A list of services to use (or a string as a relative path)
+  ws: { intents: ['guilds', 'guildMessages'] }
 });
-
-client.on('serviceReady', (service) => console.log(`Service ${service.type} has been initialised!`));
-client.on('serviceDisposed', (service) => console.log(`Service ${service.type} has been disposed.`));
 
 client.on('ready', () => {
   client.user.setStatus('online', {

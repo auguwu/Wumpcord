@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-const { Status, ServiceType, OPCodes } = require('./types');
+const { Status, OPCodes } = require('./types');
 
 /**
  * Represents the entry-point of the [clustering] API
@@ -29,8 +29,6 @@ const { Status, ServiceType, OPCodes } = require('./types');
 module.exports = {
   ClusterCommandClient: require('./ClusterCommandClient'),
   ClusterClient: require('./ClusterClient'),
-  Service: require('./Service'),
-  ServiceType,
   Status,
   OPCodes
 };
