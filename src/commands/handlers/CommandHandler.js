@@ -213,7 +213,6 @@ module.exports = class CommandHandler extends Collection {
 
     // Now we check for args!
     const allArgs = {};
-    console.log(args);
 
     for (let i = 0; i < args.length; i++) {
       /** @type {import('../arguments/Argument')} */

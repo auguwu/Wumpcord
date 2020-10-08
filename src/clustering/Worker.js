@@ -21,13 +21,12 @@
  */
 
 const { Status, OPCodes } = require('./types');
-const EventBus = require('../util/EventBus');
 const cluster = require('cluster');
 
 /**
  * Represents a class that is a [Worker] to accept IPC requests and other stuff
  */
-module.exports = class Worker extends EventBus {
+module.exports = class Worker {
   /**
    * Creates a new [Worker] instance
    * @param {import('./ClusterClient') | import('./ClusterCommandClient')} client The client instance
@@ -36,8 +35,6 @@ module.exports = class Worker extends EventBus {
    * @param {number[]} shards Tuple of shards available for this [Worker] instance
    */
   constructor(client, worker, id, shards) {
-    super();
-
     /**
      * The client instance
      * @private
@@ -68,11 +65,6 @@ module.exports = class Worker extends EventBus {
      * @type {number}
      */
     this.id = id;
-
-    process
-      .on('unhandledRejection', (reason, promise) => this.emit('unhandledRejection', reason, promise))
-      .on('uncaughtException', (error) => this.emit('uncaughtException', error))
-      .on('message', this.onMessage.bind(this));
   }
 
   /**
@@ -124,10 +116,89 @@ module.exports = class Worker extends EventBus {
   }
 
   /**
-   * Message handler from Master -> Worker
-   * @param {import('./ClusterClient').AnyMessage} message The message
+   * Returns if the worker is dead or not
    */
-  onMessage(message) {
-    console.log(`Worker: ${JSON.stringify(message)}`);
+  get dead() {
+    return this.base.isDead();
+  }
+
+  /**
+   * Gets statistics of this [Worker]
+   * @returns {Stats} The statistics gathered
+   */
+  getStatistics() {
+    /** @type {number[]} */
+    const shardsInWorker = [];
+    const memory = process.memoryUsage();
+    const shardStats = {};
+
+    const stats = {
+      workerID: this.id,
+      memory: {
+        heapTotal: memory.heapTotal,
+        computed: (memory.rss - (memory.heapUsed - memory.heapTotal)),
+        heapUsed: memory.heapUsed,
+        rss: memory.rss
+      }
+    };
+
+    this.shards.forEach(i => {
+      if (!shardsInWorker.includes(i)) shardsInWorker.push(i);
+    });
+
+    for (const shardID of shardsInWorker) {
+      const shard = this.client.shards.get(shard);
+      if (!shard) break;
+
+      shardStats[shardID] = {
+        lastHeartbeatReceived: shard.lastReceived,
+        lastHeartbeatSent: shard.lastSent,
+        voiceConnections: 0, // voice isn't implemented, we are keeping this as zero
+        largeGuilds: this.client.canCache('guild') ? this.client.guilds.filter(guild => guild.shardID === shardID && guild.memberCount > 250).length : 0,
+        channels: this.client.canCache('channel') ? this.client.channels.filter(channel => channel.guild ? channel.guild.shardID === shardID : false).length : 0,
+        guilds: this.client.canCache('guild') ? this.client.guilds.filter(guild => guild.shardID === shardID).length : 0,
+        ping: shard.ping
+      };
+    }
+
+    stats.shards = shardStats;
+    return stats;
+  }
+
+  /**
+   * Asynchronouslly evalulate JavaScript code
+   * @param {EvalOptions} options The options to use
+   */
+  async eval(options) {
+    try {
+      result = eval(`(${options.async ? 'async' : ''}()=>{${options.script}});`);
+
+      if (result instanceof Promise) result = await result;
+      if (typeof result !== 'string') result = inspect(result, {
+        depth: length,
+        showHidden: false
+      });
+
+      return {
+        async: options.async,
+        result
+      };
+    } catch(ex) {
+      return {
+        result: {
+          message: ex.message,
+          name: ex.name,
+          stack: ex.stack
+        },
+        async: options.async
+      };
+    }
   }
 };
+
+/**
+ * @typedef {object} EvalOptions
+ * @prop {number} depth The depth
+ * @prop {boolean} async If it should be executed asynchronously
+ * @prop {string} script The script to evaluate
+ */

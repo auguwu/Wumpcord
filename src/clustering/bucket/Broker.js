@@ -28,8 +28,16 @@ const { Queue } = require('@augu/immutable');
 module.exports = class MessagingBroker {
   /**
    * Creates a new [MessagingBroker] instance
+   * @param {import('../ClusterClient') | import('../ClusterCommandClient')} client The client instance
    */
-  constructor() {
+  constructor(client) {
+    /**
+     * The client
+     * @private
+     * @type {import('../ClusterClient') | import('../ClusterCommandClient')}
+     */
+    this.client = client;
+
     /**
      * The queue of messages
      * @type {Queue<Message>}
@@ -45,20 +53,24 @@ module.exports = class MessagingBroker {
   }
 
   /**
-   * Pushes a message to the broker and sends it as an IPC message
+   * Broadcasts a message to all workers
    * @template T The data
    * @template U The returned data
-   * @param {number} op The OPCode
+   * @param {string} op The OPCode
    * @param {T} [data] The data supplied
    * @param {number} [priority] The priority of the message (`0` = no, `1` = yes)
-   * @returns {Promise<U>} Promise of resolved data
+   * @returns {Promise<Array<U>>} Promise of resolved data
    */
-  push(op, data, priority = 0) {
+  broadcast(op, data, priority = 0) {
+    // if it goes over 1, make it not a priority
+    if (priority > 1) priority = 0;
+
     return new Promise((resolve, reject) => {
       const fn = priority === 0 ? 'add' : 'addFirst';
       const nonce = require('crypto').randomBytes(4).toString('hex');
 
       this.queue[fn]({
+        workerID: 'global',
         resolve,
         reject,
         nonce,
@@ -66,11 +78,41 @@ module.exports = class MessagingBroker {
         op
       });
 
-      process.send({
+      for (const worker of this.client.workers.values()) worker.base.send({ workerID: 'global', nonce, op, data });
+    });
+  }
+
+  /**
+   * Broadcasts a message to a worker
+   * @template T The data
+   * @template U The returned data
+   * @param {number} workerID The worker's ID
+   * @param {string} op The OPCode
+   * @param {T} [data] The data supplied
+   * @param {number} [priority] The priority of the message (`0` = no, `1` = yes)
+   * @returns {Promise<U>} Promise of resolved data
+   */
+  broadcastTo(workerID, op, data, priority = 0) {
+    // if it goes over 1, make it not a priority
+    if (priority > 1) priority = 0;
+
+    return new Promise((resolve, reject) => {
+      if (!this.client.workers.has(workerID)) return reject(new Error(`Worker #${workerID} doesn't exist`));
+
+      const fn = priority === 0 ? 'add' : 'addFirst';
+      const nonce = require('crypto').randomBytes(4).toString('hex');
+
+      this.queue[fn]({
+        workerID,
+        resolve,
+        reject,
         nonce,
         data,
         op
       });
+
+      const worker = this.client.workers.get(workerID);
+      worker.base.send({ workerID, nonce, data, op });
     });
   }
 
@@ -97,9 +139,10 @@ module.exports = class MessagingBroker {
 
 /**
  * @typedef {object} Message
+ * @prop {number | 'global'} workerID The worker's ID (it returns `global` if MessagingBroker.broadcast is used)
  * @prop {<T>(value?: T | PromiseLike<T>) => void} resolve Function to resolve the broker
  * @prop {<E extends Error>(error?: E) => void} reject Function to push a error when it has errored
  * @prop {string} nonce The nonce string to validate requests
  * @prop {any} [data] The data sent (if any)
- * @prop {number} op The OPCode
+ * @prop {string} op The OPCode
  */

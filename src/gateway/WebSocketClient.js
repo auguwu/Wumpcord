@@ -165,38 +165,18 @@ module.exports = class WebSocketClient extends EventBus {
    * Connects to the WebSocket service
    */
   async connect() {
-    const data = this.options.shardCount === 'auto'
-      ? await this.getBotGateway()
-      : await this.getGateway();
-
-    if (!data.hasOwnProperty('url') || (this.options.shardCount === 'auto' && !data.hasOwnProperty('shards')))
-      throw new SyntaxError('Unable to fetch data from Discord');
-
-    if (data.url.includes('?')) data.url = data.url.substring(0, data.url.indexOf('?'));
-
-    /** @type {SessionStartLimit | null} */
-    const session = data.hasOwnProperty('session_start_limit') ? data.session_start_limit : null;
-
-    if (session !== null && session.remaining <= 0) {
-      const error = new Error('You have exceeded the amount of tries to connect to the gateway');
-      error.resetAfter = session.reset_after;
-
-      this.emit('error', error);
-      return Promise.reject(error);
-    }
-
-    const auto = this.options.shardCount === 'auto' ? 'yes' : 'no';
+    const { url, shards, session, auto } = await this.getShardInfo();
 
     /**
      * The gateway URL
      * @type {string}
      */
-    this.gatewayUrl = `${data.url}/?v=${Constants.GatewayVersion}&encoding=${this.options.strategy}`;
-    if (this.options.shardCount === 'auto') {
-      this.options.shardCount = data.shards;
-      if (this.lastShardID === 1) this.lastShardID = data.shards === 1 ? 1 : data.shards - 1;
+    this.gatewayUrl = `${url}/?v=${Constants.GatewayVersion}&encoding=${this.options.strategy}`;
+    if (auto) {
+      this.options.shardCount = shards;
+      if (this.lastShardID === 1) this.lastShardID = shards === 1 ? 1 : shards - 1;
     } else {
-      this.lastShardID = this.options.shardCount;
+      this.lastShardID = shards;
     }
 
     this.emit('debug', [
@@ -452,6 +432,39 @@ module.exports = class WebSocketClient extends EventBus {
       .catch(() => null);
   }
 
+  /**
+   * Gets the shard information for this [WebSocketClient]
+   * @returns {Promise<ShardInfo>}
+   */
+  async getShardInfo() {
+    const data = this.options.shardCount === 'auto'
+      ? await this.getBotGateway()
+      : await this.getGateway();
+
+    if (!data.hasOwnProperty('url') || (this.options.shardCount === 'auto' && !data.hasOwnProperty('shards')))
+      throw new SyntaxError('Unable to fetch data from Discord');
+
+    if (data.url.includes('?')) data.url = data.url.substring(0, data.url.indexOf('?'));
+
+    /** @type {SessionStartLimit | null} */
+    const session = data.hasOwnProperty('session_start_limit') ? data.session_start_limit : null;
+
+    if (session !== null && session.remaining <= 0) {
+      const error = new Error('You have exceeded the amount of tries to connect to the gateway');
+      error.resetAfter = session.reset_after;
+
+      this.emit('error', error);
+      return Promise.reject(error);
+    }
+
+    return {
+      session,
+      shards: this.options.shardCount === 'auto' ? data.shards : this.options.shardCount,
+      auto: this.options.shardCount === 'auto',
+      url: data.url
+    };
+  }
+
   toString() {
     const user = this.user ? this.user.tag : '<unknown>';
     return `[WebSocketClient ${user}]`;
@@ -504,4 +517,10 @@ module.exports = class WebSocketClient extends EventBus {
  * @prop {Date} lastTimestamp The last timestamp the user has typed in this specific channel
  * @prop {NodeJS.Timeout} timeout The timeout to clear this [UserTyping] instance
  * @prop {Date} since Since the `typingStart` event has been emitted
+ *
+ * @typedef {object} ShardInfo
+ * @prop {SessionStartLimit} [session] The session information, if we called WebSocketClient.getBotGateway
+ * @prop {number} shards Number of shards available
+ * @prop {boolean} auto If we fetched the shard information automatically
+ * @prop {string} url The URL to connect to Discord
  */

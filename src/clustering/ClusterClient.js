@@ -22,8 +22,10 @@
 
 const { Collection, Queue } = require('@augu/immutable');
 const MessagingBroker = require('./bucket/Broker');
-const Client = require('../gateway/WebSocketClient');
+const { OPCodes } = require('./types');
+const { inspect } = require('util');
 const { cpus } = require('os');
+const Client = require('../gateway/WebSocketClient');
 const cluster = require('cluster');
 const Worker = require('./Worker');
 const Util = require('../util/Util');
@@ -48,7 +50,7 @@ module.exports = class ClusterClient extends Client {
      * The messaging broker to queue messages from Master -> Worker
      * @type {MessagingBroker}
      */
-    this.messaging = new MessagingBroker();
+    this.messaging = new MessagingBroker(this);
 
     /**
      * List of workers available
@@ -208,8 +210,8 @@ module.exports = class ClusterClient extends Client {
         await this.connect();
       }
     } else {
-      // TODO: what else should go here?
       this.emit('debug', `Spawned as worker ${process.pid}`);
+      process.on('message', this.onWorkerMessage.bind(this));
     }
   }
 
@@ -253,8 +255,127 @@ module.exports = class ClusterClient extends Client {
    * @private
    * @param {AnyMessage<any>} message The message that was received
    */
-  onWorkerMessage(message) {
-    console.log(`Master: ${JSON.stringify(message)}`);
+  async onWorkerMessage(message) {
+    this.emit('debug', `Received message from ${message.workerID === 'global' ? 'all workers' : `worker #${message.workerID}`}: ${JSON.stringify(message)}`);
+
+    if (!message.op || !message.nonce) {
+      this.emit('warn', 'Missing `op` and `nonce` from `message`, can\'t resolve data');
+      return;
+    }
+
+    const msg = this.messaging.find(message.nonce);
+    if (!msg) {
+      this.emit('warn', `Nonce string not found: "${message.nonce}", can't resolve data`);
+      return;
+    }
+
+    // you shouldn't be using the raw values anyway
+    // but it's here to make sure of it!
+    const opVal = Object.values(OPCodes);
+    if (!opVal.includes(message.op)) return msg.reject(new Error(`OPCode "${message.op}" was not found`));
+
+    this.messaging.pop(message.nonce);
+    switch (msg.op) {
+      case OPCodes.EvalAtMaster: {
+        if (!msg.data.script || !msg.data.code) return msg.reject(new Error('Missing script/code argument in `data`'));
+        let length = 1;
+
+        if (msg.data.depth && typeof msg.data.depth !== 'number') return msg.reject(new Error(`Expected \`number\`, received ${typeof msg.data.depth}`));
+        length = Number(msg.data.depth || 1);
+
+        const script = msg.data.script || msg.data.code;
+        const isAsync = script.includes('await');
+        let result;
+
+        try {
+          result = eval(`(${isAsync ? 'async' : ''}()=>{${script}});`);
+
+          if (result instanceof Promise) result = await result;
+          if (typeof result !== 'string') result = inspect(result, {
+            depth: length,
+            showHidden: false
+          });
+
+          return msg.resolve({
+            success: true,
+            d: {
+              async: isAsync,
+              result,
+              script: `(${isAsync ? 'async' : ''}()=>{${script}});`
+            }
+          });
+        } catch(ex) {
+          return msg.resolve({
+            success: false,
+            d: {
+              result: {
+                message: ex.message,
+                name: ex.name,
+                stack: ex.stack
+              },
+              async: isAsync,
+              script: `(${isAsync ? 'async' : ''}()=>{${script}})()`
+            }
+          });
+        }
+      }
+
+      case OPCodes.EvalAtWorker: {
+        if (msg.workerID === 'global') return msg.reject(new Error('Broadcasting was set to all workers, can\'t eval anything.'));
+
+        const worker = this.workers.get(msg.workerID);
+        if (!msg.data.script || !msg.data.code) return msg.reject(new Error('Missing script/code argument in `data`'));
+        let length = 1;
+
+        if (msg.data.depth && typeof msg.data.depth !== 'number') return msg.reject(new Error(`Expected \`number\`, received ${typeof msg.data.depth}`));
+        length = Number(msg.data.depth || 1);
+
+        const { result, async } = await worker.eval({
+          depth: length,
+          async: isAsync,
+          script
+        });
+
+        return msg.resolve({
+          success: result.hasOwnProperty('message'),
+          d: {
+            depth: length,
+            script,
+            async,
+            result
+          }
+        });
+      }
+
+      case OPCodes.Restart: {
+        if (msg.workerID === 'global') {
+          this.emit('debug', 'Respawning all clusters...');
+          for (const cluster of this.workers.values()) await cluster.respawn();
+
+          return msg.resolve();
+        } else {
+          const worker = this.workers.get(msg.workerID);
+          await worker.respawn();
+
+          return msg.resolve();
+        }
+      }
+
+      case OPCodes.Stats: {
+        if (msg.workerID === 'global') {
+          const stats = [];
+          for (const worker of this.workers.values()) stats.push(worker.getStatistics());
+
+          return msg.resolve(stats);
+        } else {
+          const worker = this.workers.get(msg.workerID);
+          return msg.resolve(worker.getStatistics());
+        }
+      }
+
+      default:
+        return msg.reject(new Error(`OPCode "${msg.op}" doesn't exist`));
+    }
   }
 };
 
