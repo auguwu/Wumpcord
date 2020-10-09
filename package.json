@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@augu/eslint-config": "1.8.3",
-    "eslint": "7.10.0"
+    "eslint": "7.11.0"
   },
   "peerDependencies": {
     "erlpack": "0.1.3",
