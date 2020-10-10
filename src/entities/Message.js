@@ -168,6 +168,8 @@ module.exports = class Message extends Base {
    * @returns {Promise<Guild | null>} Returns the Guild instance or `null` if a REST error occured
    */
   async getGuild() {
+    if (this.guild) return this.guild;
+
     try {
       const data = await this.client.rest.dispatch({
         endpoint: Endpoints.guild(this.guildID, true),

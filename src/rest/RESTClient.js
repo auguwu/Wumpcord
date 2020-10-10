@@ -123,7 +123,9 @@ module.exports = class RESTClient {
            */
           this.client.emit('restRatelimit', {
             retryAfter: Number(resp.headers['retry-after']),
+            endpoint: bucket.opts.endpoint,
             global: Boolean(resp.headers['x-ratelimit-global']),
+            method: bucket.opts.method,
             reset: Number(Math.floor(resp.headers['x-ratelimit-reset']))
           });
 
