@@ -33,14 +33,17 @@ const onReady = function ({ d: data }) {
   this.sessionID = data.session_id;
 
   if (this.client.options.cacheType === 'all') {
+    this.client.voiceConnections = new Collection();
     this.client.channels = new Collection();
-    this.client.guilds   = new Collection();
-    this.client.users    = new Collection({ [this.client.user.id]: this.client.user });
+    this.client.typings = new Collection();
+    this.client.guilds = new Collection();
+    this.client.users = new Collection({ [this.client.user.id]: this.client.user });
   } else {
+    this.client.voiceConnections = this.client.canCache('voice:conenction') ? new Collection() : null;
     this.client.channels = this.client.canCache('channel') ? new Collection() : null;
-    this.client.typings  = this.client.canCache('typing')  ? new Collection() : null;
-    this.client.guilds   = this.client.canCache('guild')   ? new Collection() : null;
-    this.client.users    = this.client.canCache('user')    ? new Collection({ [this.client.user.id]: this.client.user }) : null;
+    this.client.typings = this.client.canCache('typing') ? new Collection() : null;
+    this.client.guilds = this.client.canCache('guild') ? new Collection() : null;
+    this.client.users = this.client.canCache('user') ? new Collection({ [this.client.user.id]: this.client.user }) : null;
   }
 
   this.unavailableGuilds = new Set(data.guilds.map(s => s.id));

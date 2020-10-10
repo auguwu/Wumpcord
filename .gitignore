@@ -1,6 +1,5 @@
 node_modules/
 test/
-test.js
 
 package-*.json
 *.lock

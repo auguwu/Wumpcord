@@ -10,6 +10,8 @@
   - Too lazy to code your own command handler? Wumpcord will supply you with an en-riching commands API!
 - Extra utilities
   - Too lazy to make your own utilities (Reaction Menus, etc) or don't wanna add dependencies? Well, Wumpcord fully supports any utility you desire that other libraries don't, out of the box!
+- OAuth2 Support
+  - Too lazy to implement your own OAuth2 system for a dashboard? Wumpcord supplies extra utilities for making OAuth2 more simplier.
 
 ## Example Bot
 ```js
@@ -175,6 +177,30 @@ new CommandClient({
   readers: [MyTypeReader] // or a string that has to be a relative path!
 }).load();
 ```
+
+## Maintainers
+<table>
+  <tbody>
+    <tr>
+      <td align='center' valign='middle'>
+        <a href='https://github.com/auguwu' target='_blank'>
+          <img src='https://avatars0.githubusercontent.com/u/27751995' alt='August' width='225' height='auto' />
+          <br />
+          <p>August</p>
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align='center' valign='middle'>
+        <a href='https://github.com/IceeMC' target='_blank'>
+          <img src='https://avatars1.githubusercontent.com/u/31800435' alt='Ice' width='225' height='auto' />
+          <br />
+          <p>John</p>
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 ## License
 **Wumpcord** is released under the MIT License. Read [here](/LICENSE) for more information.

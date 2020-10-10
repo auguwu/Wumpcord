@@ -63,6 +63,12 @@ module.exports = class User extends Base {
      * @type {string}
      */
     this.avatar = data.avatar;
+
+    /**
+     * If the user is a bot or not
+     * @type {boolean}
+     */
+    this.bot = Boolean(data.bot);
   }
 
   /**
@@ -149,10 +155,19 @@ module.exports = class User extends Base {
   }
 
   /**
+   * If the user is a system user or not
+   */
+  get system() {
+    return !!(this.flags & UserFlags.System);
+  }
+
+  /**
    * Gets the user's DM channel
    * @returns {Promise<DMChannel | null>} The channel or `null` if an REST error occurs
    */
   async getDMChannel() {
+    if (this._dmChannel) return this._dmChannel;
+
     try {
       const data = await this.client.rest.dispatch({
         endpoint: '/users/@me/channels',
@@ -166,10 +181,46 @@ module.exports = class User extends Base {
       const channel = new DMChannel(this.client, data);
       this.client.insert('channel', channel);
 
-      return channel;
+      /**
+       * The current DM channel with the user
+       * @type {DMChannel}
+       */
+      this._dmChannel = channel;
+      return this._dmChannel;
     } catch(ex) {
       return null;
     }
+  }
+
+  /**
+   * Deletes the DM channel from the bot
+   */
+  leaveDM() {
+    if (!this._dmChannel) return Promise.resolve(true);
+
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.channel(this._dmChannel.id),
+      method: 'DELETE'
+    })
+      .then(() => {
+        if (this.client.canCache('channel')) this.client.channels.delete(this._dmChannel.id);
+
+        this._dmChannel = null;
+        return true;
+      })
+      .catch(() => false);
+  }
+
+  /**
+   * Function to check if one user is equal to another
+   * @param {User} user The user to check for
+   */
+  equals(user) {
+    return (
+      user &&
+      this.id === user.id &&
+      this.tag === user.tag
+    );
   }
 
   toString() {

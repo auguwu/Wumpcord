@@ -142,7 +142,7 @@ module.exports = class ClusterCommandClient extends CommandClient {
       const shardTuple = Util.chunk([...Array(shardInfo.shards).keys()], this.workerCount);
       let spawned = 0;
 
-      if (this.nodeArgs) {
+      if (this.nodeArgs.length) {
         this.emit('debug', `Received ${this.nodeArgs.length} node-like arguments to add!`);
         cluster.setupMaster({ execArgv: this.nodeArgs });
       }
@@ -234,31 +234,33 @@ module.exports = class ClusterCommandClient extends CommandClient {
   async onWorkerMessage(message) {
     this.emit('debug', `Received message from ${message.workerID === 'global' ? 'all workers' : `worker #${message.workerID}`}: ${JSON.stringify(message)}`);
 
-    if (!message.op || !message.nonce) {
-      this.emit('warn', 'Missing `op` and `nonce` from `message`, can\'t resolve data');
+    if (!message.op) {
+      this.emit('warn', 'Missing `op` from `message`, can\'t resolve data');
       return;
     }
 
-    const msg = this.messaging.find(message.nonce);
-    if (!msg) {
-      this.emit('warn', `Nonce string not found: "${message.nonce}", can't resolve data`);
-      return;
-    }
+    console.log(message);
+
+    //const msg = this.messaging.find(message.nonce);
+    //if (!msg) {
+    //this.emit('warn', `Nonce string not found: "${message.nonce}", can't resolve data`);
+    //return;
+    //}
 
     // you shouldn't be using the raw values anyway
     // but it's here to make sure of it!
     const opVal = Object.values(OPCodes);
-    if (!opVal.includes(message.op)) return msg.reject(new Error(`OPCode "${message.op}" was not found`));
+    if (!opVal.includes(message.op)) return message.reject(new Error(`OPCode "${message.op}" was not found`));
 
-    switch (msg.op) {
+    switch (message.op) {
       case OPCodes.EvalAtMaster: {
-        if (!msg.data.script || !msg.data.code) return msg.reject(new Error('Missing script/code argument in `data`'));
+        if (!message.data.script || !message.data.code) return message.reject(new Error('Missing script/code argument in `data`'));
         let length = 1;
 
-        if (msg.data.depth && typeof msg.data.depth !== 'number') return msg.reject(new Error(`Expected \`number\`, received ${typeof msg.data.depth}`));
-        length = Number(msg.data.depth || 1);
+        if (message.data.depth && typeof message.data.depth !== 'number') return message.reject(new Error(`Expected \`number\`, received ${typeof message.data.depth}`));
+        length = Number(message.data.depth || 1);
 
-        const script = msg.data.script || msg.data.code;
+        const script = message.data.script || message.data.code;
         const isAsync = script.includes('await');
         let result;
 
@@ -271,7 +273,7 @@ module.exports = class ClusterCommandClient extends CommandClient {
             showHidden: false
           });
 
-          return msg.resolve({
+          return message.resolve({
             success: true,
             d: {
               async: isAsync,
@@ -280,7 +282,7 @@ module.exports = class ClusterCommandClient extends CommandClient {
             }
           });
         } catch(ex) {
-          return msg.resolve({
+          return message.resolve({
             success: false,
             d: {
               result: {
@@ -296,14 +298,14 @@ module.exports = class ClusterCommandClient extends CommandClient {
       }
 
       case OPCodes.EvalAtWorker: {
-        if (msg.workerID === 'global') return msg.reject(new Error('Broadcasting was set to all workers, can\'t eval anything.'));
+        if (message.workerID === 'global') return message.reject(new Error('Broadcasting was set to all workers, can\'t eval anything.'));
 
-        const worker = this.workers.get(msg.workerID);
-        if (!msg.data.script || !msg.data.code) return msg.reject(new Error('Missing script/code argument in `data`'));
+        const worker = this.workers.get(message.workerID);
+        if (!message.data.script || !message.data.code) return message.reject(new Error('Missing script/code argument in `data`'));
         let length = 1;
 
-        if (msg.data.depth && typeof msg.data.depth !== 'number') return msg.reject(new Error(`Expected \`number\`, received ${typeof msg.data.depth}`));
-        length = Number(msg.data.depth || 1);
+        if (message.data.depth && typeof message.data.depth !== 'number') return message.reject(new Error(`Expected \`number\`, received ${typeof message.data.depth}`));
+        length = Number(message.data.depth || 1);
 
         const { result, async } = await worker.eval({
           depth: length,
@@ -311,7 +313,7 @@ module.exports = class ClusterCommandClient extends CommandClient {
           script
         });
 
-        return msg.resolve({
+        return message.resolve({
           success: result.hasOwnProperty('message'),
           d: {
             depth: length,
@@ -323,33 +325,33 @@ module.exports = class ClusterCommandClient extends CommandClient {
       }
 
       case OPCodes.Restart: {
-        if (msg.workerID === 'global') {
+        if (message.workerID === 'global') {
           this.emit('debug', 'Respawning all clusters...');
           for (const cluster of this.workers.values()) await cluster.respawn();
 
-          return msg.resolve();
+          return message.resolve();
         } else {
-          const worker = this.workers.get(msg.workerID);
+          const worker = this.workers.get(message.workerID);
           await worker.respawn();
 
-          return msg.resolve();
+          return message.resolve();
         }
       }
 
       case OPCodes.Stats: {
-        if (msg.workerID === 'global') {
+        if (message.workerID === 'global') {
           const stats = [];
           for (const worker of this.workers.values()) stats.push(worker.getStatistics());
 
-          return msg.resolve(stats);
+          return message.resolve(stats);
         } else {
-          const worker = this.workers.get(msg.workerID);
-          return msg.resolve(worker.getStatistics());
+          const worker = this.workers.get(message.workerID);
+          return message.resolve(worker.getStatistics());
         }
       }
 
       default:
-        return msg.reject(new Error(`OPCode "${msg.op}" doesn't exist`));
+        return message.reject(new Error(`OPCode "${message.op}" doesn't exist`));
     }
   }
 };

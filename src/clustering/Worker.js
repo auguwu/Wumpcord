@@ -95,7 +95,7 @@ module.exports = class Worker {
         resolve();
       });
 
-      this.base.on('message', this.client.onWorkerMessage.bind(this.client));
+      this.base.on('message', this.onMessage.bind(this));
       this.base.on('disconnect', async (code, signal) => {
         this.client.emit('close', this.id, code, signal || 'none');
         this.client.emit('debug', `Worker #${this.id} has died with code ${code}`);
@@ -193,6 +193,14 @@ module.exports = class Worker {
         async: options.async
       };
     }
+  }
+
+  /**
+   * The message
+   * @param {import('./ClusterClient').AnyMessage} msg The message
+   */
+  onMessage(msg) {
+    console.log(`Worker #${this.id}: ${JSON.stringify(msg)}`);
   }
 };
 

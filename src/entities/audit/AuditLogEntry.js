@@ -21,6 +21,6 @@
  */
 
 /**
- * Voice API for Wumpcord
+ * Represents a base class for an audit log entry
  */
-module.exports = undefined;
+module.exports = class AuditLogEntry {};

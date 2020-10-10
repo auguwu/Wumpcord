@@ -44,6 +44,12 @@ module.exports = class WebSocketClient extends EventBus {
     super();
 
     /**
+     * Existing voice connections with Discord
+     * @type {Collection<import('../voice/VoiceConnection')> | null}
+     */
+    this.voiceConnections = null;
+
+    /**
      * The last shard ID
      */
     this.lastShardID = 1;
@@ -143,7 +149,7 @@ module.exports = class WebSocketClient extends EventBus {
    * Returns the intents by it's numeric value
    */
   get intents() {
-    if (typeof this.options.ws.intents === 'undefined') return Constants.GatewayIntents.guilds | Constants.GatewayIntents.guildMessages | Constants.GatewayIntents.guildMembers;
+    if (typeof this.options.ws.intents === 'undefined') return Constants.GatewayIntents.guilds | Constants.GatewayIntents.guildMessages;
     else if (typeof this.options.ws.intents === 'number') return this.options.ws.intents;
     else {
       let intents = 0;

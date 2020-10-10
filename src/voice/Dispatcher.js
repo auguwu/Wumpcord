@@ -21,14 +21,6 @@
  */
 
 /**
- * Entrypoint of Wumpcord
+ * Represents a class to dispatch voice-related commands to/from Discord using UDP or WebSockets
  */
-module.exports = {
-  Constants: require('./Constants'),
-  Client: require('./gateway/WebSocketClient'),
-  Permissions: require('./util/Permissions'),
-  Util: require('./util/Util'),
-  commands: require('./commands'),
-  version: require('../package.json').version,
-  WebhookClient: require('./gateway/WebhookClient') // i know it doesn't belong the `gateway` folder but i dont care about where files go
-};
+module.exports = class Dispatcher {};

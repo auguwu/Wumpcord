@@ -31,6 +31,9 @@ const Member = require('./GuildMember');
 const Role = require('./Role');
 const Emoji = require('./Emoji');
 const Util = require('../util/Util');
+const VoiceRegion = require('./VoiceRegion');
+const GuildMember = require('./GuildMember');
+const GuildInvite = require('./GuildInvite');
 
 /**
  * Represents a Discord guild
@@ -537,11 +540,307 @@ module.exports = class Guild extends UnavailableGuild {
         parent_id: opts.parentID,
         nsfw: opts.nsfw || false
       }
-    }).then((data) => {
-      console.log(require('util').inspect(data, { depth: 5 }));
-      return true;
-    }).catch(() => null);
+    })
+      .then(() => true)
+      .catch(() => false);
   }
+
+  /**
+   * Returns the list of voice regions available for this [Guild]
+   * @returns {Promise<VoiceRegion[]>} A list of regions available or an empty Array if a REST error occured
+   */
+  getRegions() {
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.voiceRegions(this.id),
+      method: 'get'
+    })
+      .then((regions) => regions.map(region => new VoiceRegion(region)))
+      .catch(() => []);
+  }
+
+  /**
+   * Returns the lsit of the voice regions IDs available for this guild
+   * @returns {Promise<string[]>} A list of region IDs available from this Guild or an empty Array if a REST error occured
+   */
+  getRegionIds() {
+    return this.getRegions()
+      .then(regions => regions.map(region => region.id))
+      .catch(() => []);
+  }
+
+  /**
+   * Gets the guild preview for Discovery, this is only for Public Guilds
+   * @returns {Promise<GuildPreview>} Returns the guild preview or null if it's not a public guild
+   */
+  getPreview() {
+    return this.client.rest.dispatch({
+      endpoint: `/guilds/${this.id}/preview`,
+      method: 'get'
+    })
+      .then((preview) => preview === null ? null : new GuildPreview(preview))
+      .catch(() => null);
+  }
+
+  /**
+   * Returns a list of guild channels available in this [Guild]
+   * and possibly caches them
+   *
+   * @returns {Promise<import('./BaseChannel')[]>} Returns an Array of guild channels
+   * or an empty Array if an REST error has occured
+   */
+  getChannels() {
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.channels(this.id),
+      method: 'get'
+    })
+      .then((channels) => channels.map(channel => BaseChannel.from(this.client, channel)))
+      .catch(() => []);
+  }
+
+  /**
+   * Modifies the guild's metadata and patches this [Guild] instance,
+   * this will call the `guildUpdate` event if it's cachable by you.
+   *
+   * @param {EditGuildOptions} opts The options to use
+   * @returns {Promise<this>} Returns this [Guild] instance that has
+   * the patched updates or an error why it can't fulfill the request
+   */
+  async edit(opts) {
+    if (!opts) throw new TypeError('Missing options object, refer to the documentation: https://docs.augu.dev/Wumpcord/Types/EditGuildOptions');
+    if (!Object.keys(opts).length) throw new TypeError('Must include something to update');
+
+    // Throw an error if this is a WIP
+    if (opts.icon) throw new Error('This option isn\'t available in this context');
+    const regions = await this.getRegionIds();
+
+    // now it's time for checking the object for incoinsisent data
+    // this is where the part I want to kill myself but hey
+    // I like pain so like \o/
+    if (opts.name && typeof opts.name !== 'string') throw new TypeError(`Expected \`string\`, gotten ${typeof opts.name}`);
+    if (opts.ownerID && typeof opts.ownerID !== 'string') throw new TypeError(`Expected \`string\`, but gotten ${typeof opts.ownerID}`);
+    if (opts.afkChannelID && typeof opts.afkChannelID !== 'string') throw new TypeError(`Expected \`string\`, but gotten ${typeof opts.afkChannelID}`);
+    if (opts.systemChannelID && typeof opts.systemChannelID !== 'string') throw new TypeError(`Expected \`string\`, but gotten ${typeof opts.systemChannelID}`);
+    if (opts.afkChannelTimeout && (typeof opts.afkChannelTimeout !== 'number' || Number.isNaN(opts.afkChannelID))) throw new TypeError(`Expected \`number\`, but gotten ${typeof opts.afkChannelID}`);
+
+    if (opts.splash) {
+      if (!this.features.includes('INVITE_SPLASH')) throw new TypeError(`Guild "${this.name}" doesn't have the INVITE_SPLASH feature`);
+      throw new TypeError('`splash` in `opts` is not available in this context.');
+    }
+
+    if (opts.banner) {
+      if (!this.features.includes('BANNER')) throw new TypeError(`Guild "${this.name}" doesn't have the BANNER feature`);
+      throw new TypeError('`banner` in `opts` is not available in this context.');
+    }
+
+    if (opts.region) {
+      if (typeof opts.region !== 'string') throw new TypeError(`Expected \`string\`, gotten ${typeof opts.region}`);
+      if (!regions.includes(opts.region)) throw new TypeError(`Region "${opts.region}" wasn't a valid region (${ids.join(', ')})`);
+    }
+
+    if (opts.verificationLevel) {
+      if (typeof opts.verificationLevel !== 'number' || Number.isNaN(opts.verificationLevel)) throw new TypeError(`Expected \`number\`, but gotten ${typeof opts.verificationLevel}`);
+      if (opts.verificationLevel < 0) throw new TypeError('Verification Level must be higher or equal to 5');
+      if (opts.verificationLevel > 5) throw new TypeError('Verification Level must be lower or equal to 5');
+    }
+
+    if (opts.defaultMessageNotifications) {
+      if (typeof opts.defaultMessageNotifications !== 'number' || Number.isNaN(opts.defaultMessageNotifications)) throw new TypeError(`Expected \`number\`, but gotten ${typeof opts.defaultMessageNotifications}`);
+      if (opts.defaultMessageNotifications < 0) throw new TypeError('Default Message Notifications must be higher or equal to 1');
+      if (opts.defaultMessageNotifications > 1) throw new TypeError('Default Message Notifications must be lower or equal to 1');
+    }
+
+    if (opts.explicitContentFilter) {
+      if (typeof opts.explicitContentFilter !== 'number' || Number.isNaN(opts.explicitContentFilter)) throw new TypeError(`Expected \`number\`, but gotten ${typeof opts.explicitContentFilter}`);
+      if (opts.explicitContentFilter < 0) throw new TypeError('Explicit Content Filter must be higher or equal to 2');
+      if (opts.explicitContentFilter > 2) throw new TypeError('Explicit Content Filter must be lower or equal to 2');
+    }
+
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.guild(this.id),
+      method: 'patch',
+      data: {
+        default_message_notifications: opts.defaultMessageNotifications,
+        explicit_content_filter: opts.explicit_content_filter,
+        system_channel_id: opts.systemChannelID,
+        afk_channel_id: opts.afkChannelID,
+        afk_timeout: opts.afk_timeout,
+        owner_id: opts.ownerID,
+        region: opts.region,
+        name: opts.name
+      }
+    })
+      .then((data) => {
+        this.patch(data);
+        return this;
+      })
+      .catch(error => {
+        throw error;
+      });
+  }
+
+  /**
+   * Modifies the guild channel's position
+   * @param {string} id The channel's ID
+   * @param {number} pos The position
+   * @returns {Promise<boolean>} Boolean-represented value if it was a successful transaction
+   * or not
+   */
+  async modifyChannelPosition(id, pos) {
+    if (!id || !pos) throw new TypeError('Missing `id` or `pos` properties');
+    if (typeof id !== 'string') throw new TypeError(`Expected \`string\`, gotten ${typeof id}`);
+    if (typeof pos !== 'number' || Number.isNaN(pos)) throw new TypeError(`Expected \`number\`, gotten ${typeof pos}`);
+
+    const channels = await this.getChannels();
+    const channel = channels.find(chan => chan.id === id);
+
+    if (!channel || !['text', 'voice', 'category', 'news', 'store'].includes(channel.type)) throw new TypeError(`Channel "${id}" doesn't exist or the type isn't text, voice, category, news, or store`);
+
+    return this.client.rest.dispatch({
+      endpoint: `/guilds/${this.id}/channels`,
+      method: 'patch',
+      data: {
+        id,
+        position: pos
+      }
+    })
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  /**
+   * Edits a certain guild member's data in the guild,
+   * this is for compability only, use the specific functions
+   * layouted in [GuildMember] (i.e: `GuildMember.nick/1`)
+   *
+   * @param {string} memberID The member ID
+   * @param {EditGuildMemberOptions} opts The options to update the guild member
+   * @returns {Promise<GuildMember>} Returns the guild member's patched data
+   * or an error thrown for valdiation/REST-related errors
+   */
+  editMember(memberID, opts) {}
+
+  /**
+   * Adds a role to a guild member, use `GuildMember.addRole/1`
+   * for more of an easier way
+   *
+   * @param {string} memberID The member's ID
+   * @param {string} roleID The role's ID
+   * @returns {Promise<boolean>} Boolean-represented value
+   * if it was a success or not
+   */
+  addRole(memberID, roleID) {}
+
+  /**
+   * Removes a role to a guild member, use `GuildMember.removeRole/1`
+   * for more of an easier way
+   *
+   * @param {string} memberID The member's ID
+   * @param {string} roleID The role's ID
+   * @returns {Promise<boolean>} Boolean-represented value
+   * if it was a success or not
+   */
+  removeRole(memberID, roleID) {}
+
+  /**
+   * Kicks a member from the guild, use `GuildMember.kick/1`
+   * for more of an easier way
+   *
+   * @param {string} memberID The member's ID
+   * @param {string} [reason] The reason to put in audit logs
+   * @returns {Promise<boolean>} Boolean-represented value
+   * if they were kicked or not
+   */
+  kickMember(memberID, reason) {}
+
+  /**
+   * Gets the list of bans available for this [Guild]
+   * @returns {Promise<GuildBan[]>} Returns a list of guild bans available
+   */
+  getBans() {}
+
+  /**
+   * Unbans a member from the guild, use `GuildMember.unban/1`
+   * for more of an easier way
+   *
+   * @param {string} memberID The member's ID
+   * @param {string} [reason] The reason to put in audit logs
+   * @returns {Promise<boolean>} Boolean-represented value
+   * if they were unbanned or not
+   */
+  unbanMember(memberID, reason) {}
+
+  /**
+   * Gets a list of roles and possibly caches them
+   * @returns {Promise<Role[]>} Returns an Array of roles or an
+   * empty array of roles if an REST error occured
+   */
+  getRoles() {}
+
+  /**
+   * Creates a role for the guild and possibly caches it,
+   * the `guildRoleCreate` event is emitted when you call this function
+   * with success. Use `Role.create/1` to create this role for an
+   * easier option.
+   *
+   * @param {CreateRoleOptions} opts The options to create the role
+   * @returns {Promise<Role>} Returns the newly created
+   */
+  createRole(opts) {}
+
+  /**
+   * Deletes the role from the guild and removes it from cache;
+   * if cached. Event `guildRoleDelete` is emitted when you
+   * call this function with success. Use `Role.delete/0` to
+   * delete this role for an easier option
+   *
+   * @param {string} roleID The role's ID
+   */
+  deleteRole(roleID) {}
+
+  /**
+   * Modifies the role in this guild, to modify the
+   * role's position, use `Guild.modifyRolePosition` or `Role.modifyPosition`
+   * for an easier option. This function emits the `guildRoleUpdate` event
+   * when modified successfully. For an easier option, call `Role.modify`
+   * to modify it without providing a role ID
+   *
+   * @param {string} roleID The role to modify
+   * @param {EditGuildRoleOptions} opts The options to use to modify it
+   * @returns {Promise<Role>} The modified role or an error
+   * called when a validation/REST-related error occurs
+   */
+  modifyRole(roleID, opts) {}
+
+  /**
+   * Modifies the role's position in this guild, use `Role.modifyPosition`
+   * for an easier option. This function emits the `guildRoleUpdate` event
+   * when modified successfully.
+   *
+   * @param {string} roleID The role's ID
+   * @param {number} pos The role's position
+   * @returns {Promise<boolean>} If the role was updated
+   * successfully or not, the role will be updated in cache in realtime.
+   */
+  modifyRolePosition(roleID, pos) {}
+
+  /**
+   * Prunes members who has been inactive by it's `days` option,
+   * this function fires multiple `guildMemberRemove` events at
+   * a time, so be careful of rate-limiting if implementing
+   * a "Member has been removed!" system.
+   *
+   * @param {GuildPruneOptions} opts The options to use
+   * @returns {Promise<void>} Returns an empty promise
+   * or an error thrown if a REST error occurs
+   */
+  prune(opts) {}
+
+  /**
+   * Retrives a list of invites created by users
+   * @returns {Promise<GuildInvite[]>} Returns an Array of guild invites
+   * available or an empty Array if a REST error occurs
+   */
+  getInvites() {}
 
   toString() {
     return `[Guild "${this.name}" (${this.id})]`;

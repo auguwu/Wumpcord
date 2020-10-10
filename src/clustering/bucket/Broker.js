@@ -78,7 +78,7 @@ module.exports = class MessagingBroker {
         op
       });
 
-      for (const worker of this.client.workers.values()) worker.base.send({ workerID: 'global', nonce, op, data });
+      for (const worker of this.client.workers.values()) worker.base.send({ workerID: 'global', op, data, resolve, reject });
     });
   }
 
@@ -112,7 +112,7 @@ module.exports = class MessagingBroker {
       });
 
       const worker = this.client.workers.get(workerID);
-      worker.base.send({ workerID, nonce, data, op });
+      worker.base.send({ workerID, data, op, resolve, reject });
     });
   }
 
