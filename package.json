@@ -6,6 +6,10 @@
   "license": "MIT",
   "author": "Chris \"August\" Hernandez <august@augu.dev>",
   "repository": "https://github.com/auguwu/Wumpcord",
+  "maintainers": [
+    "Chris \"August\" Hernandez <august@augu.dev>",
+    "John \"Ice\" Burke <john@widgetbot.io>"
+  ],
   "files": [
     "build/",
     "index.d.ts"

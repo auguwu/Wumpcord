@@ -182,7 +182,7 @@ new CommandClient({
 <table>
   <tbody>
     <tr>
-      <td align='center' valign='middle'>
+      <td valign='middle'>
         <a href='https://github.com/auguwu' target='_blank'>
           <img src='https://avatars0.githubusercontent.com/u/27751995' alt='August' width='225' height='auto' />
           <br />
@@ -191,7 +191,7 @@ new CommandClient({
       </td>
     </tr>
     <tr>
-      <td align='center' valign='middle'>
+      <td valign='middle'>
         <a href='https://github.com/IceeMC' target='_blank'>
           <img src='https://avatars1.githubusercontent.com/u/31800435' alt='Ice' width='225' height='auto' />
           <br />
