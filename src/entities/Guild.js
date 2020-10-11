@@ -694,14 +694,27 @@ module.exports = class Guild extends UnavailableGuild {
     const channel = channels.find(chan => chan.id === id);
 
     if (!channel || !['text', 'voice', 'category', 'news', 'store'].includes(channel.type)) throw new TypeError(`Channel "${id}" doesn't exist or the type isn't text, voice, category, news, or store`);
+    if (channel.position === pos) return Promise.resolve();
+
+    const min = Math.min(pos, channel.position);
+    const max = Math.max(pos, channel.position);
+    const sorted = channels.filter(chan =>
+      chan.type === channel.type
+        && min <= chan.position
+        && chan.position <= max
+        && chan.id !== id
+    ).sort((chan1, chan2) => chan1.position - chan2.position);
+
+    const fn = pos > channel.position ? 'push' : 'unshift';
+    sorted[fn](channel);
 
     return this.client.rest.dispatch({
-      endpoint: `/guilds/${this.id}/channels`,
+      endpoint: Endpoints.Guild.channels(this.id),
       method: 'patch',
-      data: {
-        id,
-        position: pos
-      }
+      data: sorted.map((channel, index) => ({
+        position: index + min,
+        id: channel.id
+      }))
     })
       .then(() => true)
       .catch(() => false);

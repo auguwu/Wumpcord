@@ -55,5 +55,17 @@ module.exports = {
    * @param {unknown} value The value
    * @returns {value is Promise<any>}
    */
-  isPromise: (value) => value instanceof Promise && typeof value.then === 'function'
+  isPromise: (value) => value instanceof Promise && typeof value.then === 'function',
+
+  /**
+   * Gets the `node-cron` library if the user has installed it
+   * @returns {typeof import('node-cron') | null} Returns the library or `null` if it's not found
+   */
+  getCron() {
+    try {
+      return require('node-cron');
+    } catch(ex) {
+      return null;
+    }
+  }
 };

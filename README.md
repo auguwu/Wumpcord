@@ -92,7 +92,7 @@ const client = new ClusterClient({
 client.on('ready', () => {
   client.user.setStatus('online', {
     name: 'something',
-    type: ActivityStatus.PLAYING
+    type: 0
   });
 
   console.log(`Bot ${client.user.tag} is ready!`);
@@ -179,28 +179,11 @@ new CommandClient({
 ```
 
 ## Maintainers
-<table>
-  <tbody>
-    <tr>
-      <td valign='middle'>
-        <a href='https://github.com/auguwu' target='_blank'>
-          <img src='https://avatars0.githubusercontent.com/u/27751995' alt='August' width='225' height='auto' />
-          <br />
-          <p>August</p>
-        </a>
-      </td>
-    </tr>
-    <tr>
-      <td valign='middle'>
-        <a href='https://github.com/IceeMC' target='_blank'>
-          <img src='https://avatars1.githubusercontent.com/u/31800435' alt='Ice' width='225' height='auto' />
-          <br />
-          <p>John</p>
-        </a>
-      </td>
-    </tr>
-  </tbody>
-</table>
+- [August](https://floofy.dev)
+- [Ice](https://github.com/IceeMC)
+
+## Testers
+None.
 
 ## License
 **Wumpcord** is released under the MIT License. Read [here](/LICENSE) for more information.

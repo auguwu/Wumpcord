@@ -20,14 +20,8 @@
  * SOFTWARE.
  */
 
-/** @type {typeof import('node-cron')} */
-let Cron = undefined;
-
-try {
-  Cron = require('node-cron');
-} catch(ex) {
-  throw new SyntaxError('`node-cron` must be installed in this project');
-}
+const { getCron } = require('./util');
+const Cron = getCron();
 
 /**
  * Represents a [Job] class, which runs a specific script in a time-frame
@@ -41,6 +35,7 @@ module.exports = class Job {
    * @param {string} interval The interval (refer to [here](https://crontab.guru/)) for more info
    */
   constructor(name, interval) {
+    if (Cron === null) throw new TypeError('`node-cron` wasn\'t installed in this project.');
     if (!name || !interval) throw new TypeError('Missing `name` and `interval` in [Wumpcord.commands.Job]');
     if (typeof name !== 'string') throw new TypeError(`Expecting 'string' but gotten ${typeof name}`);
     if (typeof interval !== 'string') throw new TypeError(`Expecting 'string' but gotten ${typeof interval}`);

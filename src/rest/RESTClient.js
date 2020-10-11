@@ -64,6 +64,7 @@ module.exports = class RESTClient {
       defaults: {
         baseUrl: `https://discord.com/api/v${RestVersion}`,
         headers: {
+          'Content-Type': 'application/json',
           'User-Agent': UserAgent
         }
       }
@@ -105,15 +106,32 @@ module.exports = class RESTClient {
   request(bucket) {
     if (this.ratelimited) throw new Error('Currently ratelimited, paused execution');
 
+    const headers = Utilities.merge(bucket.headers, {
+      'X-RateLimit-Precision': 'millisecond'
+    });
+
+    if (!['get', 'head'].includes(bucket.opts.method.toLowerCase())) {
+      headers['Content-Type'] = 'application/json';
+    }
+
     return new Promise((resolve, reject) => {
       this.http.request({
         method: bucket.opts.method,
         url: bucket.opts.endpoint,
         data: bucket.opts.data,
-        headers: Utilities.merge(bucket.headers, {
-          'X-RateLimit-Precision': 'millisecond'
-        })
+        headers
       }).then(resp => {
+        if (resp.isEmpty) {
+          this.client.emit('debug', 'Missing payload from Discord, did we fuck up? (https://github.com/auguwu/Wumpcord/issues)');
+
+          /**
+           * Fired when we received an empty body
+           * @fires restEmpty
+           */
+          this.client.emit('restBodyEmpty');
+          return resolve(null);
+        }
+
         const data = resp.json();
 
         if (resp.statusCode === 429) {
@@ -174,11 +192,21 @@ module.exports = class RESTClient {
           successful: resp.successful,
           endpoint: bucket.opts.endpoint,
           method: bucket.opts.method,
-          status: resp.status
+          status: resp.status,
+          body: resp.text()
         });
 
         return data.hasOwnProperty('message') ? reject(new DiscordAPIError(data.code, data.message)) : resolve(data);
-      }).catch(error => reject(new DiscordRESTError(error.statusCode || 500, error.message)));
+      }).catch(error => {
+        const restError = new DiscordRESTError(error.statusCode || 500, error.message);
+
+        /**
+         * Fired when the REST client has failed to meet expectations
+         * @fires restError
+         */
+        this.client.emit('restError', restError);
+        return reject(restError);
+      });
     });
   }
 };

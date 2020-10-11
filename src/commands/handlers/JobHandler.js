@@ -30,17 +30,10 @@ const {
   fs: {
     readdir,
     lstat
-  }
+  },
+
+  getCron
 } = require('../util');
-
-/** @type {typeof import('node-cron')} */
-let cron = undefined;
-
-try {
-  cron = require('node-cron');
-} catch(ex) {
-  throw new SyntaxError('`node-cron` must be installed in this project');
-}
 
 /**
  * Represents the [JobHandler], to add & run jobs
@@ -89,6 +82,12 @@ module.exports = class JobHandler extends Collection {
     const stats = await lstat(this.directory);
     if (!stats.isDirectory()) {
       this.client.emit('error', new Error(`Directory "${this.directory}" was not a directory (https://docs.augu.dev/Wumpcord/errors#not-a-directory)`));
+      return;
+    }
+
+    const cron = getCron();
+    if (cron === null) {
+      this.client.emit('error', new Error('Missing required dependency: \'node-cron\''));
       return;
     }
 

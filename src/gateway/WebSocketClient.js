@@ -112,6 +112,12 @@ module.exports = class WebSocketClient extends EventBus {
     this.shards = new ShardingManager(this);
 
     /**
+     * If the bot is ready or not
+     * @type {boolean}
+     */
+    this.ready = false;
+
+    /**
      * The bot's token
      */
     this.token = opts.token;
@@ -469,6 +475,18 @@ module.exports = class WebSocketClient extends EventBus {
       auto: this.options.shardCount === 'auto',
       url: data.url
     };
+  }
+
+  /**
+   * Returns the shard ID by it's guild
+   * @param {string} guildID The guild's ID
+   * @returns {number} The shard ID
+   */
+  getShardByGuildId(guildID) {
+    if (!this.ready) throw new Error('Bot hasn\'t initialised yet, [Client.getShardByGuildId] is not available in this context. xwx');
+
+    const id = BigInt(guildID);
+    return Number((id >> 22n) % BigInt(this.shards.size));
   }
 
   toString() {

@@ -417,7 +417,7 @@ module.exports = class WebSocketShard extends EventBus {
     }
 
     this.debug(`Received OP ${data.op} from Discord using strategy ${this.strategy}`);
-    if (data.s > this.seq) {
+    if (data.s !== null && data.s > this.seq) {
       this.debug(`Received new sequence number: ${data.s}`);
       this.seq = data.s;
     }
@@ -550,6 +550,7 @@ module.exports = class WebSocketShard extends EventBus {
       if (this.client.shards.size !== this.client.options.shardCount || this.client.shards.some(s => s.status !== Constants.ShardStatus.Connected)) {
         return;
       } else {
+        this.client.ready = true;
         this.client.emit('ready');
         return;
       }
@@ -561,7 +562,9 @@ module.exports = class WebSocketShard extends EventBus {
 
       this.status = Constants.ShardStatus.Connected;
       this.emit('ready', this.id, this.unavailableGuilds);
-      if (this.client.shards.size === this.client.options.shardCount) this.triggerReadyEvent();
+
+      this.client.ready = true;
+      this.client.emit('ready');
     }, 15000);
   }
 
