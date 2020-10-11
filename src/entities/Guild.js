@@ -34,6 +34,8 @@ const Util = require('../util/Util');
 const VoiceRegion = require('./VoiceRegion');
 const GuildMember = require('./GuildMember');
 const GuildInvite = require('./GuildInvite');
+const GuildBan = require('./misc/GuildBan');
+const GuildPreview = require('./misc/GuildPreview');
 
 /**
  * Represents a Discord guild
@@ -598,6 +600,20 @@ module.exports = class Guild extends UnavailableGuild {
   }
 
   /**
+   * Gets a guild member from this guild
+   * @param {string} memberID The member's ID
+   * @returns {Promise<GuildMember>} The member instance or `null` if a REST error occured
+   */
+  fetchMember(memberID) {
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.member(this.id, memberID),
+      method: 'GET'
+    })
+      .then((data) => new GuildMember(this.client, data))
+      .catch(() => null);
+  }
+
+  /**
    * Modifies the guild's metadata and patches this [Guild] instance,
    * this will call the `guildUpdate` event if it's cachable by you.
    *
@@ -705,8 +721,11 @@ module.exports = class Guild extends UnavailableGuild {
         && chan.id !== id
     ).sort((chan1, chan2) => chan1.position - chan2.position);
 
-    const fn = pos > channel.position ? 'push' : 'unshift';
-    sorted[fn](channel);
+    if (pos > channel.position) {
+      sorted.push(channel);
+    } else {
+      sorted.unshift(channel);
+    }
 
     return this.client.rest.dispatch({
       endpoint: Endpoints.Guild.channels(this.id),
@@ -730,7 +749,43 @@ module.exports = class Guild extends UnavailableGuild {
    * @returns {Promise<GuildMember>} Returns the guild member's patched data
    * or an error thrown for valdiation/REST-related errors
    */
-  editMember(memberID, opts) {}
+  async editMember(memberID, opts) {
+    /** @type {GuildMember} */
+    let member;
+    if (!this.members || !this.members.has(memberID)) {
+      member = await this.fetchMember(memberID);
+    } else {
+      member = this.members.get(memberID);
+    }
+
+    if (member === undefined || member === null) throw new TypeError(`Member "${memberID}" doesn't exist in guild "${this.toString()}"`);
+
+    // now time to type check owo
+    if (opts.nick && typeof opts.nick !== 'string') throw new TypeError(`Expected \`string\`, but gotten ${typeof opts.nick}`);
+    if (opts.mute && typeof opts.mute !== 'boolean') throw new TypeError(`Expected \`boolean\`, but gotten ${typeof opts.mute}`);
+    if (opts.deaf && typeof opts.deaf !== 'boolean') throw new TypeError(`Expected \`boolean\`, but gotten ${typeof opts.deaf}`);
+    if (opts.roles) {
+      if (!Array.isArray(opts.roles)) throw new TypeError(`Expected \`array\`, but gotten ${typeof opts.roles}`);
+      if (opts.roles.some(roleID => typeof roleID !== 'string')) {
+        const roles = opts.roles.filter(roleID => typeof roleID !== 'string');
+        throw new TypeError(`${roles.length} roles were not a string`);
+      }
+    }
+
+    if (opts.channelID && typeof opts.channelID !== 'string') throw new TypeError(`Expected \`string\`, but gotten ${typeof opts.channelID}`);
+
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.member(this.id, member.id),
+      method: 'PATCH',
+      data: {
+        channel_id: opts.channelID,
+        roles: opts.roles,
+        mute: opts.mute,
+        deaf: opts.deaf,
+        nick: opts.nick
+      }
+    });
+  }
 
   /**
    * Adds a role to a guild member, use `GuildMember.addRole/1`
@@ -741,7 +796,35 @@ module.exports = class Guild extends UnavailableGuild {
    * @returns {Promise<boolean>} Boolean-represented value
    * if it was a success or not
    */
-  addRole(memberID, roleID) {}
+  async addRole(memberID, roleID) {
+    /** @type {GuildMember} */
+    let member;
+
+    /** @type {Role} */
+    let role;
+
+    if (!this.members || !this.members.has(memberID)) {
+      member = await this.fetchMember(memberID);
+    } else {
+      member = this.members.get(memberID);
+    }
+
+    if (!this.roles || !this.roles.has(roleID)) {
+      role = await this.fetchRole(roleID);
+    } else {
+      role = this.roles.get(roleID);
+    }
+
+    if (!member) throw new TypeError(`Member "${memberID}" was not found in this guild`);
+    if (!role) throw new TypeError(`Role "${roleID}" doesn't exist in this guild`);
+
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.memberRole(this.id, member.id, role.id),
+      method: 'PUT'
+    })
+      .then(() => true)
+      .catch(() => false);
+  }
 
   /**
    * Removes a role to a guild member, use `GuildMember.removeRole/1`
@@ -752,42 +835,88 @@ module.exports = class Guild extends UnavailableGuild {
    * @returns {Promise<boolean>} Boolean-represented value
    * if it was a success or not
    */
-  removeRole(memberID, roleID) {}
+  async removeRole(memberID, roleID) {
+    /** @type {GuildMember} */
+    let member;
+
+    /** @type {Role} */
+    let role;
+
+    if (!this.members || !this.members.has(memberID)) {
+      member = await this.fetchMember(memberID);
+    } else {
+      member = this.members.get(memberID);
+    }
+
+    if (!this.roles || !this.roles.has(roleID)) {
+      role = await this.fetchRole(roleID);
+    } else {
+      role = this.roles.get(roleID);
+    }
+
+    if (!member) throw new TypeError(`Member "${memberID}" was not found in this guild`);
+    if (!role) throw new TypeError(`Role "${roleID}" doesn't exist in this guild`);
+
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.memberRole(this.id, member.id, role.id),
+      method: 'DELETE'
+    })
+      .then(() => true)
+      .catch(() => false);
+  }
 
   /**
-   * Kicks a member from the guild, use `GuildMember.kick/1`
+   * Kicks a member from the guild, use `GuildMember.kick/0`
    * for more of an easier way
    *
    * @param {string} memberID The member's ID
-   * @param {string} [reason] The reason to put in audit logs
    * @returns {Promise<boolean>} Boolean-represented value
    * if they were kicked or not
    */
-  kickMember(memberID, reason) {}
+  async kickMember(memberID) {
+    /** @type {GuildMember} */
+    let member;
+    if (!this.members || !this.members.has(memberID)) {
+      member = await this.fetchMember(memberID);
+    } else {
+      member = this.members.get(memberID);
+    }
+
+    if (member === undefined || member === null) throw new TypeError(`Member "${memberID}" doesn't exist in guild "${this.toString()}"`);
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.member(this.id, member.id),
+      method: 'DELETE'
+    })
+      .then(() => true)
+      .catch(() => false);
+  }
 
   /**
    * Gets the list of bans available for this [Guild]
    * @returns {Promise<GuildBan[]>} Returns a list of guild bans available
    */
-  getBans() {}
-
-  /**
-   * Unbans a member from the guild, use `GuildMember.unban/1`
-   * for more of an easier way
-   *
-   * @param {string} memberID The member's ID
-   * @param {string} [reason] The reason to put in audit logs
-   * @returns {Promise<boolean>} Boolean-represented value
-   * if they were unbanned or not
-   */
-  unbanMember(memberID, reason) {}
+  getBans() {
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.bans(this.id),
+      method: 'GET'
+    })
+      .then((bans) => bans.map(ban => new GuildBan(client, { guild_id: this.id, ...ban })))
+      .catch(() => []);
+  }
 
   /**
    * Gets a list of roles and possibly caches them
    * @returns {Promise<Role[]>} Returns an Array of roles or an
    * empty array of roles if an REST error occured
    */
-  getRoles() {}
+  getRoles() {
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.roles(this.id),
+      method: 'GET'
+    })
+      .then((roles) => roles.map(role => new Role(this.client, role)))
+      .catch(() => []);
+  }
 
   /**
    * Creates a role for the guild and possibly caches it,
@@ -798,7 +927,42 @@ module.exports = class Guild extends UnavailableGuild {
    * @param {CreateRoleOptions} opts The options to create the role
    * @returns {Promise<Role>} Returns the newly created
    */
-  createRole(opts) {}
+  createRole(opts) {
+    if (!opts) throw new TypeError('Missing `opts` object');
+    if (typeof opts !== 'object' && !Array.isArray(opts)) return new TypeError(`Expected \`object\`, but received ${typeof opts}`);
+
+    if (opts.name && typeof opts.name !== 'string') throw new TypeError(`Expected \`string\`, but received ${typeof opts.name}`);
+    if (opts.color && (typeof opts.color !== 'number' || typeof opts.color !== 'string')) throw new TypeError(`Expected \`string\` or \`number\`, but received ${typeof opts.color}`);
+    if (opts.hoistable && typeof opts.hoistable !== 'boolean') throw new TypeError(`Expected \`boolean\`, but received ${typeof opts.hoistable}`);
+    if (opts.mentionable && typeof opts.mentionable !== 'boolean') throw new TypeError(`Expected \`boolean\`, but received ${typeof opts.mentionable}`);
+    if (opts.permissions && typeof opts.permissions !== 'number') throw new TypeError(`Expected \`number\`, but recieved ${typeof opts.permissions}`);
+
+    let color;
+    if (opts.color) {
+      if (typeof opts.color === 'string') {
+        color = parseInt(opts.color.replace('#', ''), 16);
+      } else {
+        color = opts.color;
+      }
+    }
+
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.roles(this.id),
+      method: 'PUT',
+      data: {
+        mentionable: opts.mentionable,
+        permissions: opts.permissions,
+        color,
+        hoist: opts.hoistable,
+        name: opts.name
+      }
+    })
+      .then((role) => {
+        if (this.client.canCache('member:role')) this.roles.set(role.id, new Role(this.client, role));
+        return new Role(this.client, role);
+      })
+      .catch(() => null);
+  }
 
   /**
    * Deletes the role from the guild and removes it from cache;
@@ -808,7 +972,18 @@ module.exports = class Guild extends UnavailableGuild {
    *
    * @param {string} roleID The role's ID
    */
-  deleteRole(roleID) {}
+  async deleteRole(roleID) {
+    const roles = await this.getRoles();
+    const found = roles.find(role => role.id === roleID);
+
+    if (!found) throw new TypeError(`Role "${roleID}" was not found in the guild`);
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.role(this.id, found.id),
+      method: 'DELETE'
+    })
+      .then(() => true)
+      .catch(() => false);
+  }
 
   /**
    * Modifies the role in this guild, to modify the
@@ -822,7 +997,43 @@ module.exports = class Guild extends UnavailableGuild {
    * @returns {Promise<Role>} The modified role or an error
    * called when a validation/REST-related error occurs
    */
-  modifyRole(roleID, opts) {}
+  async modifyRole(roleID, opts) {
+    const roles = await this.getRoles();
+    const role = roles.find(role => role.id === roleID);
+
+    if (!role) throw new TypeError(`Role with ID "${roleID}" was not found`);
+    if (!opts) throw new TypeError('Missing `opts` object');
+    if (typeof opts !== 'object' && !Array.isArray(opts)) throw new TypeError(`Expected \`object\`, received ${typeof opts}`);
+
+    if (opts.name && typeof opts.name !== 'string') throw new TypeError(`Expected \`string\`, but received ${typeof opts.name}`);
+    if (opts.color && (typeof opts.color !== 'number' || typeof opts.color !== 'string')) throw new TypeError(`Expected \`string\` or \`number\`, but received ${typeof opts.color}`);
+    if (opts.hoistable && typeof opts.hoistable !== 'boolean') throw new TypeError(`Expected \`boolean\`, but received ${typeof opts.hoistable}`);
+    if (opts.mentionable && typeof opts.mentionable !== 'boolean') throw new TypeError(`Expected \`boolean\`, but received ${typeof opts.mentionable}`);
+    if (opts.permissions && typeof opts.permissions !== 'number') throw new TypeError(`Expected \`number\`, but recieved ${typeof opts.permissions}`);
+
+    let color;
+    if (opts.color) {
+      if (typeof opts.color === 'string') {
+        color = parseInt(opts.color.replace('#', ''), 16);
+      } else {
+        color = opts.color;
+      }
+    }
+
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.role(this.id, role.id),
+      method: 'PATCH',
+      data: {
+        mentionable: opts.mentionable,
+        permissions: opts.permissions,
+        color,
+        hoist: opts.hoistable,
+        name: opts.name
+      }
+    })
+      .then(() => true)
+      .catch(() => false);
+  }
 
   /**
    * Modifies the role's position in this guild, use `Role.modifyPosition`
@@ -834,7 +1045,38 @@ module.exports = class Guild extends UnavailableGuild {
    * @returns {Promise<boolean>} If the role was updated
    * successfully or not, the role will be updated in cache in realtime.
    */
-  modifyRolePosition(roleID, pos) {}
+  async modifyRolePosition(roleID, pos) {
+    const roles = await this.getRoles();
+    const role = roles.find(role => role.id === roleID);
+
+    if (!role) throw new TypeError(`Role with ID "${roleID}" was not found`);
+    if (role.position === pos) return Promise.resolve();
+
+    const min = Math.min(pos, role.position);
+    const max = Math.max(pos, role.position);
+    const sorted = roles.filter(role =>
+      min <= role.position &&
+      role.position <= max &&
+      role.id !== roleID
+    ).sort((role1, role2) => role1.position - role2.position);
+
+    if (pos > role.position) {
+      sorted.push(role);
+    } else {
+      sorted.unshift(role);
+    }
+
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.roles(this.id),
+      method: 'PATCH',
+      data: sorted.map((role, idx) => ({
+        position: idx + min,
+        id: role.id
+      }))
+    })
+      .then(() => true)
+      .catch(() => false);
+  }
 
   /**
    * Prunes members who has been inactive by it's `days` option,
@@ -846,14 +1088,42 @@ module.exports = class Guild extends UnavailableGuild {
    * @returns {Promise<void>} Returns an empty promise
    * or an error thrown if a REST error occurs
    */
-  prune(opts) {}
+  prune(opts) {
+    const options = Util.merge(opts, { days: 7 });
+
+    if (options.computed && typeof options.computed !== 'boolean') throw new TypeError(`Expected \`boolean\`, but received ${typeof options.computed}`);
+    if (options.roles) {
+      if (!Array.isArray(options.roles)) throw new TypeError(`Expected \`array\`, but received ${typeof options.roles}`);
+      if (options.roles.some(role => typeof role !== 'string')) {
+        const roles = options.roles.filter(role => typeof role !== 'string');
+        throw new TypeError(`${roles.length} roles weren't a string`);
+      }
+    }
+
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.prune(this.id),
+      method: 'POST',
+      data: {
+        computed_prune_count: options.computed,
+        roles: options.roles,
+        days: options.days
+      }
+    });
+  }
 
   /**
    * Retrives a list of invites created by users
    * @returns {Promise<GuildInvite[]>} Returns an Array of guild invites
    * available or an empty Array if a REST error occurs
    */
-  getInvites() {}
+  getInvites() {
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.invites(this.id),
+      method: 'GET'
+    })
+      .then((invites) => invites.map(invite => new GuildInvite(this.client, invite)))
+      .catch(() => []);
+  }
 
   toString() {
     return `[Guild "${this.name}" (${this.id})]`;
@@ -885,4 +1155,39 @@ module.exports = class Guild extends UnavailableGuild {
  * @prop {Array<{ allow: number; deny: number; type: 'role' | 'member'; id: string }>} [permissionOverwrites=undefined] List of overwrites, must match the overwrite object
  * @prop {string} [parentID=undefined] The parent category's channel ID
  * @prop {boolean} [nsfw=false] If the channel is NSFW or not
+ *
+ * @typedef {object} EditGuildOptions
+ * @prop {string} name
+ * @prop {string} [icon]
+ * @prop {string} [ownerID]
+ * @prop {string} [afkChannelID]
+ * @prop {number} [afkChannelTimeout]
+ * @prop {string} [systemChannelID]
+ * @prop {string} [splash]
+ * @prop {string} [banner]
+ * @prop {string} [region]
+ * @prop {number} [verificationLevel]
+ * @prop {number} [defaultMessageNotifications]
+ * @prop {number} [explicitContentFilter]
+ *
+ * @typedef {object} EditGuildMemberOptions
+ * @prop {string} [nick]
+ * @prop {boolean} [mute]
+ * @prop {boolean} [deaf]
+ * @prop {string[]} [roles]
+ * @prop {string} [channelID]
+ *
+ * @typedef {object} CreateRoleOptions
+ * @prop {string} [name]
+ * @prop {string | number} [color]
+ * @prop {boolean} [hoistable]
+ * @prop {boolean} [mentionable]
+ * @prop {number} [permissions]
+ *
+ * @typedef {CreateRoleOptions} EditGuildRoleOptions
+ *
+ * @typedef {object} GuildPruneOptions
+ * @prop {number} [days]
+ * @prop {string[]} [roles]
+ * @prop {boolean} [computed]
  */

@@ -20,7 +20,40 @@
  * SOFTWARE.
  */
 
+const User = require('../User');
+
 /**
  * Represents a guild ban
  */
-module.exports = class GuildBan {};
+module.exports = class GuildBan {
+  /**
+   * Creates a new [GuildBan] instance
+   * @param {import('../../gateway/WebSocketClient')} client The client
+   * @param {BanPacket} data The data
+   */
+  constructor(client, data) {
+    /**
+     * The reason of the ban
+     * @type {?string}
+     */
+    this.reason = data.reason;
+
+    /**
+     * The guild if it was cached or not
+     * @type {import('../Guild') | null}
+     */
+    this.guild = client.canCache('guild') ? client.guilds.get(data.guild_id) : null;
+
+    /**
+     * The user instance
+     */
+    this.user = client.canCache('user') ? client.users.get(data.user.id) || new User(client, data.user) : new User(client, data.user);
+  }
+};
+
+/**
+ * @typedef {object} BanPacket
+ * @prop {string} guild_id The guild's ID (not passed in by Discord)
+ * @prop {import('../User').UserPacket} user The user packet
+ * @prop {string} [reason] The reason
+ */

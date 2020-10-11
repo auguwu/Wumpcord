@@ -121,7 +121,8 @@ module.exports = class RESTClient {
         data: bucket.opts.data,
         headers
       }).then(resp => {
-        if (resp.isEmpty) {
+        // 204 = no content, so let's add a check!
+        if (resp.statusCode !== 204 && resp.isEmpty) {
           this.client.emit('debug', 'Missing payload from Discord, did we fuck up? (https://github.com/auguwu/Wumpcord/issues)');
 
           /**
