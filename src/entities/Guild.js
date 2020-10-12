@@ -21,7 +21,7 @@
  */
 /* eslint-disable camelcase */
 
-const { OPCodes, Endpoints } = require('../Constants');
+const { OPCodes, Endpoints, AuditLogActions } = require('../Constants');
 const UnavailableGuild = require('./UnavailableGuild');
 const { Collection } = require('@augu/immutable');
 const VoiceState = require('./VoiceState');
@@ -36,6 +36,7 @@ const GuildMember = require('./GuildMember');
 const GuildInvite = require('./GuildInvite');
 const GuildBan = require('./misc/GuildBan');
 const GuildPreview = require('./misc/GuildPreview');
+const { toCamelCase } = require('../util/Util');
 
 /**
  * Represents a Discord guild
@@ -366,6 +367,8 @@ module.exports = class Guild extends UnavailableGuild {
    * @returns {import('./User') | null}
    */
   get owner() {
+    if (!this.client.canCache('user')) return null;
+
     return this.client.users.get(this.ownerID) || null;
   }
 
@@ -1125,6 +1128,49 @@ module.exports = class Guild extends UnavailableGuild {
       .catch(() => []);
   }
 
+  /**
+   * Fetches the audit log list from this [Guild],
+   * this function requires the bot to have **View Audit Logs** permission,
+   * so beware of permission checks before running this function.
+   *
+   * @param {FetchAuditLogsOptions} opts The options to use
+   * @returns {Promise<AuditLogs[]>} Returns an Array of audit log entries
+   * or an empty Array if a REST error occured
+   */
+  getAuditLogs(opts = { limit: 50 }) {
+    if (opts && typeof opts !== 'object') throw new TypeError(`Expected \`object\`, but received ${typeof opts}`);
+    if (opts.actionType) {
+      if (typeof opts.actionType !== 'number' || typeof opts.actionType !== 'string') throw new TypeError(`Expected \`number\`, but received ${typeof opts.actionType}`);
+
+      const types = Object.keys(toCamelCase(AuditLogActions));
+      if (typeof opts.actionType === 'string' && !types.includes(opts.actionType)) throw new TypeError(`Unknown action to fetch from "${opts.actionType}"`);
+
+      const int = Number(opts.actionType);
+      if (isNaN(int)) throw new TypeError(`"${opts.actionType}" was not a number`);
+
+      const values = Object.values(AuditLogActions);
+      if (!values.includes(opts.actionType)) throw new TypeError(`Audit log action "${opts.actionType}" doesn't exist, refer `);
+    }
+
+    if (opts.limit) {
+      if (typeof opts.limit !== 'number') throw new TypeError(`Expected \`number\`, but gotten ${typeof opts.limit}`);
+
+      const int = Number(opts.limit);
+      if (isNaN(int)) throw new TypeError(`"${opts.limit}" was not a number`);
+
+      if (int < 0 || int > 100) throw new TypeError(`"${int}" can't go <0 or >50`);
+    }
+
+    if (opts.before && typeof opts.before !== 'string') throw new TypeError(`Expected \`number\`, but gotten ${typeof opts.before}`);
+
+    const url = Util.getAuditLogUrl(opts);
+    return this.client.rest.dispatch({
+      endpoint: url,
+      method: 'GET'
+    })
+      .catch(() => []);
+  }
+
   toString() {
     return `[Guild "${this.name}" (${this.id})]`;
   }
@@ -1190,4 +1236,9 @@ module.exports = class Guild extends UnavailableGuild {
  * @prop {number} [days]
  * @prop {string[]} [roles]
  * @prop {boolean} [computed]
+ *
+ * @typedef {object} FetchAuditLogsOptions
+ * @prop {number} [limit]
+ * @prop {string} [before]
+ * @prop {number | string} [actionType]
  */

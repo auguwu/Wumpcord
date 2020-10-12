@@ -120,6 +120,8 @@ module.exports = class GuildMember extends Base {
    * Gets the hoisted role or `null` if not found
    */
   get hoistedRole() {
+    if (!this.client.canCache('member:role')) return null;
+
     return this.roles.get(this.hoistedRoleID) || null;
   }
 
@@ -127,7 +129,48 @@ module.exports = class GuildMember extends Base {
    * Get's the cached guild or `null` if not cached
    */
   get guild() {
+    if (!this.client.canCache('guild')) return null;
+
     return this.client.guilds.get(this.guildID) || null;
+  }
+
+  /**
+   * Bans this member from this guild,
+   * use the `Guild.ban/2` method if the guild isn't cache-able, using [Message.getGuild/0]
+   * to populate `guild` in [Message].
+   *
+   * @param {import('./Guild').BanOptions} opts The options to use
+   */
+  ban(opts = {}) {
+    if (this.guild) return this.guild.ban(this.id, opts);
+
+    throw new SyntaxError('Due to caching, you must use the `Guild.ban/2` method.');
+  }
+
+  /**
+   * Unbans this member from the current guild,
+   * use the `Guild.unban/1` method if the guild isn't cached or isn't enabled
+   * by default
+   */
+  unban() {
+    if (this.guild) return this.guild.unban(this.id);
+
+    throw new SyntaxError('Due to caching, you must use the `Guild.unban/1` method.');
+  }
+
+  /**
+   * Fetches new data for this [GuildMember] and resets the cache
+   * and the properties of this [GuildMember] or throws a REST
+   * error if anything occurs.
+   */
+  fetch() {
+    return this.client.rest.dispatch({
+      endpoint: `/guilds/${this.guildID}/members/${this.id}`,
+      method: 'GET'
+    }).then((data) => {
+      this.patch(data);
+      return this;
+    });
   }
 };
 

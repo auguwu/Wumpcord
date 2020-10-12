@@ -100,6 +100,39 @@ module.exports = class GuildInvite {
     this.inviter = this.client.canCache('user') ? this.client.users.get(data.inviter.id) || new (require('./User'))(this.client, data.inviter) : null;
   }
 
+  /**
+   * Deletes the invite from this guild,
+   * will fire the `inviteDelete` event when deleted
+   * successfully
+   *
+   * @returns {Promise<boolean>} Boolean-represented value if it
+   * was deleted successfully, after the next iteration of the process,
+   * this won't be cached and will be deleted from Discord
+   */
+  delete() {
+    return this.client.rest.dispatch({
+      endpoint: `/invites/${this.code}`,
+      method: 'DELETE'
+    })
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  /**
+   * Fetches the recent data for this invite
+   * @param {boolean} [withCounts] If we should add `with_counts` to the query,
+   * to get the approx. member/presence count
+   */
+  fetch(withCounts = true) {
+    return this.client.rest.dispatch({
+      endpoint: `/invites/${this.code}${withCounts ? '?with_counts=true' : ''}`,
+      method: 'GET'
+    }).then((data) => {
+      this.patch(data);
+      return this;
+    });
+  }
+
   toString() {
     return `[Invite "https://discord.gg/${this.code}"]`;
   }
