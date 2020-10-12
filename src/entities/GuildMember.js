@@ -172,6 +172,22 @@ module.exports = class GuildMember extends Base {
       return this;
     });
   }
+
+  /**
+   * Edit the member's details if needed,
+   * if the guild isn't cached, you can use the specific guild methods
+   * to update a member's details, i.e `Guild.setNick/2`, this can also
+   * emit the `guildMemberUpdate` event when updated successfully.
+   *
+   * @param {import('./Guild').EditGuildMemberOptions} opts The options to use
+   * @returns {Promise<this>} Returns the newly edited data and
+   * cached (if we can) or a REST error thrown
+   */
+  edit(opts) {
+    // TODO: Run `Client.getGuild/1` since "this.guildID" exists?
+    if (!this.guild) throw new Error(`Guild "${this.guildID}" wasn't cached, unable to edit member metadata`);
+    return this.guild.editMember(this.id, opts);
+  }
 };
 
 /**

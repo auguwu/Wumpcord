@@ -37,6 +37,7 @@ const GuildInvite = require('./GuildInvite');
 const GuildBan = require('./misc/GuildBan');
 const GuildPreview = require('./misc/GuildPreview');
 const { toCamelCase } = require('../util/Util');
+const AuditLogs = require('./misc/AuditLogs');
 
 /**
  * Represents a Discord guild
@@ -1163,11 +1164,12 @@ module.exports = class Guild extends UnavailableGuild {
 
     if (opts.before && typeof opts.before !== 'string') throw new TypeError(`Expected \`number\`, but gotten ${typeof opts.before}`);
 
-    const url = Util.getAuditLogUrl(opts);
+    const url = Util.getAuditLogUrl(this.id, opts);
     return this.client.rest.dispatch({
       endpoint: url,
       method: 'GET'
     })
+      .then((logs) => new AuditLogs(this.client, logs))
       .catch(() => []);
   }
 
