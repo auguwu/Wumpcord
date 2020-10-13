@@ -483,9 +483,6 @@ module.exports = class WebSocketShard extends EventBus {
           if (this.client.canCache('guild')) {
             this.guilds.set(data.d.id, new Guild(this.client, { shard_id: this.id, ...data.d }));
             this.client.insert('guild', new Guild(this.client, { shard_id: this.id, ...data.d }));
-          } else {
-            this.guilds++;
-            this.client.guilds++;
           }
 
           this.checkReady();

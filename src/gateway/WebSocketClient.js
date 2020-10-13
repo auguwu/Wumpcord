@@ -31,6 +31,7 @@ const { merge }       = require('../util/Util');
 const VoiceRegion     = require('../entities/VoiceRegion');
 const { Endpoints }   = require('../Constants');
 const GuildMember     = require('../entities/GuildMember');
+const Application     = require('../entities/Application');
 
 /**
  * Represents a client for handling all WebSocket shard connections
@@ -330,9 +331,10 @@ module.exports = class WebSocketClient extends EventBus {
   dispose() {
     this.emit('debug', 'Reaching EOL status, closing...');
 
-    if (this.channels !== null) this.channels.clear();
-    if (this.guilds !== null) this.guilds.clear();
-    if (this.users !== null) this.users.clear();
+    // something is returning a number, TODO
+    if (this.guilds && this.guilds instanceof Collection) this.guilds.clear();
+    if (this.channels) this.channels.clear();
+    if (this.users) this.users.clear();
 
     for (const shard of this.shards.values()) shard.disconnect(false);
     this.emit('debug', 'Disposed, goodbye.');
@@ -487,6 +489,18 @@ module.exports = class WebSocketClient extends EventBus {
 
     const id = BigInt(guildID);
     return Number((id >> 22n) % BigInt(this.shards.size));
+  }
+
+  /**
+   * Returns the OAuth2 application of this [WebSocketClient] or a user's OAuth2 application
+   * @param {string} [userID='@me'] The application to get
+   * @returns {Promise<Application>} The application details
+   */
+  getApplication(userID = '@me') {
+    return this.rest.dispatch({
+      endpoint: `/oauth2/applications/${userID}`,
+      method: 'GET'
+    }).then((data) => new Application(this, data));
   }
 
   toString() {

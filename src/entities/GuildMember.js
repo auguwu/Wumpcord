@@ -21,6 +21,7 @@
  */
 
 const { Collection } = require('@augu/immutable');
+const User = require('./User');
 const Base = require('./Base');
 
 /**
@@ -57,10 +58,10 @@ module.exports = class GuildMember extends Base {
    */
   patch(data) {
     /**
-     * The user, if cached
-     * @type {import('./User') | null}
+     * The user itself
+     * @type {import('./User')}
      */
-    this.user = this.client.canCache('user') ? this.client.users.get(data.user.id) : null;
+    this.user = this.client.canCache('user') ? this.client.users.get(data.user.id) || new (require('./User'))(this.client, data) : null;
 
     /**
      * Date when the user has booted
@@ -104,6 +105,13 @@ module.exports = class GuildMember extends Base {
      */
     this.guildID = data.guild_id; // we populate this, discord doesn't
 
+    /**
+     * The guild (private)
+     * @private
+     * @type {import('./Guild')}
+     */
+    this._guild = this.client.canCache('guild') ? this.client.guilds.get(data.guild_id) || null : null;
+
     if (data.roles) {
       if (this.client.canCache('member:role') && this.client.canCache('guild')) {
         for (let i = 0; i < data.roles.length; i++) {
@@ -126,36 +134,30 @@ module.exports = class GuildMember extends Base {
   }
 
   /**
-   * Get's the cached guild or `null` if not cached
-   */
-  get guild() {
-    if (!this.client.canCache('guild')) return null;
-
-    return this.client.guilds.get(this.guildID) || null;
-  }
-
-  /**
-   * Bans this member from this guild,
-   * use the `Guild.ban/2` method if the guild isn't cache-able, using [Message.getGuild/0]
-   * to populate `guild` in [Message].
-   *
+   * Bans this member from this guild, if the guild isn't cached
+   * we do a REST request to fetch the guild
    * @param {import('./Guild').BanOptions} opts The options to use
    */
-  ban(opts = {}) {
-    if (this.guild) return this.guild.ban(this.id, opts);
+  async ban(opts = {}) {
+    if (!this._guild) {
+      const guild = await this.client.getGuild(this.guildID);
+      this._guild = guild;
+    }
 
-    throw new SyntaxError('Due to caching, you must use the `Guild.ban/2` method.');
+    return this._guild.ban(this.id, opts);
   }
 
   /**
-   * Unbans this member from the current guild,
-   * use the `Guild.unban/1` method if the guild isn't cached or isn't enabled
-   * by default
+   * Unbans this member from this guild, if the guild isn't cached
+   * we do a REST request to fetch the guild
    */
-  unban() {
-    if (this.guild) return this.guild.unban(this.id);
+  async unban() {
+    if (!this._guild) {
+      const guild = await this.client.getGuild(this.guildID);
+      this._guild = guild;
+    }
 
-    throw new SyntaxError('Due to caching, you must use the `Guild.unban/1` method.');
+    return this._guild.unban(this.id);
   }
 
   /**
@@ -174,19 +176,169 @@ module.exports = class GuildMember extends Base {
   }
 
   /**
-   * Edit the member's details if needed,
-   * if the guild isn't cached, you can use the specific guild methods
-   * to update a member's details, i.e `Guild.setNick/2`, this can also
-   * emit the `guildMemberUpdate` event when updated successfully.
+   * Edit the member's details if needed to. If the client can't cache
+   * or it's not cached using a provider, it'll create a REST call to Discord
+   * and possibly caches it and stores it later.
    *
    * @param {import('./Guild').EditGuildMemberOptions} opts The options to use
    * @returns {Promise<this>} Returns the newly edited data and
    * cached (if we can) or a REST error thrown
    */
-  edit(opts) {
-    // TODO: Run `Client.getGuild/1` since "this.guildID" exists?
-    if (!this.guild) throw new Error(`Guild "${this.guildID}" wasn't cached, unable to edit member metadata`);
-    return this.guild.editMember(this.id, opts);
+  async edit(opts) {
+    if (!this._guild) {
+      const guild = await this.client.getGuild(this.guildID);
+      this._guild = guild;
+    }
+
+    return this._guild.editMember(this.id, opts);
+  }
+
+  /**
+   * Adds a role to the member. If the client can't cache
+   * or it's not cached using a provider, it'll create a REST call to Discord
+   * and possibly caches it and stores it later.
+   *
+   * @param {string} roleID The role ID to add
+   * @param {string} [reason] The reason to put in audit logs
+   */
+  async addRole(roleID, reason) {
+    if (!this._guild) {
+      const guild = await this.client.getGuild(this.guildID);
+      this._guild = guild;
+    }
+
+    return this._guild.addRole(this.id, roleID, reason);
+  }
+
+  /**
+   * Removes a role from a member. If the client can't cache
+   * or it's not cached using a provider, it'll create a REST call to Discord
+   * and possibly caches it and stores it later. This will call
+   * the `guildMemberUpdate` event that is emitted when called successfully.
+   *
+   * @param {string | import('./Role')} roleID The role ID or the role itself
+   * @param {string} [reason] The reason to put in audit logs
+   */
+  async removeRole(roleID, reason) {
+    if (!this._guild) {
+      const guild = await this.client.getGuild(this.guildID);
+      this._guild = guild;
+    }
+
+    const id = typeof roleID === 'string' ? roleID : roleID.id;
+    return this._guild.removeRole(this.id, id, reason);
+  }
+
+  /**
+   * Sets the member's nickname. If the client can't cache
+   * or it's not cached using a provider, it'll create a REST call to Discord
+   * and possibly caches it and stores it later. This will call
+   * the `guildMemberUpdate` event that is emitted when called successfully.
+   *
+   * @param {string} nick The nickname ot set
+   * @param {string} [reason] The reason to put in audit logs
+   */
+  async setNick(nick, reason) {
+    if (!this._guild) {
+      const guild = await this.client.getGuild(this.guildID);
+      this._guild = guild;
+    }
+
+    return this._guild.editMember(this.id, { nick }, reason);
+  }
+
+  /**
+   * Mutes the user in a voice channel. If the client can't cache
+   * or it's not cached using a provider, it'll create a REST call to Discord
+   * and possibly caches it and stores it later.
+   *
+   * @param {string} [reason] A reason to put in audit logs
+   */
+  async mute(reason) {
+    if (!this._guild) {
+      const guild = await this.client.getGuild(this.guildID);
+      this._guild = guild;
+    }
+
+    return this._guild.editMember(this.id, { mute: true }, reason);
+  }
+
+  /**
+   * Unmutes the user in a voice channel. If the client can't cache
+   * or it's not cached using a provider, it'll create a REST call to Discord
+   * and possibly caches it and stores it later.
+   *
+   * @param {string} [reason] A reason to put in audit logs
+   */
+  async unmute(reason) {
+    if (!this._guild) {
+      const guild = await this.client.getGuild(this.guildID);
+      this._guild = guild;
+    }
+
+    return this._guild.editMember(this.id, { mute: false }, reason);
+  }
+
+  /**
+   * Deafens the user in a voice channel. If the client can't cache
+   * or it's not cached using a provider, it'll create a REST call to Discord
+   * and possibly caches it and stores it later.
+   *
+   * @param {string} [reason] A reason to put in audit logs
+   */
+  async deafen(reason) {
+    if (!this._guild) {
+      const guild = await this.client.getGuild(this.guildID);
+      this._guild = guild;
+    }
+
+    return this._guild.editMember(this.id, { deaf: true }, reason);
+  }
+
+  /**
+   * Undeafens the user in a voice channel. If the client can't cache
+   * or it's not cached using a provider, it'll create a REST call to Discord
+   * and possibly caches it and stores it later.
+   *
+   * @param {string} [reason] A reason to put in audit logs
+   */
+  async undeafen(reason) {
+    if (!this._guild) {
+      const guild = await this.client.getGuild(this.guildID);
+      this._guild = guild;
+    }
+
+    return this._guild.editMember(this.id, { deaf: true }, reason);
+  }
+
+  /**
+   * Switches the user to a different channel, the bot must
+   * require the **Move Members** permission before executiong
+   * this action. The `voiceStateUpdate` event will emit
+   * when called successfully.
+   *
+   * @param {string} channelID The channel to move to
+   * @param {string} [reason] The reason to put in audit logs
+   */
+  async switch(channelID, reason) {
+    if (!this._guild) {
+      const guild = await this.client.getGuild(this.guildID);
+      this._guild = guild;
+    }
+
+    /** @type {import('./channel/VoiceChannel')} */
+    let channel = this.client.canCache('channel') ? this.client.channels.get(channelID) : null;
+    if (!channel) {
+      const chan = await this.client.getChannel(channelID);
+      channel = chan;
+    }
+
+    if (channel.type !== 'voice') throw new SyntaxError(`Channel with ID "${channel.id}" was not a voice channel.`);
+    return this._guild.editMember(this.id, { channelID: channel.id }, reason);
+  }
+
+  toString() {
+    return `[GuildMember "${this.user.username}#${this.user.discriminator}" (ID: ${this.id}; G: ${this._guild ? this._guild.name : 'unknown'})]`;
   }
 };
 
