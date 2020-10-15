@@ -32,6 +32,8 @@
   },
   "peerDependencies": {
     "erlpack": "0.1.3",
-    "node-cron": "2.0.3"
+    "ioredis": "4.17.3",
+    "node-cron": "2.0.3",
+    "sodium": "3.0.2"
   }
 }

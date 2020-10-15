@@ -21,9 +21,11 @@
  */
 
 const WebhookClient = require('./gateway/WebhookClient');
+const RedisProvider = require('./caching/RedisProvider');
 const Permissions = require('./util/Permissions');
 const { version } = require('../package.json');
 const Constants = require('./Constants');
+const Provider = require('./caching/Provider');
 const commands = require('./commands');
 const oauth2 = require('./oauth2');
 const Client = require('./gateway/WebSocketClient');
@@ -40,5 +42,7 @@ module.exports = {
   oauth2,
   Permissions,
   Util,
-  WebhookClient
+  WebhookClient,
+  RedisProvider,
+  Provider
 };

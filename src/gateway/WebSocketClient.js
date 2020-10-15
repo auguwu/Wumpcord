@@ -51,6 +51,12 @@ module.exports = class WebSocketClient extends EventBus {
     this.voiceConnections = null;
 
     /**
+     * The provider to use when caching
+     * @type {import('../caching/Provider')}
+     */
+    this.provider = opts.provider;
+
+    /**
      * The last shard ID
      */
     this.lastShardID = 1;
@@ -197,8 +203,13 @@ module.exports = class WebSocketClient extends EventBus {
       `[Debug => Session Limit]: ${session ? `${session.remaining}/${session.total}` : 'Not auto sharding'}`,
     ].join('\n'));
 
+    if (this.provider) {
+      if (Util.isPromise(this.provider.connect)) await this.provider.connect();
+      else this.provider.connect();
+    }
+
     for (let i = 0; i < this.lastShardID; i++) {
-      this.shards.spawn(i, this.options.strategy);
+      await this.shards.spawn(i, this.options.strategy);
       await Util.sleep(5000);
     }
   }

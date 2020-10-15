@@ -20,15 +20,19 @@
  * SOFTWARE.
  */
 
+const EventBus = require('../util/EventBus');
+
 /**
  * Represents a base provider, to provide a caching solution
  */
-module.exports = class BaseProvider {
+module.exports = class BaseProvider extends EventBus {
   /**
    * Creates a new [BaseProvider] instance
    * @param {string} name The provider's name
    */
   constructor(name) {
+    super();
+
     if (!name) throw new TypeError('Missing `name` in BaseProvider');
     if (typeof name !== 'string') throw new TypeError(`Expected \`string\`, but gotten ${typeof name}`);
 
@@ -52,5 +56,9 @@ module.exports = class BaseProvider {
    */
   dispose() {
     throw new TypeError('Missing `dispose()` function');
+  }
+
+  toString() {
+    return `[BaseProvider "${this.name}"]`;
   }
 };

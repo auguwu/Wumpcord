@@ -233,6 +233,39 @@ module.exports = class Utilities {
   }
 
   /**
+   * Plucks out a property if it exists from an object
+   * @template T The data object
+   * @param {T} obj The object
+   * @param {keyof T} key The key to pluck out
+   * @returns {Exclude<T, keyof T>} The object with the plucked out object
+   * @arity Wumpcord.Utilities.pluck/2
+   */
+  static pluck(obj, key) {
+    for (const k in obj) {
+      if (k === key) {
+        delete obj[k];
+        break; // let's break it
+      }
+    }
+
+    return obj;
+  }
+
+  /**
+   * Checks if `value` is a Promise
+   * @param {unknown} value The value
+   * @returns {value is Promise<any>} Returns a boolean-represented value
+   * if it is a promise or not
+   */
+  static isPromise(value) {
+    return (
+      value instanceof Promise &&
+      typeof value.then === 'function' &&
+      typeof value.catch === 'function'
+    );
+  }
+
+  /**
    * Set of lodash functions that are modified to the library's
    * expectations so we don't bundle in a huge library into the
    * project.
