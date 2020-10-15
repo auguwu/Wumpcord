@@ -955,7 +955,7 @@ module.exports = class Guild extends UnavailableGuild {
       method: 'PUT',
       data: {
         mentionable: opts.mentionable,
-        permissions: opts.permissions,
+        permissions: String(opts.permissions),
         color,
         hoist: opts.hoistable,
         name: opts.name
@@ -1029,7 +1029,7 @@ module.exports = class Guild extends UnavailableGuild {
       method: 'PATCH',
       data: {
         mentionable: opts.mentionable,
-        permissions: opts.permissions,
+        permissions: String(opts.permissions),
         color,
         hoist: opts.hoistable,
         name: opts.name

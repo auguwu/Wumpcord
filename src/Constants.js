@@ -46,7 +46,7 @@ module.exports = {
   /**
    * The gateway version to use
    */
-  GatewayVersion: 6,
+  GatewayVersion: 8,
 
   /**
    * Avaliable cache types to use
@@ -85,7 +85,7 @@ module.exports = {
   /**
    * API rest version to use
    */
-  RestVersion: 7,
+  RestVersion: 8,
 
   /**
    * The default user agent
