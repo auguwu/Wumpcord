@@ -106,12 +106,8 @@ module.exports = class RESTClient {
   request(bucket) {
     if (this.ratelimited) throw new Error('Currently ratelimited, paused execution');
 
-    const headers = Utilities.merge(bucket.headers, {
-      'X-RateLimit-Precision': 'millisecond'
-    });
-
     if (!['get', 'head'].includes(bucket.opts.method.toLowerCase())) {
-      headers['Content-Type'] = 'application/json';
+      bucket.opts.headers['Content-Type'] = 'application/json';
     }
 
     return new Promise((resolve, reject) => {
@@ -119,7 +115,7 @@ module.exports = class RESTClient {
         method: bucket.opts.method,
         url: bucket.opts.endpoint,
         data: bucket.opts.data,
-        headers
+        headers: bucket.opts.headers
       }).then(resp => {
         // 204 = no content, so let's add a check!
         if (resp.statusCode !== 204 && resp.isEmpty) {

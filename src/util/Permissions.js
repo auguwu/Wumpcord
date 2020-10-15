@@ -28,21 +28,21 @@ const Constants = require('../Constants');
 module.exports = class Permissions {
   /**
    * Creates a new [Permissions] class
-   * @param {number} allow The allowed permissions
-   * @param {number} [deny] The denied permissions
+   * @param {string} allow The allowed permissions
+   * @param {string} [deny] The denied permissions
    */
-  constructor(allow, deny = 0) {
+  constructor(allow, deny = '0') {
     /**
      * The allowed permissions
      * @type {number}
      */
-    this.allowed = allow;
+    this.allowed = Number(allow);
 
     /**
      * The denied permissions
      * @type {number}
      */
-    this.denied  = deny;
+    this.denied  = Number(deny);
   }
 
   /**

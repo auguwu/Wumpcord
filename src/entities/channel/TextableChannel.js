@@ -220,8 +220,7 @@ module.exports = class TextableChannel extends BaseChannel {
       data: send,
       headers
     })
-      .then((data) => new Message(this.client, data))
-      .catch(() => null);
+      .then((data) => new Message(this.client, data));
   }
 
   /**
