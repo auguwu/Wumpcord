@@ -26,7 +26,7 @@ const { version } = require('../package.json');
 const Constants = require('./Constants');
 const commands = require('./commands');
 const oauth2 = require('./oauth2');
-const Client = require('./Client');
+const Client = require('./gateway/WebSocketClient');
 const Util = require('./util/Util');
 
 /**

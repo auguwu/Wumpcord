@@ -178,12 +178,101 @@ new CommandClient({
 }).load();
 ```
 
+## OAuth2 API
+Wumpcord provides a `OAuth2Client` to do stuff related to Discord's API, you can view the [documentation](https://docs.augu.dev/Wumpcord/notes#oauth2) for more information.
+
+To initialise it, we need to use the `oauth2` namespace when importing the library, so like:
+
+```js
+// CommonJS
+const { oauth } = require('wumpcord');
+
+// ESNext
+import { oauth2 } from 'wumpcord';
+```
+
+Now, we have to initialise the client in the `oauth2` namespace, here's how we can do it:
+
+```js
+const client = new oauth2.OAuth2Client({
+  // Redirect URL when we successfully gotten an access token (used in express middleware)
+  redirectUrl: '',
+
+  // Callback URL to get the access token (used in express middleware)
+  callbackUrl: '',
+
+  // Cache type, view Caching for more information
+  cacheType: 'all',
+
+  // The client's secret (required)
+  clientSecret: '',
+
+  // If we should provide a `&state` param when redirecting
+  // this will also validat ethe state
+  useState: true,
+
+  // The client's ID
+  clientID: '',
+
+  // The scopes used
+  scopes: [],
+});
+```
+
+### Caching
+In the oauth2 namespace, we also have ways to make it minimal without any memory leaks! It uses the same concept of the
+[WebSocketClient]'s caching system.
+
+- Guilds
+- Users
+
+### Express
+You heard in the example above saying "(used in express middleware)", the oauth2 namespace has an Express handler
+built-in to not re-invent the wheel, so you can just apply `OAuth2Client.express` to the middleware stack and boom!
+
+The library will automatically listen for the [callbackUrl] set in the client options when initialising
+a new instance. We also have lifecycle hooks that are required if you wanna do stuff like getting a
+user from the database or something.
+
+#### Express Example
+```js
+const { oauth2 } = require('wumpcord');
+const express = require('express');
+
+const client = new oauth2.OAuth2Client({
+  redirectUrl: '/discord/success',
+  callbackUrl: '/discord/callback',
+  cacheType: 'all',
+  clientSecret: '',
+  useState: true,
+  clientID: '',
+  scopes: [],
+  onError(req, res, error) {
+    
+  },
+  onSuccess(req, res, accessToken) {
+    
+  }
+});
+
+const app = express();
+
+app.use(express.json());
+app.use(client.express);
+
+app.get('/discord', (_, res) => res.redirect(client.authorizationUrl));
+app.get('/discord/success', (_, res) => res.status(200).send('Success!'));
+
+app.listen(3000, () => console.log('http://localhost:3000'));
+
+```
+
 ## Maintainers
 - [August](https://floofy.dev)
 - [Ice](https://github.com/IceeMC)
 
 ## Testers
-None.
+None at the moment.
 
 ## License
 **Wumpcord** is released under the MIT License. Read [here](/LICENSE) for more information.
