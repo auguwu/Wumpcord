@@ -13,6 +13,11 @@
 - OAuth2 Support
   - Too lazy to implement your own OAuth2 system for a dashboard? Wumpcord supplies extra utilities for making OAuth2 more simplier.
 
+## Need Support?
+You can join the server below and join in #support under the **Wumpcord** category
+
+[![discord embed owo](https://discord.com/api/v8/guilds/382725233695522816/widget.png?style=banner3)](https://discord.gg/yDnbEDH)
+
 ## Example Bot
 ```js
 const { Client } = require('wumpcord');
