@@ -144,7 +144,7 @@ module.exports = class WebSocketShard extends EventBus {
 
     this.status = Constants.ShardStatus.Connecting;
     this.attempts++;
-    this.initialise();
+    return this.initialise();
   }
 
   /**
@@ -187,6 +187,17 @@ module.exports = class WebSocketShard extends EventBus {
         this.debug(`Connecting to potentially resume zombified connection (${this.attempts}/${this.client.options.ws.tries})`);
         this.client.shards.connect(this.id);
       } else {
+        this.attempts++;
+        if (this.attempts > this.client.options.ws.tries) {
+          this.debug(`Reached the maximum amount of tries (${this.client.options.ws.tries}), exiting process...`);
+          setTimeout(() => {
+            this.hardReset();
+            this.client.dispose();
+
+            process.exit(1);
+          }, 5000);
+        }
+
         this.debug(`Now attempting to un-zombify this connection (${this.attempts}/${this.client.options.ws.tries})`);
         setTimeout(() => {
           this.debug('Attempting to un-zombify connection...');
@@ -250,21 +261,12 @@ module.exports = class WebSocketShard extends EventBus {
    */
   identify() {
     this.debug('Now identifying with Discord...');
-    let intents = 0;
-    if (Array.isArray(this.client.options.ws.intents)) {
-      for (const intent of this.client.options.ws.intents) {
-        if (typeof intent === 'number') intents |= intent;
-        if (Constants.GatewayIntents[intent]) intents |= Constants.GatewayIntents[intent];
-      }
-    } else {
-      intents = this.client.options.ws.intents;
-    }
 
     const packet = {
       guild_subscriptions: Boolean(this.client.options.ws.guildSubscriptions),
       large_threshold: Boolean(this.client.options.ws.largeThreshold),
       compress: false, // TODO: add compression
-      intents,
+      intents: this.client.intents,
       token: this.client.token,
       v: Constants.GatewayVersion,
       properties: {
@@ -284,23 +286,34 @@ module.exports = class WebSocketShard extends EventBus {
   initialise() {
     this.debug('Now creating a new connection...');
 
-    this.socket = new WebSocket(this.client.gatewayUrl, this.client.options.ws.clientOptions);
-    this.socket.on('message', this.onMessage.bind(this));
-    this.socket.on('error', this.onError.bind(this));
-    this.socket.on('close', this.onClose.bind(this));
-    this.socket.on('open', this.onOpen.bind(this));
+    return new Promise((resolve, reject) => {
+      this.socket = new WebSocket(this.client.gatewayUrl, this.client.options.ws.clientOptions);
+      this.socket.on('message', this.onMessage.bind(this));
+      this.socket.on('error', this.onError.bind(this));
+      this.socket.on('close', this.onClose.bind(this));
+      this.socket.on('open', this.onOpen.bind(this));
 
-    this._reconnectTimeout = setTimeout(() => {
-      this.debug('Didn\'t initialise a new session in the correct time, reconnecting...');
-      this.disconnect(true);
-    }, this.reconnectTime);
+      this.resolver = resolve;
+      this.rejecter = reject;
+
+      this._reconnectTimeout = setTimeout(() => {
+        this.debug('Didn\'t initialise a new session in the correct time, reconnecting...');
+        this.disconnect(true);
+
+        this.rejecter();
+        this.rejecter = undefined;
+      }, this.reconnectTime);
+    });
   }
 
   onOpen() {
     this.debug('New session has been established');
     this.emit('establish', this.id);
 
-    clearTimeout(this._reconnectTimeout);
+    this.resolver();
+    this.resolver = undefined;
+
+    if (this._reconnectTimeout) clearTimeout(this._reconnectTimeout);
   }
 
   /**
@@ -547,6 +560,11 @@ module.exports = class WebSocketShard extends EventBus {
       if (this.client.shards.size !== this.client.options.shardCount || this.client.shards.some(s => s.status !== Constants.ShardStatus.Connected)) {
         return;
       } else {
+        if (this.resolver) {
+          this.resolver();
+          this.resolver = undefined;
+        }
+
         this.client.ready = true;
         this.client.emit('ready');
         return;

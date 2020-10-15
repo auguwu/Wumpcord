@@ -150,21 +150,20 @@ module.exports = class Utilities {
 
   /**
    * Merges 2 objects into a huge one
-   * @template T The original object
-   * @template U The object that is returned
-   * @param {...T} items The objects to merge
-   * @returns {U} The merged object
+   * @template T The object
+   * @param {T} given The given object
+   * @param {T} def The default
+   * @returns {T} The returned object
    * @arity Wumpcord.Utilities.merge/1
    */
-  static merge(...items) {
-    const obj = {};
-    for (let i = 0; i < items.length; i++) {
-      for (const k in items[i]) {
-        if (!obj.hasOwnProperty(k)) obj[k] = items[i][k];
-      }
+  static merge(given, def) {
+    if (!given) return def;
+    for (const key in def) {
+      if (!Object.hasOwnProperty.call(given, key) || given[key] === undefined) given[key] = def[key];
+      else if (given[key] === Object(given[key])) given[key] = Utilities.merge(def[key], given[key]);
     }
 
-    return obj;
+    return given;
   }
 
   /**

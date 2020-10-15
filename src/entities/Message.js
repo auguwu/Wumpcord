@@ -123,7 +123,9 @@ module.exports = class Message extends Base {
     /**
      * The author
      */
-    this.author = data.author ? new (require('./User'))(this.client, data.author) : null;
+    this.author = data.author && this.client.canCache('user')
+      ? this.client.users.get(data.author.id) || new (require('./User'))(this.client, data.author)
+      : null;
 
     /**
      * The guild's ID
@@ -327,6 +329,7 @@ module.exports = class Message extends Base {
  * @prop {UserPacket} author
  * @prop {AttachmentPacket[]} attachments
  * @prop {string} guild_id
+ * @prop {MessageReactionPacket[]} reactions
  *
  * @typedef {object} GuildMemberPacket
  * @prop {string[]} roles
@@ -343,4 +346,9 @@ module.exports = class Message extends Base {
  * @prop {string} id
  * @prop {string} discriminator
  * @prop {string} avatar
+ *
+ * @typedef {object} MessageReactionPacket
+ * @prop {number} count
+ * @prop {boolean} me
+ * @prop {import('./Emoji').EmojiPacket} emoji
  */

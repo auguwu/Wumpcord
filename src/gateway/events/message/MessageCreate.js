@@ -33,11 +33,12 @@ const onMessageCreate = async function ({ d: data }) {
   if (channel !== null && channel.type === 'text') {
     if (!this.client.canCache('message')) this.debug('Can\'t cache messages, `messageDelete` and `messageUpdate` will only emit partial IDs');
     if (!this.client.canCache('channel')) this.debug('Can\'t cache channels, `messageDelete` and `messageUpdate` will only emit partial IDs');
-    if (this.client.canCache('message')) channel.messages.addFirst(message);
 
     message.patch(data);
   }
 
+  // populate guild
+  await message.getGuild();
   this.client.emit('message', message);
 };
 
