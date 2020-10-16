@@ -29,7 +29,7 @@ module.exports = class DiscordRatelimitedError extends Error {
    * @param {RatelimitErrorObject} obj The object that contains errors
    */
   constructor(obj) {
-    super(`Ratelimited on "${obj.method.toUpperCase()} ${obj.endpoint}"`);
+    super(`Ratelimited on endpoint "${obj.method.toUpperCase()} ${obj.endpoint}"`);
 
     /**
      * Retry after x amount of milliseconds

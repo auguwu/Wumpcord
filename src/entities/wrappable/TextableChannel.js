@@ -20,33 +20,26 @@
  * SOFTWARE.
  */
 
-const PaginationBuilder = require('./entities/utilities/pagination/PaginationBuilder');
-const WebhookClient = require('./gateway/WebhookClient');
-const RedisProvider = require('./caching/RedisProvider');
-const EmbedBuilder = require('./entities/utilities/EmbedBuilder');
-const Permissions = require('./util/Permissions');
-const { version } = require('../package.json');
-const Constants = require('./Constants');
-const Provider = require('./caching/Provider');
-const commands = require('./commands');
-const oauth2 = require('./oauth2');
-const Client = require('./gateway/WebSocketClient');
-const Util = require('./util/Util');
+const Multipart = require('../../util/Multipart');
+const Util = require('../../util/Util');
 
 /**
- * Entrypoint of Wumpcord
+ * Returns if `value` is a [MessageFile] instance
+ * @param {unknown} value The value to check
+ * @returns {value is MessageFile} Returns if the object is a message file
  */
-module.exports = {
-  Constants,
-  Client,
-  version,
-  commands,
-  oauth2,
-  Permissions,
-  Util,
-  WebhookClient,
-  RedisProvider,
-  Provider,
-  EmbedBuilder,
-  PaginationBuilder
-};
+const isMessageFile = (value) =>
+  typeof value === 'object'
+    && !Array.isArray(value)
+    && Object.hasOwnProperty.call(value, 'file');
+
+/**
+ * Represents a textable channel with methods like `send`, etc
+ *
+ * Use `TextableChannel.decorate/3` to decorate a channel with the functions available
+ */
+class TextableChannel {
+
+}
+
+module.exports = TextableChannel;

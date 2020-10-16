@@ -38,6 +38,12 @@ module.exports = class RESTClient {
    */
   constructor(client) {
     /**
+     * The last dispatched called
+     * @type {number}
+     */
+    this.lastDispatched = NaN;
+
+    /**
      * If we have been ratelimited
      * @type {boolean}
      */
@@ -83,8 +89,7 @@ module.exports = class RESTClient {
    * Returns the ping of the [RESTClient]
    */
   get ping() {
-    const date = new Date().getTime();
-    return Number.isNaN(this.lastCall) ? NaN : (date - this.lastCall);
+    return Number.isNaN(this.lastCall) ? NaN : (this.lastCall - this.lastDispatched);
   }
 
   /**
@@ -104,10 +109,14 @@ module.exports = class RESTClient {
       this.cache.add(bucket);
       this.request(bucket)
         .then((data) => {
+          this.lastDispatched = new Date().getTime();
           this.cache.remove(bucket);
+
           return resolve(data);
         }).catch((error) => {
+          this.lastDispatched = new Date().getTime();
           this.cache.remove(bucket);
+
           return reject(error);
         });
     });
