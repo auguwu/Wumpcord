@@ -52,6 +52,8 @@ module.exports = class WebSocketShard extends EventBus {
   constructor(client, options) {
     super();
 
+    if (options.strategy === 'etf' && Erlpack === undefined) throw new SyntaxError('Suggested to use ETF strategy, but `erlpack` isn\'t installed?');
+
     /**
      * The reconnect time to re-connect if a connection is zombified
      * @type {number}
@@ -142,6 +144,7 @@ module.exports = class WebSocketShard extends EventBus {
       return;
     }
 
+    this.debug(`Initialising a new connection (${this.sessionID ? 'using old session key' : 'creating new session'})`);
     this.status = Constants.ShardStatus.Connecting;
     this.attempts++;
     return this.initialise();
@@ -222,7 +225,7 @@ module.exports = class WebSocketShard extends EventBus {
   send(op, data) {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
       this.socket.send(this.pack({ op, d: data }));
-      this.debug(`Sent OPCode "${op}" to Discord with strategy ${this.strategy}`);
+      this.debug(`Sent OPCode "${op} (${Util.getKey(Constants.OPCodes, op) || 'Unknown'})" to Discord with strategy ${this.strategy}`);
     } else {
       this.debug('Connection is non-existent, not sending data');
     }
@@ -451,8 +454,12 @@ module.exports = class WebSocketShard extends EventBus {
 
           this.checkReady();
         } else {
-          if (GatewayEvents.hasOwnProperty(data.t)) return GatewayEvents[data.t].call(this, data);
-          this.emit('event', this.id, data);
+          if (GatewayEvents.hasOwnProperty(data.t)) {
+            if (data.t === 'READY' || data.t === 'RESUMED') return GatewayEvents[data.t](this, data);
+            else return GatewayEvents[data.t].call(this, data);
+          } else {
+            this.emit('event', this.id, data);
+          }
         }
       } break;
 
@@ -461,11 +468,12 @@ module.exports = class WebSocketShard extends EventBus {
         break;
 
       case Constants.OPCodes.InvalidSession: {
-        this.seq = -1;
-        this.sessionID = undefined;
-
-        this.emit('warn', this.id, 'Invalid session, re-identifying');
+        this.status = Constants.ShardStatus.Nearly;
+        this.debug(`Session ID ${this.sessionID} was invalid, re-creating session...`);
         this.identify();
+
+        this.sessionID = undefined;
+        this.seq = -1;
       } break;
 
       case Constants.OPCodes.Reconnect:
@@ -482,7 +490,11 @@ module.exports = class WebSocketShard extends EventBus {
         }
 
         this.status = Constants.ShardStatus.Nearly;
-        this.sessionID ? this.resume() : this.identify();
+        if (this.sessionID) {
+          this.resume();
+        } else {
+          this.identify();
+        }
       } break;
 
       case Constants.OPCodes.HeartbeatAck: {
@@ -523,7 +535,7 @@ module.exports = class WebSocketShard extends EventBus {
   resume() {
     this.send(Constants.OPCodes.Resume, {
       session_id: this.sessionID,
-      token: `Bot ${this.client.token}`,
+      token: this.client.token,
       seq: this.seq
     });
   }

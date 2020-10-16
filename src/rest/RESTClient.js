@@ -44,6 +44,12 @@ module.exports = class RESTClient {
     this.ratelimited = false;
 
     /**
+     * The last rest call send
+     * @type {number}
+     */
+    this.lastCall = NaN;
+
+    /**
      * The client
      * @private
      * @type {import('../gateway/WebSocketClient')}
@@ -71,6 +77,14 @@ module.exports = class RESTClient {
     });
 
     if (client) this.http.defaults.headers.Authorization = `Bot ${client.token}`;
+  }
+
+  /**
+   * Returns the ping of the [RESTClient]
+   */
+  get ping() {
+    const date = new Date().getTime();
+    return Number.isNaN(this.lastCall) ? NaN : (date - this.lastCall);
   }
 
   /**
@@ -129,6 +143,7 @@ module.exports = class RESTClient {
           return resolve(null);
         }
 
+        this.lastCall = new Date().getTime();
         const data = resp.json();
 
         if (resp.statusCode === 429) {
@@ -190,7 +205,8 @@ module.exports = class RESTClient {
           endpoint: bucket.opts.endpoint,
           method: bucket.opts.method,
           status: resp.status,
-          body: resp.text()
+          body: resp.text(),
+          ping: this.ping
         });
 
         return data.hasOwnProperty('message') ? reject(new DiscordAPIError(data.code, data.message)) : resolve(data);

@@ -26,29 +26,29 @@ const { BotUser } = require('../../entities');
 
 /**
  * Received when the dispatcher calls `READY`
- * @type {import('.').EventCallee}
+ * @param {import('../WebSocketShard')} shard The shard
  */
-const onReady = function ({ d: data }) {
-  this.client.user = new BotUser(this.client, data.user);
-  this.sessionID = data.session_id;
+const onReady = function (shard, { d: data }) {
+  shard.client.user = new BotUser(shard.client, data.user);
+  shard.sessionID = data.session_id;
 
-  if (this.client.options.cacheType === 'all') {
-    this.client.voiceConnections = new Collection();
-    this.client.channels = new Collection();
-    this.client.typings = new Collection();
-    this.client.guilds = new Collection();
-    this.client.users = new Collection({ [this.client.user.id]: this.client.user });
+  if (shard.client.options.cacheType === 'all') {
+    shard.client.voiceConnections = new Collection();
+    shard.client.channels = new Collection();
+    shard.client.typings = new Collection();
+    shard.client.guilds = new Collection();
+    shard.client.users = new Collection({ [shard.client.user.id]: shard.client.user });
   } else {
-    this.client.voiceConnections = this.client.canCache('voice:conenction') ? new Collection() : null;
-    this.client.channels = this.client.canCache('channel') ? new Collection() : null;
-    this.client.typings = this.client.canCache('typing') ? new Collection() : null;
-    this.client.guilds = this.client.canCache('guild') ? new Collection() : null;
-    this.client.users = this.client.canCache('user') ? new Collection({ [this.client.user.id]: this.client.user }) : null;
+    shard.client.voiceConnections = shard.client.canCache('voice:conenction') ? new Collection() : null;
+    shard.client.channels = shard.client.canCache('channel') ? new Collection() : null;
+    shard.client.typings = shard.client.canCache('typing') ? new Collection() : null;
+    shard.client.guilds = shard.client.canCache('guild') ? new Collection() : null;
+    shard.client.users = shard.client.canCache('user') ? new Collection({ [shard.client.user.id]: shard.client.user }) : null;
   }
 
-  this.unavailableGuilds = new Set(data.guilds.map(s => s.id));
-  this.status = ShardStatus.WaitingForGuilds;
-  this.checkReady();
+  shard.unavailableGuilds = new Set(data.guilds.map(s => s.id));
+  shard.status = ShardStatus.WaitingForGuilds;
+  shard.checkReady();
 };
 
 module.exports = onReady;

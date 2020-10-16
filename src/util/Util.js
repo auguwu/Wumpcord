@@ -266,6 +266,17 @@ module.exports = class Utilities {
   }
 
   /**
+   * Finds a object's key from it's initial value
+   * @template T The data object
+   * @param {T} obj The object
+   * @param {T[keyof T]} key The key to find
+   * @returns {keyof T} The value found or `null` if not specified
+   */
+  static getKey(obj, key) {
+    return Object.keys(obj).find(val => obj[val] === key);
+  }
+
+  /**
    * Set of lodash functions that are modified to the library's
    * expectations so we don't bundle in a huge library into the
    * project.

@@ -53,7 +53,7 @@ module.exports = class ShardingManager extends Collection {
    */
   get ping() {
     const ping = this.reduce((a, b) => a + b.ping, 0);
-    return ping / this.size;
+    return ping;
   }
 
   /**
@@ -63,6 +63,13 @@ module.exports = class ShardingManager extends Collection {
    * @arity Wumpcord.Sharding.ShardingManager.spawn/2
    */
   spawn(id, strategy = 'etf') {
+    if (this.has(id)) {
+      const shard = this.get(id);
+      if (shard.status === 0) return; // connected, let's not spawn another one >w>
+
+      return shard.connect();
+    }
+
     if (!Constants.StrategyTypes.includes(strategy)) throw new TypeError(`Expecting 'etf' or 'json', but received "${strategy}"`);
 
     const shard = new WebSocketShard(this.client, { id, strategy });
@@ -101,8 +108,6 @@ module.exports = class ShardingManager extends Collection {
     if (!this.has(id)) return;
 
     const shard = this.get(id);
-    shard.removeAllListeners();
-
     return this.spawn(shard.id, shard.strategy);
   }
 };

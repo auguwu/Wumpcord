@@ -24,14 +24,13 @@ const { ShardStatus } = require('../../Constants');
 
 /**
  * Received when the dispatcher calls `READY`
- * @type {import('.').EventCallee}
+ * @param {import('../WebSocketShard')} shard The shard
  */
-const onResumed = function ({ d: data }) {
-  this.debug(`Session "${this.sessionID}" has replayed ${this.seq === -1 ? 'no' : (data.s - this.seq).toLocaleString()} events`);
-
-  this.status = ShardStatus.Connected;
-  this.sendHeartbeat();
-  this.emit('resume', this.seq === -1 ? 0 : (data.s - this.seq));
+const onResumed = function (shard, { d: data }) {
+  shard.debug(`Session "${shard.sessionID}" has replayed ${shard.seq === -1 ? 'no' : (data.seq - shard.seq).toLocaleString()} events`);
+  shard.status = ShardStatus.Connected;
+  shard.sendHeartbeat();
+  shard.emit('resume', this.seq === -1 ? 0 : (data.s - this.seq));
 };
 
 module.exports = onResumed;
