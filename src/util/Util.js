@@ -315,10 +315,11 @@ module.exports = class Utilities {
     } else if (color instanceof Role) {
       color = parseInt(color.hex.replace('#', ''), 16);
     } else if (Array.isArray(color)) {
-      if (color.length > 2) throw new RangeError('RGB values must cap at index of 2 (example: [0, 0, 0])');
+      if (color.length > 3) throw new RangeError('RGB values must cap at index of 3 (example: [0, 0, 0])');
       if (color.some(x => typeof x !== 'number' && isNaN(Number(x)))) throw new TypeError('Some values weren\'t a number in the array');
 
-      color = (color[0] << 16) + (color[1] << 8) + color[2];
+      const colors = color.map(Number);
+      color = (colors[0] << 16) + (colors[1] << 8) + colors[2];
     }
 
     if (color < 0 || color > 0xFFFFFF) throw new RangeError('Color can\'t be lower than 0 or higher than 0xFFFFFF');

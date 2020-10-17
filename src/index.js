@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-const PaginationBuilder = require('./entities/utilities/pagination/PaginationBuilder');
+const PaginationBuilder = require('./entities/utilities/PaginationBuilder');
 const WebhookClient = require('./gateway/WebhookClient');
 const RedisProvider = require('./caching/RedisProvider');
 const EmbedBuilder = require('./entities/utilities/EmbedBuilder');

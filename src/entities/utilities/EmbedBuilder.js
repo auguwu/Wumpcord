@@ -61,7 +61,7 @@ module.exports = class EmbedBuilder {
      * The fields of the embed
      * @type {EmbedField[]}
      */
-    this.fields = data.fields.map(Util.clone);
+    this.fields = (data.fields || []).map(Util.clone);
 
     /**
      * The image that the embed will display
@@ -217,6 +217,15 @@ module.exports = class EmbedBuilder {
    */
   setURL(url) {
     this.url = url;
+    return this;
+  }
+
+  /**
+   * Sets the color of the embed
+   * @param {'random' | 'default' | import('../../util/Util').Resolvable<string | number | import('../Role')>}
+   */
+  setColor(color) {
+    this.color = Util.resolveColor(color);
     return this;
   }
 
