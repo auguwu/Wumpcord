@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 
+const Role = require('../entities/Role');
+
 /** for [Utilities.lodash] namespace */
 const hasUnicodeWord = RegExp.prototype.test.bind(
   /[a-z][A-Z]|[A-Z]{2}[a-z]|[0-9][a-zA-Z]|[a-zA-Z][0-9]|[^a-zA-Z0-9 ]/
@@ -277,6 +279,55 @@ module.exports = class Utilities {
   }
 
   /**
+   * Resolves a string or an array of strings
+   * into a proper string
+   * @param {Resolvable<string>} str The resolvable strings
+   * @param {string} [sep='\n'] The seperator to use
+   * @returns {string} The string
+   */
+  static resolveString(str, sep = '\n') {
+    if (str instanceof Array) return str.join(sep);
+    if (typeof str === 'string') return str;
+    return String(str);
+  }
+
+  /**
+   * Clones an object
+   * @template T The object that is being cloned
+   * @param {T} obj The object to clone
+   * @returns {T} The newly cloned object
+   */
+  static clone(obj) {
+    return Object.assign(Object.create(obj), obj);
+  }
+
+  /**
+   * Resolves a color string
+   * @param {'random' | 'default' | Resolvable<string | number | import('../entities/Role')>} color The color to convert
+   * @returns {number} The raw value
+   */
+  static resolveColor(color) {
+    if (typeof color === 'string') {
+      if (color === 'random') return Math.floor(Math.random() * (0xFFFFFF + 1));
+      if (color === 'default') return 0;
+
+      color = parseInt(color.replace('#', ''), 16);
+    } else if (color instanceof Role) {
+      color = parseInt(color.hex.replace('#', ''), 16);
+    } else if (Array.isArray(color)) {
+      if (color.length > 2) throw new RangeError('RGB values must cap at index of 2 (example: [0, 0, 0])');
+      if (color.some(x => typeof x !== 'number' && isNaN(Number(x)))) throw new TypeError('Some values weren\'t a number in the array');
+
+      color = (color[0] << 16) + (color[1] << 8) + color[2];
+    }
+
+    if (color < 0 || color > 0xFFFFFF) throw new RangeError('Color can\'t be lower than 0 or higher than 0xFFFFFF');
+    if (color && isNaN(color)) throw new TypeError(`Color \`${color}\` was not a number`);
+
+    return color;
+  }
+
+  /**
    * Set of lodash functions that are modified to the library's
    * expectations so we don't bundle in a huge library into the
    * project.
@@ -327,4 +378,9 @@ module.exports = class Utilities {
  * @prop {(str: string) => string} firstUpper Returns the first letter of a string as uppercase
  * @prop {(str: string) => string} camelcase Converts `string` to [camel case](https://en.wikipedia.org/wiki/CamelCase)
  * @prop {(str: string, pattern?: RegExp) => string[]} words Splits `string` into an array of its words
+ */
+
+/**
+ * @typedef {T | T[]} Resolvable
+ * @template T
  */

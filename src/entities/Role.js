@@ -100,7 +100,7 @@ module.exports = class Role extends Base {
    * Gets the hexadecimal version of the color of the role
    * @returns {?string} `null` if the color is black
    */
-  get hexColor() {
+  get hex() {
     if (this.color === 0) return null;
     return parseInt(this.color).toString(16);
   }
@@ -110,7 +110,7 @@ module.exports = class Role extends Base {
    * @returns {[number, number, number]} Returns the RGB colors by an Array of 3
    */
   // Credit: https://stackoverflow.com/a/5624139
-  get rgbColor() {
+  get rgb() {
     if (this.color === 0) return [];
 
     let items = [];

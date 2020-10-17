@@ -32,3 +32,8 @@ module.exports = {
   UnavailableGuild: require('./UnavailableGuild'),
   User: require('./User')
 };
+
+/**
+ * @typedef {import('./channel/TextChannel') | import('./channel/NewsChannel') | import('./channel/GroupChannel') | import('./channel/DMChannel')} TextableChannel
+ * @typedef {import('./channel/NewsChannel') | import('./channel/TextChannel')} GuildTextableChannel
+ */
