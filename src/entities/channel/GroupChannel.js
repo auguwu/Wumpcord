@@ -21,27 +21,32 @@
  */
 
 const { Collection } = require('@augu/immutable');
-const { Endpoints } = require('../../Constants');
-const TextableChannel = require('./TextableChannel');
-const Message = require('../Message');
+const TextableChannel = require('../wrappable/TextableChannel');
+const BaseChannel = require('../BaseChannel');
 
 /**
  * Represents a group channel
  */
-module.exports = class GroupChannel extends TextableChannel {
+class GroupChannel extends BaseChannel {
   /**
    * Creates a new [GroupChannel] instance
    * @param {import('../../gateway/WebSocketClient')} client The client
    * @param {any} data The data to use
    */
   constructor(client, data) {
-    super(client, data);
+    super(data);
 
     /**
      * The last message ID
      * @type {?string}
      */
     this.lastMessageID = data.last_message_id;
+
+    /**
+     * The client that is passed in
+     * @private
+     */
+    this.client = client;
 
     if (data.recipients) {
       /**
@@ -58,19 +63,7 @@ module.exports = class GroupChannel extends TextableChannel {
       }
     }
   }
+}
 
-  /**
-   * Gets the last message, if specified
-   * @returns {Promise<Message>} The message or `null` if can't be fetched
-   */
-  getLastMessage() {
-    if (this.lastMessageID === null) return null;
-
-    return this.client.rest.dispatch({
-      endpoint: Endpoints.Channel.message(this.id, this.lastMessageID),
-      method: 'get'
-    })
-      .then((data) => new Message(this.client, data))
-      .catch(() => null);
-  }
-};
+TextableChannel.decorate(GroupChannel, { full: true });
+module.exports = GroupChannel;

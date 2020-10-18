@@ -21,28 +21,33 @@
  */
 
 const PermissionOverwrite = require('../PermissionOverwrite');
-const TextableChannel = require('./TextableChannel');
 const { Collection } = require('@augu/immutable');
-const { Endpoints } = require('../../Constants');
-const Message = require('../Message');
+const TextableChannel = require('../wrappable/TextableChannel');
+const BaseChannel = require('../BaseChannel');
 
 /**
  * Represents a news channel on Discord
  */
-module.exports = class NewsChannel extends TextableChannel {
+class NewsChannel extends BaseChannel {
   /**
    * Creates a new [NewsChannel] class
    * @param {import('../../gateway/WebSocketClient')} client The client
    * @param {NewsChannelPacket} data The data
    */
   constructor(client, data) {
-    super(client, data);
+    super(data);
 
     /**
      * List of permission overwrites in this channel or `null` if not cachable
      * @type {Collection<PermissionOverwrite> | null}
      */
     this.permissionOverwrites = client.canCache('permission:overwrite') ? new Collection() : null;
+
+    /**
+     * The client that is passed in
+     * @private
+     */
+    this.client = client;
 
     this.patch(data);
   }
@@ -99,22 +104,10 @@ module.exports = class NewsChannel extends TextableChannel {
 
     return this;
   }
+}
 
-  /**
-   * Gets the last message, if specified
-   * @returns {Promise<Message>} The message or `null` if can't be fetched
-   */
-  getLastMessage() {
-    if (this.lastMessageID === null) return null;
-
-    return this.client.rest.dispatch({
-      endpoint: Endpoints.Channel.message(this.id, this.lastMessageID),
-      method: 'get'
-    })
-      .then((data) => new Message(this.client, data))
-      .catch(() => null);
-  }
-};
+TextableChannel.decorate(NewsChannel, { full: true });
+module.exports = NewsChannel;
 
 /**
  * @typedef {object} NewsChannelPacket

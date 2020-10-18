@@ -21,26 +21,33 @@
  */
 
 const PermissionOverwrite = require('../PermissionOverwrite');
-const TextableChannel = require('./TextableChannel');
+const TextableChannel = require('../wrappable/TextableChannel');
+const BaseChannel = require('../BaseChannel');
 const { Collection } = require('@augu/immutable');
 
 /**
  * Represents a store channel on Discord
  */
-module.exports = class StoreChannel extends TextableChannel {
+class StoreChannel extends BaseChannel {
   /**
    * Creates a new [StoreChannel] class
    * @param {import('../../gateway/WebSocketClient')} client The client
    * @param {StoreChannelPacket} data The data
    */
   constructor(client, data) {
-    super(client, data);
+    super(data);
 
     /**
      * List of permission overwrites in this channel or `null` if not cachable
      * @type {Collection<PermissionOverwrite> | null}
      */
     this.permissionOverwrites = client.canCache('permission:overwrite') ? new Collection() : null;
+
+    /**
+     * The client that is passed in
+     * @private
+     */
+    this.client = client;
 
     this.patch(data);
   }
@@ -91,7 +98,10 @@ module.exports = class StoreChannel extends TextableChannel {
 
     return this;
   }
-};
+}
+
+TextableChannel.decorate(StoreChannel, { full: true });
+module.exports = TextableChannel;
 
 /**
  * @typedef {object} StoreChannelPacket

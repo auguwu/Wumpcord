@@ -21,10 +21,11 @@
  */
 
 const { UserFlags, CdnUrl, Endpoints } = require('../Constants');
+const TextableChannel = require('./wrappable/TextableChannel');
 const DMChannel = require('./channel/DMChannel');
 const Base = require('./Base');
 
-module.exports = class User extends Base {
+class User extends Base {
   /**
    * Creates a new [User] instance
    * @param {import('../gateway/WebSocketClient')} client The client
@@ -173,8 +174,7 @@ module.exports = class User extends Base {
         endpoint: '/users/@me/channels',
         method: 'post',
         data: {
-          recipients: [this.id],
-          type: 1
+          recipient_id: this.id // eslint-disable-line camelcase
         }
       });
 
@@ -226,7 +226,10 @@ module.exports = class User extends Base {
   toString() {
     return `[User ${this.tag} (${this.id})]`;
   }
-};
+}
+
+TextableChannel.decorate(User, { full: false });
+module.exports = User;
 
 /**
  * @typedef {object} UserPacket

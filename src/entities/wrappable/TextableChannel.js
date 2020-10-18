@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-const ReactionCollector = require('../utilities/ReactionCollector');
 const MessageCollector = require('../utilities/MessageCollector');
 const EmbedBuilder = require('../utilities/EmbedBuilder');
 const Multipart = require('../../util/Multipart');
@@ -108,9 +107,9 @@ const getContent = (client, content, options) => {
     } else {
       if (Object.hasOwnProperty.call(data, 'content')) throw new TypeError('Property "content" is already populated');
 
-      if (content.hasOwnProperty('content')) data.content = options.content;
-      if (content.hasOwnProperty('embed')) data.embed = resolveEmbed(options.embed);
-      if (content.hasOwnProperty('mentions')) data.allowed_mentions = Util.formatAllowedMentions(client.options.allowedMentions, options.mentions); // eslint-disable-line camelcase
+      if (content.hasOwnProperty('content')) data.content = content.content;
+      if (content.hasOwnProperty('embed')) data.embed = resolveEmbed(content.embed);
+      if (content.hasOwnProperty('mentions')) data.allowed_mentions = Util.formatAllowedMentions(client.options.allowedMentions, content.mentions); // eslint-disable-line camelcase
     }
   } else {
     throw new TypeError('No content, file or embed was passed');
@@ -118,7 +117,6 @@ const getContent = (client, content, options) => {
 
   return {
     data,
-    multipart,
     headers
   };
 };
@@ -140,7 +138,7 @@ const resolveEmbed = (value) => {
  * Use `TextableChannel.decorate/3` to decorate a channel with the functions available
  * @template T The channel generic
  */
-module.exports = class TextableChannel {
+class TextableChannel {
   /**
    * Decorates a class with the needed properties
    * @param {T} klazz The class to decorate
@@ -159,16 +157,14 @@ module.exports = class TextableChannel {
       'bulkDelete',
       'startTyping',
       'stopTyping',
-      'getTypingCount',
+      'getTyping',
       'awaitMessages',
-      'awaitReactions',
-      'createReactionCollector',
       'createMessageCollector'
     );
 
     for (let i = 0; i < props.length; i++) {
       if (ignore.includes(props[i])) continue;
-      Object.defineProperty(klazz.prototype, props[i], Object.getOwnPropertyDescriptor(TextableChannel.prototype, props[i]));
+      Object.defineProperty(klazz.prototype, props[i], Object.getOwnPropertyDescriptor(this.prototype, props[i]));
     }
   }
 
@@ -207,7 +203,162 @@ module.exports = class TextableChannel {
       throw new TypeError(`Expecting \`array\`, but gotten ${typeof messageIDs}`);
     }
   }
-};
+
+  /**
+   * Retrieves x amount of messages from this TextableChannel
+   * @param {number} amount The amount to get
+   * @param {GetMessagesOptions} options The options to use
+   * @returns {Message[]} Returns an Array of messages
+   * that was retrieved or a REST error of anything
+   * occured.
+   */
+  getMessages(amount, options) {
+    if (isNaN(amount)) throw new TypeError(`Amount "${amount}" was not a number`);
+    if (amount < 2 || amount > 100) throw new TypeError('The amount must be lower/equal to 2 or higher/equal to 100');
+
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Channel.messages(this.id),
+      method: 'GET',
+      data: {
+        limit: amount,
+        before: Util.get('before', undefined, options),
+        after: Util.get('after', undefined, options),
+        around: Util.get('around', undefined, options)
+      }
+    })
+      .then(data => data.map(val => new Message(this.client, val)));
+  }
+
+  /**
+   * Starts typing in a channel
+   * @param {number} [count=1] How many times we should call [TextableChannel.startTyping]
+   * @returns {Promise<void>} Returns a promise of nothing
+   */
+  startTyping(count = 1) {
+    if (typeof count !== 'undefined' && count < 1) throw new RangeError('Typing count must be higher than 1');
+    if (!this.client.canCache('typing')) return Promise.reject(new SyntaxError('User typings are not cachable'));
+
+    if (this.client.typings.has(`${this.client.user.id}:${this.id}`)) {
+      const entry = this.client.typings.get(this.id);
+      entry.count = (count || entry.count) + 1;
+      return entry.promise;
+    }
+
+    const entry = {};
+    entry.promise = new Promise(async (resolve, reject) => {
+      const dispatchCall = this.client.rest.dispatch({
+        endpoint: Endpoints.Channel.typing(this.id),
+        method: 'post'
+      });
+
+      Object.assign(entry, {
+        interval: setInterval(async() => {
+          try {
+            await dispatchCall;
+          } catch(ex) {
+            clearInterval(entry.interval);
+            this.client.typings.delete(`${this.client.user.id}:${this.id}`);
+            return reject(ex);
+          }
+        }, 9000),
+        resolve,
+        count
+      });
+
+      try {
+        await dispatchCall;
+        this.client.typings.set(`${this.client.user.id}:${this.id}`, entry);
+      } catch(ex) {
+        clearInterval(entry.interval);
+        this.client.typings.delete(`${this.client.user.id}:${this.id}`);
+        return reject(ex);
+      }
+    });
+
+    return entry.promise;
+  }
+
+  /**
+   * Stops typing in a channel
+   * @param {boolean} [force=true] If we should
+   * force-close the typing indicator
+   * @returns {void} Nothing.
+   */
+  stopTyping(force = true) {
+    if (this.client.typings.has(`${this.client.user.id}:${this.id}`)) {
+      const entry = this.client.typings.get(`${this.client.user.id}:${this.id}`);
+      if (entry.count <= 0 || force) {
+        clearInterval(entry.interval);
+        this.client.typings.delete(`${this.client.user.id}:${this.id}`);
+        return entry.resolve();
+      }
+    }
+  }
+
+  /**
+   * Gets the typing of the bot or a user
+   * @param {string} [userID] The user to get
+   * @returns {import('../../gateway/WebSocketClient').UserTyping} Returns the typing instance
+   */
+  getTyping(userID) {
+    const key = userID ? `${userID}:${this.id}` : `${this.client.user.id}:${this.id}`;
+    return this.client.typings.get(key) || null;
+  }
+
+  /**
+   * Creates a new [MessageCollector] instance
+   */
+  createMessageCollector() {
+    return new MessageCollector(this.client);
+  }
+
+  /**
+   * Awaits a new message passed by the filter
+   * and returns the result if any or an error
+   * on why the collector has failed to succeed.
+   *
+   * @param {import('../utilities/MessageCollector').FilterFunction} filter The filter function
+   * @param {number} [time=60000] The time to resolve this message
+   */
+  awaitMessages(filter, time = 60) {
+    const collector = this.createMessageCollector();
+    if (!this.collector) {
+      /**
+       * The message collector for this [TextableChannel]
+       */
+      this.collector = collector;
+    }
+
+    return this.collector.awaitMessage(filter, {
+      channelID: this.id,
+      time
+    });
+  }
+
+  /**
+   * Sends a message to this [TextableChannel]
+   * @param {string | CreateMessageOptions | import('../..').MessageFile[]} content The content to send
+   * @param {CreateMessageOptions | import('../..').MessageFile[]} [options] The options to use
+   * @returns {Promise<Message>} Returns a new [Message] instance
+   * or a REST error if anything occured
+   */
+  async send(content, options) {
+    if (this instanceof require('../user') || this instanceof require('../GuildMember')) {
+      const channel = await this.getDMChannel();
+      return channel.send(content, options);
+    }
+
+    const { data, headers } = getContent(this.client, content, options);
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Channel.messages(this.id),
+      headers,
+      method: 'POST',
+      data
+    });
+  }
+}
+
+module.exports = TextableChannel;
 
 /**
  * @typedef {object} GetMessagesOptions

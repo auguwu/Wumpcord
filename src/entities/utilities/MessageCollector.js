@@ -29,8 +29,8 @@ module.exports = class MessageCollector {
    */
   constructor(client) {
     /**
-     * The collectors available
-     * @type {Collection<Collector>}
+     * The collectors available per-channel
+     * @type {Collection<Collector[]>}
      */
     this.collectors = new Collection();
 
@@ -42,12 +42,9 @@ module.exports = class MessageCollector {
    * @param {import('../Message')} msg The message
    */
   verify(msg) {
-    // If there is no author, skip
-    if (!msg.author) return;
-
-    const collector = this.collectors.get(`${msg.channel.id}:${msg.author.id}`);
+    const collector = this.collectors.get(msg.channelID);
     if (collector && collector.filter(msg)) {
-      this.collectors.delete(`${msg.channel.id}:${msg.author.id}`);
+      this.collectors.delete(msg.channelID);
       return collector.accept(msg);
     }
   }
@@ -62,16 +59,16 @@ module.exports = class MessageCollector {
   awaitMessage(filter, options) {
     // this is an internal function, we don't need to validate it uwu
     return new Promise((resolve, reject) => {
-      const key = `${options.channelID}:${options.userID}`;
-      if (this.collectors.has(key)) this.collectors.delete(key);
-
       const collector = {
         accept: resolve,
         reject,
         filter
       };
 
-      this.collectors.set(key, collector);
+      const collectors = this.collectors.get(options.channelID) || [];
+      collectors.push(collector);
+
+      this.collectors.set(options.channelID, collectors);
       const time = options.time < 1000 ? options.time * 1000 : options.time;
 
       setTimeout(() => {
@@ -90,7 +87,6 @@ module.exports = class MessageCollector {
  *
  * @typedef {object} CollectorOptions
  * @prop {string} channelID The channel ID
- * @prop {string} userID The user ID
  * @prop {number} time How many [milli]seconds to reject the promise if nothing was found
  *
  * @typedef {(value: import('../Message') | PromiseLike<import('../Message')>) => void} ResolveFunction

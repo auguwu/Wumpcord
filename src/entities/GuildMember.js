@@ -21,13 +21,13 @@
  */
 
 const { Collection } = require('@augu/immutable');
-const User = require('./User');
+const TextableChannel = require('./wrappable/TextableChannel');
 const Base = require('./Base');
 
 /**
  * Represents a Guild member
  */
-module.exports = class GuildMember extends Base {
+class GuildMember extends Base {
   /**
    * Creates a new [GuildMember] instance
    * @param {import('../gateway/WebSocketClient')} client The client
@@ -61,7 +61,7 @@ module.exports = class GuildMember extends Base {
      * The user itself
      * @type {import('./User')}
      */
-    this.user = this.client.canCache('user') ? this.client.users.get(data.user.id) || new (require('./User'))(this.client, data) : null;
+    this.user = this.client.canCache('user') ? this.client.users.get(data.user.id) || new (require('./User'))(this.client, data) : new (require('./User'))(this.client, data);
 
     /**
      * Date when the user has booted
@@ -337,10 +337,19 @@ module.exports = class GuildMember extends Base {
     return this._guild.editMember(this.id, { channelID: channel.id }, reason);
   }
 
+  /**
+   * Gets the DM channel of this [GuildMember]
+   */
+  getDMChannel() {
+    return this.user.getDMChannel();
+  }
+
   toString() {
     return `[GuildMember "${this.user.username}#${this.user.discriminator}" (ID: ${this.id}; G: ${this._guild ? this._guild.name : 'unknown'})]`;
   }
-};
+}
+
+module.exports = GuildMember;
 
 /**
  * @typedef {object} GuildMemberPacket

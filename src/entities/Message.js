@@ -144,7 +144,7 @@ class Message extends Base {
      * List of stickers available
      * @type {Sticker[]}
      */
-    this.stickers = data.stickers.map(data => new Sticker(data));
+    //this.stickers = data.stickers.map(data => new Sticker(data));
 
     if (data.attachments) {
       /**
@@ -319,7 +319,7 @@ class Message extends Base {
 }
 
 // Adds methods from the "Editable" interface
-Editable.apply(Message);
+//Editable.apply(Message);
 module.exports = Message;
 
 /**
