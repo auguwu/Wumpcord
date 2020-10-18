@@ -78,13 +78,13 @@ module.exports = class Presence extends Base {
      * The current game
      * @type {GamePresence}
      */
-    this.current = data.game || null;
+    this.current = data.activities[0] || null;
 
     /**
      * The current user or `null` if not cached
      * @type {import('./User') | null}
      */
-    this.user = this.client.users ? this.client.users.get(data.user.id) : null;
+    this.user = this.client.users ? this.client.users.get(data.user.id) : new (require('./User'))(this.client, data.user);
 
     if (data.activities) {
       if (this.client.canCache('presence:activity')) {
@@ -101,7 +101,6 @@ module.exports = class Presence extends Base {
  * @typedef {object} PresencePacket
  * @prop {PartialUser} user
  * @prop {'online' | 'offline' | 'dnd' | 'away'} status
- * @prop {GamePresence} game
  * @prop {RawClientStatus} client_status
  * @prop {PartialActivity[]} activities
  *
