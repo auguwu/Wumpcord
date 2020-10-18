@@ -428,7 +428,13 @@ module.exports = {
     null,
     'Incoming',
     'Channel Following'
-  ]
+  ],
+
+  StickerType: {
+    0: 'png',
+    1: 'apng',
+    2: 'lottie'
+  }
 };
 
 /**

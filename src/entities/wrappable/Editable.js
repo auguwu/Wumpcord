@@ -20,39 +20,4 @@
  * SOFTWARE.
  */
 
-const PaginationBuilder = require('./entities/utilities/PaginationBuilder');
-const WebhookClient = require('./gateway/WebhookClient');
-const RedisProvider = require('./caching/RedisProvider');
-const EmbedBuilder = require('./entities/utilities/EmbedBuilder');
-const Permissions = require('./util/Permissions');
-const { version } = require('../package.json');
-const Constants = require('./Constants');
-const Provider = require('./caching/Provider');
-const commands = require('./commands');
-const oauth2 = require('./oauth2');
-const Client = require('./gateway/WebSocketClient');
-const Util = require('./util/Util');
-
-/**
- * Entrypoint of Wumpcord
- */
-module.exports = {
-  Constants,
-  Client,
-  version,
-  commands,
-  oauth2,
-  Permissions,
-  Util,
-  WebhookClient,
-  RedisProvider,
-  Provider,
-  EmbedBuilder,
-  PaginationBuilder
-};
-
-/**
- * @typedef {object} MessageFile
- * @prop {Buffer} file The file to send
- * @prop {string} [name] The filename
- */
+module.exports = class Editable {};

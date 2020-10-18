@@ -329,6 +329,27 @@ module.exports = class Utilities {
   }
 
   /**
+   * Checks if the object or an array is a [MessageFile]
+   * @param {Resolvable<unknown>} value The value
+   * @returns {value is MessageFile} Returns a boolean-represented value
+   * that is a [MessageFile] instance
+   */
+  static isMessageFile(value) {
+    if (Array.isArray(value)) return value.some(val => Object.hasOwnProperty.call(val, 'file'));
+    return typeof value === 'object' && this.isMultipart(value.file) || Buffer.isBuffer(value.file);
+  }
+
+  /**
+   * Checks if [value] is a Multipart or a Buffer
+   * @param {unknown} value The value to check
+   * @returns {value is import('./Multipart')} Returns a boolean-represented
+   * value if `value` is a [Multipart] instance
+   */
+  static isMultipart(value) {
+    return value instanceof require('./Multipart');
+  }
+
+  /**
    * Set of lodash functions that are modified to the library's
    * expectations so we don't bundle in a huge library into the
    * project.
@@ -373,6 +394,7 @@ module.exports = class Utilities {
 };
 
 /**
+ * @typedef {import('..').MessageFile} MessageFile
  * @typedef {object} LodashNamespace Namespace for [Utilities.lodash] getter
  * @prop {(str: string) => string[]} unicodeWords Splits a Unicode `string` into an array of its words
  * @prop {(str: string) => string[]} asciiWords Converts `string` to an array of ascii-related characters

@@ -28,6 +28,8 @@ const Guild = require('./Guild');
 const Base = require('./Base');
 const Utilities = require('../util/Util');
 const Constants = require('../Constants');
+const Sticker = require('./Sticker');
+const Editable = require('./wrappable/Editable');
 
 /**
  * Checks if an object is a [MessageFile] instance
@@ -39,7 +41,7 @@ const isMessageFile = (obj) => typeof obj === 'object' && !Array.isArray(obj) &&
 /**
  * Represents a [Discord] message
  */
-module.exports = class Message extends Base {
+class Message extends Base {
   /**
    * Creates a new [Message] instance
    * @param {import('../gateway/WebSocketClient')} client The client
@@ -137,6 +139,12 @@ module.exports = class Message extends Base {
      * @type {Collection<Message>}
      */
     this.edits = new Collection();
+
+    /**
+     * List of stickers available
+     * @type {Sticker[]}
+     */
+    this.stickers = data.stickers.map(data => new Sticker(data));
 
     if (data.attachments) {
       /**
@@ -302,14 +310,17 @@ module.exports = class Message extends Base {
       method: 'patch',
       data: send
     })
-      .then(data => new Message(this.client, data))
-      .catch(() => null);
+      .then(data => new Message(this.client, data));
   }
 
   toString() {
     return `[Message "${this.content}" (${this.id})]`;
   }
-};
+}
+
+// Adds methods from the "Editable" interface
+Editable.apply(Message);
+module.exports = Message;
 
 /**
  * @typedef {object} MessagePacket
@@ -330,6 +341,7 @@ module.exports = class Message extends Base {
  * @prop {AttachmentPacket[]} attachments
  * @prop {string} guild_id
  * @prop {MessageReactionPacket[]} reactions
+ * @prop {StickerPacket[]} stickers
  *
  * @typedef {object} GuildMemberPacket
  * @prop {string[]} roles
@@ -351,4 +363,14 @@ module.exports = class Message extends Base {
  * @prop {number} count
  * @prop {boolean} me
  * @prop {import('./Emoji').EmojiPacket} emoji
+ *
+ * @typedef {object} StickerPacket
+ * @prop {string} id
+ * @prop {string} name
+ * @prop {string} description
+ * @prop {string} pack_id
+ * @prop {string} asset
+ * @prop {string} preview_asset
+ * @prop {number} format_type
+ * @prop {string} tags
  */

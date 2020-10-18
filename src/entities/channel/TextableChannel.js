@@ -273,7 +273,7 @@ module.exports = class TextableChannel extends BaseChannel {
  *
  * @typedef {object} CreateMessageOptions
  * @prop {string} [content] The message content
- * @prop {import('../message/MessageEmbed') | import('../message/MessageEmbed').Embed} [embed] The embed to send
+ * @prop {import('../utilities/EmbedBuilder') | import('../utilities/EmbedBuilder').Embed} [embed] The embed to send
  * @prop {MessageFile} [file] The file to send
  *
  * @typedef {object} MessageFile
