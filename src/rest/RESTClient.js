@@ -26,7 +26,7 @@ const DiscordRESTError = require('./DiscordRestError');
 const DiscordAPIError = require('./DiscordAPIError');
 const { HttpClient } = require('@augu/orchid');
 const { Queue } = require('@augu/immutable');
-const Utilities = require('../util/Util');
+const Util = require('../util/Util');
 
 /**
  * Represents a client for executing calls to Discord's REST API
@@ -103,7 +103,12 @@ module.exports = class RESTClient {
       const bucket = {
         resolve,
         reject,
-        opts
+        opts: {
+          endpoint: opts.endpoint,
+          headers: Util.get('headers', {}, opts),
+          method: opts.method || 'GET',
+          data: Util.get('data', undefined, opts)
+        }
       };
 
       this.cache.add(bucket);

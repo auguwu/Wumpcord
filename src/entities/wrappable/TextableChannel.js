@@ -343,7 +343,7 @@ class TextableChannel {
    * or a REST error if anything occured
    */
   async send(content, options) {
-    if (this instanceof require('../user') || this instanceof require('../GuildMember')) {
+    if (this instanceof require('../user')) {
       const channel = await this.getDMChannel();
       return channel.send(content, options);
     }
@@ -354,7 +354,7 @@ class TextableChannel {
       headers,
       method: 'POST',
       data
-    });
+    }).then(data => new Message(this.client, data));
   }
 }
 

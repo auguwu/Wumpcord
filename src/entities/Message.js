@@ -319,7 +319,7 @@ class Message extends Base {
 }
 
 // Adds methods from the "Editable" interface
-//Editable.apply(Message);
+Editable.decorate(Message);
 module.exports = Message;
 
 /**
