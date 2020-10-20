@@ -75,6 +75,7 @@ const getContent = (client, content, options) => {
       if (options.hasOwnProperty('content')) data.content = options.content;
       if (options.hasOwnProperty('embed')) data.embed = resolveEmbed(options.embed);
       if (options.hasOwnProperty('mentions')) data.allowed_mentions = Util.formatAllowedMentions(client.options.allowedMentions, options.mentions); // eslint-disable-line camelcase
+      if (options.hasOwnProperty('tts')) data.tts = options.tts;
     }
   } else if (typeof content === 'object') {
     // We received a file array, let's parse it
@@ -110,6 +111,7 @@ const getContent = (client, content, options) => {
       if (content.hasOwnProperty('content')) data.content = content.content;
       if (content.hasOwnProperty('embed')) data.embed = resolveEmbed(content.embed);
       if (content.hasOwnProperty('mentions')) data.allowed_mentions = Util.formatAllowedMentions(client.options.allowedMentions, content.mentions); // eslint-disable-line camelcase
+      if (content.hasOwnProperty('tts')) data.tts = content.tts;
     }
   } else {
     throw new TypeError('No content, file or embed was passed');
@@ -370,6 +372,7 @@ module.exports = TextableChannel;
  * @prop {string} [content] The message content
  * @prop {import('../utilities/EmbedBuilder') | import('../utilities/EmbedBuilder').Embed} [embed] The embed to send
  * @prop {MessageFile} [file] The file to send
+ * @prop {boolean} [tts] If we should use Text to Speech
  *
  * @typedef {object} DecorateOptions
  * @prop {string[]} [ignore] The ignored properties

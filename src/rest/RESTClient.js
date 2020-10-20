@@ -154,12 +154,15 @@ module.exports = class RESTClient {
            * @fires restEmpty
            */
           this.client.emit('restBodyEmpty');
+
+          this.lastCall = new Date().getTime();
           return resolve(null);
         }
 
         this.lastCall = new Date().getTime();
-        const data = resp.json();
+        if (resp.statusCode === 204) return resolve();
 
+        const data = resp.json();
         if (resp.statusCode === 429) {
           /**
            * Emitted when the REST client has reached a ratelimited state

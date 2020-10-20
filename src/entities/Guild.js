@@ -1169,8 +1169,27 @@ module.exports = class Guild extends UnavailableGuild {
       endpoint: url,
       method: 'GET'
     })
-      .then((logs) => new AuditLogs(this.client, logs))
-      .catch(() => []);
+      .then((logs) => new AuditLogs(this.client, logs));
+  }
+
+  /**
+   * Fetches a list of emojis from the server
+   * @returns {Promise<Emoji[]>} Returns an Array of emojis to use
+   * and possibly caches them if needed.
+   */
+  getEmojis() {
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.emojis(this.id),
+      method: 'GET'
+    })
+      .then(data => {
+        const all = data.map(emote => new Emoji(this.client, { guild_id: this.id, ...emote }));
+        if (this.client.canCache('emoji')) {
+          for (let i = 0; i < all.length; i++) this.emojis.set(all[i].id, all[i]);
+        }
+
+        return all;
+      });
   }
 
   toString() {

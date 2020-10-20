@@ -446,15 +446,15 @@ module.exports = class WebSocketClient extends EventBus {
 
   /**
    * Restfully gets a message
+   * @param {string} channelID The channel's ID
    * @param {string} messageID The message's ID
    * @returns {Promise<import('../entities/Message') | null>} The message or `null` if not found
    */
-  getMessage(messageID) {
+  getMessage(channelID, messageID) {
     return this.rest.dispatch({
-      endpoint: Endpoints.Channel.message(messageID),
+      endpoint: Endpoints.Channel.message(channelID, messageID),
       method: 'get'
-    }).then((data) => new Message(this, data))
-      .catch(() => null);
+    }).then((data) => new Message(this, data));
   }
 
   /**

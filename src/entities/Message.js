@@ -30,6 +30,9 @@ const Utilities = require('../util/Util');
 const Constants = require('../Constants');
 const Sticker = require('./Sticker');
 const Editable = require('./wrappable/Editable');
+const Emoji = require('./Emoji');
+const Util = require('../util/Util');
+const User = require('./User');
 
 /**
  * Checks if an object is a [MessageFile] instance
@@ -313,6 +316,110 @@ class Message extends Base {
       .then(data => new Message(this.client, data));
   }
 
+  /**
+   * Cross-posts this message to all guilds, if the message's channel is considered a News Channel.
+   * @returns {Promise<Message>} Returns the message that was cross-posted
+   * or a REST error if anything occured
+   */
+  async crosspost() {
+    const channel = this.channel ? this.channel : (await this.getChannel());
+    if (channel.type !== 'news') throw new TypeError('The channel must be a news channel to crosspost this message.');
+
+    return this.client.rest.dispatch({
+      endpoint: `/channels/${this.channelID}/messages/${this.id}/crosspost`,
+      method: 'POST'
+    }).then(data => new this.constructor(this.client, data));
+  }
+
+  /**
+   * Adds a reaction to the message. If the message hasn't been reacted, the bot will require the **Add Reactions**
+   * permission else it'll require the **Read Message History** permission. Warn that `messageReactionAdd`
+   * is emitted when this function is called.
+   *
+   * @param {string | import('./Emoji')} reaction The reaction to add,
+   * if `reaction` is the `Emoji` class, it'll use `Emoji.mention` to parse the emoji
+   * or you'll have to parse it yourself. You can use `Util.parseEmoji('id', 'name', animated)` to
+   * parse it yourself.
+   * @returns {Promise<void>} Returns an empty promise
+   */
+  react(reaction) {
+    let emote;
+    if (reaction instanceof Emoji) emote = reaction.id;
+    else {
+      if (reaction === decodeURI(reaction)) emote = reaction;
+      else emote = reaction;
+    }
+
+    return this.client.rest.dispatch({
+      endpoint: `/channels/${this.channelID}/messages/${this.id}/reactions/${emote}/@me`,
+      method: 'PUT'
+    });
+  }
+
+  /**
+   * Removes a reaction from this message that the bot has made, this method
+   * will call the `messageReactionRemove` if there is more than 1 emote; else it'll
+   * emit the `messageReactionRemoveEmoji`/`messageReactionRemoveAll` event(s).
+   *
+   * @param {string | Emoji} reaction The reaction to use,
+   * this can be an instance of `Emoji` or a string. If you want
+   * to pass in a custom emote, you can use the Emoji instance
+   * or use the `Util.parseEmoji/3` utility function.
+   *
+   * @returns {Promise<void>} Empty promise of nothing.
+   */
+  unreact(reaction) {
+    let emote;
+    if (reaction instanceof Emoji) emote = reaction.id;
+    else {
+      if (reaction === decodeURI(reaction)) emote = reaction;
+    }
+
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Channel.messageReaction(this.channelID, this.id, emote),
+      method: 'DELETE'
+    });
+  }
+
+  /**
+   * Gets all of the reactions in this [Message]
+   * @param {string | Emoji} reaction The reaction to get the users from
+   * @param {GetMessageReactionOptions} [options] The options to use
+   * @returns {Promise<Array<import('./User')>>} Returns an array of users
+   * who have reacted on this message
+   */
+  getReactions(reaction, options) {
+    options = Util.merge(options, { limit: 100 });
+
+    if (typeof options !== 'object' && !Array.isArray(options)) throw new TypeError(`Expected \`object\`, but received ${typeof options}`);
+    if (options.before && typeof options.before !== 'string') throw new TypeError(`Expected \`string\`, but received ${typeof options.before}`);
+    if (options.after && typeof options.after !== 'string') throw new TypeError(`Expected \`string\`, but received ${typeof options.after}`);
+    if (options.limit) {
+      if (typeof options.limit !== 'number') throw new TypeError(`Expected \`number\`, but gotten ${typeof options.limit}`);
+      if (options.limit < 2 || options.limit > 100) throw new RangeError('Limit of reactions must be 2-100.');
+    }
+
+    let emote;
+    if (reaction instanceof Emoji) emote = reaction.id;
+    else {
+      if (reaction === decodeURI(reaction)) emote = reaction;
+    }
+
+    let url = Endpoints.Channel.messageReaction(this.channelID, this.id, emote);
+    const entries = Object.entries(options);
+    for (let i = 0; i < entries.length; i++) {
+      const [key, value] = entries[i];
+      const prefix = i === 0 ? '?' : '&';
+
+      url += `${prefix}${key}=${value}`;
+    }
+
+    return this.client.rest.dispatch({
+      endpoint: url,
+      method: 'GET'
+    }).then(data => data.map(user => new User(this.client, user)));
+  }
+
   toString() {
     return `[Message "${this.content}" (${this.id})]`;
   }
@@ -373,4 +480,9 @@ module.exports = Message;
  * @prop {string} preview_asset
  * @prop {number} format_type
  * @prop {string} tags
+ *
+ * @typedef {object} GetMessageReactionOptions
+ * @prop {string} [before]
+ * @prop {string} [after]
+ * @prop {number} [limit]
  */
