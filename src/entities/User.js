@@ -208,8 +208,7 @@ class User extends Base {
 
         this._dmChannel = null;
         return true;
-      })
-      .catch(() => false);
+      });
   }
 
   /**

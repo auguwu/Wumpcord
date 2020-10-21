@@ -114,8 +114,7 @@ module.exports = class GuildInvite {
       endpoint: `/invites/${this.code}`,
       method: 'DELETE'
     })
-      .then(() => true)
-      .catch(() => false);
+      .then(() => true);
   }
 
   /**
