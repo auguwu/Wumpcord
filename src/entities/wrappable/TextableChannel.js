@@ -161,7 +161,10 @@ class TextableChannel {
       'stopTyping',
       'getTyping',
       'awaitMessages',
-      'createMessageCollector'
+      'createMessageCollector',
+      'getPins',
+      'addPin',
+      'deletePin'
     );
 
     for (let i = 0; i < props.length; i++) {
@@ -357,6 +360,45 @@ class TextableChannel {
       method: 'POST',
       data
     }).then(data => new Message(this.client, data));
+  }
+
+  /**
+   * Fetches the list of pins available
+   * @returns {Promise<Array<Message>>} Returns an array of messages
+   * or a REST error if anything occurs
+   */
+  getPins() {
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Channel.pins(this.id),
+      method: 'GET'
+    }).then(data => data.map(msg => new Message(this.client, msg)));
+  }
+
+  /**
+   * Adds a message to the pinned list
+   * @param {Message} message The message to add
+   * @returns {Promise<void>}
+   */
+  async addPin(message) {
+    const pins = await this.getPins();
+    if (pins.length > 50) throw new RangeError('Reached the maximum amount of pins.');
+
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Channel.pin(this.id, message.id),
+      method: 'PUT'
+    });
+  }
+
+  /**
+   * Deletes a message from the pinned list
+   * @param {Message} message The message to remove
+   * @returns {Promise<void>}
+   */
+  deletePin(message) {
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Channel.pin(this.id, message.id),
+      method: 'DELETE'
+    });
   }
 }
 

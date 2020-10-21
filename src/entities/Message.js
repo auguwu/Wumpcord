@@ -344,10 +344,11 @@ class Message extends Base {
    */
   react(reaction) {
     let emote;
-    if (reaction instanceof Emoji) emote = reaction.id;
+    if (reaction instanceof Emoji) emote = `:${reaction.name}:${reaction.id}`;
     else {
       if (reaction === decodeURI(reaction)) emote = reaction;
-      else emote = reaction;
+      else if (reaction.startsWith(':')) emote = reaction;
+      else throw new TypeError('Emote must be a unicode character or must be like ":name:id"');
     }
 
     return this.client.rest.dispatch({
@@ -370,9 +371,11 @@ class Message extends Base {
    */
   unreact(reaction) {
     let emote;
-    if (reaction instanceof Emoji) emote = reaction.id;
+    if (reaction instanceof Emoji) emote = `:${reaction.name}:${reaction.id}`;
     else {
       if (reaction === decodeURI(reaction)) emote = reaction;
+      else if (reaction.startsWith(':')) emote = reaction;
+      else throw new TypeError('Emote must be a unicode character or must be like ":name:id"');
     }
 
     return this.client.rest.dispatch({
@@ -418,6 +421,58 @@ class Message extends Base {
       endpoint: url,
       method: 'GET'
     }).then(data => data.map(user => new User(this.client, user)));
+  }
+
+  /**
+   * Deletes all of the reactions on this message, this will emit the `messageReactionRemoveAll` event.
+   * The bot would require the **Manage Messages** permission to execute this function.
+   */
+  deleteReactions() {
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Channel.messageReactions(this.channelID, this.id),
+      method: 'DELETE'
+    });
+  }
+
+  /**
+   * Deletes a single reaction, this will emit the `messageReactionRemoveEmoji`/`messageReactionRemove`
+   * event. The bot would require the **Manage Messages** permission.
+   *
+   * @param {string | Emoji} reaction The reaction to remove from
+   */
+  deleteReaction(reaction) {
+    let emote;
+    if (reaction instanceof Emoji) emote = `:${reaction.name}:${reaction.id}`;
+    else {
+      if (reaction === decodeURI(reaction)) emote = reaction;
+      else if (reaction.startsWith(':')) emote = reaction;
+      else throw new TypeError('Emote must be a unicode character or must be like ":name:id"');
+    }
+
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Channel.messageReaction(this.channelID, this.id, emote),
+      method: 'DELETE'
+    });
+  }
+
+  /**
+   * Pins this message to the current channel
+   */
+  async pin() {
+    const channel = this.channel ? this.channel : (await this.getChannel());
+    if (Util.isTextableChannel(channel)) return channel.pin(this);
+
+    throw new TypeError(`Channel "${channel.id}" was not a textable channel`);
+  }
+
+  /**
+   * Un-pins this message to the current channel
+   */
+  async unpin() {
+    const channel = this.channel ? this.channel : (await this.getChannel());
+    if (Util.isTextableChannel(channel)) return channel.unpin(this);
+
+    throw new TypeError(`Channel "${channel.id}" was not a textable channel`);
   }
 
   toString() {

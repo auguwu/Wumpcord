@@ -24,6 +24,7 @@ const { UserFlags, CdnUrl, Endpoints } = require('../Constants');
 const TextableChannel = require('./wrappable/TextableChannel');
 const DMChannel = require('./channel/DMChannel');
 const Base = require('./Base');
+const DynamicImage = require('./wrappable/DynamicImage');
 
 class User extends Base {
   /**
@@ -229,6 +230,7 @@ class User extends Base {
 }
 
 TextableChannel.decorate(User, { full: false });
+DynamicImage.decorate(User, ['avatar']);
 module.exports = User;
 
 /**

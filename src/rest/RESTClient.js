@@ -196,6 +196,10 @@ module.exports = class RESTClient {
              * @fires restUnratelimit
              */
             this.client.emit('restUnratelimit');
+
+            // Execute the request
+            this.cache.addFirst(bucket);
+            this.dispatch(bucket);
           }, Date.now() - (Number(resp.headers['retry-after'])));
 
           return reject(error);

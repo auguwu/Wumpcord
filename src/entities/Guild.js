@@ -38,11 +38,13 @@ const GuildBan = require('./misc/GuildBan');
 const GuildPreview = require('./misc/GuildPreview');
 const { toCamelCase } = require('../util/Util');
 const AuditLogs = require('./misc/AuditLogs');
+const DynamicWrapper = require('./wrappable/DynamicImage');
+const NotImplementedError = require('../exceptions/NotImplementedError');
 
 /**
  * Represents a Discord guild
  */
-module.exports = class Guild extends UnavailableGuild {
+class Guild extends UnavailableGuild {
   /**
    * Creates a new [Guild] instance
    * @param {import('../gateway/WebSocketClient')} client The WebSocket client
@@ -1192,10 +1194,83 @@ module.exports = class Guild extends UnavailableGuild {
       });
   }
 
+  /**
+   * Creates an emoji in the server, this will emit the `guildEmojisUpdate`
+   * event when called successfully.
+   *
+   * @param {CreateEmojiOptions} options The options to use
+   */
+  createEmoji(options) {
+    throw new NotImplementedError('Guild', 'createEmoji');
+  }
+
+  /**
+   * Retrives an emoji from this Guild
+   * @param {string} id The emoji's ID
+   * @returns {Promise<Emoji>} The emoji or an
+   * REST error if anything occurs
+   */
+  getEmoji(id) {
+    return this.client.rest.dispatch({
+      endpoint: `/guilds/${this.id}/emojis/${id}`,
+      method: 'get'
+    }).then(data => new Emoji(this.client, { guild_id: this.id, ...data }));
+  }
+
+  /**
+   * Modifies an emoji from this Guild, when this
+   * function is called successfully, the `guildEmojisUpdate`
+   * event will emit.
+   *
+   * @param {ModifyEmojiOptions} options The options to use
+   * to modify the emoji.
+   * @returns {Promise<Emoji>} Returns the newly updated
+   * emoji and possibly caches it.
+   */
+  modifyEmoji(options) {
+    if (!options) throw new TypeError('Missing `options` object');
+    if (typeof options !== 'object' && !Array.isArray(options)) throw new TypeError(`Expecting \`object\`, but received ${typeof options === 'object' ? 'array' : options}`);
+    if (!options.id) throw new TypeError('Missing the emoji\'s ID. (https://docs.augu.dev/wumpcord/types#modify-emoji)');
+    if (Object.keys(options).length === 0) throw new TypeError('No keys were provided to modify an emoji.');
+    if (typeof options.id !== 'string') throw new TypeError(`Expected \`string\`, but gotten ${typeof options.id}`);
+    if (options.name && typeof options.name !== 'string') throw new TypeError(`Expected \`string\`, but received ${typeof options.name}`);
+    if (options.roles && !Array.isArray(options.roles)) throw new TypeError(`Expected \`array\`, but received ${typeof options.roles}`);
+
+    return this.client.rest.dispatch({
+      endpoint: `/guilds/${this.id}/emojis/${options.id}`,
+      method: 'PATCH',
+      data: {
+        roles: options.roles,
+        name: options.name
+      }
+    }).then(data => {
+      const emoji = new Emoji(this.client, { guild_id: this.id, ...data });
+      if (this.client.canCache('emoji')) this.emojis.set(emoji.id, emoji);
+
+      return emoji;
+    });
+  }
+
+  /**
+   * Deletes an emoji from the [Guild], when this
+   * function is called successfully, the `guildEmojisUpdate`
+   * event will emit.
+   * @param {string} id The emoji's ID
+   */
+  deleteEmoji(id) {
+    return this.client.rest.dispatch({
+      endpoint: `/guilds/${this.id}/emojis/${id}`,
+      method: 'DELETE'
+    }).then(() => {});
+  }
+
   toString() {
     return `[Guild "${this.name}" (${this.id})]`;
   }
-};
+}
+
+DynamicWrapper.decorate(Guild, ['icon', 'banner', 'splash']);
+module.exports = Guild;
 
 /**
  * @typedef {object} FetchGuildMembersOptions
@@ -1262,4 +1337,14 @@ module.exports = class Guild extends UnavailableGuild {
  * @prop {number} [limit]
  * @prop {string} [before]
  * @prop {number | string} [actionType]
+ *
+ * @typedef {object} CreateEmojiOptions
+ * @prop {string[]} roles
+ * @prop {any} image
+ * @prop {string} name
+ *
+ * @typedef {object} ModifyEmojiOptions
+ * @prop {string[]} [roles]
+ * @prop {string} [name]
+ * @prop {string} id
  */
