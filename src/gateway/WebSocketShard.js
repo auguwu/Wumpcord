@@ -313,9 +313,6 @@ module.exports = class WebSocketShard extends EventBus {
     this.debug('New session has been established');
     this.emit('establish', this.id);
 
-    this.resolver();
-    this.resolver = undefined;
-
     if (this._reconnectTimeout) clearTimeout(this._reconnectTimeout);
   }
 
@@ -589,6 +586,9 @@ module.exports = class WebSocketShard extends EventBus {
 
       this.status = Constants.ShardStatus.Connected;
       this.emit('ready', this.id, this.unavailableGuilds);
+
+      this.resolver();
+      this.resolver = undefined;
 
       this.client.ready = true;
       this.client.emit('ready');
