@@ -268,7 +268,7 @@ module.exports = {
     InviteDelete:           42,
     WebhookCreate:          50,
     WebhookUpdate:          51,
-    WebhooKDelete:          52,
+    WebhookDelete:          52,
     EmojiCreate:            60,
     EmojiUpdate:            61,
     EmojiDelete:            62,
@@ -326,7 +326,7 @@ module.exports = {
     Bravery:         1 << 6,
     Brilliance:      1 << 7,
     Balance:         1 << 8, // the best dont @ me
-    EarlySupported:  1 << 9,
+    EarlySupporter:  1 << 9,
     TeamUser:        1 << 10,
     System:          1 << 12,
     BugHunterLevel2: 1 << 14,
@@ -420,7 +420,8 @@ module.exports = {
     0: 'Playing',
     1: 'Streaming',
     2: 'Listening To',
-    3: 'Watching'
+    4: 'Custom Status',
+    5: 'Competing In'
   },
 
   WebhookTypes: [

@@ -24,6 +24,77 @@ declare module 'wumpcord' {
     type ImageFormats = 'jpg' | 'png' | 'webp' | 'jpeg' | 'gif';
 
     /**
+     * Available events for the WebSocket client
+     */
+    interface WebSocketClientEvents {
+      channelCreate(channel: Wumpcord.Entities.BaseChannel): void;
+      channelDelete(channel: Wumpcord.Entities.BaseChannel): void;
+      channelUpdate(old: Wumpcord.Entities.BaseChannel | null, channel?: Wumpcord.Entities.BaseChannel): void;
+      debug(message: string): void;
+    }
+
+    /**
+     * Represents a class to emit events from a class
+     */
+    export class EventBus<T extends object> {
+      /** List of listeners available to this current [EventBus] */
+      private listeners: { [x: string]: keyof T };
+
+      /**
+       * Emits a new event
+       * @param event The event to emit
+       * @param args Additional arguments to pass in
+       * @returns Boolean-represented value if the event was emitted or not
+       */
+      public emit<K extends keyof T>(event: K, ...args: any[]): boolean;
+
+      /**
+       * Pushes a listener callback to the listeners stack
+       * @param event The event to receive events from
+       * @param listener The listener to run when we run [EventBus.emit]
+       * @returns This [EventBus] to chain methods
+       */
+      public on<K extends keyof T>(event: K, listener: T[K]): this;
+
+      /**
+       * Pushes a listener callback that is only called once and is
+       * removed from the callstack when emitted
+       * 
+       * @param event The event to receive events from
+       * @param listener The listener to run when we run [EventBus.emit]
+       * @returns This [EventBus] instance to chain methods
+       */
+      public once<K extends keyof T>(event: K, listener: T[K]): this;
+
+      /**
+       * Removes a listener callback from the listeners stack
+       * @param event The event to remove the listener from
+       * @param listener The actual listener to remove it from
+       * @returns A boolean-represented value if we removed it or not
+       */
+      public remove<K extends keyof T>(event: K, listener: T[K]): boolean;
+
+      /**
+       * Returns the length of listeners of a specific event
+       * @param event The event
+       * @returns A number of the listeners available of the specific event in this [EventBus] instance
+       */
+      public size<K extends keyof T>(event: K): number;
+
+      /**
+       * Returns the length of all listeners available
+       * @returns A number of the listeners available to this [EventBus] instance
+       */
+      public size(): number;
+
+      /**
+       * Removes all of the listeners in this [EventBus] instance
+       * @returns This instance to chain methods
+       */
+      public removeAllListeners(): this;
+    }
+
+    /**
      * The commands API allows you to create a bot without creating any external command handler.
      * ```js
      * const { commands } = require('wumpcord'); // CommonJS
@@ -115,7 +186,17 @@ declare module 'wumpcord' {
        * The endpoints available
        */
       export namespace Endpoints {
+        export function channel(channelID: string): string;
+        export function webhook(id: string): string;
+        export function invite(id: string): string;
+        export function guild(id: string, withCounts?: boolean): string;
+        export function user(id: string): string;
+        export const voiceRegions: string;
+        export const gatewayBot: string;
+        export const channels: string;
         export const Channel: Endpoints.ChannelObject;
+        export const gateway: string;
+        export const users: string;
         export const Guild: Endpoints.GuildObject;
         export const User: Endpoints.UserObject;
         export const CDN: Endpoints.CDNObject;
@@ -142,327 +223,146 @@ declare module 'wumpcord' {
 
         interface GuildObject {
           auditLogs(guildID: string): string;
+          ban(guildID: string, memberID: string): string;
+          bans(guildID: string): string;
+          channels(guildID: string): string;
+          emoji(guildID: string, emojiID: string): string;
+          emojis(guildID): string;
+          integration(guildID: string, integrationID: string): string;
+          integrations(guildID: string): string;
+          invites(guildID: string): string;
+          vanityUrl(guildID: string): string;
+          member(guildID: string, memberID: string): string;
+          memberNick(guildID: string, memberID: string): string;
+          memberRole(guildID: string, memberID: string, roleID: string): string;
+          members(guildID: string): string;
+          membersSearch(guildID: string): string;
+          messagesSearch(guildID: string): string;
+          preview(guildID: string): string;
+          prune(guildID: string): string;
+          role(guildID: string, roleID: string): string;
+          roles(guildID: string): string;
+          voiceRegions(guildID: string): string;
+          webhooks(guildID: string): string;
+          widget(guildID: string): string;
+        }
+
+        interface UserObject {
+          channels(userID: string): string;
+          connections(userID: string): string;
+          connection(userID: string, platform: string, id: string): string;
+          guild(userID: string, guildID: string): string;
+          guilds(userID: string): string;
+          note(userID: string, targetID: string): string;
+          profile(userID: string): string;
+          relationship(userID: string, relID: string): string;
+          settings(userID: string): string;
+        }
+
+        interface CDNObject {
+          getChannelIcon(id: string, icon: string): string;
+          getCustomEmoji(id: string): string;
+          getDefaultAvatar(discrim: number): string;
+          getGuildBanner(id: string, banner: string): string;
+          getGuildIcon(id: string, icon: string): string;
+          getGuildSplash(id: string, splash: string): string;
+          getUserAvatar(id: string, avatar: string): string;
         }
       }
+
+      type KeyedPermissions = 'createInstantInvite' | 'kickMembers' | 'banMembers'
+        | 'administrator' | 'manageChannels' | 'manageGuild' | 'addReactions'
+        | 'viewAuditLogs' | 'voicePrioritySpeaker' | 'stream' | 'readMessages'
+        | 'sendMessages' | 'sendTTSMessages' | 'manageMessages' | 'embedLinks'
+        | 'attachFiles' | 'readMessageHistory' | 'mentionEveryone' | 'externalEmojis'
+        | 'viewGuildInsights' | 'voiceConnect' | 'voiceSpeak' | 'voiceMuteMembers'
+        | 'voiceDeafenMembers' | 'voiceMoveMembers' | 'voiceUseVAD' | 'changeNickname'
+        | 'manageNicknames' | 'manageRoles' | 'manageWebhooks' | 'manageEmojis'
+        | 'all' | 'allGuild' | 'allText' | 'allVoice';
+
+      type KeyedOPCodes = 'Event' | 'Heartbeat' | 'Identify' | 'StatusUpdate' | 'VoiceServerUpdate'
+        | 'VoiceServerPing' | 'Resume' | 'Reconnect' | 'GetGuildMembers' | 'InvalidSession'
+        | 'Hello' | 'HeartbeatAck' | 'SyncGuild' | 'SyncCall';
+
+      type KeyedMessageTypes = 'Delete' | 'RecipientAdd' | 'RecipientRemove'
+        | 'Call' | 'ChannelNameChange' | 'ChannelIconChange' | 'ChannelPinnedMessage'
+        | 'GuildMemberJoin' | 'UserPremiumGuildSubscription' | 'UserPremiumGuildScriptionTier1'
+        | 'UserPremiumGuildScriptionTier2' | 'UserPremiumGuildScriptionTier3' | 'ChannelFollowAdd'
+        | 'GuildDiscoveryDisqualified' | 'GuildDiscoveryRequalified';
+
+      type KeyedAuditLogActions = 'GuildUpdate' | 'ChannelCreate' | 'ChannelUpdate'
+        | 'ChannelDelete' | 'ChannelOverwriteCreate' | 'ChannelOverwriteUpdate'
+        | 'ChannelOverwriteDelete' | 'MemberKick' | 'MemberPrune' | 'MemberBanAdd'
+        | 'MemberBanRemove' | 'MemberUpdate' | 'MemberRoleUpdate' | 'MemberMove'
+        | 'MemberDisconnect' | 'BotAdd' | 'RoleCreate' | 'RoleUpdate' | 'RoleDelete'
+        | 'InviteCreate' | 'InviteDelete' | 'InviteUpdate' | 'WebhookCreate' | 'WebhookUpdate'
+        | 'WebhookDelete' | 'EmojiCreate' | 'EmojiUpdate' | 'EmojiDelete' | 'MessageDelete'
+        | 'MessageBulkDelete' | 'MessagePin' | 'MessageUnpin' | 'IntegrationCreate'
+        | 'IntegrationUpdate' | 'IntegrationDelete';
+
+      type KeyedUserFlags = 'None' | 'Staff' | 'Partner' | 'HypesquadEvents'
+        | 'BugHunterLevel1' | 'Bravery' | 'Brillance' | 'Balance' // balance is the best uwu
+        | 'EarlySupporter' | 'TeamUser' | 'System' | 'BugHunterLevel2'
+        | 'VerifiedBot' | 'VerifiedBotDev';
+
+      type KeyedGatewayIntents = 'guilds' | 'guildMembers' | 'guildBans' | 'guildEmojis'
+        | 'guildIntegrations' | 'guildWebhooks' | 'guildInvites' | 'guildVoiceStates'
+        | 'guildPresences' | 'guildMessages' | 'guildMessageReactions' | 'guildMessageTyping'
+        | 'directMessages' | 'directMessageReactions' | 'directMessageTyping';
+
+      type KeyedGatewayEvents = 'Ready' | 'Resumed' | 'ChannelCreate' | 'ChannelUpdate'
+        | 'ChannelDelete' | 'ChannelPinUpdate' | 'GuildCreate' | 'GuildUpdate' | 'GuildDelete'
+        | 'GuildBanAdd' | 'GuildBanRemove' | 'GuildEmojisUpdate' | 'GuildIntegrationUpdate'
+        | 'GuildMemberAdd' | 'GuildMemberDelete' | 'GuildMemberUpdate' | 'GuildMemberChunk'
+        | 'GuildRoleDelete' | 'GuildRoleCreate' | 'GuildRoleUpdate' | 'MessageCreated'
+        | 'MessageUpdate' | 'MessageDelete' | 'MessageDeleteBulk' | 'MessageReactionAdd'
+        | 'MessageReactionRemove' | 'MessageReactionRemoveAll' | 'messageReactionRemoveEmoji'
+        | 'TypingStart' | 'UserUpdate' | 'VoiceStateUpdate' | 'VoiceServerUpdate'
+        | 'WebhookUpdate' | 'PresenceUpdate' | 'GiftCodeUpdate';
+
+      type KeyedActivityFlags = 'Instance' | 'Join' | 'Spectate' | 'JoinRequest' | 'Sync' | 'Play';
+      type KeyedShardStatus = 'Connected' | 'Connecting' | 'Zombie' | 'Nearly' | 'Disposed' | 'Dead' | 'WaitingForGuilds';
+
+      export type AuditLogActions = { [x in KeyedAuditLogActions]: number };
+      export type GatewayIntents = { [x in KeyedGatewayIntents]: number };
+      export type ActivityFlags = { [x in KeyedActivityFlags]: number };
+      export type GatewayEvents = { [x in KeyedGatewayEvents]: string };
+      export type MessageTypes = { [x in KeyedMessageTypes]: number };
+      export type WebhookTypes = [first: null, ...rest: string[]];
+      export type ShardStatus = { [x in KeyedShardStatus]: number };
+      export type Permissions = { [x in Wumpcord.Constants.KeyedPermissions]: number };
+      export type UserFlags = { [x in KeyedUserFlags]: number };
+      export type OPCodes = { [x in Wumpcord.Constants.KeyedOPCodes]: number; };
+
+      export type MessageFlags = {
+        [x in 'Crossposted' | 'IsCrosspost' | 'SupressEmbeds' | 'SourceMessageDeleted' | 'Urgent']: number;
+      };
+
+      export type ChannelTypes = {
+        [x in 0 | 1 | 2 | 3 | 5 | 6]: string;
+      };
+
+      export type ActivityStatus = {
+        [x in 'Playing' | 'Streaming' | 'Listening' | 'Custom' | 'Competing']: number;
+      };
+
+      export type GuildBoostTier = {
+        [x in 0 | 1 | 2 | 3]: string;
+      };
+
+      export type ActivityTypes = {
+        [x in 0 | 1 | 2 | 4 | 5]: string;
+      }
+
+      export type StickerType = {
+        [x in 0 | 1 | 2]: string;
+      };
+    }
+
+    export class Client extends EventBus<WebSocketClientEvents> {
+
     }
   }
 
   export = Wumpcord;
 }
-
-// this is for typings and aaaaaaaaaaaaaaaa
-/*
-  Endpoints: {
-    Guild: {
-      auditLogs: (guildID)                    => `/guilds/${guildID}/audit-logs`,
-      ban: (guildID, memberID)                => `/guilds/${guildID}/bans/${memberID}`,
-      bans: (guildID)                         => `/guilds/${guildID}/bans`,
-      channels: (guildID)                     => `/guilds/${guildID}/channels`,
-      emoji: (guildID, emojiID)               => `/guilds/${guildID}/emojis/${emojiID}`,
-      emojis: (guildID)                       => `/guilds/${guildID}/emojis`,
-      integration: (guildID, integrationID)   => `/guilds/${guildID}/integrations/${integrationID}`,
-      integrations: (guildID)                 => `/guilds/${guildID}/integrations`,
-      invites: (guildID)                      => `/guilds/${guildID}/invites`,
-      vanityUrl: (guildID)                    => `/guilds/${guildID}/vanity-url`,
-      member: (guildID, memberID)             => `/guilds/${guildID}/members/${memberID}`,
-      memberNick: (guildID, memberID)         => `/guilds/${guildID}/members/${memberID}/nick`,
-      memberRole: (guildID, memberID, roleID) => `/guilds/${guildID}/members/${memberID}/${roleID}`,
-      members: (guildID)                      => `/guilds/${guildID}/members`,
-      membersSearch: (guildID)                => `/guilds/${guildID}/members/search`,
-      messagesSearch: (guildID)               => `/guilds/${guildID}/messages/search`,
-      preview: (guildID)                      => `/guilds/${guildID}/preview`,
-      prune: (guildID)                        => `/guilds/${guildID}/prune`,
-      role: (guildID, roleID)                 => `/guilds/${guildID}/roles/${roleID}`,
-      roles: (guildID)                        => `/guilds/${guildID}/roles`,
-      voiceRegions: (guildID)                 => `/guilds/${guildID}/regions`,
-      webhooks: (guildID)                     => `/guilds/${guildID}/webhooks`,
-      widget: (guildID)                       => `/guilds/${guildID}/widget`
-    },
-    User: {
-      channels: (userID)                 => `/users/${userID}/channels`,
-      connections: (userID)              => `/users/${userID}/connections`,
-      connection: (userID, platform, id) => `/users/${userID}/${platform}/${id}`,
-      guild: (userID, guildID)           => `/users/${userID}/guilds/${guildID}`,
-      guilds: (userID)                   => `/users/${userID}/guilds`,
-      note: (userID, targetID)           => `/users/${userID}/note/${targetID}`,
-      profile: (userID)                  => `/users/${userID}/profile`,
-      relationship: (userID, relID)      => `/users/${userID}/relationships/${relID}`,
-      settings: (userID)                 => `/users/${userID}/settings`
-    },
-    CDN: {
-      getChannelIcon: (id, icon)   => `/channel-icons/${id}/${icon}`,
-      getCustomEmoji: (id)         => `/emojis/${id}`,
-      getDefaultAvatar: (discrim)  => `/embed/avatars/${discrim}`,
-      getGuildBanner: (id, banner) => `/banners/${id}/${banner}`,
-      getGuildIcon: (id, icon)     => `/icons/${id}/${icon}`,
-      getGuildSplash: (id, splash) => `/splashes/${id}/${splash}`,
-      getUserAvatar: (id, avatar)  => `/avatars/${id}/${avatar}`
-    },
-    voiceRegions:                    '/voice/regions',
-    gateway:                         '/gateway',
-    gatewayBot:                      '/gateway/bot',
-    channels:                        '/channels',
-    channel: (channelID)             => `/channels/${channelID}`,
-    webhook: (id)                    => `/webhooks/${id}`,
-    invite: (id)                     => `/invite/${id}`,
-    guild: (id, withCounts)          => `/guilds/${id}?with_counts=${withCounts ? 'true' : 'false'}`,
-    users:                           '/users',
-    user: (id)                       => `/users/${id}`
-  },
-
-  ActivityStatus: {
-    Playing: 0,
-    Streaming: 1,
-    Listening: 2,
-    Custom: 4,
-    Competing: 5
-  },
-
-  OPCodes: {
-    Event: 0,
-    Heartbeat: 1,
-    Identify: 2,
-    StatusUpdate: 3,
-    VoiceServerUpdate: 4,
-    VoiceServerPing: 5,
-    Resume: 6,
-    Reconnect: 7,
-    GetGuildMembers: 8,
-    InvalidSession: 9,
-    Hello: 10,
-    HeartbeatAck: 11,
-    SyncGuild: 12,
-    SyncCall: 13
-  },
-
-  Permissions: {
-    createInstantInvite : 1,
-    kickMembers         : 1 << 1,
-    banMembers          : 1 << 2,
-    administrator       : 1 << 3,
-    manageChannels      : 1 << 4,
-    manageGuild         : 1 << 5,
-    addReactions        : 1 << 6,
-    viewAuditLogs       : 1 << 7,
-    voicePrioritySpeaker: 1 << 8,
-    stream              : 1 << 9,
-    readMessages        : 1 << 10,
-    sendMessages        : 1 << 11,
-    sendTTSMessages     : 1 << 12,
-    manageMessages      : 1 << 13,
-    embedLinks          : 1 << 14,
-    attachFiles         : 1 << 15,
-    readMessageHistory  : 1 << 16,
-    mentionEveryone     : 1 << 17,
-    externalEmojis      : 1 << 18,
-    viewGuildInsights   : 1 << 19,
-    voiceConnect        : 1 << 20,
-    voiceSpeak          : 1 << 21,
-    voiceMuteMembers    : 1 << 22,
-    voiceDeafenMembers  : 1 << 23,
-    voiceMoveMembers    : 1 << 24,
-    voiceUseVAD         : 1 << 25,
-    changeNickname      : 1 << 26,
-    manageNicknames     : 1 << 27,
-    manageRoles         : 1 << 28,
-    manageWebhooks      : 1 << 29,
-    manageEmojis        : 1 << 30,
-    all                 : 0b1111111111111111111111111111111,
-    allGuild            : 0b1111100000010000000000010111111,
-    allText             : 0b0110000000001111111110001010001,
-    allVoice            : 0b0110011111100000000001100010001
-  },
-
-  AuditLogActions: {
-    GuildUpdate:            1,
-    ChannelCreate:          10,
-    ChannelUpdate:          11,
-    ChannelDelete:          12,
-    ChannelOverwriteCreate: 13,
-    ChannelOverwriteUpdate: 14,
-    ChannelOverwriteDelete: 15,
-    MemberKick:             20,
-    MemberPrune:            21,
-    MemberBanAdd:           22,
-    MemberBanRemove:        23,
-    MemberUpdate:           24,
-    MemberRoleUpdate:       25,
-    MemberMove:             26,
-    MemberDisconnect:       27,
-    BotAdd:                 28,
-    RoleCreate:             30,
-    RoleUpdate:             31,
-    RoleDelete:             32,
-    InviteCreate:           40,
-    InviteUpdate:           41,
-    InviteDelete:           42,
-    WebhookCreate:          50,
-    WebhookUpdate:          51,
-    WebhooKDelete:          52,
-    EmojiCreate:            60,
-    EmojiUpdate:            61,
-    EmojiDelete:            62,
-    MessageDelete:          72,
-    MessageBulkDelete:      73,
-    MessagePin:             74,
-    MessageUnpin:           75,
-    IntegrationCreate:      80,
-    IntegrationUpdate:      81,
-    IntegrationDelete:      82
-  },
-
-  MessageFlags: {
-    Crossposted:          1 << 0,
-    IsCrosspost:          1 << 1,
-    SupressEmbeds:        1 << 2,
-    SourceMessageDeleted: 1 << 3,
-    Urgent:               1 << 4
-  },
-
-  MessageTypes: {
-    Default:                           0,
-    RecipientAdd:                      1,
-    RecipientRemove:                   2,
-    Call:                              3,
-    ChannelNameChange:                 4,
-    ChannelIconChange:                 5,
-    ChannelPinnedMessage:              6,
-    GuildMemberJoin:                   7,
-    UserPremiumGuildSubscription:      8,
-    UserPremiumGuildSubscriptionTier1: 9,
-    UserPremiumGuildSubscriptionTier2: 10,
-    UserPremiumGuildSubscriptionTier3: 11,
-    ChannelFollowAdd:                  12,
-    GuildDiscoveryDisqualified:        15,
-    GuildDiscoveryRequalified:         16
-  },
-
-  ChannelTypes: {
-    0: 'text',
-    1: 'dm',
-    2: 'voice',
-    3: 'group',
-    4: 'category',
-    5: 'news',
-    6: 'store'
-  },
-
-  UserFlags: {
-    None:            0,
-    Staff:           1 << 0,
-    Partner:         1 << 1,
-    HypesquadEvents: 1 << 2,
-    BugHunterLevel1: 1 << 3,
-    Bravery:         1 << 6,
-    Brilliance:      1 << 7,
-    Balance:         1 << 8, // the best dont @ me
-    EarlySupported:  1 << 9,
-    TeamUser:        1 << 10,
-    System:          1 << 12,
-    BugHunterLevel2: 1 << 14,
-    VerifiedBot:     1 << 16,
-    VerifiedBotDev:  1 << 17
-  },
-
-  GatewayIntents: {
-    guilds:                 1 << 0,
-    guildMembers:           1 << 1,
-    guildBans:              1 << 2,
-    guildEmojis:            1 << 3,
-    guildIntegrations:      1 << 4,
-    guildWebhooks:          1 << 5,
-    guildInvites:           1 << 6,
-    guildVoiceStates:       1 << 7,
-    guildPresences:         1 << 8,
-    guildMessages:          1 << 9,
-    guildMessageReactions:  1 << 10,
-    guildMessageTyping:     1 << 11,
-    directMessages:         1 << 12,
-    directMessageReactions: 1 << 13,
-    directMessageTyping:    1 << 14
-  },
-
-  GatewayEvents: {
-    Ready:                      'READY',
-    Resumed:                    'RESUMED',
-    ChannelCreate:              'CHANNEL_CREATE',
-    ChannelUpdate:              'CHANNEL_UPDATE',
-    ChannelDelete:              'CHANNEL_DELETE',
-    ChannelPinUpdate:           'CHANNEL_PINS_UPDATE',
-    GuildCreate:                'GUILD_CREATE',
-    GuildUpdate:                'GUILD_UPDATE',
-    GuildDelete:                'GUILD_DELETE',
-    GuildBanAdd:                'GUILD_BAN_ADD',
-    GuildBanRemove:             'GUILD_BAN_REMOVE',
-    GuildEmojisUpdate:          'GUILD_EMOJIS_UPDATE',
-    GuildIntegrationUpdate:     'GUILD_INTEGRATIONS_UPDATE',
-    GuildMemberAdd:             'GUILD_MEMBER_ADD',
-    GuildMemberDelete:          'GUILD_MEMBER_REMOVE',
-    GuildMemberUpdate:          'GUILD_MEMBER_UPDATE',
-    GuildMemberChunk:           'GUILD_MEMBERS_CHUNK',
-    GuildRoleCreate:            'GUILD_ROLE_CREATE',
-    GuildRoleDelete:            'GUILD_ROLE_DELETE',
-    GuildRoleUpdate:            'GUILD_ROLE_UPDATE',
-    MessageCreated:             'MESSAGE_CREATE',
-    MessageUpdate:              'MESSAGE_UPDATE',
-    MessageDelete:              'MESSAGE_DELETE',
-    MessageDeleteBulk:          'MESSAGE_DELETE_BULK',
-    MessageReactionAdd:         'MESSAGE_REACTION_ADD',
-    MessageReactionRemove:      'MESSAGE_REACTION_REMOVE',
-    MessageReactionRemoveAll:   'MESSAGE_REACTION_REMOVE_ALL',
-    MessageReactionRemoveEmoji: 'MESSAGE_REACTION_REMOVE_EMOJI',
-    TypingStart:                'TYPING_START', // why does this exist
-    UserUpdate:                 'USER_UPDATE',
-    VoiceStateUpdate:           'VOICE_STATE_UPDATE',
-    VoiceServerUpdate:          'VOICE_SERVER_UPDATE',
-    WebhookUpdate:              'WEBHOOKS_UPDATE',
-    PresenceUpdate:             'PRESENCE_UPDATE',
-    GiftCodeUpdate:             'GIFT_CODE_UPDATE'
-  },
-
-  ActivityFlags: {
-    Instance:    1 << 0,
-    Join:        1 << 1,
-    Spectate:    1 << 2,
-    JoinRequest: 1 << 3,
-    Sync:        1 << 4,
-    Play:        1 << 5
-  },
-
-  GuildBoostTier: {
-    0: 'None',
-    1: 'Tier1',
-    2: 'Tier2',
-    3: 'Tier3'
-  },
-
-  ShardStatus: {
-    Connected:        0,
-    Connecting:       1,
-    Zombie:           2,
-    Nearly:           3,
-    Disposed:         4,
-    Dead:             5,
-    WaitingForGuilds: 6
-  },
-
-  ActivityTypes: {
-    0: 'Playing',
-    1: 'Streaming',
-    2: 'Listening To',
-    3: 'Watching'
-  },
-
-  WebhookTypes: [
-    // they index at 1 for some reason lol
-    null,
-    'Incoming',
-    'Channel Following'
-  ],
-
-  StickerType: {
-    0: 'png',
-    1: 'apng',
-    2: 'lottie'
-  }
-*/

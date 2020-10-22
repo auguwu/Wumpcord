@@ -398,8 +398,7 @@ module.exports = class WebSocketClient extends EventBus {
 
         this.insert('guild', guild);
         return guild;
-      })
-      .catch(() => null);
+      });
   }
 
   /**
@@ -417,8 +416,7 @@ module.exports = class WebSocketClient extends EventBus {
 
         this.insert('channel', channel);
         return channel;
-      })
-      .catch(() => null);
+      });
   }
 
   /**
@@ -440,8 +438,7 @@ module.exports = class WebSocketClient extends EventBus {
         }
 
         return member;
-      })
-      .catch(() => null);
+      });
   }
 
   /**
@@ -504,12 +501,11 @@ module.exports = class WebSocketClient extends EventBus {
 
   /**
    * Returns the OAuth2 application of this [WebSocketClient] or a user's OAuth2 application
-   * @param {string} [userID='@me'] The application to get
    * @returns {Promise<Application>} The application details
    */
-  getApplication(userID = '@me') {
+  getApplication() {
     return this.rest.dispatch({
-      endpoint: `/oauth2/applications/${userID}`,
+      endpoint: '/oauth2/applications/@me',
       method: 'GET'
     }).then((data) => new Application(this, data));
   }
