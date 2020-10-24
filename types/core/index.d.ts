@@ -46,7 +46,7 @@ type ImageFormats = 'jpg' | 'png' | 'webp' | 'jpeg' | 'gif';
  * The permissions object, used for `Permissions.toJSON`
  */
 type PermissionObject = {
-  [x in Constants.KeyedPermissions]: boolean;
+  [x in Constants.KeyedPermissions]?: boolean;
 };
 
 /**
