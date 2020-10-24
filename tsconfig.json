@@ -1,0 +1,14 @@
+{
+  "include": ["types/**/*.d.ts"],
+  "exclude": ["node_modules", "src"],
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "CommonJS",
+    "lib": ["ES2015", "ES2016", "ES2017", "ES2018", "ES2019", "ES2020", "ESNext"],
+    "strict": true,
+    "noImplicitAny": false,
+    "moduleResolution": "node",
+    "declaration": false,
+    "types": ["node"]
+  }
+}

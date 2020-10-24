@@ -359,6 +359,29 @@ declare module 'wumpcord' {
       };
     }
 
+    /**
+     * List of entities available for easy accessibility for interacting
+     * with Discord's Rest API
+     */
+    namespace Entities {
+      /**
+       * Represents a base class of a Presence activity
+       */
+      class Activity {
+        constructor(data: discord.ActivityPacket);
+
+        /**
+         * The type of activity the user is doing
+         */
+        public type: string;
+
+        /**
+         * The activity name
+         */
+        public name: string;
+      }
+    }
+
     export class Client extends EventBus<WebSocketClientEvents> {
 
     }
