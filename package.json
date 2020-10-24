@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@augu/immutable": "0.5.0",
-    "@augu/orchid": "1.7.0",
+    "@augu/orchid": "1.8.0",
     "ws": "7.3.1"
   },
   "devDependencies": {
