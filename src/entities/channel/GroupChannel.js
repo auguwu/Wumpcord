@@ -60,6 +60,7 @@ class GroupChannel extends BaseChannel {
         const user = new (require('../User'))(this.client, recipient);
 
         if (client.canCache('user')) this.recipients.set(user.id, user);
+        this.client.insert('user', user);
       }
     }
   }

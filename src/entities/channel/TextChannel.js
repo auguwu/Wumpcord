@@ -39,9 +39,9 @@ class TextChannel extends BaseChannel {
 
     /**
      * List of permission overwrites in this channel or `null` if not cachable
-     * @type {Collection<PermissionOverwrite> | null}
+     * @type {Collection<PermissionOverwrite>}
      */
-    this.permissionOverwrites = client.canCache('permission:overwrite') ? new Collection() : null;
+    this.permissionOverwrites = new Collection();
 
     /**
      * List of messages to cache for this [TextChannel]
@@ -51,9 +51,9 @@ class TextChannel extends BaseChannel {
 
     /**
      * List of invites to cache for this [TextChannel]
-     * @type {Collection<import('../GuildInvite')> | null}
+     * @type {Collection<import('../GuildInvite')>}
      */
-    this.invites = client.canCache('invite') ? new Collection() : null;
+    this.invites = new Collection();
 
     /**
      * The client that is passed in
@@ -117,16 +117,25 @@ class TextChannel extends BaseChannel {
      */
     this.lastMessageID = data.last_message_id;
 
+    /**
+     * Returns the guild ID
+     * @type {?string}
+     */
+    this.guildID = data.guild_id || null;
+
     if (data.permission_overwrites) {
-      if (this.client.canCache('overwrites')) {
-        for (let i = 0; i < data.permission_overwrites.length; i++) {
-          const overwrite = data.permission_overwrites[i];
-          this.permissionOverwrites.set(overwrite.id, new PermissionOverwrite(overwrite));
-        }
+      for (let i = 0; i < data.permission_overwrites.length; i++) {
+        const overwrite = data.permission_overwrites[i];
+        this.permissionOverwrites.set(overwrite.id, new PermissionOverwrite(overwrite));
       }
     }
 
     return this;
+  }
+
+  get guild() {
+    if (!this.client.canCache('guild')) return null;
+    return this.client.guilds.get(this.guildID) || null;
   }
 }
 

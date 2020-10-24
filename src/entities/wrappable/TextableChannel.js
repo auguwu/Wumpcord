@@ -26,6 +26,8 @@ const Multipart = require('../../util/Multipart');
 const Message = require('../Message');
 const Util = require('../../util/Util');
 const { Endpoints } = require('../../Constants');
+const Constants = require('../../Constants');
+const Permissions = require('../../util/Permissions');
 
 /**
  * Gets the content data for sending/editing messages
@@ -150,8 +152,11 @@ class TextableChannel {
     options = Util.merge(options, {
       ignore: [],
       props: ['send'],
-      full: false
+      full: false,
+      send: true
     });
+
+    if (options.send === false) options.props.splice(options.props.indexOf('send'), 1);
 
     const { full, props, ignore } = options;
     if (full) props.push(
@@ -164,7 +169,8 @@ class TextableChannel {
       'createMessageCollector',
       'getPins',
       'addPin',
-      'deletePin'
+      'deletePin',
+      'permissionsOf'
     );
 
     for (let i = 0; i < props.length; i++) {
@@ -400,6 +406,48 @@ class TextableChannel {
       method: 'DELETE'
     });
   }
+
+  /**
+   * Gets the [Permissions] instance of a member in this channel
+   * @param {string} memberID The member's ID
+   */
+  permissionsOf(memberID) {
+    if (!this.guild) throw new Error(`Base "${this.constructor.name}" is not a Guild channel.`);
+
+    /** @type {import('../GuildMember')} */
+    let member;
+
+    if (this.client.canCache && this.guild.members.has(memberID)) {
+      member = this.guild.members.get(memberID);
+    } else {
+      this.guild.fetchMember(memberID).then(e => {
+        member = e;
+      });
+    }
+
+    let permission = member.permission.allowed;
+    if (permission & Constants.Permissions.administrator) return new Permissions(Constants.Permissions.all);
+
+    let overwrite = this.permissionOverwrites.get(this.guild ? this.guildID : this.guildID);
+    if (overwrite) permission = (permission & ~overwrite.permissions.denied) | overwrite.permissions.allowed;
+
+    let deny = 0;
+    let allow = 0;
+    if (!this.client.canCache('overwrites')) return new Permissions(permission);
+
+    for (const roleID of member.roles.keys()) {
+      if ((overwrite = this.permissionOverwrites.get(roleID))) {
+        deny |= overwrite.permissions.denied;
+        allow |= overwrite.permissions.allowed;
+      }
+    }
+
+    permission = (permission & ~deny) | allow;
+    overwrite = this.permissionOverwrites.get(memberID);
+
+    if (overwrite) permission = (permission & ~overwrite.permissions.denied) | overwrite.permissions.allowed;
+    return new Permissions(permission);
+  }
 }
 
 module.exports = TextableChannel;
@@ -420,4 +468,5 @@ module.exports = TextableChannel;
  * @prop {string[]} [ignore] The ignored properties
  * @prop {string[]} [props] The properties to pass down to the class
  * @prop {boolean} [full] If we should include all the properties that can be passed down
+ * @prop {boolean} [send] If we should add `send` to the class
  */

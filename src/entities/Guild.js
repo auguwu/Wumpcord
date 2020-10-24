@@ -615,8 +615,7 @@ class Guild extends UnavailableGuild {
       endpoint: Endpoints.Guild.member(this.id, memberID),
       method: 'GET'
     })
-      .then((data) => new GuildMember(this.client, data))
-      .catch(() => null);
+      .then((data) => new GuildMember(this.client, data));
   }
 
   /**
@@ -1261,7 +1260,7 @@ class Guild extends UnavailableGuild {
     return this.client.rest.dispatch({
       endpoint: `/guilds/${this.id}/emojis/${id}`,
       method: 'DELETE'
-    }).then(() => {});
+    }).then(() => {}); // eslint-disable-line
   }
 
   toString() {

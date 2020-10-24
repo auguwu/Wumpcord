@@ -49,18 +49,16 @@ module.exports = class Permissions {
    * Gets a JSON-like structure of all the permissions
    */
   toJSON() {
-    if (!this.json) {
-      this.json = {};
+    const blob = {};
 
-      for (const key of Object.keys(Constants.Permissions)) {
-        if (!key.startsWith('all')) {
-          if (this.allowed & Constants.Permissions[key]) this.json[key] = true;
-          else if (this.denied & Constants.Permissions[key]) this.json[key] = false;
-        }
+    for (const key of Object.keys(Constants.Permissions)) {
+      if (!key.startsWith('all')) {
+        if (this.allowed & Constants.Permissions[key]) blob[key] = true;
+        else if (this.denied & Constants.Permissions[key]) blob[key] = false;
       }
-    } else {
-      return this.json;
     }
+
+    return blob;
   }
 
   /**

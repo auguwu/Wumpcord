@@ -61,7 +61,7 @@ module.exports = class Role extends Base {
 
     /**
      * The permissions
-     * @type {Permissions}
+     * @type {import('../util/Permissions')}
      */
     this.permissions = new Permissions(data.permissions);
 

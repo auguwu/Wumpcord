@@ -53,7 +53,7 @@ module.exports = class CategoryChannel extends BaseChannel {
      * List of permission overwrites
      * @type {Collection<PermissionOverwrite> | null}
      */
-    this.permissionOverwrites = client.canCache('overwrites') ? new Collection() : null;
+    this.permissionOverwrites = new Collection();
 
     this.patch(data);
   }
@@ -92,11 +92,9 @@ module.exports = class CategoryChannel extends BaseChannel {
     }
 
     if (data.permission_overwrites) {
-      if (this.client.canCache('overwrites')) {
-        for (let i = 0; i < data.permission_overwrites.length; i++) {
-          const overwrite = data.permission_overwrites[i];
-          this.permissionOverwrites.set(overwrite.id, new PermissionOverwrite(overwrite));
-        }
+      for (let i = 0; i < data.permission_overwrites.length; i++) {
+        const overwrite = data.permission_overwrites[i];
+        this.permissionOverwrites.set(overwrite.id, new PermissionOverwrite(overwrite));
       }
     }
 

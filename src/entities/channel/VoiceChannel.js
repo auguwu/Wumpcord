@@ -23,11 +23,12 @@
 const PermissionOverwrite = require('../PermissionOverwrite');
 const { Collection } = require('@augu/immutable');
 const BaseChannel = require('../BaseChannel');
+const TextableChannel = require('../wrappable/TextableChannel');
 
 /**
  * Represents a voice channel in Discord
  */
-module.exports = class VoiceChannel extends BaseChannel {
+class VoiceChannel extends BaseChannel {
   /**
    * Creates a new [VoiceChannel] instance
    * @param {import('../../gateway/WebSocketClient')} client The client
@@ -47,7 +48,7 @@ module.exports = class VoiceChannel extends BaseChannel {
      * List of permission overwrites
      * @type {Collection<PermissionOverwrite> | null}
      */
-    this.permissionOverwrites = client.canCache('overwrites') ? new Collection() : null;
+    this.permissionOverwrites = new Collection();
 
     this.patch(data);
   }
@@ -88,17 +89,17 @@ module.exports = class VoiceChannel extends BaseChannel {
     this.bitrate = data.bitrate;
 
     if (data.permission_overwrites) {
-      if (this.client.canCache('overwrites')) {
-        for (let i = 0; i < data.permission_overwrites.length; i++) {
-          const overwrite = data.permission_overwrites[i];
-          this.permissionOverwrites.set(overwrite.id, new PermissionOverwrite(overwrite));
-        }
+      for (let i = 0; i < data.permission_overwrites.length; i++) {
+        const overwrite = data.permission_overwrites[i];
+        this.permissionOverwrites.set(overwrite.id, new PermissionOverwrite(overwrite));
       }
     }
 
     return this;
   }
-};
+}
+
+TextableChannel.decorate(VoiceChannel, { props: ['permissionsOf'], send: false });
 
 /**
  * @typedef {object} VoiceChannelPacket

@@ -23,6 +23,8 @@
 const { Collection } = require('@augu/immutable');
 const TextableChannel = require('./wrappable/TextableChannel');
 const Base = require('./Base');
+const Permissions = require('../util/Permissions');
+const Constants = require('../Constants');
 
 /**
  * Represents a Guild member
@@ -45,7 +47,7 @@ class GuildMember extends Base {
 
     /**
      * List of roles, if cachable
-     * @type {Collection<Role>}
+     * @type {Collection<import('./Role')>}
      */
     this.roles = client.canCache('member:role') ? new Collection() : null;
 
@@ -173,6 +175,34 @@ class GuildMember extends Base {
       this.patch(data);
       return this;
     });
+  }
+
+  /**
+   * Returns the permission list of this [GuildMember]
+   * @returns {Permissions} The permissions utility
+   */
+  get permission() {
+    if (!this._guild) {
+      return new Permissions(0);
+    } else if (this.id === this._guild.ownerID) {
+      return new Permissions(Constants.Permissions.all);
+    } else {
+      let permissions = this._guild.roles.get(this._guild.id).permissions.allowed;
+      this.roles.forEach((role) => {
+        role = this._guild.roles.get(role);
+        if (!role) return;
+
+        const perms = role.permissions.allowed;
+        if (perms & Constants.Permissions.administrator) {
+          permissions = Constants.Permissions.all;
+          return;
+        } else {
+          permissions |= perms;
+        }
+      });
+
+      return new Permissions(permissions);
+    }
   }
 
   /**
