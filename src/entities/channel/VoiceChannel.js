@@ -100,6 +100,7 @@ class VoiceChannel extends BaseChannel {
 }
 
 TextableChannel.decorate(VoiceChannel, { props: ['permissionsOf'], send: false });
+module.exports = VoiceChannel;
 
 /**
  * @typedef {object} VoiceChannelPacket
