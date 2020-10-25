@@ -58,6 +58,12 @@ module.exports = class Command {
     this.category = info.category || 'None';
 
     /**
+     * The cooldown for this [Command]
+     * @type {number}
+     */
+    this.cooldown = info.cooldown || 5;
+
+    /**
      * The name of the command
      * @type {string}
      */
@@ -65,7 +71,7 @@ module.exports = class Command {
 
     /**
      * The argument list to traverse from
-     * @type {Array<import('./arguments/Argument').ArgumentInfo>}
+     * @type {Array<import('./arguments/Argument')>}
      */
     this.args = info.args || [];
   }
@@ -142,33 +148,11 @@ module.exports = class Command {
   }
 
   /**
-   * Executes the command
-   * @param {import('../entities/Message')} msg The message
-   */
-  execute(msg) {
-    // todo: this
-  }
-
-  /**
    * Formats this [Command] to it's actual usage
    */
   format() {
     const prefix = this.bot.getDefaultPrefix(); // returns the first element in the `prefix` array
-    const args = this.args.map(arg => {
-      const [prefix, suffix] = [arg.required ? '<' : '[', arg.required ? '>' : ']'];
-      let text = prefix;
-
-      if (arg.oneOf.length) {
-        const items = arg.oneOf.map(item => item.toString());
-        text += `${items.map(i => `"${i}"`).join(' | ')}${suffix}`;
-
-        return text;
-      }
-
-      text += `${arg.label || 'none'}:${arg.type.id}${suffix}`;
-
-      return text;
-    }).join(' ');
+    const args = this.args.map(arg => arg.format()).join(' ');
 
     return `${prefix}${this.name} ${args}`;
   }
@@ -178,6 +162,7 @@ module.exports = class Command {
  * @typedef {object} CommandInfo
  * @prop {string} name The command's name
  * @prop {string | ((client: import('./CommandClient')) => string)} description The command's description
+ * @prop {number} [cooldown=5] The number of seconds to pause the execution
  * @prop {string[]} [inhibitors=[]] List of inhibitors to run
  * @prop {string[]} [aliases=[]] Any additional aliases to set this command as
  * @prop {string} [category='none'] The category of the command, will default to `'none'`

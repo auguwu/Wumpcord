@@ -29,13 +29,100 @@
 module.exports = class ArgumentPrompt {
   /**
    * Creates a new [ArgumentPrompt] instance
-   * @param {Array<import('./Argument')>} args The arguments
+   * @param {import('../Command')} command The command
+   * @param {import('../CommandContext')} ctx The command's context
    */
-  constructor(args) {
+  constructor(command, ctx) {
     /**
-     * The list of arguments available
-     * @type {Array<import('./Argument')>}
+     * The command
+     * @type {import('../Command')}
      */
-    this.args = new Array(args.length);
+    this.command = command;
+
+    /**
+     * The command's context
+     * @type {import('../CommandContext')}
+     */
+    this.context = ctx;
+  }
+
+  /**
+   * Collects the arguments
+   * @param {string[]} raw The raw arguments
+   * @returns {ArgumentCollectResult} The result
+   */
+  async collect(raw) {
+    const collected = {};
+    const args = this.command.args;
+    const required = args.reduce((uno, dos) => uno + (dos.required ? 1 : 0), 0);
+
+    if (!raw || !raw.length) return { failed: false, collected };
+
+    if (raw.length < required) return {
+      reason: 'Little few arguments were present',
+      failed: true
+    };
+
+    if (raw.length > args.length && !args[args.length - 1].infinite) return {
+      reason: 'Too many arguments were present',
+      failed: true
+    };
+
+    for (let i = 0; i < args.length; i++) {
+      const argument = args[i];
+      const rawArg = argument.infinite ? raw.slice(i).join(' ') : raw[i];
+
+      const validated = await argument.validate(this.context, rawArg);
+      if (!validated) {
+        const message = typeof argument.prompts.validatation === 'function'
+          ? argument
+            .prompts
+            .validatation(this.context)
+          : argument
+            .prompts
+            .validatation
+            .replace(/[$]user[$]/g, this.context.author.tag)
+            .replace(/[$]arg[$]/g, argument.label) || `Validation error occured for argument "${argument.label}", view the command's usage for more information.`;
+
+        const result = {
+          reason: message,
+          failed: true
+        };
+
+        return result;
+      }
+
+      const message = await this.context.send([
+        `[ Prompt for **${this.context.author.tag}** ]`,
+        `> **${argument.prompts.start}**`,
+        '',
+        'This prompt will destroy itself if you don\'t respond in the next 60 seconds.'
+      ].join('\n'));
+
+      try {
+        const collected = this.context.channel.awaitMessages((msg) => msg.author.id === message.author.id, 60000);
+        const value = await argument.parse(collected.content);
+        collected[argument.label] = value;
+      } catch(ex) {
+        await message.delete(`[${this.context.author.tag}] Prompt has ended unexpectedly.`);
+        return {
+          failed: true,
+          reason: 'Prompt has ended unexpectedly.'
+        };
+      }
+    }
+
+    return {
+      collected,
+      failed: false,
+      reason: null
+    };
   }
 };
+
+/**
+ * @typedef {object} ArgumentCollectResult
+ * @prop {{ [x: string]: any }} collected The actual argument
+ * @prop {string} [reason=null] The reason why the argument failed
+ * @prop {boolean} failed If the prompt failed
+ */

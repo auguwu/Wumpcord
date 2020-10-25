@@ -21,6 +21,8 @@
  */
 
 const { Collection } = require('@augu/immutable');
+const CooldownBucket = require('../cooldowns/CooldownBucket');
+const ArgumentPrompt = require('../arguments/ArgumentPrompt');
 const Context = require('../CommandContext');
 const Module = require('../Module');
 const toLower = s => s.toLowerCase();
@@ -30,7 +32,6 @@ const {
 } = require('path');
 
 const {
-  isPromise,
   fs: {
     readdir,
     lstat
@@ -63,6 +64,12 @@ module.exports = class CommandHandler extends Collection {
      * @type {Collection<import('../Module')>}
      */
     this.modules = new Collection();
+
+    /**
+     * The cooldown bucket
+     * @type {CooldownBucket}
+     */
+    this.cooldowns = new CooldownBucket();
 
     /**
      * The command client
@@ -165,6 +172,8 @@ module.exports = class CommandHandler extends Collection {
     // If the message author is a bot or is System
     if (msg.author.system || msg.author.bot) return;
 
+    console.trace('passed bot test');
+
     // Let's get the prefixes
     const mention = new RegExp(`<@!${this.client.user.id}> `).exec(msg.content);
     const prefixes = this.client.prefixes.filter(Boolean);
@@ -184,6 +193,8 @@ module.exports = class CommandHandler extends Collection {
     // Let's not do anything if the prefix is null
     if (prefix === null) return;
 
+    console.trace('passed prefix check');
+
     // Now let's get the command and the args
     const args = msg.content.slice(prefix.length).split(/ +/g);
     const name = args.shift();
@@ -194,8 +205,11 @@ module.exports = class CommandHandler extends Collection {
     // Check if the command is `null`
     if (!commands.length) return;
 
+    console.trace('pass command check');
+
     const command = commands[0];
     const context = new Context(this.client, msg);
+    const failed = [];
 
     // Now we check for any conditional logic with Inhibitors
     for (const inhibitor of command.inhibitors) {
@@ -203,43 +217,64 @@ module.exports = class CommandHandler extends Collection {
       if (!i) continue;
 
       const ran = await i.run(context);
-      if (!ran) {
-        this.client.emit('inhibitor.failed', context, inhibitor);
-        continue;
-      } else {
-        continue;
-      }
+      if (!ran) failed.push(i.name);
     }
+
+    if (failed.length) {
+      console.trace('failed inhibitor check');
+
+      /**
+       * Emitted when the user has failed a check
+       * @fires inhibitor.failed
+       * @param {CommandContext} ctx The command's context
+       * @param {Inhibitor[]} failed How many inhibitors failed
+       */
+      this.client.emit('inhibitor.failed', context, failed);
+      return;
+    }
+
+    console.trace('passed inhibitor check');
 
     // Now we check for args!
-    const allArgs = {};
+    const prompt = new ArgumentPrompt(command, context);
+    const allArgs = prompt.collect(args);
 
-    for (let i = 0; i < args.length; i++) {
-      /** @type {import('../arguments/Argument')} */
-      const arg = command.args[i];
-      try {
-        let result;
-        if (isPromise(arg.validate)) result = await arg.validate(context, args[i]);
-        else result = arg.validate(context, args[i]);
+    if (allArgs.failed) {
+      console.trace('failed argument check');
 
-        if (!result) return context.send(`Validation failed for arg "${arg.label || 'none?'}"`);
-        allArgs[arg.label] = arg.parse(context, args[i]) || arg.default;
-      } catch(ex) {
-        if (!arg.default) return context.send(`${ex.name}: ${ex.message}\n> Usage: **${command.format()}**`);
-        else {
-          allArgs[arg.label] = arg.default;
-          continue;
-        }
-      }
+      /**
+       * Emitted when the argument has failed to parse
+       * @fires argument.failed
+       * @param {CommandContext} ctx The command's context
+       * @param {ArgumentCollectResult} result The result
+       */
+      this.client.emit('argument.failed', context, allArgs);
+      return;
     }
 
+    console.trace('passed argument check');
+
+    // Now we check for cooldowns
+    //const token = this.cooldowns.check(command, context);
+    //if (token && token.throttled) {
+    /**
+       * Emitted when the user has hit the cooldown
+       * @fires command.cooldown
+       * @param {CooldownToken} token The token
+       */
+    //this.client.emit('coomand.cooldown', token);
+    //return;
+    //}
+
     try {
-      await command.run(context, allArgs);
+      await command.run(context, allArgs.collected);
+      console.trace('passed command check');
     } catch(ex) {
       const error = new Error(ex.message);
       error.name = 'CommandError';
       error.stack = ex.stack;
 
+      console.trace('failed command check', '\n', error);
       this.client.emit('command.error', context, command, error);
     }
   }

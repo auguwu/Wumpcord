@@ -33,7 +33,11 @@ module.exports = class HelpCommand extends Command {
         {
           required: false,
           label: 'cmdOrMod',
-          type: 'command|module'
+          type: 'command|module',
+          prompts: {
+            start: 'What command or module do you want documentation on?',
+            valdiation: (ctx) => `That doesn't seem like a command or module, **${ctx.author.tag}**~`
+          }
         }
       ],
       name: 'help'
@@ -45,8 +49,8 @@ module.exports = class HelpCommand extends Command {
    * @param {import('../CommandContext')} ctx The command's context
    * @param {{ cmdOrMod: import('../Command') | import('../Module') }} args The command's arguments
    */
-  async run(ctx, { cmdOrMod }) {
-    if (!cmdOrMod) {
+  async run(ctx, args) {
+    if (!args) {
       const commands = this.bot.commands.filter(async command => {
         let result;
         for (let i = 0; i < command.inhibitors.length; i++) {
@@ -80,10 +84,10 @@ module.exports = class HelpCommand extends Command {
 
       return ctx.send({ embed });
     } else {
-      const isModule = cmdOrMod.commands !== undefined;
+      const isModule = args.cmdOrMod.commands !== undefined;
       if (isModule) {
         const embed = {
-          title: `[ Module ${cmdOrMod.name} ]`,
+          title: `[ Module ${args.cmdOrMod.name} ]`,
           description: []
         };
 
@@ -99,9 +103,9 @@ module.exports = class HelpCommand extends Command {
       } else {
         return ctx.send({
           embed: {
-            title: `[ Command ${cmdOrMod.name} ]`,
+            title: `[ Command ${args.cmdOrMod.name} ]`,
             description: [
-              `> :pencil2: **| ${cmdOrMod.description}**`,
+              `> :pencil2: **| ${args.cmdOrMod.description}**`,
               '',
               '```apache',
               `Usage: ${cmdOrMod.format()}`,

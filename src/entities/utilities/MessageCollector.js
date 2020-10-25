@@ -34,7 +34,7 @@ module.exports = class MessageCollector {
      */
     this.collectors = new Collection();
 
-    client.on('message', (msg) => this.verify.call(this, msg));
+    client.on('message', (msg) => this.verify(msg));
   }
 
   /**
@@ -43,8 +43,12 @@ module.exports = class MessageCollector {
    */
   verify(msg) {
     const collector = this.collectors.get(msg.channelID);
-    if (collector && collector.filter(msg)) {
-      this.collectors.delete(msg.channelID);
+    if (!collector.length) return;
+
+    if (collector && collector[collector.length - 1].filter(msg)) {
+      collector.splice(collector.length - 1, 1);
+      this.collectors.set(msg.channelID, collector);
+
       return collector.accept(msg);
     }
   }
