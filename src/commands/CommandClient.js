@@ -46,7 +46,7 @@ module.exports = class CommandClient extends WebSocketClient {
 
     /**
      * The inhibitor handler
-     * @type {import('./handlers/InhibitorHandler') | null}
+     * @type {InhibitorHandler}
      */
     this.inhibitors = new InhibitorHandler(this, options.inhibitors);
 

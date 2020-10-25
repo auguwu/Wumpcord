@@ -48,6 +48,7 @@ module.exports = class CommandContext {
    * Creates a new message in a channel
    * @param {string | CreateMessageOptions | Buffer | MessageFile} content The content to send
    * @param {CreateMessageOptions | Buffer | MessageFile} [options] Any additional options
+   * @returns {Promise<import('../entities/Message')>} Returns a new message instance
    */
   send(content, options) {
     return this.message.channel.send(content, options);
@@ -76,6 +77,6 @@ module.exports = class CommandContext {
 };
 
 /**
- * @typedef {import('../entities/channel/TextableChannel').CreateMessageOptions} CreateMessageOptions
- * @typedef {import('../entities/channel/TextableChannel').MessageFile} MessageFile
+ * @typedef {import('../entities/wrappable/TextableChannel').CreateMessageOptions} CreateMessageOptions
+ * @typedef {import('..').MessageFile} MessageFile
  */

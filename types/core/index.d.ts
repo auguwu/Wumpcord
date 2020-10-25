@@ -22,14 +22,30 @@
 
 /* eslint-disable @typescript-eslint/ban-types */
 
-/**
- * Core module of Wumpcord, this is used for exporting everything
- * that isn't available in a namespace
- */
+import { ClientOptions as WebSocketClientOptions } from 'ws';
+import { HttpClient, HttpMethod } from '@augu/orchid';
+import { Collection, Queue } from '@augu/immutable';
 
-/**
- * The available cache types
- */
+import {
+  SessionStartLimit,
+  Application,
+  Guild,
+  User,
+  BaseChannel,
+  Message,
+  GuildMember,
+  Role,
+  Gateway,
+  BotGateway,
+  VoiceRegion,
+  GuildEmoji,
+  Invite,
+  TextChannel,
+  MemberChunk,
+  MessageFile,
+  BotUser
+} from '../discord';
+
 type CacheType = 'guild' | 'user' | 'channel'
   | 'member' | 'member:role' | 'voice'
   | 'attachments' | 'overwrites' | 'emoji'
@@ -37,76 +53,174 @@ type CacheType = 'guild' | 'user' | 'channel'
   | 'typing' | 'invites' | 'voice:connections'
   | 'audit:entries';
 
-/**
- * Available image formats supported by Discord
- */
 type ImageFormats = 'jpg' | 'png' | 'webp' | 'jpeg' | 'gif';
-
-/**
- * The permissions object, used for `Permissions.toJSON`
- */
 type PermissionObject = {
   [x in Constants.KeyedPermissions]?: boolean;
 };
+
+type TypedObject<K extends string | number | symbol, V = unknown> = { [x in K]: V };
+type PackStrategy = (...args: any[]) => string;
+type UnpackStrategy = (...args: any[]) => any;
+type ActivityType = 'online' | 'offline' | 'idle' | 'dnd';
+type PartialEntity<T> = T | TypedObject<'id', string>;
+
+interface ClientOptions {
+  populatePresences?: boolean;
+  allowedMentions?: AllowedMentions;
+  getAllUsers?: boolean;
+  disabledEvents?: Constants.Event[];
+  shardCount?: 'auto' | number;
+  strategy?: 'etf' | 'json';
+  cache?: CacheType | CacheType[];
+  token: string;
+  ws?: WebSocketOptions;
+}
+
+interface WebSocketOptions {
+  guildSubscriptions?: boolean;
+  largeThreshold?: number;
+  connectTimeout?: number;
+  clientOptions?: WebSocketClientOptions;
+  compress?: boolean;
+  intents?: number | number[] | (keyof Constants.GatewayIntents)[];
+  tries?: number;
+}
+
+interface AllowedMentions {
+  everyone?: boolean;
+  roles?: boolean | string[];
+  users?: boolean | string[];
+}
+
+interface UserTyping {
+  lastTimestamp: Date;
+  elapsedTime: number;
+  timeout: NodeJS.Timeout;
+  channel: string | TextChannel;
+  since: Date;
+  user: string | User;
+}
+
+interface ShardInfo {
+  session?: SessionStartLimit;
+  shards: number;
+  auto: boolean;
+  url: string;
+}
+
+interface FormattedAllowedMentions extends AllowedMentions {
+  parse?: ('roles' | 'users' | 'everyone')[];
+}
+
+interface RestRatelimitInfo {
+  retryAfter: number;
+  enedpoint: string;
+  global: boolean;
+  method: HttpMethod;
+  rest: number;
+}
+
+interface WebSocketShardEvents {
+  disconnect(id: number): void;
+  establish(id: number): void;
+  resume(id: number, replayed: number): void;
+  error(id: number, error: any): void;
+  debug(id: number, message: string): void;
+  close(id: number, error: any, recoverable: boolean): void;
+  ready(id: number, guilds: Set<string>): void;
+  ready(id: number): void;
+  event(id: number, data: any): void;
+  warn(id: number, message: string): void;
+}
+
+interface WebSocketClientEvents {
+  // Channels
+  channelPinsUpdate(channel: BaseChannel, old: Date, now: Date): void;
+  channelCreate(channel: BaseChannel): void;
+  channelDelete(channel: BaseChannel): void;
+  channelUpdate(old: PartialEntity<BaseChannel>, channel?: BaseChannel): void;
+
+  // Guilds
+  guildIntegrationsUpdate(guild: PartialEntity<Guild>): void;
+  guildMemberRemove(guild: PartialEntity<Guild>, member: PartialEntity<GuildMember>): void;
+  guildEmojisUpdate(guild: PartialEntity<Guild>, old: GuildEmoji[], now: GuildEmoji[]): void;
+  guildMemberUpdate(old: PartialEntity<GuildMember>, now?: GuildMember): void;
+  guildMemberChunk(guild: PartialEntity<Guild>, member: PartialEntity<GuildMember>, chunk: MemberChunk): void;
+  guildRoleRemove(role: PartialEntity<Role>): void;
+  guildRoleUpdate(role: PartialEntity<Role>): void;
+  guildMemberAdd(guild: PartialEntity<Guild>, member: PartialEntity<GuildMember>): void;
+  guildBanRemove(guild: PartialEntity<Guild>, user: User): void;
+  guildRoleAdd(role: PartialEntity<Role>): void;
+  guildBanAdd(guild: PartialEntity<Guild>, user: User): void;
+  guildCreate(guild: PartialEntity<Guild>): void;
+  guildDelete(guild: PartialEntity<Guild>): void;
+  guildUpdate(old: PartialEntity<Guild>, now?: Guild): void;
+
+  // Invites
+  inviteCreate(invite: Invite): void;
+  inviteDelete(invite: Invite): void;
+
+  // Messages
+  messageReactionRemoveEmoji(message: PartialEntity<Message>, emoji: GuildEmoji): void;
+  messageReactionRemoveAll(message: PartialEntity<Message>, emoji: GuildEmoji): void;
+  messageReactionRemove(message: PartialEntity<Message>, user: PartialEntity<User>, emoji: GuildEmoji): void;
+  messageReactionAdd(message: PartialEntity<Message>, user: PartialEntity<User>, emoji: GuildEmoji): void;
+  messageDeleteBulk(message: Array<PartialEntity<Message>>): void; // eslint-disable-line
+  messageCreate(message: Message): void;
+  messageDelete(message: PartialEntity<Message>): void;
+  messageUpdate(old: PartialEntity<Message>, now?: Message): void;
+
+  // Rest Client
+  restUnratelimit(): void;
+  restBodyEmpty(): void;
+  restRatelimit(info: RestRatelimitInfo): void;
+  restCall(props: RestCallProperties): void;
+
+  // Normal
+  debug(message: string): void;
+  error(error: any): void;
+  warn(message: string): void;
+}
+
+interface SendActivityOptions {
+  name: string;
+  type: string;
+  url?: string;
+  afk?: boolean;
+}
+
+interface RatelimitBucket {
+  resolve(value?: any | PromiseLike<any>): void;
+  reject(error: DiscordRESTError): void;
+  opts: DispatchOptions;
+}
+
+interface DispatchOptions<T = unknown> {
+  endpoint: string;
+  headers: TypedObject<string, any>;
+  method: HttpMethod;
+  data?: T;
+}
+
+interface RestCallProperties {
+  successful: boolean;
+  endpoint: string;
+  method: HttpMethod;
+  status: string;
+}
 
 /**
  * Represents a class to emit events from a class
  */
 declare class EventBus<T extends object> {
-  /** List of listeners available to this current [EventBus] */
   private listeners: { [x: string]: keyof T };
 
-  /**
-   * Emits a new event
-   * @param event The event to emit
-   * @param args Additional arguments to pass in
-   * @returns Boolean-represented value if the event was emitted or not
-   */
   public emit<K extends keyof T>(event: K, ...args: any[]): boolean;
-
-  /**
-   * Pushes a listener callback to the listeners stack
-   * @param event The event to receive events from
-   * @param listener The listener to run when we run [EventBus.emit]
-   * @returns This [EventBus] to chain methods
-   */
   public on<K extends keyof T>(event: K, listener: T[K]): this;
-
-  /**
-   * Pushes a listener callback that is only called once and is
-   * removed from the callstack when emitted
-   *
-   * @param event The event to receive events from
-   * @param listener The listener to run when we run [EventBus.emit]
-   * @returns This [EventBus] instance to chain methods
-   */
   public once<K extends keyof T>(event: K, listener: T[K]): this;
-
-  /**
-   * Removes a listener callback from the listeners stack
-   * @param event The event to remove the listener from
-   * @param listener The actual listener to remove it from
-   * @returns A boolean-represented value if we removed it or not
-   */
   public remove<K extends keyof T>(event: K, listener: T[K]): boolean;
-
-  /**
-   * Returns the length of listeners of a specific event
-   * @param event The event
-   * @returns A number of the listeners available of the specific event in this [EventBus] instance
-   */
   public size<K extends keyof T>(event: K): number;
-
-  /**
-   * Returns the length of all listeners available
-   * @returns A number of the listeners available to this [EventBus] instance
-   */
   public size(): number;
-
-  /**
-   * Removes all of the listeners in this [EventBus] instance
-   * @returns This instance to chain methods
-   */
   public removeAllListeners(): this;
 }
 
@@ -115,58 +229,28 @@ declare class EventBus<T extends object> {
  * but it's a object of stuff combined.
  */
 export namespace Constants {
-  /**
-   * The available strategy types to encode or decode data to/from Discord
-   *
-   * - **etf**
-   * - **json**
-   */
+  export type GuildFeatures = 'ANIMATED_ICON' | 'BANNER' | 'COMMERECE' | 'COMMUNITY'
+    | 'DISCOVERABLE' | 'FEATURABLE' | 'INVITE_SPLASH' | 'NEWS' | 'PARTNERED' | 'RELAY_ENABLED'
+    | 'NEWS' | 'PARTNERED' | 'VANITY_URL' | 'VERIFIED' | 'VIP_REGIONS' | 'WELCOME_SCREEN_ENABLED';
+
+  export type Event = 'READY' | 'RESUMED' | 'CHANNEL_CREATE' | 'CHANNEL_UPDATE'
+    | 'CHANNEL_DELETE' | 'CHANNEL_PINS_UPDATE' | 'GUILD_CREATE' | 'GUILD_UPDATE' | 'GUILD_DELETE'
+    | 'GUILD_BAN_ADD' | 'GUILD_BAN_REMOVE' | 'GUILD_EMOJIS_UPDATE' | 'GUILD_INTEGRATIONS_UPDATE'
+    | 'GUILD_MEMBER_ADD' | 'GUILD_MEMBER_REMOVE' | 'GUILD_MEMBER_UPDATE' | 'GUILD_MEMBERS_CHUNK'
+    | 'GUILD_ROLE_CREATE' | 'GUILD_ROLE_DELETE' | 'GUILD_ROLE_UPDATE' | 'MESSAGE_CREATE' | 'MESSAGE_UPDATE'
+    | 'MESSAGE_DELETE' | 'MESSAGE_DELETE_BULK' | 'MESSAGE_REACTION_ADD' | 'MESSAGE_REACTION_REMOVE'
+    | 'MESSAGE_REACTION_REMOVE_ALL' | 'MESSAGE_REACTION_REMOVE_EMOJI' | 'TYPING_START' | 'USER_UPDATE'
+    | 'VOICE_STATE_UPDATE' | 'VOICE_SERVER_UPDATE' | 'WEBHOOKS_UPDATE' | 'PRESENCE_UPDATE' | 'GIFT_CODE_UPDATE';
+
   export const StrategyTypes: string[];
-
-  /**
-   * List of unrecoverable codes and will shutdown the bot
-   */
   export const UnrecoverableCodes: number[];
-
-  /**
-   * The gateway version we use to authenicate to Discord
-   */
   export const GatewayVersion: number;
-
-  /**
-   * The cache types that Wumpcord uses to
-   * determine if it should be cached or not.
-   */
   export const CacheType: CacheType[];
-
-  /**
-   * The image formats used to format an image from Discord's CDN
-   */
   export const ImageFormats: ImageFormats[];
-
-  /**
-   * The rest version to use to use the REST API
-   */
   export const RestVersion: number;
-
-  /**
-   * The User-Agent that Discord needs
-   */
   export const UserAgent: string;
-
-  /**
-   * The CDN url
-   */
   export const CdnUrl: string;
-
-  /**
-   * The Rest API url
-   */
   export const RestUrl: string;
-
-  /**
-   * The endpoints available
-   */
   export namespace Endpoints {
     export function channel(channelID: string): string;
     export function webhook(id: string): string;
@@ -341,66 +425,123 @@ export namespace Constants {
   };
 }
 
-/**
- * Utility class to handle Multipart data, used for sending buffers
- * to Discord
- */
 declare class Multipart {
-  /**
-   * If this [Multipart] instance is finished,
-   * all `append` calls will be blocked if this is true.
-   */
   public finished: boolean;
-
-  /**
-   * Returns the boundary
-   */
   public get boundary(): string;
-
-  /**
-   * Appends an item to this [Multipart] instance
-   * @param field The field name
-   * @param data The data to append
-   * @param filename Optional file name to set it as
-   */
   public append<T = unknown>(field: string, data: T, filename?: string): void;
-
-  /**
-   * Finishes this [Multipart] instance, all `append` blocks
-   * will be dismissed if this is called
-   */
   public finish(): Buffer[];
 }
 
-/**
- * Utility to handle Discord permissions
- */
 declare class Permissions {
-  /**
-   * Creates a new [Permissions] instance
-   * @param allowed The allowed permissions as a string
-   * @param denied The denied permissions as a string
-   */
   constructor(allowed: string, denied: string);
 
-  /**
-   * The allowed permissions
-   */
   public allowed: number;
-
-  /**
-   * The denied permissions
-   */
   public denied: number;
-
-  /**
-   * Converts this [Permissions] into a object
-   * @returns The permissions object
-   */
   public toJSON(): PermissionObject;
-
-  /**
-   * Returns a boolean-represented value if we have access or not
-   */
   public has(permission: Constants.KeyedPermissions): boolean;
+}
+
+export namespace Util {
+  export type Resolvable<T> = T | T[];
+
+  export function get<T extends object, U = unknown>(
+    prop: keyof T,
+    defaultValue: U,
+    options?: T
+  ): U;
+  export function sleep(ms: number): Promise<unknown>;
+  export function formatAllowedMentions(options: ClientOptions, allowed: AllowedMentions): FormattedAllowedMentions;
+  export function merge<T>(given: T, def: T): T;
+  export function chunk<T>(entries: T[], chunkSize: number): T[][];
+  export function toCamelCase<T, U>(obj: T): U;
+  export function getAuditLogUrl(guildID: string, opts: TypedObject<string, string>): string;
+  export function pluck<T, U>(obj: T, key: keyof T): U;
+  export function isPromise(value: unknown): value is Promise<unknown>;
+  export function getKey<T, K extends keyof T>(obj: T, key: K): T[K];
+  export function resolveString(str: Resolvable<string>, sep?: string): string;
+  export function clone<T>(obj: T): T;
+  export function resolveColor(color: Resolvable<number> | string | Role): number;
+  export function isMessageFile(value: unknown): value is MessageFile;
+  export function isMultipart(value: unknown): value is Multipart;
+}
+
+declare class WebSocketShard extends EventBus<WebSocketShardEvents> {
+  public unavailableGuilds: Set<string>;
+  public reconnectTime: number;
+  public sessionID?: string;
+  public strategy: NonNullable<ClientOptions['strategy']>;
+  public attempts: number;
+  public status: number;
+  public guilds: Collection<Guild>;
+  public seq: number;
+  public id: number;
+
+  public get ping(): number;
+  public get pack(): PackStrategy;
+  public get unpack(): UnpackStrategy;
+
+  public connect(): Promise<void>;
+  public disconnect(reconnect?: boolean): void;
+  public send<T>(op: number, data?: T): void;
+  public setStatus(status: ActivityType, opts: SendActivityOptions): void;
+}
+
+declare class ShardManager extends Collection<WebSocketShard> {
+  public get ping(): number;
+
+  public spawn(id: number, strategy: NonNullable<ClientOptions['strategy']>): Promise<void>;
+  public dispose(shard: WebSocketShard): void;
+  public connect(id: number): Promise<void>;
+}
+
+export class Client extends EventBus<WebSocketClientEvents> {
+  constructor(options: ClientOptions);
+
+  public voiceConnections: Collection<any> | null;
+  public lastShardID: number;
+  public provider: any;
+  public channels: Collection<BaseChannel> | null;
+  public options: ClientOptions;
+  public typings: Collection<UserTyping> | null;
+  public guilds: Collection<Guild> | null;
+  public shards: ShardManager;
+  public ready: boolean;
+  public token: string;
+  public users: Collection<User> | null;
+  public user?: BotUser;
+  public rest: RestClient;
+
+  public get intents(): number;
+  public connect(): Promise<void>;
+  public getBotGateway(): Promise<BotGateway>;
+  public getGateway(): Promise<Gateway>;
+  public canCache(type: ClientOptions['cache']): boolean;
+  public setStatus(status: ActivityType, opts: SendActivityOptions): void;
+  public insert<T>(type: 'guild' | 'user' | 'channel' | 'voice', packet: T): void;
+  public requestGuildMembers(): Promise<void>;
+  public dispose(): void;
+  public getVoiceRegions(): Promise<VoiceRegion[]>;
+  public getUser(id: string): Promise<User>;
+  public getGuild(id: string): Promise<Guild>;
+  public getChannel(id: string): Promise<BaseChannel>;
+  public getGuildMember(guildID: string, memberID: string): Promise<GuildMember>;
+  public getMessage(channelID: string, messageID: string): Promise<Message>;
+  public getShardInfo(): Promise<ShardInfo>;
+  public getShardByGuildId(guildID: string): number;
+  public getApplication(): Promise<Application>;
+}
+
+declare class RestClient {
+  public lastDispatched: number;
+  public ratelimited: boolean;
+  public lastCall: number;
+  public cache: Queue<RatelimitBucket>;
+  public http: HttpClient;
+
+  public get ping(): number;
+  public dispatch<T>(opts: DispatchOptions<T>): Promise<T>;
+}
+
+declare class DiscordRESTError extends Error {
+  public status: number;
 }

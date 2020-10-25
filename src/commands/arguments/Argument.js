@@ -63,6 +63,12 @@ module.exports = class Argument {
     this.default = info.default || undefined;
 
     /**
+     * The prompts to display
+     * @type {string}
+     */
+    this.prompt = info.prompt;
+
+    /**
      * The parser function, if found
      * @type {ParserFunction}
      */
@@ -116,8 +122,9 @@ module.exports = class Argument {
    */
   static _validate(info) {
     if (typeof info !== 'object' && !Array.isArray(info)) throw new SyntaxError(`Expected \`object\`, received ${typeof info}`);
-    if (!info.label || !info.type) throw new TypeError('Missing `label` and/or `type` in [Argument.info]');
+    if (!info.label || !info.type || !info.prompt) throw new TypeError('Missing `label`, `type`, and/or `prompt` in [Argument.info]');
 
+    if (typeof info.prompt !== 'string') throw new TypeError(`Expected \`string\`, gotten ${typeof info.prompt}`);
     if (typeof info.label !== 'string') throw new TypeError(`Expected \`string\`, gotten ${typeof info.label}`);
     if (typeof info.type !== 'string') throw new TypeError(`Expected \`string\`, gotten ${typeof info.type}`);
 
@@ -148,6 +155,37 @@ module.exports = class Argument {
     if (this.parser) return this.parser(ctx, val, this);
     return this.type.parse(ctx, val, this);
   }
+
+  /**
+   * Obtains the values of this argument
+   * @param {import('../CommandContext')} ctx The command's context
+   * @param {string} val The raw value
+   * @param {number} [promptLimit=Infinity] The prompt limit
+   */
+  async obtain(ctx, val, promptLimit = Infinity) {
+    if (val === '' && this.default !== null || this.default !== undefined) {
+      return {
+        cancelled: false,
+        prompts: [],
+        answers: [],
+        value: this.default
+      };
+    }
+
+    if (this.infinite) return this.obtainInfinite(ctx, val, promptLimit);
+    const prompts = [];
+    const answers = [];
+    let valid = !(val === '') ? await this.validate(ctx, val) : false;
+
+    while (!valid) {
+      if (prompts.length >= promptLimit) return {
+        cancelled: true,
+        prompts,
+        answers,
+        value: null
+      };
+    }
+  }
 };
 
 /**
@@ -159,6 +197,7 @@ module.exports = class Argument {
  * @prop {boolean} [required=false] If the argument is required or not
  * @prop {any} [default] A default value if the argument isn't presented
  * @prop {ParserFunction} [parser] Custom function to parse this [Argument]
+ * @prop {string} prompt The prompt to display
  * @prop {any[]} [oneOf=[]] An array of items to represent what it should be
  * @prop {string} label The argument's label
  * @prop {number} [min=0] The minimum number to use (type must be `int` or `double`)

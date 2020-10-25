@@ -73,7 +73,7 @@ module.exports = class AuditLogEntry extends Base {
 
     // partial options dependant on the audit log change
     // docs: https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-optional-audit-entry-info
-    if (data.options) {
+    if (data.options !== undefined) {
       if (this.actionType === AuditLogActions.MemberPrune) {
         /**
          * Number of days after inactive members were kicked
