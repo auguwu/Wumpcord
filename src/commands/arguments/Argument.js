@@ -142,6 +142,14 @@ module.exports = class Argument {
   }
 
   /**
+   * Obtains the parsed value from this [Argument]
+   * @param {string} val The raw value
+   */
+  async obtain(val) {
+    if (this.infinite) return this.obtainInfinite(val);
+  }
+
+  /**
    * Validates this [Argument]
    * @param {import('../CommandContext')} ctx The command's context
    * @param {string} val The raw value

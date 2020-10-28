@@ -68,6 +68,17 @@ module.exports = class ArgumentPrompt {
       failed: true
     };
 
+
+
+    return {
+      collected,
+      failed: false,
+      reason: null
+    };
+  }
+};
+
+/*
     for (let i = 0; i < args.length; i++) {
       const argument = args[i];
       const rawArg = argument.infinite ? raw.slice(i).join(' ') : raw[i];
@@ -121,15 +132,7 @@ module.exports = class ArgumentPrompt {
           reason: 'Prompt has ended unexpectedly.'
         };
       }
-    }
-
-    return {
-      collected,
-      failed: false,
-      reason: null
-    };
-  }
-};
+*/
 
 /**
  * @typedef {object} ArgumentCollectResult

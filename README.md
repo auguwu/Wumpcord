@@ -4,14 +4,10 @@
 ## Features
 - Not cached by default
   - Everything is not cached by default (guilds, users, etc), you'll have to enable it with the stuff you want cached.
-- Clustering
-  - You can opt to using the Clustering API, so the library will do it for you without any external libraries.
 - Command Handling
   - Too lazy to code your own command handler? Wumpcord will supply you with an en-riching commands API!
 - Extra utilities
   - Too lazy to make your own utilities (Reaction Menus, etc) or don't wanna add dependencies? Well, Wumpcord fully supports any utility you desire that other libraries don't, out of the box!
-- OAuth2 Support
-  - Too lazy to implement your own OAuth2 system for a dashboard? Wumpcord supplies extra utilities for making OAuth2 more simplier.
 
 ## Need Support?
 You can join the server below and join in #support under the **Wumpcord** category

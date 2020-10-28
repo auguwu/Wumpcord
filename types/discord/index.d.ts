@@ -27,6 +27,7 @@
  * Namespace for all Discord-related objects that don't bleed into the `core` module
  */
 
+import * as discord from 'discord-api-types/v8';
 import * as core from '../core';
 
 // Gateway-related content
@@ -43,76 +44,6 @@ export interface SessionStartLimit {
   reset_after: number;
   remaning: number;
   total: number;
-}
-
-// Data packets
-interface GuildChannelPacket {
-  permission_overwrites: PermissionOverwritePacket;
-  last_message_id: string;
-  parent_id?: string;
-  guild_id: string;
-  topic?: string;
-  nsfw: boolean;
-  name: string;
-  id: string;
-}
-
-interface DMChannelPacket {
-  last_message_id: string;
-  recipient: UserPacket;
-}
-
-interface GroupChannelPacket {
-  last_message_id: string;
-  recipients: UserPacket[];
-}
-
-interface CategoryChannelPacket extends GuildChannelPacket {}
-interface NewsChannelPacket extends GuildChannelPacket {}
-interface StoreChannelPacket extends GuildChannelPacket {}
-interface TextChannelPacket extends GuildChannelPacket {}
-interface VoiceChannelPacket extends Exclude<GuildChannelPacket, 'topic'> {
-  user_limit: number;
-  bitrate: number;
-}
-
-interface AuditLogEntryChange {
-  old_value: any;
-  new_value: any;
-  key: string;
-}
-
-interface AuditLogEntryPacket {
-  action_type: number;
-  target_id?: string;
-  options?: AuditLogEntryOptions;
-  user_id: string;
-  changes: AuditLogEntryChange[];
-  id: string;
-}
-
-interface AuditLogEntryOptions {
-  delete_member_days?: string;
-  members_removed?: string;
-  channel_id?: string;
-  message_id?: string;
-  role_name?: string;
-  count?: string;
-  type?: '0' | '1';
-  id?: string;
-}
-
-interface AuditLogsPacket {
-  audit_log_entries: AuditLogEntryPacket[];
-  integrations: any[];
-  webhooks: any[];
-  users: UserPacket[];
-}
-
-interface GuildBanPacket {
-  guild_id: string;
-  reason?: string;
-  user: UserPacket;
 }
 
 // Extendable objects
@@ -137,13 +68,13 @@ interface Textable {
   startTyping?(count?: number): Promise<void>;
   getMessages?(amount: number, options?: GetMessageOptions): Promise<Message[]>;
   stopTyping?(force?: boolean): Promise<void>;
-  bulkDelete?(messageIDs: Array<string | Message>): Promise<string[]>;
+  bulkDelete?(messageIDs: (string | Message)[]): Promise<string[]>;
   deletePin?(message: Message): Promise<void>;
   getTyping?(userID: string): core.UserTyping | null;
   getPins?(): Promise<Message[]>;
   addPin?(message: Message): Promise<void>;
   send?(
-    content: string | CreateMessageOptions | MessageFile[] | MessageFile, 
+    content: string | CreateMessageOptions | MessageFile[] | MessageFile,
     options?: CreateMessageOptions | MessageFile[] | MessageFile
   ): Promise<Message>;
 }
