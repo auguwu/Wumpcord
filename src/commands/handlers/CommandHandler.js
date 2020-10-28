@@ -237,7 +237,7 @@ module.exports = class CommandHandler extends Collection {
 
     // Now we check for args!
     const prompt = new ArgumentPrompt(command, context);
-    const allArgs = prompt.collect(args);
+    const allArgs = await prompt.collect(args);
 
     if (allArgs.failed) {
       console.trace('failed argument check');
@@ -255,16 +255,16 @@ module.exports = class CommandHandler extends Collection {
     console.trace('passed argument check');
 
     // Now we check for cooldowns
-    //const token = this.cooldowns.check(command, context);
-    //if (token && token.throttled) {
-    /**
+    const token = this.cooldowns.check(command, context);
+    if (token && token.throttled) {
+      /**
        * Emitted when the user has hit the cooldown
        * @fires command.cooldown
        * @param {CooldownToken} token The token
        */
-    //this.client.emit('coomand.cooldown', token);
-    //return;
-    //}
+      this.client.emit('command.cooldown', context, token);
+      return;
+    }
 
     try {
       await command.run(context, allArgs.collected);
@@ -274,7 +274,6 @@ module.exports = class CommandHandler extends Collection {
       error.name = 'CommandError';
       error.stack = ex.stack;
 
-      console.trace('failed command check', '\n', error);
       this.client.emit('command.error', context, command, error);
     }
   }

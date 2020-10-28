@@ -49,7 +49,7 @@ module.exports = class ArgumentPrompt {
   /**
    * Collects the arguments
    * @param {string[]} raw The raw arguments
-   * @returns {ArgumentCollectResult} The result
+   * @returns {Promise<ArgumentCollectResult>} The result
    */
   async collect(raw) {
     const collected = {};
@@ -92,19 +92,11 @@ module.exports = class ArgumentPrompt {
         return result;
       }
 
-      const message = await this.context.send([
-        `[ Prompt for **${this.context.author.tag}** ]`,
-        `> **${argument.prompts.start}**`,
-        '',
-        'This prompt will destroy itself if you don\'t respond in the next 60 seconds.'
-      ].join('\n'));
-
       try {
-        const collected = this.context.channel.awaitMessages((msg) => msg.author.id === message.author.id, 60000);
-        const value = await argument.parse(collected.content);
+        const value = await argument.parse(this.context, rawArg);
         collected[argument.label] = value;
       } catch(ex) {
-        await message.delete(`[${this.context.author.tag}] Prompt has ended unexpectedly.`);
+        console.log(ex);
         return {
           failed: true,
           reason: 'Prompt has ended unexpectedly.'

@@ -320,7 +320,7 @@ class TextableChannel {
    * Creates a new [MessageCollector] instance
    */
   createMessageCollector() {
-    return new MessageCollector(this.client);
+    return new MessageCollector(this);
   }
 
   /**

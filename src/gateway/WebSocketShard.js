@@ -323,6 +323,7 @@ module.exports = class WebSocketShard extends EventBus {
    * @arity Wumpcord.Sharding.WebSocketShard.onClose/2
    */
   onClose(code, reason) {
+    console.trace(`[${code}] ${reason}`);
     if (code) {
       this.debug(`Connection has closed ${code === 1000 ? 'cleanly' : 'uncleanly'} for ${reason || 'no reason?'}`);
       let error = new Error(`${code}: ${reason === '' ? 'None' : reason}`);

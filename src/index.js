@@ -49,4 +49,13 @@ module.exports = {
  * @typedef {object} MessageFile
  * @prop {Buffer} file The file to send
  * @prop {string} [name] The filename
+ *
+ * @typedef {import('./entities/channel/TextChannel')} TextChannel
+ * @typedef {import('./entities/channel/StoreChannel')} StoreChannel
+ * @typedef {import('./entities/channel/NewsChannel')} NewsChannel
+ * @typedef {import('./entities/channel/DMChannel')} DMChannel
+ * @typedef {import('./entities/channel/GroupChannel')} GroupChannel
+ *
+ * @typedef {TextChannel | StoreChannel | NewsChannel} GuildTextableChannel
+ * @typedef {TextChannel | StoreChannel | NewsChannel | DMChannel | GroupChannel} TextableChannel
  */

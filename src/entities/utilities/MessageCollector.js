@@ -21,65 +21,14 @@
  */
 
 const { Collection } = require('@augu/immutable');
+const EventBus = require('../../util/EventBus');
 
-module.exports = class MessageCollector {
+module.exports = class MessageCollector extends EventBus {
   /**
    * Creates a new [MessageCollector] instance
    * @param {import('../../gateway/WebSocketClient')} client The client
    */
-  constructor(client) {
-    /**
-     * The collectors available per-channel
-     * @type {Collection<Collector[]>}
-     */
-    this.collectors = new Collection();
-
-    client.on('message', (msg) => this.verify(msg));
-  }
-
-  /**
-   * Verifies the collector's message
-   * @param {import('../Message')} msg The message
-   */
-  verify(msg) {
-    const collector = this.collectors.get(msg.channelID);
-    if (!collector.length) return;
-
-    if (collector && collector[collector.length - 1].filter(msg)) {
-      collector.splice(collector.length - 1, 1);
-      this.collectors.set(msg.channelID, collector);
-
-      return collector.accept(msg);
-    }
-  }
-
-  /**
-   * Awaits a new message, pushes to the callstack
-   * and gets awaited by a filter function
-   *
-   * @param {FilterFunction} filter The filter to pass in
-   * @param {CollectorOptions} options The options
-   */
-  awaitMessage(filter, options) {
-    // this is an internal function, we don't need to validate it uwu
-    return new Promise((resolve, reject) => {
-      const collector = {
-        accept: resolve,
-        reject,
-        filter
-      };
-
-      const collectors = this.collectors.get(options.channelID) || [];
-      collectors.push(collector);
-
-      this.collectors.set(options.channelID, collectors);
-      const time = options.time < 1000 ? options.time * 1000 : options.time;
-
-      setTimeout(() => {
-        this.collectors.delete(key);
-        return reject(new Error('Collector ran out of time'));
-      }, time);
-    });
+  constructor(channel, options) {
   }
 };
 

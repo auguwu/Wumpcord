@@ -29,6 +29,19 @@ const { Queue } = require('@augu/immutable');
 const Util = require('../util/Util');
 
 /**
+ * Returns the offset from Discord to us
+ * @param {number} date The date
+ */
+const getApiOffset = (date) => new Date(date).getTime() - Date.now();
+
+/**
+ * Calculates the reset date
+ * @param {number} reset The reset time
+ * @param {number} serverDate The server date for Discord
+ */
+const calculateResetTime = (reset, serverDate) => new Date(Number(reset) * 1000).getTime() - getApiOffset(serverDate);
+
+/**
  * Represents a client for executing calls to Discord's REST API
  */
 module.exports = class RESTClient {
@@ -50,10 +63,28 @@ module.exports = class RESTClient {
     this.ratelimited = false;
 
     /**
+     * The remaining requests before we lock this [RestClient]
+     * @type {number}
+     */
+    this.remaining = -1;
+
+    /**
+     * The reset time
+     * @type {number}
+     */
+    this.resetTime = -1;
+
+    /**
      * The last rest call send
      * @type {number}
      */
     this.lastCall = NaN;
+
+    /**
+     * The limit before we lock this [RestClient]
+     * @type {number}
+     */
+    this.limit = -1;
 
     /**
      * The client
@@ -93,6 +124,20 @@ module.exports = class RESTClient {
   }
 
   /**
+   * Returns if the Rest client is inactive or not
+   */
+  get inactive() {
+    return this.cache.size() === 0 && !this.locked;
+  }
+
+  /**
+   * If we are locked from making any requests
+   */
+  get locked() {
+    return (this.remaining <= 0 && Date.now() < this.resetTime);
+  }
+
+  /**
    * Dispatches a new request
    * @param {DispatchOptions} opts The options to use
    * @returns {Promise<any>} Promise to resolve data from Discord
@@ -110,6 +155,23 @@ module.exports = class RESTClient {
           data: Util.get('data', undefined, opts)
         }
       };
+
+      if (this.locked) {
+        const time = this.reset + 500 - Date.now();
+
+        /**
+         * Emitted when this [RestClient] is locked from making requests
+         * @fires restLocked
+         * @param {number} time How much time we have
+         */
+        this.client.emit('restLocked', time);
+
+        const error = new Error('Rest client is currently locked from making anymore requests.');
+        error.name = 'RestLockedError';
+        error.retry = time;
+
+        return reject(error);
+      }
 
       this.cache.add(bucket);
       this.request(bucket)
@@ -144,7 +206,7 @@ module.exports = class RESTClient {
         url: bucket.opts.endpoint,
         data: bucket.opts.data,
         headers: bucket.opts.headers
-      }).then(resp => {
+      }).then(async resp => {
         // 204 = no content, so let's add a check!
         if (resp.statusCode !== 204 && resp.isEmpty) {
           this.client.emit('debug', 'Missing payload from Discord, did we fuck up? (https://github.com/auguwu/Wumpcord/issues)');
@@ -162,6 +224,25 @@ module.exports = class RESTClient {
         this.lastCall = new Date().getTime();
         if (resp.statusCode === 204) return resolve();
 
+        const resetTime = resp.headers['x-ratelimit-reset'];
+        const serverDate = resp.headers['date'];
+        const remaining = resp.headers['x-ratelimit-remaining'];
+
+        this.resetTime = resetTime && !Array.isArray(resetTime) ? calculateResetTime(Number(resetTime), serverDate) : Date.now();
+        this.remaining = remaining && !Array.isArray(remaining) ? Number(remaining) : -1;
+
+        // view https://github.com/discordapp/discord-api-docs/issues/182
+        if (bucket.opts.endpoint.includes('reactions')) {
+          this.resetTime = new Date(serverDate).getTime() - getApiOffset(serverDate) + 250;
+        }
+
+        if (resp.headers.hasOwnProperty('x-ratelimit-global')) {
+          this.globalTimer = Util.sleep(resp.headers['retry-after']);
+          await this.globalTimer;
+
+          this.globalTimer = null;
+        }
+
         const data = resp.json();
         if (resp.statusCode === 429) {
           /**
@@ -169,40 +250,16 @@ module.exports = class RESTClient {
            * @fires restRatelimit
            */
           this.client.emit('restRatelimit', {
-            retryAfter: Number(resp.headers['retry-after']),
+            retryAfter: (Date.now() - Number(Math.floor(resp.headers['x-ratelimit-reset']))) * 1000,
             endpoint: bucket.opts.endpoint,
             global: Boolean(resp.headers['x-ratelimit-global']),
             method: bucket.opts.method,
             reset: Number(Math.floor(resp.headers['x-ratelimit-reset']))
           });
 
-          const error = new DiscordRatelimitError({
-            retryAfter: Number(resp.headers['retry-after']),
-            resetTime: Number(Math.floor(resp.headers['x-ratelimit-reset'])),
-            endpoint: bucket.opts.endpoint,
-            global: Boolean(resp.headers['x-ratelimit-global']),
-            method: bucket.opts.method
-          });
-
-          // Clear it if we already have one running
-          if (this._ratelimitTimeout) clearTimeout(this._ratelimitTimeout);
-
           this.ratelimited = true;
-          this._ratelimitTimeout = setTimeout(() => {
-            this.ratelimited = false;
-
-            /**
-             * Emitted when we are now un-ratelimited
-             * @fires restUnratelimit
-             */
-            this.client.emit('restUnratelimit');
-
-            // Execute the request
-            this.cache.addFirst(bucket);
-            this.dispatch(bucket);
-          }, Date.now() - (Number(resp.headers['retry-after'])));
-
-          return reject(error);
+          await Util.sleep(resp.headers['retry-after']);
+          return this.request(bucket);
         }
 
         // Check for 502 errors because Cloudflare is amazing!
@@ -222,10 +279,16 @@ module.exports = class RESTClient {
          * @param {RestCallProperties} props The properties
          */
         this.client.emit('restCall', {
+          ratelimitInfo: {
+            ratelimited: this.ratelimited,
+            resetTime: this.resetTime,
+            remaining: this.remaining
+          },
           successful: resp.successful,
           endpoint: bucket.opts.endpoint,
           method: bucket.opts.method,
           status: resp.status,
+          locked: this.locked,
           body: resp.text(),
           ping: this.ping
         });

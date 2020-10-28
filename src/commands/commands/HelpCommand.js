@@ -50,7 +50,7 @@ module.exports = class HelpCommand extends Command {
    * @param {{ cmdOrMod: import('../Command') | import('../Module') }} args The command's arguments
    */
   async run(ctx, args) {
-    if (!args) {
+    if (!args.cmdOrMod) {
       const commands = this.bot.commands.filter(async command => {
         let result;
         for (let i = 0; i < command.inhibitors.length; i++) {
@@ -91,7 +91,7 @@ module.exports = class HelpCommand extends Command {
           description: []
         };
 
-        for (const command of cmdOrMod.commands.values()) embed.description.push(`-> **${command.format()}: ${command.description}**`);
+        for (const command of args.cmdOrMod.commands.values()) embed.description.push(`-> **${command.format()}: ${command.description}**`);
 
         return ctx.send({
           embed: {
@@ -108,7 +108,7 @@ module.exports = class HelpCommand extends Command {
               `> :pencil2: **| ${args.cmdOrMod.description}**`,
               '',
               '```apache',
-              `Usage: ${cmdOrMod.format()}`,
+              `Usage: ${args.cmdOrMod.format()}`,
               '```'
             ].join('\n'),
             color: 0x470B4D
