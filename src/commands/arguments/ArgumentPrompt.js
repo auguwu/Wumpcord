@@ -93,10 +93,29 @@ module.exports = class ArgumentPrompt {
       }
 
       try {
+        const message = await this.context.send([
+          `[ Prompt for **${this.context.author.tag}** ]`,
+          '',
+          `> :pencil2: **${argument.prompts.start || `What should I do with \`${argument.label}\`?`}**`,
+          '>',
+          '> You have 60 seconds to answer or this prompt will self-destroy itself. Alternatively,',
+          '> you can say `stop`, `abort`, or `die` to destroy this prompt yourself.'
+        ].join('\n'));
+
+        const msg = await this.context.channel.awaitMessages(message.author.id, (m) => m.author.id === message.author.id, 60);
+        if (['stop', 'abort', 'die'].includes(msg.content)) {
+          return {
+            failed: true,
+            reason: 'Prompt was self-destructed by user.'
+          };
+        }
+
         const value = await argument.parse(this.context, rawArg);
         collected[argument.label] = value;
       } catch(ex) {
-        console.log(ex);
+        console.trace('failed owo');
+        console.error(ex);
+
         return {
           failed: true,
           reason: 'Prompt has ended unexpectedly.'

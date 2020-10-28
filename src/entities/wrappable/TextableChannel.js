@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-const MessageCollector = require('../utilities/MessageCollector');
+const MessageCollectorManager = require('../managers/MessageCollectorManager');
 const EmbedBuilder = require('../utilities/EmbedBuilder');
 const Multipart = require('../../util/Multipart');
 const Message = require('../Message');
@@ -166,7 +166,6 @@ class TextableChannel {
       'stopTyping',
       'getTyping',
       'awaitMessages',
-      'createMessageCollector',
       'getPins',
       'addPin',
       'deletePin',
@@ -317,33 +316,24 @@ class TextableChannel {
   }
 
   /**
-   * Creates a new [MessageCollector] instance
-   */
-  createMessageCollector() {
-    return new MessageCollector(this);
-  }
-
-  /**
    * Awaits a new message passed by the filter
    * and returns the result if any or an error
    * on why the collector has failed to succeed.
    *
+   * @param {string} userID The user's ID
    * @param {import('../utilities/MessageCollector').FilterFunction} filter The filter function
    * @param {number} [time=60000] The time to resolve this message
    */
-  awaitMessages(filter, time = 60) {
-    const collector = this.createMessageCollector();
+  awaitMessages(userID, filter, time = 60) {
     if (!this.collector) {
       /**
        * The message collector for this [TextableChannel]
+       * @type {MessageCollectorManager}
        */
-      this.collector = collector;
+      this.collector = new MessageCollectorManager(this.client, this);
     }
 
-    return this.collector.awaitMessage(filter, {
-      channelID: this.id,
-      time
-    });
+    return this.collector.createSession(userID, filter, { time });
   }
 
   /**

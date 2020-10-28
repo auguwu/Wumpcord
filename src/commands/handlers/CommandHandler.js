@@ -172,8 +172,6 @@ module.exports = class CommandHandler extends Collection {
     // If the message author is a bot or is System
     if (msg.author.system || msg.author.bot) return;
 
-    console.trace('passed bot test');
-
     // Let's get the prefixes
     const mention = new RegExp(`<@!${this.client.user.id}> `).exec(msg.content);
     const prefixes = this.client.prefixes.filter(Boolean);
@@ -193,8 +191,6 @@ module.exports = class CommandHandler extends Collection {
     // Let's not do anything if the prefix is null
     if (prefix === null) return;
 
-    console.trace('passed prefix check');
-
     // Now let's get the command and the args
     const args = msg.content.slice(prefix.length).split(/ +/g);
     const name = args.shift();
@@ -204,8 +200,6 @@ module.exports = class CommandHandler extends Collection {
 
     // Check if the command is `null`
     if (!commands.length) return;
-
-    console.trace('pass command check');
 
     const command = commands[0];
     const context = new Context(this.client, msg);
@@ -221,8 +215,6 @@ module.exports = class CommandHandler extends Collection {
     }
 
     if (failed.length) {
-      console.trace('failed inhibitor check');
-
       /**
        * Emitted when the user has failed a check
        * @fires inhibitor.failed
@@ -232,8 +224,6 @@ module.exports = class CommandHandler extends Collection {
       this.client.emit('inhibitor.failed', context, failed);
       return;
     }
-
-    console.trace('passed inhibitor check');
 
     // Now we check for args!
     const prompt = new ArgumentPrompt(command, context);
@@ -252,8 +242,6 @@ module.exports = class CommandHandler extends Collection {
       return;
     }
 
-    console.trace('passed argument check');
-
     // Now we check for cooldowns
     const token = this.cooldowns.check(command, context);
     if (token && token.throttled) {
@@ -268,7 +256,6 @@ module.exports = class CommandHandler extends Collection {
 
     try {
       await command.run(context, allArgs.collected);
-      console.trace('passed command check');
     } catch(ex) {
       const error = new Error(ex.message);
       error.name = 'CommandError';
