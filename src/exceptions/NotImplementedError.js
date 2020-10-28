@@ -30,7 +30,7 @@ module.exports = class NotImplementedError extends Error {
    * @param {string} method The method that this error is being thrown at
    */
   constructor(klazz, method) {
-    super(`Method "${klazz}#${method}" is not implemented at this current time.`);
+    super(`Method "${klazz}#${method}" is not implemented at this given time.`);
 
     this.name = 'NotImplementedError';
   }
