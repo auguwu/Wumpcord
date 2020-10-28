@@ -28,6 +28,7 @@
  */
 
 import * as discord from 'discord-api-types/v8';
+import { Tracing } from 'trace_events';
 import * as core from '../core';
 
 // Gateway-related content
@@ -46,35 +47,114 @@ export interface SessionStartLimit {
   total: number;
 }
 
-// Extendable objects
-interface DynamicImage {
-  dynamicAvatarUrl?(format?: core.ImageFormats, size?: number): string | null;
-  dynamicSplashUrl?(format?: core.ImageFormats, size?: number): string | null;
-  dynamicBannerUrl?(format?: core.ImageFormats, size?: number): string | null;
-  dynamicIconUrl?(format?: core.ImageFormats, size?: number): string | null;
-}
+type AnyChannel = TextChannel | DMChannel | GroupChannel | VoiceChannel | StoreChannel | NewsChannel;
 
+// Extendable objects
 interface Editable {
-  edit?(
+  edit(
     content: string | CreateMessageOptions | MessageFile | MessageFile[],
     options?: CreateMessageOptions | MessageFile | MessageFile[]
   ): Promise<Message>;
 }
 
 interface Textable {
-  createMessageCollector?(): core.MessageCollector;
-  permissionsOf?(memberID: string): core.Permissions;
-  awaitMessages?(filter: core.FilterFunction<Message>, time?: number): void;
-  startTyping?(count?: number): Promise<void>;
-  getMessages?(amount: number, options?: GetMessageOptions): Promise<Message[]>;
-  stopTyping?(force?: boolean): Promise<void>;
-  bulkDelete?(messageIDs: (string | Message)[]): Promise<string[]>;
-  deletePin?(message: Message): Promise<void>;
-  getTyping?(userID: string): core.UserTyping | null;
-  getPins?(): Promise<Message[]>;
-  addPin?(message: Message): Promise<void>;
-  send?(
+  permissionsOf(memberID: string): core.Permissions;
+  awaitMessages(filter: core.FilterFunction<Message>, time?: number): void;
+  startTyping(count?: number): Promise<void>;
+  getMessages(amount: number, options?: GetMessageOptions): Promise<Message[]>;
+  stopTyping(force?: boolean): Promise<void>;
+  bulkDelete(messageIDs: (string | Message)[]): Promise<string[]>;
+  deletePin(message: Message): Promise<void>;
+  getTyping(userID: string): core.UserTyping | null;
+  getPins(): Promise<Message[]>;
+  addPin(message: Message): Promise<void>;
+  send(
     content: string | CreateMessageOptions | MessageFile[] | MessageFile,
     options?: CreateMessageOptions | MessageFile[] | MessageFile
   ): Promise<Message>;
 }
+
+interface CreateMessageOptions {
+  allowedMentions?: core.AllowedMentions;
+  content: string;
+  embed?: discord.APIEmbed;
+  file?: MessageFile;
+  tts?: boolean;
+}
+
+interface MessageFile {
+  name?: string;
+  file: core.Multipart | Buffer;
+}
+
+// Discord API objects made for Wumpcord
+export class Activity {
+  constructor(data: discord.GatewayActivity);
+
+  public timestamps: discord.GatewayActivity['timestamps'];
+  public sessionID?: string;
+  public createdAt: Date;
+  public details: discord.GatewayActivity['details'];
+  public syncID?: string;
+  public emoji?: PartialEmoji;
+  public state: discord.GatewayActivity['state'];
+  public party: discord.GatewayActivity['party'];
+  public type: string;
+  public name: string;
+  public rpc: boolean;
+  public id: string;
+}
+
+export class Application extends Base {
+  constructor(client: core.Client, data: discord.APIApplication);
+
+  public get coverUrl(): string | null;
+  public get iconUrl(): string | null;
+  public rpcOrigins?: string[];
+  public primarySKU?: string;
+  public coverImage?: string;
+  public description: string;
+  public codeGrant: boolean;
+  public guildID?: string;
+  public summary: string;
+  public guild?: Guild;
+  public owner: User;
+  public team?: Team;
+  public slug?: string;
+  public icon: string | null;
+  public name: string;
+
+  public dynamicCoverUrl(format?: core.ImageFormats, size?: number): string | null;
+  public dynamicIconUrl(format?: core.ImageFormats, size?: number): string | null;
+}
+
+export class Attachment extends Base {
+  constructor(data: discord.APIAttachment);
+
+  public proxyUrl: string;
+  public height: string;
+  public width: string;
+  public size: string;
+  public url: string;
+}
+
+declare class Base {
+  constructor(id: string);
+
+  public createdAt: Date;
+  public id: string;
+}
+
+export class BaseChannel extends Base {
+  constructor(data: discord.APIChannel);
+
+  public static from(client: core.Client, data: any): AnyChannel;
+  public type: string;
+}
+
+export class BotUser extends User {
+  public mfaEnabled: boolean;
+  public verified: boolean;
+}
+
+
