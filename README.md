@@ -43,7 +43,6 @@ client.start();
 ## Sharding
 There is two ways of sharding your bot:
 
-- Using the [Clustering](#clustering) API
 - Using the normal client
 
 ### Normal client
@@ -75,6 +74,8 @@ client.start();
 ```
 
 ## Clustering
+> :warning: **| This section is under expiremental features, this is not a finalised version.**
+>
 > Only use the API if your bot is over ~10k guilds or more since the Client will error if it's over the cap to use the Clustering API (may change in the future)
 
 This is basically an extension to Wumpcord that allows the ability to cluster your bot without any external dependencies.
@@ -180,6 +181,8 @@ new CommandClient({
 ```
 
 ## OAuth2 API
+> :warning: **| This section is under expiremental features, this is not a finalised version.**
+
 Wumpcord provides a `OAuth2Client` to do stuff related to Discord's API, you can view the [documentation](https://docs.augu.dev/Wumpcord/notes#oauth2) for more information.
 
 To initialise it, we need to use the `oauth2` namespace when importing the library, so like:
