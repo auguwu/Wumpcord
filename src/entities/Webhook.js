@@ -151,7 +151,27 @@ class Webhook extends Base {
       return this;
     });
   }
+
+  /**
+   * Sends a message to the webhook's channel
+   * @param {string | SendMessageOptions} content The content to send
+   * @param {SendMessageOptions} [options] Any additional options to use
+   */
+  send() {
+    if (this.token === undefined) throw new TypeError('Missing `token` variable in this [Webhook] class.');
+  }
 }
+
+/*
+content	string	the message contents (up to 2000 characters)	one of content, file, embeds
+username	string	override the default username of the webhook	false
+avatar_url	string	override the default avatar of the webhook	false
+tts	boolean	true if this is a TTS message	false
+file	file contents	the contents of the file being sent	one of content, file, embeds
+embeds	array of up to 10 embed objects	embedded rich content	one of content, file, embeds
+payload_json	string	See message create	multipart/form-data only
+allowed_mentions	allowed mention object	allowed mentions for the message	false
+*/
 
 DynamicImage.decorate(Webhook, ['avatar']);
 module.exports = Webhook;
