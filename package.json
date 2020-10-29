@@ -33,7 +33,7 @@
     "@augu/eslint-config": "1.8.3",
     "@types/node": "14.14.2",
     "@types/ws": "7.2.7",
-    "eslint": "7.12.0",
+    "eslint": "7.12.1",
     "typescript": "4.0.3"
   },
   "peerDependencies": {
