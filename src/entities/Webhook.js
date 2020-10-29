@@ -26,6 +26,7 @@ const PartialGuild = require('./partial/Guild');
 const DynamicImage = require('./wrappable/DynamicImage');
 const Base = require('./Base');
 const NotImplementedError = require('../exceptions/NotImplementedError');
+const Util = require('../util/Util');
 
 class Webhook extends Base {
   /**
@@ -157,8 +158,27 @@ class Webhook extends Base {
    * @param {string | SendMessageOptions} content The content to send
    * @param {SendMessageOptions} [options] Any additional options to use
    */
-  send() {
+  send(content, options) {
     if (this.token === undefined) throw new TypeError('Missing `token` variable in this [Webhook] class.');
+
+    const { url, data } = this._transformOptions(content, options);
+    return this.client.rest.dispatch({
+      endpoint: url,
+      method: 'post',
+      data
+    });
+  }
+
+  /**
+   * Transforms the options for [Webhook.send],
+   * this is an internal function and shouldn't be used elsewhere.
+   *
+   * @param {string | SendMessageOptions} content The content to send
+   * @param {SendMessageOptions} [options] Any additional options
+   * @returns {{ data: any; url: string; }} Returns the data that was transformed
+   */
+  _transformOptions(content, options) {
+    
   }
 }
 
@@ -169,7 +189,6 @@ avatar_url	string	override the default avatar of the webhook	false
 tts	boolean	true if this is a TTS message	false
 file	file contents	the contents of the file being sent	one of content, file, embeds
 embeds	array of up to 10 embed objects	embedded rich content	one of content, file, embeds
-payload_json	string	See message create	multipart/form-data only
 allowed_mentions	allowed mention object	allowed mentions for the message	false
 */
 
