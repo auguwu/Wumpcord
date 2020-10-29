@@ -28,6 +28,7 @@ const Util = require('../../util/Util');
 const { Endpoints } = require('../../Constants');
 const Constants = require('../../Constants');
 const Permissions = require('../../util/Permissions');
+const Webhook = require('../Webhook');
 
 /**
  * Gets the content data for sending/editing messages
@@ -169,7 +170,8 @@ class TextableChannel {
       'getPins',
       'addPin',
       'deletePin',
-      'permissionsOf'
+      'permissionsOf',
+      'getWebhooks'
     );
 
     for (let i = 0; i < props.length; i++) {
@@ -437,6 +439,18 @@ class TextableChannel {
 
     if (overwrite) permission = (permission & ~overwrite.permissions.denied) | overwrite.permissions.allowed;
     return new Permissions(permission);
+  }
+
+  /**
+   * Gets a list of webhooks available in the channel
+   * @returns {Promise<Webhook[]>} Returns an array of
+   * Webhook objects or a REST error of anything occured
+   */
+  getWebhooks() {
+    return this.client.rest.dispatch({
+      endpoint: `/channels/${this.id}/webhooks`,
+      method: 'get'
+    }).then(data => data.map(d => new Webhook(this.client, d)));
   }
 }
 
