@@ -61,6 +61,12 @@ module.exports = class WebSocketShard extends EventBus {
     this.reconnectTime = Util.get('reconnectTimeout', 7000, options);
 
     /**
+     * Closing sequence number
+     * @type {number}
+     */
+    this.closeSeq = -1;
+
+    /**
      * List of unavailable guilds
      * @type {Set<string>}
      */
@@ -101,6 +107,12 @@ module.exports = class WebSocketShard extends EventBus {
      * Collection or a number of the guilds for this shard
      */
     this.guilds = client.canCache('guild') ? new Collection() : 0;
+
+    /**
+     * If we acked an heartbeat previously
+     * @type {boolean}
+     */
+    this.acked = true;
 
     /**
      * The sequence number
@@ -323,7 +335,8 @@ module.exports = class WebSocketShard extends EventBus {
    * @arity Wumpcord.Sharding.WebSocketShard.onClose/2
    */
   onClose(code, reason) {
-    console.trace(`[${code}] ${reason}`);
+    if (this.seq !== -1) this.closeSeq = this.seq;
+
     if (code) {
       this.debug(`Connection has closed ${code === 1000 ? 'cleanly' : 'uncleanly'} for ${reason || 'no reason?'}`);
       let error = new Error(`${code}: ${reason === '' ? 'None' : reason}`);
@@ -485,8 +498,11 @@ module.exports = class WebSocketShard extends EventBus {
           if (this._heartbeatInterval) clearInterval(this._heartbeatInterval);
 
           this._heartbeatInterval = setTimeout(() => this.sendHeartbeat(), data.d.heartbeat_interval);
+          this._heartbeatInterval.unref();
         }
 
+        // i have no idea honestly
+        this.sendHeartbeat();
         this.status = Constants.ShardStatus.Nearly;
         if (this.sessionID) {
           this.resume();
@@ -496,8 +512,12 @@ module.exports = class WebSocketShard extends EventBus {
       } break;
 
       case Constants.OPCodes.HeartbeatAck: {
+        this.acked = true;
         this.lastReceived = new Date().getTime();
         this.debug('Received heartbeat back! Connection is stable.');
+
+        // Let's see if this works?
+        this._heartbeatInterval.unref();
       } break;
 
       default: {
@@ -521,8 +541,13 @@ module.exports = class WebSocketShard extends EventBus {
    */
   sendHeartbeat() {
     if (this.status !== Constants.ShardStatus.Connected) return;
+    if (!this.acked) {
+      this.debug('Didn\'t receive heartbeat back, restarting service');
+      return this.disconnect(true, 1012);
+    }
 
     this.lastSent = new Date().getTime();
+    this.acked = false;
     this.send(Constants.OPCodes.Heartbeat, this.seq);
     this.debug('Sent heartbeat to Discord');
   }

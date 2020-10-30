@@ -178,7 +178,7 @@ class Webhook extends Base {
    * @returns {{ data: any; url: string; }} Returns the data that was transformed
    */
   _transformOptions(content, options) {
-    
+
   }
 }
 
