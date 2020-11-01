@@ -26,20 +26,12 @@ const BaseChannel = require('./BaseChannel');
 const Attachment = require('./Attachment');
 const Guild = require('./Guild');
 const Base = require('./Base');
-const Utilities = require('../util/Util');
 const Constants = require('../Constants');
 const Sticker = require('./Sticker');
 const Editable = require('./wrappable/Editable');
 const Emoji = require('./Emoji');
 const Util = require('../util/Util');
-const User = require('./User');
-
-/**
- * Checks if an object is a [MessageFile] instance
- * @param {unknown} obj The object
- * @returns {obj is import('./channel/DMChannel').MessageFile} Returns a boolean value if it is or not
- */
-const isMessageFile = (obj) => typeof obj === 'object' && !Array.isArray(obj) && obj.hasOwnProperty('file');
+const PaginationBuilder = require('./utilities/PaginationBuilder');
 
 /**
  * Represents a [Discord] message
@@ -272,51 +264,6 @@ class Message extends Base {
   }
 
   /**
-   * Edits the message
-   * @param {string | import('./channel/DMChannel').CreateMessageOptions} content The content to send
-   * @param {import('./channel/DMChannel').CreateMessageOptions} [options] Any additional options
-   * @returns {Promise<Message>} Returns a message instance of the edited message or `null` if can't be patched
-   */
-  async edit(content, options) {
-    let send;
-
-    if (typeof content === 'string') {
-      send = { content };
-    } else if (typeof content === 'object') {
-      if (Array.isArray(content))
-        throw new Error('Cannot edit message with file(s).');
-      else if (isMessageFile(content))
-        throw new Error('Cannot edit message with file.');
-      else {
-        if (send.hasOwnProperty('content')) throw new SyntaxError('`content` is already populated');
-        if (!send.hasOwnProperty('content') && content.hasOwnProperty('content')) send.content = content.content;
-        if (content.hasOwnProperty('embed')) send.embed = content.embed;
-        if (content.hasOwnProperty('allowedMentions')) send.allowed_mentions = Utilities.formatAllowedMentions(this.client, content.allowedMentions); // eslint-disable-line camelcase
-      }
-    } else if (typeof options === 'object') {
-      if (Array.isArray(content))
-        throw new Error('Cannot edit message with file(s).');
-      else if (isMessageFile(content))
-        throw new Error('Cannot edit message with file.');
-      else {
-        if (send.hasOwnProperty('content')) throw new SyntaxError('`content` is already populated');
-        if (!send.hasOwnProperty('content') && options.hasOwnProperty('content')) send.content = options.content;
-        if (options.hasOwnProperty('embed')) send.embed = options.embed;
-        if (options.hasOwnProperty('allowedMentions')) send.allowed_mentions = Utilities.formatAllowedMentions(this.client, options.allowedMentions); // eslint-disable-line camelcase
-      }
-    } else {
-      throw new SyntaxError('No content, file, or embed was specified.');
-    }
-
-    return this.client.rest.dispatch({
-      endpoint: Endpoints.Channel.message(this.channel ? this.channel.id : this.channelID, this.id),
-      method: 'patch',
-      data: send
-    })
-      .then(data => new Message(this.client, data));
-  }
-
-  /**
    * Cross-posts this message to all guilds, if the message's channel is considered a News Channel.
    * @returns {Promise<Message>} Returns the message that was cross-posted
    * or a REST error if anything occured
@@ -420,7 +367,7 @@ class Message extends Base {
     return this.client.rest.dispatch({
       endpoint: url,
       method: 'GET'
-    }).then(data => data.map(user => new User(this.client, user)));
+    }).then(data => data.map(user => new (require('../User'))(this.client, user)));
   }
 
   /**
@@ -473,6 +420,17 @@ class Message extends Base {
     if (Util.isTextableChannel(channel)) return channel.unpin(this);
 
     throw new TypeError(`Channel "${channel.id}" was not a textable channel`);
+  }
+
+  /**
+   * Creates a pagination builder instance of this [Message]
+   * @param {import('./utilities/PaginationBuilder')} [options] The options to use
+   */
+  async paginate(options) {
+    const builder = new PaginationBuilder(this, options);
+
+    await builder.init();
+    builder.run();
   }
 
   toString() {

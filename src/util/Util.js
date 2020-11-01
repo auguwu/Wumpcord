@@ -352,6 +352,17 @@ module.exports = class Utilities {
   }
 
   /**
+   * Returns if the value is a TextableChannel instance
+   * @param {unknown} value The value
+   * @returns {value is import('..').GuildTextableChannel}
+   */
+  static isTextableChannel(value) {
+    return value instanceof require('../entities/channel/TextChannel')
+      || value instanceof require('../entities/channel/StoreChannel')
+      || value instanceof require('../entities/channel/NewsChannel');
+  }
+
+  /**
    * Set of lodash functions that are modified to the library's
    * expectations so we don't bundle in a huge library into the
    * project.

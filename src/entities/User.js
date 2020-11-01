@@ -22,7 +22,6 @@
 
 const { UserFlags, CdnUrl, Endpoints } = require('../Constants');
 const TextableChannel = require('./wrappable/TextableChannel');
-const DMChannel = require('./channel/DMChannel');
 const Base = require('./Base');
 const DynamicImage = require('./wrappable/DynamicImage');
 
@@ -179,7 +178,7 @@ class User extends Base {
         }
       });
 
-      const channel = new DMChannel(this.client, data);
+      const channel = new (require('./channel/DMChannel'))(this.client, data);
       this.client.insert('channel', channel);
 
       /**

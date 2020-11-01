@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-const WebhookClient = require('./gateway/WebhookClient');
 const EmbedBuilder = require('./entities/utilities/EmbedBuilder');
 const Permissions = require('./util/Permissions');
 const { version } = require('../package.json');
@@ -39,7 +38,6 @@ module.exports = {
   commands,
   Permissions,
   Util,
-  WebhookClient,
   EmbedBuilder
 };
 

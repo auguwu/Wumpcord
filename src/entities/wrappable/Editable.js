@@ -20,9 +20,22 @@
  * SOFTWARE.
  */
 
+const EmbedBuilder = require('../utilities/EmbedBuilder');
 const { Endpoints } = require('../../Constants');
 const Multipart = require('../../util/Multipart');
 const Message = require('../Message');
+const Util = require('../../util/Util');
+
+/**
+ * Resolves a [Embed] from a builder or an object
+ * @param {EmbedBuilder | import('../utilities/EmbedBuilder').Embed} value The value
+ * @returns {import('../utilities').Embed} The embed itself
+ */
+const resolveEmbed = (value) => {
+  if (value instanceof EmbedBuilder) return value.build();
+  if (typeof value === 'object' && !Array.isArray(value)) return value;
+  throw new TypeError(`Expecting \`object\` or \`EmbedBuilder\`, but received ${typeof value}`);
+};
 
 /**
  * Gets the content data for sending/editing messages

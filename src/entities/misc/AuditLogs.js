@@ -22,7 +22,6 @@
 
 const { Collection } = require('@augu/immutable');
 const AuditLogEntry = require('./AuditLogEntry');
-const User = require('../User');
 
 module.exports = class AuditLogs {
   /**
@@ -56,7 +55,7 @@ module.exports = class AuditLogs {
      * The users when fetched this audit log
      * @type {Array<import('../User')>}
      */
-    this.users = data.users.map(user => this.client.canCache('user') ? this.client.users.get(user.id) || new User(this.client, user) : new User(this.client, user));
+    this.users = data.users.map(user => this.client.canCache('user') ? this.client.users.get(user.id) || new (require('../User'))(this.client, user) : new (require('../User'))(this.client, user));
 
     /**
      * List of integrations

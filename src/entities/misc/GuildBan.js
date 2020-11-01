@@ -20,8 +20,6 @@
  * SOFTWARE.
  */
 
-const User = require('../User');
-
 /**
  * Represents a guild ban
  */
@@ -47,7 +45,7 @@ module.exports = class GuildBan {
     /**
      * The user instance
      */
-    this.user = client.canCache('user') ? client.users.get(data.user.id) || new User(client, data.user) : new User(client, data.user);
+    this.user = client.canCache('user') ? client.users.get(data.user.id) || new (require('../User'))(client, data.user) : new (require('../User'))(client, data.user);
   }
 };
 

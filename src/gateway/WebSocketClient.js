@@ -51,12 +51,6 @@ module.exports = class WebSocketClient extends EventBus {
     this.voiceConnections = null;
 
     /**
-     * The provider to use when caching
-     * @type {import('../caching/Provider')}
-     */
-    this.provider = opts.provider;
-
-    /**
      * The last shard ID
      */
     this.lastShardID = 1;
@@ -178,6 +172,15 @@ module.exports = class WebSocketClient extends EventBus {
 
       return intents;
     }
+  }
+
+  /**
+   * Check if the bot has the intent
+   * @param {import('../Constants').GatewayIntents} intent The intent to check
+   * @returns {boolean} If the bot has it added or not
+   */
+  hasIntent(intent) {
+    return !!(this.intents & Constants.GatewayIntents[intent]);
   }
 
   /**
