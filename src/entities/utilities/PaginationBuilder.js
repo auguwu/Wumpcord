@@ -89,6 +89,12 @@ module.exports = class PaginationBuilder {
     this.forthPageEmoji = Util.get('forthPageEmoji', undefined, options);
 
     /**
+     * If we should cycle through the pages, even if we went to the last page
+     * @type {boolean}
+     */
+    this.cycle = Util.get('cycle', false, options);
+
+    /**
      * The current page to switch to
      * @type {number}
      */
@@ -134,14 +140,15 @@ module.exports = class PaginationBuilder {
     if (this.timeout > 900000) throw new SyntaxError('Timeout can\'t be no longer than 15 minutes.');
     if (this.maxMatches !== Infinity && this.maxMatches > 1500) throw new SyntaxError('Maxmium page load can\'t be higher than 1,500 pages per concurrent embed.');
 
-    const page = this.pages[this.current - 1];
+    const permission = await this.hasPermission();
+    const page = this.pages[this.current === this.pages.length ? this.current - 1 : this.current];
+    const showPageContent = this.showPageNumbers ? `[ Viewing page **${this.current}/${this.pages.length}** ]\n${permission ? '' : '> :pencil2: **Missing \`Manage Messages\` to edit reactions, this prompt might not work without it!**'}` : '';
+
     const content = {
       embed: typeof page === 'object' ? page : undefined,
       content: typeof page === 'string'
-        ? page
-        : this.showPageNumbers
-          ? `[ Viewing page **${this.current}/${this.pages.length}** ]`
-          : ''
+        ? `${page}\n${showPageContent}`
+        : 'Nothing to display?'
     };
 
     if (this.invoked.author.id === this.invoked.client.user.id) {
@@ -177,7 +184,7 @@ module.exports = class PaginationBuilder {
    */
   async react(emoji) {
     await this.message.react(emoji);
-    await Util.sleep(3000);
+    await Util.sleep(2000);
   }
 
   /**
@@ -201,32 +208,85 @@ module.exports = class PaginationBuilder {
 
   /**
    * Check if we have permissions to remove the reaction
+   * @returns {Promise<boolean>} If we have permission to manage messages or not
    */
-  hasPermission() {
-    return this.message.guild !== undefined && this.message.channel.permissionsOf(this.message.client.user.id).has('manageMessages');
+  async hasPermission() {
+    const message = this.message || this.invoked;
+    if (!message.hasOwnProperty('guild')) await message.getGuild();
+    if (!message.hasOwnProperty('channel')) await message.getChannel();
+
+    return (await message.channel.permissionsOf(message.client.user.id)).has('manageMessages');
   }
 
   /**
    * Updates the message with the page
    */
-  update() {
-    const page = this.pages[this.current - 1];
-    this.message.edit({
+  async update() {
+    const permission = await this.hasPermission();
+    const page = this.pages[this.current === this.pages.length ? this.current - 1 : this.current];
+    const showPageContent = this.showPageNumbers ? `[ Viewing page **${this.current}/${this.pages.length}** ]\n${permission ? '' : '> :pencil2: **Missing \`Manage Messages\` to edit reactions, this prompt might not work without it!**'}` : '';
+    const content = {
       embed: typeof page === 'object' ? page : undefined,
       content: typeof page === 'string'
-        ? page
-        : this.showPageNumbers
-          ? `[ Viewing page **${this.current}/${this.pages.length}** ]`
-          : ''
-    });
+        ? `${page}\n${showPageContent}`
+        : 'Nothing to display?'
+    };
+
+    await this.message.edit(content);
   }
 
   /**
    * Runs the actual pagination builder
    */
   run() {
-    this.reactions.on('react', (event) => {
-      console.log(event);
+    this.reactions.on('react', async (event) => {
+      if (this.firstPageEmoji !== undefined && event.emoji.name === this.firstPageEmoji) {
+        if (await this.hasPermission()) await event.message.unreact(this.firstPageEmoji, event.message.author.id);
+        if (this.current > 1) {
+          this.current = 1;
+          await this.update();
+        }
+      }
+
+      if (this.forthPageEmoji !== undefined && event.emoji.name === this.forthPageEmoji) {
+        if (await this.hasPermission()) await event.message.unreact(this.firstPageEmoji, event.message.author.id);
+
+        if (this.current < this.pages.length) {
+          this.current++;
+          await this.update();
+        } else if (this.current === 1 && this.cycle === true) {
+          this.current = this.pages.length;
+          await this.update();
+        }
+      }
+
+      if (this.lastPageEmoji !== undefined && event.emoji.name === this.lastPageEmoji) {
+        if (await this.hasPermission()) await event.message.unreact(this.firstPageEmoji, event.message.author.id);
+        if (this.current < this.pages.length) {
+          this.current = this.pages.length;
+          await this.update();
+        }
+      }
+
+      if (this.backwardPageEmoji && event.emoji.name === this.backwardPageEmoji) {
+        if (await this.hasPermission()) await event.message.unreact(this.firstPageEmoji, event.message.author.id);
+
+        if (this.pages > 1) {
+          this.pages--;
+          await this.update();
+        } else if (this.current === 1 && this.cycle === true) {
+          this.current = this.pages.length;
+          await this.update();
+        }
+      }
+
+      if (event.emoji.name === this.trashEmoji) {
+        try {
+          await event.message.deleteReactions();
+        } catch(ex) {
+          await event.message.edit('Unable to remove reactions, do I have the **Manage Messages** permission?');
+        }
+      }
     });
   }
 };
@@ -240,6 +300,7 @@ module.exports = class PaginationBuilder {
  * @prop {number} [maxMatches=Infinity] The maxmium page load to use
  * @prop {string} [trashEmoji='🗑️'] The trash emoji to dispose this [PaginationBuilder], if it's not specified it'll not dispose itself
  * @prop {number} [timeout=60000] The timeout to dipose this [PaginationBuilder] instance
+ * @prop {boolean} [cycle=false] If we should cycle through all of the pages even if we reached the last one
  * @prop {boolean} [show=false] If we should show the page numbers or not
  * @prop {Array<string | import('./EmbedBuilder') | import('./EmbedBuilder').Embed>} [pages] The pages to add
  */

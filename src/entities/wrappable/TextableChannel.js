@@ -402,7 +402,7 @@ class TextableChannel {
    * Gets the [Permissions] instance of a member in this channel
    * @param {string} memberID The member's ID
    */
-  permissionsOf(memberID) {
+  async permissionsOf(memberID) {
     if (!this.guild) throw new Error(`Base "${this.constructor.name}" is not a Guild channel.`);
 
     /** @type {import('../GuildMember')} */
@@ -411,9 +411,7 @@ class TextableChannel {
     if (this.client.canCache && this.guild.members.has(memberID)) {
       member = this.guild.members.get(memberID);
     } else {
-      this.guild.fetchMember(memberID).then(e => {
-        member = e;
-      });
+      member = await this.guild.fetchMember(memberID);
     }
 
     let permission = member.permission.allowed;

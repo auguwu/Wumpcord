@@ -286,9 +286,11 @@ class Message extends Base {
    * if `reaction` is the `Emoji` class, it'll use `Emoji.mention` to parse the emoji
    * or you'll have to parse it yourself. You can use `Util.parseEmoji('id', 'name', animated)` to
    * parse it yourself.
+   *@param {string} [userID] The user to remove the reaction from
+   *
    * @returns {Promise<void>} Returns an empty promise
    */
-  react(reaction) {
+  react(reaction, userID = '@me') {
     let emote;
     if (reaction instanceof Emoji) emote = `:${reaction.name}:${reaction.id}`;
     else {
@@ -298,7 +300,7 @@ class Message extends Base {
     }
 
     return this.client.rest.dispatch({
-      endpoint: `/channels/${this.channelID}/messages/${this.id}/reactions/${emote}/@me`,
+      endpoint: `/channels/${this.channelID}/messages/${this.id}/reactions/${emote}/${userID}`,
       method: 'PUT'
     });
   }
@@ -312,10 +314,11 @@ class Message extends Base {
    * this can be an instance of `Emoji` or a string. If you want
    * to pass in a custom emote, you can use the Emoji instance
    * or use the `Util.parseEmoji/3` utility function.
+   * @param {string} [userID] The user to remove the reaction from
    *
    * @returns {Promise<void>} Empty promise of nothing.
    */
-  unreact(reaction) {
+  unreact(reaction, userID = '@me') {
     let emote;
     if (reaction instanceof Emoji) emote = `:${reaction.name}:${reaction.id}`;
     else {
@@ -325,7 +328,7 @@ class Message extends Base {
     }
 
     return this.client.rest.dispatch({
-      endpoint: Endpoints.Channel.messageReaction(this.channelID, this.id, emote),
+      endpoint: Endpoints.Channel.messageReactionUser(this.channelID, this.id, emote, userID),
       method: 'DELETE'
     });
   }
@@ -376,27 +379,6 @@ class Message extends Base {
   deleteReactions() {
     return this.client.rest.dispatch({
       endpoint: Endpoints.Channel.messageReactions(this.channelID, this.id),
-      method: 'DELETE'
-    });
-  }
-
-  /**
-   * Deletes a single reaction, this will emit the `messageReactionRemoveEmoji`/`messageReactionRemove`
-   * event. The bot would require the **Manage Messages** permission.
-   *
-   * @param {string | Emoji} reaction The reaction to remove from
-   */
-  deleteReaction(reaction) {
-    let emote;
-    if (reaction instanceof Emoji) emote = `:${reaction.name}:${reaction.id}`;
-    else {
-      if (reaction === decodeURI(reaction)) emote = reaction;
-      else if (reaction.startsWith(':')) emote = reaction;
-      else throw new TypeError('Emote must be a unicode character or must be like ":name:id"');
-    }
-
-    return this.client.rest.dispatch({
-      endpoint: Endpoints.Channel.messageReaction(this.channelID, this.id, emote),
       method: 'DELETE'
     });
   }

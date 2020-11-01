@@ -79,6 +79,11 @@ module.exports = class ReactionCollector extends EventBus {
     this.disposed = false;
 
     this.client.on('messageReactionAdd', this.onReaction.bind(this));
+    this.client.on('messageReactionRemoveAll', async (message) => {
+      if (!message.author) return;
+      await message.delete();
+    });
+
     if (this.options.time) {
       /**
        * The timeout to run

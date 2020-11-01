@@ -40,7 +40,7 @@ const onMessageReactionRemoveAll = function ({ d: data }) {
   let channel = this.client.channels.get(data.channel_id) || { id: data.channel_id, messages: new Queue() };
   let message = channel.messages.find(msg => msg.id === data.message_id) || { id: data.message_id };
 
-  this.client.emit('messageReactionRemoveAll', message, new Emoji(this.client, data.emoji));
+  this.client.emit('messageReactionRemoveAll', message);
 };
 
 module.exports = onMessageReactionRemoveAll;
