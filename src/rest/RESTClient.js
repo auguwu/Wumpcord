@@ -196,7 +196,7 @@ module.exports = class RESTClient {
   request(bucket) {
     if (this.ratelimited) throw new Error('Currently ratelimited, paused execution');
 
-    if (!['get', 'head'].includes(bucket.opts.method.toLowerCase())) {
+    if (!['get', 'head'].includes(bucket.opts.method.toLowerCase()) && !bucket.opts.headers.hasOwnProperty('Content-Type')) {
       bucket.opts.headers['Content-Type'] = 'application/json';
     }
 

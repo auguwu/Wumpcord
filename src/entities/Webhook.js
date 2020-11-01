@@ -27,6 +27,7 @@ const DynamicImage = require('./wrappable/DynamicImage');
 const Base = require('./Base');
 const NotImplementedError = require('../exceptions/NotImplementedError');
 const Util = require('../util/Util');
+const Multipart = require('../util/Multipart');
 
 class Webhook extends Base {
   /**
@@ -161,9 +162,11 @@ class Webhook extends Base {
   send(content, options) {
     if (this.token === undefined) throw new TypeError('Missing `token` variable in this [Webhook] class.');
 
-    const { url, data } = this._transformOptions(content, options);
+    const { url, data, headers } = this._transformOptions(content, options);
+    console.log({ url, data, headers });
     return this.client.rest.dispatch({
       endpoint: url,
+      headers,
       method: 'post',
       data
     });
@@ -173,24 +176,129 @@ class Webhook extends Base {
    * Transforms the options for [Webhook.send],
    * this is an internal function and shouldn't be used elsewhere.
    *
-   * @param {string | SendMessageOptions} content The content to send
+   * @param {string | SendMessageOptions | import('..').MessageFile | Array<import('..').MessageFile>} content The content to send
    * @param {SendMessageOptions} [options] Any additional options
-   * @returns {{ data: any; url: string; }} Returns the data that was transformed
+   * @returns {{ data: any; url: string; headers?: { [x: string]: any } }} Returns the data that was transformed
    */
   _transformOptions(content, options) {
+    let send = {};
+    const headers = {};
 
+    if (typeof content === 'string' && options === undefined) {
+      return {
+        headers: {},
+        data: { content },
+        url: `/webhooks/${this.id}/${this.token}?wait=true`
+      };
+    }
+
+    if (typeof content === 'object') {
+      if (Array.isArray(content)) {
+        if (content.some(x => !Util.isMessageFile(x))) {
+          const filtered = content.filter(x => !Util.isMessageFile(x));
+          throw new TypeError(`${filtered.length} item(s) were not a instance of [MessageFile]`);
+        }
+
+        const data = new Multipart();
+        headers['Content-Type'] = `multipart/form-data; boundary=${multipart.boundary}`;
+        for (let i = 0; i < content.length; i++) {
+          const file = content[i];
+          if (!file.file) continue;
+
+          const name = file.name || 'file.png';
+          data.append(name, file.file, name);
+        }
+
+        send = data.finish();
+      }
+
+      if (Util.isMessageFile(content)) {
+        const data = new Multipart();
+        headers['Content-Type'] = `multipart/form-data; boundary=${multipart.boundary}`;
+
+        if (!content.file) throw new TypeError('Missing `file` in [MessageFile], under Webhook#send.');
+
+        const name = content.name || 'file.png';
+        data.append(name, content.file, name);
+      }
+
+      const available = ['content', 'embeds', 'avatarUrl', 'username', 'file', 'allowedMentions'];
+      const populated = [];
+
+      for (let i = 0; i < available.length; i++) {
+        if (Object.hasOwnProperty.call(send, available[i])) {
+          populated.push(available[i]);
+        }
+      }
+
+      if (populated.length) throw new TypeError(`Properties ${available.join(', ')} are already populated`);
+      if (content.hasOwnProperty('avatarUrl')) send.avatar_url = data.avatarUrl; // eslint-disable-line
+      if (content.hasOwnProperty('username')) send.username = data.username;
+      if (content.hasOwnProperty('mentions')) send.allowed_mentions = Util.formatAllowedMentions(this.client.options.allowedMentions, content.allowed_mentions); // eslint-disable-line
+      if (content.hasOwnProperty('content')) send.content = content.content;
+      if (content.hasOwnProperty('embeds')) send.embeds = content.embeds;
+      if (content.hasOwnProperty('tts')) send.tts = Boolean(content.tts);
+    } else if (typeof options === 'object') {
+      if (Array.isArray(content)) {
+        if (content.some(x => !Util.isMessageFile(x))) {
+          const filtered = content.filter(x => !Util.isMessageFile(x));
+          throw new TypeError(`${filtered.length} item(s) were not a instance of [MessageFile]`);
+        }
+
+        const data = new Multipart();
+        headers['Content-Type'] = `multipart/form-data; boundary=${multipart.boundary}`;
+        for (let i = 0; i < content.length; i++) {
+          const file = content[i];
+          if (!file.file) continue;
+
+          const name = file.name || 'file.png';
+          data.append(name, file.file, name);
+        }
+
+        send = data.finish();
+      }
+
+      if (Util.isMessageFile(content)) {
+        const data = new Multipart();
+        headers['Content-Type'] = `multipart/form-data; boundary=${multipart.boundary}`;
+
+        if (!content.file) throw new TypeError('Missing `file` in [MessageFile], under Webhook#send.');
+
+        const name = content.name || 'file.png';
+        data.append(name, content.file, name);
+      }
+
+      const available = ['content', 'embeds', 'avatarUrl', 'username', 'file', 'allowedMentions'];
+      const populated = [];
+
+      for (let i = 0; i < available.length; i++) {
+        if (Object.hasOwnProperty.call(send, available[i])) {
+          populated.push(available[i]);
+        }
+      }
+
+      if (populated.length) throw new TypeError(`Properties ${available.join(', ')} are already populated`);
+      if (options.hasOwnProperty('avatarUrl')) send.avatar_url = data.avatarUrl; // eslint-disable-line
+      if (options.hasOwnProperty('username')) send.username = data.username;
+      if (options.hasOwnProperty('mentions')) send.allowed_mentions = Util.formatAllowedMentions(this.client.options.allowedMentions, options.mentions); // eslint-disable-line
+      if (options.hasOwnProperty('content')) send.content = content.content;
+      if (options.hasOwnProperty('embeds')) send.embeds = content.embeds;
+      if (options.hasOwnProperty('tts')) send.tts = Boolean(content.tts);
+    }
+
+    const shouldWait = content.hasOwnProperty('wait') && typeof content.wait === 'boolean'
+      ? content.wait
+      : options && options.hasOwnProperty('wait') && typeof options.wait === 'boolean'
+        ? options.wait
+        : true;
+
+    return {
+      data: send,
+      headers,
+      url: `/webhooks/${this.id}/${this.token}?wait=${shouldWait ? 'true' : 'false'}`
+    };
   }
 }
-
-/*
-content	string	the message contents (up to 2000 characters)	one of content, file, embeds
-username	string	override the default username of the webhook	false
-avatar_url	string	override the default avatar of the webhook	false
-tts	boolean	true if this is a TTS message	false
-file	file contents	the contents of the file being sent	one of content, file, embeds
-embeds	array of up to 10 embed objects	embedded rich content	one of content, file, embeds
-allowed_mentions	allowed mention object	allowed mentions for the message	false
-*/
 
 DynamicImage.decorate(Webhook, ['avatar']);
 module.exports = Webhook;
@@ -200,4 +308,12 @@ module.exports = Webhook;
  * @prop {string} [channelID] The channel to move to
  * @prop {any} [image] The new avatar
  * @prop {string} name The name of the webhook
+ *
+ * @typedef {object} SendMessageOptions
+ * @prop {string} [avatarUrl] The avatar URL to use
+ * @prop {string} [username] The username to set the webhook as
+ * @prop {import('../gateway/WebSocketClient').AllowedMentions} [mentions] Any allowed mentions to use
+ * @prop {string} [content] The content to send
+ * @prop {Array<import('./utilities/EmbedBuilder').Embed>} [embeds] List of embeds to display
+ * @prop {boolean} [tts] If we should use the Text to Speech feature
  */

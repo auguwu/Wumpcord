@@ -141,7 +141,6 @@ const resolveEmbed = (value) => {
  * Represents a textable channel with methods like `send`.
  *
  * Use `TextableChannel.decorate/3` to decorate a channel with the functions available
- * @template T The channel generic
  */
 class TextableChannel {
   /**

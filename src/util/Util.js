@@ -336,7 +336,9 @@ module.exports = class Utilities {
    */
   static isMessageFile(value) {
     if (Array.isArray(value)) return value.some(val => Object.hasOwnProperty.call(val, 'file'));
-    return typeof value === 'object' && this.isMultipart(value.file) || Buffer.isBuffer(value.file);
+    if (['', undefined, null].includes(value)) return false;
+
+    return typeof value === 'object' && Object.hasOwnProperty.call(value, 'file') && this.isMultipart(value.file) || Buffer.isBuffer(value.file);
   }
 
   /**
