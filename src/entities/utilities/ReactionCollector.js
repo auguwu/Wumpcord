@@ -42,7 +42,7 @@ module.exports = class ReactionCollector extends EventBus {
      * @private
      * @type {import('../../gateway/WebSocketClient')}
      */
-    this.client = message.guild ? message.guild.client : message.channel.client;
+    this.client = message.client;
 
     /**
      * The message to listen to reactions to
@@ -94,11 +94,13 @@ module.exports = class ReactionCollector extends EventBus {
    * @param {import('../User')} user The user who reacted to it
    * @param {import('../Emoji')} emoji The emoji they reacted to
    */
-  onReaction(message, user, emoji) {
+  async onReaction(message, user, emoji) {
     if (message.id !== this.message.id) return;
-    if (this.filter(message)) {
-      this.reactions.add({ message, user, emoji });
-      this.emit('react', message, user, emoji);
+
+    const cached = !message.hasOwnProperty('author') ? await this.client.getMessage(this.message.channelID, message.id) : message;
+    if (this.filter(cached)) {
+      this.reactions.add({ message: cached, user, emoji });
+      this.emit('react', { message: cached, user, emoji });
 
       if (this.reactions.size() > this.options.max) return this.end('maxTries');
     }

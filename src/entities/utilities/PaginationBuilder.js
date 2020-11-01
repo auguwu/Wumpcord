@@ -158,17 +158,26 @@ module.exports = class PaginationBuilder {
       this.message = await this.invoked.channel.send(content);
     }
 
-    if (this.firstPageEmoji !== undefined) await this.message.react(this.firstPageEmoji);
-    if (this.forthPageEmoji !== undefined) await this.message.react(this.forthPageEmoji);
-    if (this.lastPageEmoji !== undefined) await this.message.react(this.lastPageEmoji);
-    if (this.backPageEmoji !== undefined) await this.message.react(this.backPageEmoji);
-    await this.message.react(this.trashEmoji);
+    if (this.firstPageEmoji !== undefined) await this.react(this.firstPageEmoji);
+    if (this.forthPageEmoji !== undefined) await this.react(this.forthPageEmoji);
+    if (this.lastPageEmoji !== undefined) await this.react(this.lastPageEmoji);
+    if (this.backPageEmoji !== undefined) await this.react(this.backPageEmoji);
+    await this.react(this.trashEmoji);
 
     /**
      * The reaction handler to use
      */
-    this.reactions = new ReactionCollector(message, (m) => m.author.id === this.invoker.author.id);
+    this.reactions = new ReactionCollector(this.message, (m) => m.author.id === this.invoked.author.id, { max: this.maxMatches });
     this.ongoing = true;
+  }
+
+  /**
+   * React to a message but not get ratelimited
+   * @param {string} emoji The emoji
+   */
+  async react(emoji) {
+    await this.message.react(emoji);
+    await Util.sleep(3000);
   }
 
   /**
@@ -216,8 +225,8 @@ module.exports = class PaginationBuilder {
    * Runs the actual pagination builder
    */
   run() {
-    this.reactions.on('react', (message, user, emoji) => {
-      console.log(emoji);
+    this.reactions.on('react', (event) => {
+      console.log(event);
     });
   }
 };

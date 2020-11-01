@@ -28,7 +28,6 @@ const Guild = require('./Guild');
 const Base = require('./Base');
 const Constants = require('../Constants');
 const Sticker = require('./Sticker');
-const Editable = require('./wrappable/Editable');
 const Emoji = require('./Emoji');
 const Util = require('../util/Util');
 const PaginationBuilder = require('./utilities/PaginationBuilder');
@@ -431,6 +430,57 @@ class Message extends Base {
 
     await builder.init();
     builder.run();
+
+    return builder;
+  }
+
+  /**
+   * Edits the message
+   * @param {string | import('./wrappable/TextableChannel').CreateMessageOptions} content The content to send
+   * @param {import('./wrappable/TextableChannel').CreateMessageOptions} [options] Any additional options
+   * @returns {Promise<Message>} Returns a message instance of the edited message or `null` if can't be patched
+   */
+  async edit(content, options) {
+    let send = {};
+
+    if (typeof content === 'string') {
+      send = { content };
+    } else if (typeof content === 'object') {
+      if (Array.isArray(content))
+        throw new Error('Cannot edit message with file(s).');
+      else if (Util.isMessageFile(content))
+        throw new Error('Cannot edit message with file.');
+      else {
+        if (send.hasOwnProperty('content')) throw new SyntaxError('`content` is already populated');
+
+        if (!send.hasOwnProperty('content') && content.hasOwnProperty('content')) send.content = content.content;
+        if (content.hasOwnProperty('tts')) send.tts = Boolean(content.tts);
+        if (content.hasOwnProperty('embed')) send.embed = content.embed;
+        if (content.hasOwnProperty('allowedMentions')) send.allowed_mentions = Utilities.formatAllowedMentions(this.client, content.allowedMentions); // eslint-disable-line camelcase
+      }
+    } else if (typeof options === 'object') {
+      if (Array.isArray(options))
+        throw new Error('Cannot edit message with file(s).');
+      else if (Util.isMessageFile(options))
+        throw new Error('Cannot edit message with file.');
+      else {
+        if (send.hasOwnProperty('content')) throw new SyntaxError('`content` is already populated');
+
+        if (!send.hasOwnProperty('content') && options.hasOwnProperty('content')) send.content = options.content;
+        if (options.hasOwnProperty('tts')) send.tts = Boolean(options.tts);
+        if (options.hasOwnProperty('embed')) send.embed = options.embed;
+        if (options.hasOwnProperty('mentions')) send.allowed_mentions = Util.formatAllowedMentions(this.client, options.mentions); // eslint-disable-line camelcase
+      }
+    } else {
+      throw new SyntaxError('No content or embed was specified.');
+    }
+
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Channel.message(this.channel ? this.channel.id : this.channelID, this.id),
+      method: 'patch',
+      data: send
+    })
+      .then(data => new Message(this.client, data));
   }
 
   toString() {
@@ -438,8 +488,6 @@ class Message extends Base {
   }
 }
 
-// Adds methods from the "Editable" interface
-Editable.decorate(Message);
 module.exports = Message;
 
 /**
