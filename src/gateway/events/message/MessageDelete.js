@@ -44,14 +44,14 @@ const onMessageDelete = function ({ d: data }) {
     return;
   }
 
-  const message = channel.messages.find(m => m.id === data.id);
+  const message = channel.messages.get(data.id);
   if (!message) {
     this.debug('Message wasn\'t cached, will emit `messageDelete` with it\'s ID');
     this.client.emit('messageDelete', { id: data.id });
     return;
   }
 
-  channel.messages.remove(message);
+  channel.messages.cache.delete(data.id);
   this.client.emit('messageDelete', message);
 };
 

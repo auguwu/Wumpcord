@@ -47,7 +47,7 @@ const onChannelCreate = function ({ d: data }) {
   }
 
   const channel = BaseChannel.from(this.client, data);
-  guild.channels.set(channel.id, channel);
+  guild.channels.add(channel);
 
   this.client.emit('channelCreate', channel);
 };

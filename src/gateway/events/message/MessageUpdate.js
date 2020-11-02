@@ -54,7 +54,7 @@ const onMessageUpdate = function ({ d: data }) {
   }
 
   const msg = new Message(this.client, data);
-  channel.messages.remove(message.id);
+  channel.messages.cache.delete(message.id);
   channel.messages.add(msg);
 
   this.client.emit('messageUpdate', message, msg);

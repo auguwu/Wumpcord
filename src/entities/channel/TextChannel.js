@@ -25,6 +25,8 @@ const PermissionOverwrite = require('../PermissionOverwrite');
 const TextableChannel = require('../wrappable/TextableChannel');
 const BaseChannel = require('../BaseChannel');
 
+const ChannelMessageStore = require('../../stores/ChannelMessageStore');
+
 /**
  * Represents a text channel on Discord
  */
@@ -44,10 +46,10 @@ class TextChannel extends BaseChannel {
     this.permissionOverwrites = new Collection();
 
     /**
-     * List of messages to cache for this [TextChannel]
-     * @type {Queue<import('../Message')> | null}
+     * The message channel cache
+     * @type {ChannelMessageStore}
      */
-    this.messages = client.canCache('message') ? new Queue() : null;
+    this.messages = new ChannelMessageStore(client);
 
     /**
      * List of invites to cache for this [TextChannel]

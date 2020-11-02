@@ -50,6 +50,7 @@ const onChannelPinsUpdate = function ({ d: data }) {
 
   const oldTimestamp = channel.lastPinTimestamp;
   channel.lastPinTimestamp = data.last_pin_timestamp === null ? null : new Date(data.last_pin_timestamp);
+  guild.channels.add(channel);
 
   this.client.emit('channelPinsUpdate', channel, oldTimestamp, channel.lastPinTimestamp);
 };

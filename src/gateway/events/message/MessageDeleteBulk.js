@@ -49,13 +49,11 @@ const onMessageBulkDelete = function ({ d: data }) {
   const messages = new Collection();
   for (let i = 0; i < data.ids.length; i++) {
     const id = data.ids[i];
-    const msg = channel.messages.find(uwu => uwu.id === id);
+    const msg = channel.messages.get(id);
 
     if (msg) {
-      channel.messages.remove(msg);
+      channel.messages.cache.delete(msg.id);
       messages.set(msg.id, msg);
-    } else {
-      this.debug(`Possible uncached message "${id}"`);
     }
   }
 
