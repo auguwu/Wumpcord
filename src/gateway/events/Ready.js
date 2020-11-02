@@ -24,6 +24,8 @@ const { ShardStatus } = require('../../Constants');
 const { Collection } = require('@augu/immutable');
 const { BotUser } = require('../../entities');
 
+const ChannelStore = require('../../stores/ChannelStore');
+
 /**
  * Received when the dispatcher calls `READY`
  * @param {import('../WebSocketShard')} shard The shard
@@ -32,15 +34,15 @@ const onReady = function (shard, { d: data }) {
   shard.client.user = new BotUser(shard.client, data.user);
   shard.sessionID = data.session_id;
 
+  shard.client.channels = new ChannelStore(shard.client);
+
   if (shard.client.options.cacheType === 'all') {
     shard.client.voiceConnections = new Collection();
-    shard.client.channels = new Collection();
     shard.client.typings = new Collection();
     shard.client.guilds = new Collection();
     shard.client.users = new Collection({ [shard.client.user.id]: shard.client.user });
   } else {
     shard.client.voiceConnections = shard.client.canCache('voice:conenction') ? new Collection() : null;
-    shard.client.channels = shard.client.canCache('channel') ? new Collection() : null;
     shard.client.typings = shard.client.canCache('typing') ? new Collection() : null;
     shard.client.guilds = shard.client.canCache('guild') ? new Collection() : null;
     shard.client.users = shard.client.canCache('user') ? new Collection({ [shard.client.user.id]: shard.client.user }) : null;

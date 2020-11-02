@@ -26,7 +26,7 @@ const NotOverridedError = require('../exceptions/NotOverridedError');
 /**
  * Represents a [Store] to handle cache-related to Wumpcord
  * @template T: The cache object
- * @abstract Methods `fetch`, `get`, `add`, `delete`, and `patch` should be over-rided or it'll throw an Error.
+ * @abstract Method `fetch` should be over-rided or it'll throw an Error.
  */
 module.exports = class BaseStore {
   /**
@@ -82,13 +82,35 @@ module.exports = class BaseStore {
 
   /**
    * Gets an object from cache or returns `null` if not found
-   * @param {string | T} id The ID or the cachable object
+   * @param {string} id The ID of the cachable object to find
    * @returns {T | null} Returns the cached object or `null` if not found
    */
   get(id) {
-    if (id instanceof this.holdable) return id;
-    if (typeof id === 'string') return this.cache.get(id) || null;
+    return this.cache.get(id) || null;
+  }
 
-    return null;
+  /**
+   * Adds a new object to the cache
+   * @param {any} data The data supplied from Discord
+   * @returns {T} The cached object or a new instance of it
+   */
+  add(data) {
+    const existing = this.get(data.id);
+    if (existing && existing.patch) existing.patch(data);
+    if (existing) return existing;
+
+    const obj = data instanceof this.holdable
+      ? data
+      : this.injectClient
+        ? new this.holdable(this.client, data)
+        : new this.holdable(data);
+
+    if (this.canCache) this.cache.set(data.id, obj);
+
+    return obj;
+  }
+
+  valueOf() {
+    return this.cache;
   }
 };

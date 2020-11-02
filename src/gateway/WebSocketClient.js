@@ -33,6 +33,8 @@ const { Endpoints }   = require('../Constants');
 const GuildMember     = require('../entities/GuildMember');
 const Application     = require('../entities/Application');
 
+const ChannelStore = require('../stores/ChannelStore');
+
 /**
  * Represents a client for handling all WebSocket shard connections
  */
@@ -60,7 +62,7 @@ module.exports = class WebSocketClient extends EventBus {
      * the bot can see, use `Client#fetchChannel` to get the channel
      * and possibly cache it
      *
-     * @type {Collection<import('../entities/BaseChannel')> | null}
+     * @type {ChannelStore}
      */
     this.channels = null;
 
@@ -347,8 +349,9 @@ module.exports = class WebSocketClient extends EventBus {
 
     // something is returning a number, TODO
     if (this.guilds && this.guilds instanceof Collection) this.guilds.clear();
-    if (this.channels) this.channels.clear();
     if (this.users) this.users.clear();
+
+    this.channels.cache.clear();
 
     for (const shard of this.shards.values()) shard.disconnect(false);
     this.emit('debug', 'Disposed, goodbye.');

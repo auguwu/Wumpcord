@@ -82,7 +82,7 @@ module.exports = class CategoryChannel extends BaseChannel {
     this.name = data.name;
 
     if (this.client.canCache('channel')) {
-      const children = this.client.channels.filter(channel => channel.parentID !== null && channel.parentID === this.id);
+      const children = this.client.channels.cache.filter(channel => channel.parentID !== null && channel.parentID === this.id);
       if (children.length) {
         for (let i = 0; i < children.length; i++) {
           const child = children[i];

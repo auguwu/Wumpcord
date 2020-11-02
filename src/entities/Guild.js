@@ -41,6 +41,7 @@ const AuditLogs = require('./misc/AuditLogs');
 const DynamicWrapper = require('./wrappable/DynamicImage');
 const NotImplementedError = require('../exceptions/NotImplementedError');
 const Webhook = require('./Webhook');
+const ChannelStore = require('../stores/ChannelStore');
 
 /**
  * Represents a Discord guild
@@ -56,9 +57,9 @@ class Guild extends UnavailableGuild {
 
     /**
      * The channels cache or `null` if not cachable
-     * @type {Collection<import('./BaseChannel')> | null}
+     * @type {ChannelStore}
      */
-    this.channels = client.canCache('channel') ? new Collection() : null;
+    this.channels = new ChannelStore(client);
 
     /**
      * The members cache or `null` if not cachable
@@ -103,7 +104,7 @@ class Guild extends UnavailableGuild {
 
   /**
    * Populates everything else from Discord to this [Guild] instance
-   * @param {GuildPacket} data The data
+   * @param {import('discord-api-types/v8').APIGuild} data The data
    */
   patch(data) {
     /**
@@ -305,14 +306,12 @@ class Guild extends UnavailableGuild {
     }
 
     if (data.channels) {
-      if (this.client.canCache('channel')) {
-        for (let i = 0; i < data.channels.length; i++) {
-          const channel = data.channels[i];
-          const type = BaseChannel.from(this.client, channel);
+      for (let i = 0; i < data.channels.length; i++) {
+        const d = data.channels[i];
+        const c = BaseChannel.from(this.client, { guild_id: this.id, ...d });
 
-          this.channels.set(type.id, type);
-          this.client.insert('channel', type); // insert if not in the cache
-        }
+        this.client.channels.add(c);
+        this.channels.add(c);
       }
     }
 

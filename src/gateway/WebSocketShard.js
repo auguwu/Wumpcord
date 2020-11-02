@@ -515,9 +515,6 @@ module.exports = class WebSocketShard extends EventBus {
         this.acked = true;
         this.lastReceived = new Date().getTime();
         this.debug('Received heartbeat back! Connection is stable.');
-
-        // Let's see if this works?
-        this._heartbeatInterval.unref();
       } break;
 
       default: {
