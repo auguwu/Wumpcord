@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@augu/immutable": "0.5.0",
-    "@augu/orchid": "1.8.0",
+    "@augu/orchid": "1.8.1",
     "discord-api-types": "0.7.0",
     "ws": "7.3.1"
   },
