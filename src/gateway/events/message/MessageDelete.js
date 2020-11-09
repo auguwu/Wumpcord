@@ -51,7 +51,7 @@ const onMessageDelete = function ({ d: data }) {
     return;
   }
 
-  channel.messages.cache.delete(data.id);
+  channel.messages.remove(data.id);
   this.client.emit('messageDelete', message);
 };
 

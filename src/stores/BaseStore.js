@@ -110,6 +110,21 @@ module.exports = class BaseStore {
     return obj;
   }
 
+  /**
+   * Deletes an item from cache
+   * @param {string | T} idOrInstance The ID of the entity or the entity itself
+   */
+  remove(idOrInstance) {
+    /** @type {string} */
+    let id;
+
+    if (typeof idOrInstance === 'string') id = idOrInstance;
+    else if (idOrInstance instanceof this.holdable) id = idOrInstance.id;
+    else throw new TypeError(`Expecting \`string\` or \`T\`, received ${typeof idOrInstance === 'object' ? 'array' : typeof idOrInstance}`);
+
+    this.cache.delete(id);
+  }
+
   valueOf() {
     return this.cache;
   }

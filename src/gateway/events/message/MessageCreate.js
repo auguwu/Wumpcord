@@ -35,7 +35,7 @@ const onMessageCreate = async function ({ d: data }) {
     if (!this.client.canCache('channel')) this.debug('Can\'t cache channels, `messageDelete` and `messageUpdate` will only emit partial IDs');
 
     message.patch(data);
-    if (channel.messages) channel.messages.add(message);
+    channel.messages.add(message);
   }
 
   // populate guild

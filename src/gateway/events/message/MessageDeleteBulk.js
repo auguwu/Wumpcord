@@ -52,7 +52,7 @@ const onMessageBulkDelete = function ({ d: data }) {
     const msg = channel.messages.get(id);
 
     if (msg) {
-      channel.messages.cache.delete(msg.id);
+      channel.messages.remove(msg.id);
       messages.set(msg.id, msg);
     }
   }
