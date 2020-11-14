@@ -36,6 +36,7 @@ const onMessageCreate = async function ({ d: data }) {
 
     message.patch(data);
     channel.messages.add(message);
+    this.client.channels.cache.set(channel.id, channel); // force push it
   }
 
   // populate guild
