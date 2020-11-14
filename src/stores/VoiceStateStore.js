@@ -20,23 +20,23 @@
  * SOFTWARE.
  */
 
-const Presence = require('../entities/Presence');
+const VoiceState = require('../entities/VoiceState');
 const BaseStore = require('./BaseStore');
 
-/** @extends {BaseStore<Presence>} */
-module.exports = class GuildPresenceStore extends BaseStore {
+/** @extends {BaseStore<VoiceState>} */
+module.exports = class VoiceStateStore extends BaseStore {
   /**
-   * Creates a new [GuildPresenceStore] instance
+   * Creates a new [VoiceStateStore] instance
    * @param {import('../gateway/WebSocketClient')} client The WebSocket client instance
    */
   constructor(client) {
     super(
       client,
-      Presence,
-      client.canCache('presence'),
+      VoiceState,
+      client.canCache('voice:state'),
       true
     );
   }
 
-  // presence store can't fetch stuff :(
+  // can't fetch voice states
 };

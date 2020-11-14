@@ -42,6 +42,7 @@ const DynamicWrapper = require('./wrappable/DynamicImage');
 const NotImplementedError = require('../exceptions/NotImplementedError');
 const Webhook = require('./Webhook');
 
+const GuildVoiceStateStore = require('../stores/VoiceStateStore');
 const GuildPresenceStore = require('../stores/GuildPresenceStore');
 const GuildMemberStore = require('../stores/GuildMemberStore');
 const GuildRoleStore = require('../stores/GuildRoleStore');
@@ -85,9 +86,9 @@ class Guild extends UnavailableGuild {
 
     /**
      * The voice state cache or `null` if not cachable
-     * @type {Collection<import('./VoiceState')> | null}
+     * @type {GuildVoiceStateStore}
      */
-    this.voiceStates = client.canCache('voice:state') ? new Collection() : null;
+    this.voiceStates = new GuildVoiceStateStore(client);
 
     /**
      * The presence cache or `null` if not cachable
@@ -325,11 +326,9 @@ class Guild extends UnavailableGuild {
     }
 
     if (data.voice_states) {
-      if (this.client.canCache('voice:state')) {
-        for (let i = 0; i < data.voice_states.length; i++) {
-          const state = data.voice_states[i];
-          this.voiceStates.set(state.id, new VoiceState(this.client, state));
-        }
+      for (let i = 0; i < data.voice_states.length; i++) {
+        const state = data.voice_states[i];
+        this.voiceStates.add(new VoiceState(this.client, state));
       }
     }
 
