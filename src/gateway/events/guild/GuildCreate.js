@@ -30,7 +30,7 @@ const onGuildCreate = function ({ d: data }) {
   this.debug(`Received new guild: "${data.name}"`);
 
   const guild = new Guild(this.client, { shard_id: this.id, ...data }); // eslint-disable-line camelcase
-  this.client.insert('guild', guild);
+  this.client.guilds.add(guild);
   this.client.emit('guildCreate', guild);
 };
 

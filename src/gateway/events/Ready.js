@@ -25,6 +25,7 @@ const { Collection } = require('@augu/immutable');
 const { BotUser } = require('../../entities');
 
 const ChannelStore = require('../../stores/ChannelStore');
+const GuildStore = require('../../stores/GuildStore');
 
 /**
  * Received when the dispatcher calls `READY`
@@ -35,16 +36,15 @@ const onReady = function (shard, { d: data }) {
   shard.sessionID = data.session_id;
 
   shard.client.channels = new ChannelStore(shard.client);
+  shard.client.guilds = new GuildStore(shard.client);
 
   if (shard.client.options.cacheType === 'all') {
     shard.client.voiceConnections = new Collection();
     shard.client.typings = new Collection();
-    shard.client.guilds = new Collection();
     shard.client.users = new Collection({ [shard.client.user.id]: shard.client.user });
   } else {
     shard.client.voiceConnections = shard.client.canCache('voice:conenction') ? new Collection() : null;
     shard.client.typings = shard.client.canCache('typing') ? new Collection() : null;
-    shard.client.guilds = shard.client.canCache('guild') ? new Collection() : null;
     shard.client.users = shard.client.canCache('user') ? new Collection({ [shard.client.user.id]: shard.client.user }) : null;
   }
 

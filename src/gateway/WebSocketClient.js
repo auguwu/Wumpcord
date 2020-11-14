@@ -35,6 +35,7 @@ const Application     = require('../entities/Application');
 const Template        = require('../entities/Template');
 
 const ChannelStore = require('../stores/ChannelStore');
+const GuildStore = require('../stores/GuildStore');
 
 /**
  * Represents a client for handling all WebSocket shard connections
@@ -99,7 +100,7 @@ module.exports = class WebSocketClient extends EventBus {
      * the bot is currently in, use `Client#fetchGuild` to get the guild
      * and possibly cache it
      *
-     * @type {Collection<import('../entities/Guild')> | null}
+     * @type {GuildStore}
      */
     this.guilds = null;
 
