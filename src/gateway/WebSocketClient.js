@@ -32,6 +32,7 @@ const VoiceRegion     = require('../entities/VoiceRegion');
 const { Endpoints }   = require('../Constants');
 const GuildMember     = require('../entities/GuildMember');
 const Application     = require('../entities/Application');
+const Template        = require('../entities/Template');
 
 const ChannelStore = require('../stores/ChannelStore');
 
@@ -514,6 +515,18 @@ module.exports = class WebSocketClient extends EventBus {
       endpoint: '/oauth2/applications/@me',
       method: 'GET'
     }).then((data) => new Application(this, data));
+  }
+
+  /**
+   * Returns a guild template
+   * @param {string} code The code to use
+   * @returns {Promise<Template>} The template details
+   */
+  getGuildTemplate(code) {
+    return this.rest.dispatch({
+      endpoint: `/guilds/templates/${code}`,
+      method: 'GET'
+    }).then(data => new Template(this, data));
   }
 
   toString() {
