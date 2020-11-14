@@ -78,7 +78,7 @@ module.exports = class Presence extends Base {
      * The current game
      * @type {GamePresence}
      */
-    this.current = data.activities[0] || null;
+    this.current = data.activities[0];
 
     /**
      * The current user or `null` if not cached

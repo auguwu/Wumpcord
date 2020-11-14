@@ -42,6 +42,7 @@ const DynamicWrapper = require('./wrappable/DynamicImage');
 const NotImplementedError = require('../exceptions/NotImplementedError');
 const Webhook = require('./Webhook');
 
+const GuildPresenceStore = require('../stores/GuildPresenceStore');
 const GuildMemberStore = require('../stores/GuildMemberStore');
 const GuildRoleStore = require('../stores/GuildRoleStore');
 const ChannelStore = require('../stores/ChannelStore');
@@ -90,9 +91,9 @@ class Guild extends UnavailableGuild {
 
     /**
      * The presence cache or `null` if not cachable
-     * @type {Collection<import('./Presence') | null>}
+     * @type {GuildPresenceStore}
      */
-    this.presences = client.canCache('presence') ? new Collection() : null;
+    this.presences = new GuildPresenceStore(client);
 
     /**
      * The client instance
@@ -317,11 +318,9 @@ class Guild extends UnavailableGuild {
     }
 
     if (data.members) {
-      if (this.client.canCache('member')) {
-        for (let i = 0; i < data.members.length; i++) {
-          const member = data.members[i];
-          this.members.add({ guild_id: this.id, ...member });
-        }
+      for (let i = 0; i < data.members.length; i++) {
+        const member = data.members[i];
+        this.members.add(new Member(this.client, { guild_id: this.id, ...member }));
       }
     }
 
@@ -335,11 +334,9 @@ class Guild extends UnavailableGuild {
     }
 
     if (data.presences) {
-      if (this.client.canCache('presence')) {
-        for (let i = 0; i < data.presences.length; i++) {
-          const presence = data.presences[i];
-          this.presences.set(presence.user.id, new Presence(this.client, presence));
-        }
+      for (let i = 0; i < data.presences.length; i++) {
+        const presence = data.presences[i];
+        this.presences.add(new Presence(this.client, presence));
       }
     }
 
