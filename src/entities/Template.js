@@ -128,7 +128,14 @@ module.exports = class Template {
     });
   }
 
+  /**
+   * Returns the template URL
+   */
+  get url() {
+    return `https://discord.new/${code}`;
+  }
+
   toString() {
-    return `[Template "https://discord.new/template/${this.code}"]`;
+    return `[Template "https://discord.new/${this.code}"]`;
   }
 };
