@@ -41,7 +41,7 @@ const onGuildMemberChunk = function ({ d: data }) {
   const members = new Collection();
   for (const member of data.members) {
     members.set(member.user.id, member);
-    guild.members.set(member.user.id, member);
+    guild.members.add(member);
   }
 
   if (data.presences) this.client.emit('warn', 'Received presences, this is a WIP.');

@@ -303,7 +303,7 @@ module.exports = class WebSocketClient extends EventBus {
     }
 
     /** @type {Promise<Array<Collection<import('../entities/GuildMember')>>>} */
-    const promises = this.guilds.map(guild => {
+    const promises = this.guilds.cache.map(guild => {
       if (!guild.unavailable) {
         if (this.options.populatePresences && !(this.intents & Constants.GatewayIntents.guildPresences)) {
           this.emit('debug', 'Missing `guildPresences` intent');
@@ -327,18 +327,12 @@ module.exports = class WebSocketClient extends EventBus {
     await Promise
       .all(promises)
       .then(members => members.map(collection => {
-        if (collection.some(member => !this.users.has(member.user.id))) {
-          const uncached = collection.filter(member => !this.users.has(member.user.id));
-          this.emit('debug', `Received ${uncached.length} uncached members`);
+        if (!collection) return;
 
-          if (this.canCache('member')) {
-            for (let i = 0; i < uncached.length; i++) {
-              const member = uncached[i];
-              const user = new (require('../entities/User'))(this, member.user);
-
-              this.insert('user', user);
-            }
-          }
+        this.emit('debug', `[Debug => Guild Members] Now caching possibly ${collection.size} members`);
+        for (const member of collection.values()) {
+          const user = new (require('../entities/User'))(this, member.user);
+          this.users.add(user);
         }
       }));
   }
