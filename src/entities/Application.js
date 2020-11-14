@@ -91,7 +91,7 @@ module.exports = class OAuth2Application extends Base {
     this.owner = this.client.canCache('user')
       ? /team\d+/g.test(data.owner.username)
         ? null
-        : this.client.users.get(data.owner.id) || new (require('./User'))(this.client, data.owner)
+        : this.client.users.add(new (require('./User'))(this.client, data.owner))
       : null;
 
     /**

@@ -119,9 +119,7 @@ class Message extends Base {
     /**
      * The author
      */
-    this.author = data.author && this.client.canCache('user')
-      ? this.client.users.get(data.author.id) || new (require('./User'))(this.client, data.author)
-      : null;
+    this.author = data.author ? this.client.users.add(new (require('./User'))(this.client, data.author)) : null;
 
     /**
      * The guild's ID
@@ -154,7 +152,7 @@ class Message extends Base {
     }
 
     // Insert if not in cache
-    this.client.insert('user', this.author);
+    if (this.author !== null) this.client.users.add(this.author);
 
     // add this message to `edits`
     this.edits.set(this.id, this);
@@ -180,7 +178,7 @@ class Message extends Base {
     });
 
     const guild = new Guild(this.client, data);
-    this.client.insert('guild', guild);
+    this.client.guilds.add(guild);
 
     /**
      * The guild of this message

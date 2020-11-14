@@ -102,9 +102,7 @@ module.exports = class Template {
      * The creator's data if cached
      * @type {User}
      */
-    this.creator = this.client.canCache('user')
-      ? this.client.users.get(this.creatorID) || new User(this.client, data.creator)
-      : new User(this.client, data.creator);
+    this.creator = this.client.users.add(new User(this.client, data.creator));
 
     /**
      * The sourced guild's data if cached

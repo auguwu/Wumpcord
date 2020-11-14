@@ -349,10 +349,8 @@ module.exports = class WebSocketClient extends EventBus {
   dispose() {
     this.emit('debug', 'Reaching EOL status, closing...');
 
-    // something is returning a number, TODO
-    if (this.guilds && this.guilds instanceof Collection) this.guilds.clear();
-    if (this.users) this.users.clear();
-
+    this.users.cache.clear();
+    this.guilds.cache.clear();
     this.channels.cache.clear();
 
     for (const shard of this.shards.values()) shard.disconnect(false);

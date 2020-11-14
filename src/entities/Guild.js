@@ -360,7 +360,7 @@ class Guild extends UnavailableGuild {
   get owner() {
     if (!this.client.canCache('user')) return null;
 
-    return this.client.users.get(this.ownerID) || null;
+    return this.client.users.get(this.ownerID);
   }
 
   /**
