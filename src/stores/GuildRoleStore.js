@@ -51,7 +51,12 @@ module.exports = class GuildRoleStore extends BaseStore {
       method: 'GET'
     }).then(roles => {
       const foundRole = roles.find(role => role.id === roleID);
-      if (foundRole) this.add(foundRole);
+      if (foundRole) {
+        this.add(foundRole);
+        return new GuildRole(this.client, { guild_id: guildID, ...foundRole }); // eslint-disable-line camelcase
+      }
+
+      return null;
     });
   }
 };
