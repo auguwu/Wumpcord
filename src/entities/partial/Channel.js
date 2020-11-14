@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-const { ChannelTypes } = require('../../Constants');
 const Base = require('../Base');
 
 module.exports = class PartialChannel extends Base {

@@ -110,7 +110,6 @@ class NewsChannel extends BaseChannel {
   }
 
   get guild() {
-    if (!this.client.canCache('guild')) return null;
     return this.client.guilds.get(this.guildID) || null;
   }
 }

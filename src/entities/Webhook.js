@@ -163,7 +163,6 @@ class Webhook extends Base {
     if (this.token === undefined) throw new TypeError('Missing `token` variable in this [Webhook] class.');
 
     const { url, data, headers } = this._transformOptions(content, options);
-    console.log({ url, data, headers });
     return this.client.rest.dispatch({
       endpoint: url,
       headers,

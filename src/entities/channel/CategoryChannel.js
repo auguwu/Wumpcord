@@ -44,12 +44,6 @@ module.exports = class CategoryChannel extends BaseChannel {
     this.client = client;
 
     /**
-     * The children
-     * @type {Collection<import('../BaseChannel')> | null}
-     */
-    this.children = client.canCache('channel') ? new Collection() : null;
-
-    /**
      * List of permission overwrites
      * @type {Collection<PermissionOverwrite> | null}
      */
@@ -81,16 +75,6 @@ module.exports = class CategoryChannel extends BaseChannel {
      */
     this.name = data.name;
 
-    if (this.client.canCache('channel')) {
-      const children = this.client.channels.cache.filter(channel => channel.parentID !== null && channel.parentID === this.id);
-      if (children.length) {
-        for (let i = 0; i < children.length; i++) {
-          const child = children[i];
-          this.children.set(child.id, child);
-        }
-      }
-    }
-
     if (data.permission_overwrites) {
       for (let i = 0; i < data.permission_overwrites.length; i++) {
         const overwrite = data.permission_overwrites[i];
@@ -99,6 +83,20 @@ module.exports = class CategoryChannel extends BaseChannel {
     }
 
     return this;
+  }
+
+  /**
+   * Returns the list of children in this [CategoryChannel]
+   */
+  get children() {
+    return this
+      .client
+      .channels
+      .cache
+      .filter(channel =>
+        channel.parentID !== null &&
+        channel.parentID === this.id
+      );
   }
 };
 
