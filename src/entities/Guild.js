@@ -45,6 +45,7 @@ const Webhook = require('./Webhook');
 const GuildVoiceStateStore = require('../stores/VoiceStateStore');
 const GuildPresenceStore = require('../stores/GuildPresenceStore');
 const GuildMemberStore = require('../stores/GuildMemberStore');
+const GuildEmojiStore = require('../stores/GuildEmojiStore');
 const GuildRoleStore = require('../stores/GuildRoleStore');
 const ChannelStore = require('../stores/ChannelStore');
 
@@ -80,9 +81,9 @@ class Guild extends UnavailableGuild {
 
     /**
      * The emoji cache or `null` if not cachable
-     * @type {Collection<import('./Emoji')> | null}
+     * @type {GuildEmojiStore}
      */
-    this.emojis = client.canCache('emoji') ? new Collection() : null;
+    this.emojis = new GuildEmojiStore(client);
 
     /**
      * The voice state cache or `null` if not cachable
@@ -293,11 +294,9 @@ class Guild extends UnavailableGuild {
     this.shardID = data.shard_id || 0;
 
     if (data.emojis) {
-      if (this.client.canCache('emoji')) {
-        for (let i = 0; i < data.emojis.length; i++) {
-          const emoji = data.emojis[i];
-          this.emojis.set(emoji.id, new Emoji(this.client, { guild_id: this.id, ...emoji }));
-        }
+      for (let i = 0; i < data.emojis.length; i++) {
+        const emoji = data.emojis[i];
+        this.emojis.add(new Emoji(this.client, { guild_id: this.id, ...emoji }));
       }
     }
 
