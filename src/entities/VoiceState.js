@@ -122,14 +122,14 @@ module.exports = class VoiceState extends Base {
    * @returns {import('./channel/VoiceChannel')} The voice channel
    */
   get channel() {
-    return this.client.channels.get(this.channelID) || null;
+    return this.client.channels.get(this.channelID);
   }
 
   /**
    * Returns the [User] that using this [VoiceState]
    */
   get user() {
-    return this.client.users.get(this.userID) || null;
+    return this.client.users.get(this.userID);
   }
 };
 

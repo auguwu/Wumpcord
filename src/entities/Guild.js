@@ -42,6 +42,13 @@ const DynamicWrapper = require('./wrappable/DynamicImage');
 const NotImplementedError = require('../exceptions/NotImplementedError');
 const Webhook = require('./Webhook');
 
+const GuildVoiceStateStore = require('../stores/VoiceStateStore');
+const GuildPresenceStore = require('../stores/GuildPresenceStore');
+const GuildMemberStore = require('../stores/GuildMemberStore');
+const GuildEmojiStore = require('../stores/GuildEmojiStore');
+const GuildRoleStore = require('../stores/GuildRoleStore');
+const ChannelStore = require('../stores/ChannelStore');
+
 /**
  * Represents a Discord guild
  */
@@ -56,39 +63,39 @@ class Guild extends UnavailableGuild {
 
     /**
      * The channels cache or `null` if not cachable
-     * @type {Collection<import('./BaseChannel')> | null}
+     * @type {ChannelStore}
      */
-    this.channels = client.canCache('channel') ? new Collection() : null;
+    this.channels = new ChannelStore(client);
 
     /**
      * The members cache or `null` if not cachable
-     * @type {Collection<import('./GuildMember')> | null}
+     * @type {GuildMemberStore}
      */
-    this.members = client.canCache('member') ? new Collection() : null;
+    this.members = new GuildMemberStore(client);
 
     /**
      * The role cache or `null` if not cachable
-     * @type {Collection<import('./Role')> | null}
+     * @type {GuildRoleStore}
      */
-    this.roles = client.canCache('member:role') ? new Collection() : null;
+    this.roles = new GuildRoleStore(client);
 
     /**
      * The emoji cache or `null` if not cachable
-     * @type {Collection<import('./Emoji')> | null}
+     * @type {GuildEmojiStore}
      */
-    this.emojis = client.canCache('emoji') ? new Collection() : null;
+    this.emojis = new GuildEmojiStore(client);
 
     /**
      * The voice state cache or `null` if not cachable
-     * @type {Collection<import('./VoiceState')> | null}
+     * @type {GuildVoiceStateStore}
      */
-    this.voiceStates = client.canCache('voice:state') ? new Collection() : null;
+    this.voiceStates = new GuildVoiceStateStore(client);
 
     /**
      * The presence cache or `null` if not cachable
-     * @type {Collection<import('./Presence') | null>}
+     * @type {GuildPresenceStore}
      */
-    this.presences = client.canCache('presence') ? new Collection() : null;
+    this.presences = new GuildPresenceStore(client);
 
     /**
      * The client instance
@@ -103,7 +110,7 @@ class Guild extends UnavailableGuild {
 
   /**
    * Populates everything else from Discord to this [Guild] instance
-   * @param {GuildPacket} data The data
+   * @param {import('discord-api-types/v8').APIGuild} data The data
    */
   patch(data) {
     /**
@@ -287,59 +294,47 @@ class Guild extends UnavailableGuild {
     this.shardID = data.shard_id || 0;
 
     if (data.emojis) {
-      if (this.client.canCache('emoji')) {
-        for (let i = 0; i < data.emojis.length; i++) {
-          const emoji = data.emojis[i];
-          this.emojis.set(emoji.id, new Emoji(this.client, { guild_id: this.id, ...emoji }));
-        }
+      for (let i = 0; i < data.emojis.length; i++) {
+        const emoji = data.emojis[i];
+        this.emojis.add(new Emoji(this.client, { guild_id: this.id, ...emoji }));
       }
     }
 
     if (data.roles) {
-      if (this.client.canCache('member:role')) {
-        for (let i = 0; i < data.roles.length; i++) {
-          const role = data.roles[i];
-          this.roles.set(role.id, new Role(this.client, { guild_id: this.id, ...role }));
-        }
+      for (let i = 0; i < data.roles.length; i++) {
+        const role = data.roles[i];
+        this.roles.add(new Role(this.client, { guild_id: this.id, ...role }));
       }
     }
 
     if (data.channels) {
-      if (this.client.canCache('channel')) {
-        for (let i = 0; i < data.channels.length; i++) {
-          const channel = data.channels[i];
-          const type = BaseChannel.from(this.client, channel);
+      for (let i = 0; i < data.channels.length; i++) {
+        const d = data.channels[i];
+        const c = BaseChannel.from(this.client, { guild_id: this.id, ...d });
 
-          this.channels.set(type.id, type);
-          this.client.insert('channel', type); // insert if not in the cache
-        }
+        this.client.channels.add(c);
+        this.channels.add(c);
       }
     }
 
     if (data.members) {
-      if (this.client.canCache('member')) {
-        for (let i = 0; i < data.members.length; i++) {
-          const member = data.members[i];
-          this.members.set(member.id, new Member(this.client, { guild_id: this.id, ...member }));
-        }
+      for (let i = 0; i < data.members.length; i++) {
+        const member = data.members[i];
+        this.members.add(new Member(this.client, { guild_id: this.id, ...member }));
       }
     }
 
     if (data.voice_states) {
-      if (this.client.canCache('voice:state')) {
-        for (let i = 0; i < data.voice_states.length; i++) {
-          const state = data.voice_states[i];
-          this.voiceStates.set(state.id, new VoiceState(this.client, state));
-        }
+      for (let i = 0; i < data.voice_states.length; i++) {
+        const state = data.voice_states[i];
+        this.voiceStates.add(new VoiceState(this.client, state));
       }
     }
 
     if (data.presences) {
-      if (this.client.canCache('presence')) {
-        for (let i = 0; i < data.presences.length; i++) {
-          const presence = data.presences[i];
-          this.presences.set(presence.user.id, new Presence(this.client, presence));
-        }
+      for (let i = 0; i < data.presences.length; i++) {
+        const presence = data.presences[i];
+        this.presences.add(new Presence(this.client, presence));
       }
     }
 
@@ -361,7 +356,7 @@ class Guild extends UnavailableGuild {
   get owner() {
     if (!this.client.canCache('user')) return null;
 
-    return this.client.users.get(this.ownerID) || null;
+    return this.client.users.get(this.ownerID);
   }
 
   /**
@@ -379,7 +374,7 @@ class Guild extends UnavailableGuild {
     userIds: []
   }) {
     return new Promise((resolve, reject) => {
-      if (this.memberCount === this.members.size && !limit && !presences && !query && !userIds && !force) return resolve(this.members);
+      if (this.memberCount === this.members.size && !limit && !presences && !query && !userIds && !force) return resolve(this.members.cache);
 
       if (nonce.length > 32) return reject(new RangeError('Nonce length was over 32.'));
       if (!this.shard) return reject(new Error(`Shard #${this.shardID} doesn't exist`));
@@ -393,7 +388,6 @@ class Guild extends UnavailableGuild {
         limit: limit || this.maxMembers
       });
 
-      const guildMembers = this.client.canCache('member') ? new Collection() : null; // this gets merged
       const members = new Collection(); // this gets resolved
       const timeout = setTimeout(() => {
         clearTimeout(timeout);
@@ -406,13 +400,12 @@ class Guild extends UnavailableGuild {
 
         for (const member of all.values()) {
           if (this.client.canCache('member')) {
-            members.set(member.user.id, member);
-            guildMembers.set(member.user.id, new Member(this.client, { guild_id: this.id, ...member }));
+            members.set(member.user.id, new Member(this.client, { guild_id: this.id, ...member }));
           }
         }
 
         if (this.client.canCache('member')) {
-          this.members = guildMembers;
+          this.members.cache = members;
         }
 
         if (limit && (members ? members.size >= limit : true)) {
@@ -592,11 +585,7 @@ class Guild extends UnavailableGuild {
    * @returns {Promise<GuildMember>} The member instance or `null` if a REST error occured
    */
   fetchMember(memberID) {
-    return this.client.rest.dispatch({
-      endpoint: Endpoints.Guild.member(this.id, memberID),
-      method: 'GET'
-    })
-      .then((data) => new GuildMember(this.client, data));
+    return this.members.fetch(this.id, memberID);
   }
 
   /**
@@ -734,7 +723,7 @@ class Guild extends UnavailableGuild {
   async editMember(memberID, opts) {
     /** @type {GuildMember} */
     let member;
-    if (!this.members || !this.members.has(memberID)) {
+    if (!this.members.has(memberID)) {
       member = await this.fetchMember(memberID);
     } else {
       member = this.members.get(memberID);
@@ -785,7 +774,7 @@ class Guild extends UnavailableGuild {
     /** @type {Role} */
     let role;
 
-    if (!this.members || !this.members.has(memberID)) {
+    if (!this.members.has(memberID)) {
       member = await this.fetchMember(memberID);
     } else {
       member = this.members.get(memberID);
@@ -823,7 +812,7 @@ class Guild extends UnavailableGuild {
     /** @type {Role} */
     let role;
 
-    if (!this.members || !this.members.has(memberID)) {
+    if (!this.members.has(memberID)) {
       member = await this.fetchMember(memberID);
     } else {
       member = this.members.get(memberID);
@@ -856,7 +845,7 @@ class Guild extends UnavailableGuild {
   async kickMember(memberID) {
     /** @type {GuildMember} */
     let member;
-    if (!this.members || !this.members.has(memberID)) {
+    if (!this.members.has(memberID)) {
       member = await this.fetchMember(memberID);
     } else {
       member = this.members.get(memberID);

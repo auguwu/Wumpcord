@@ -20,35 +20,18 @@
  * SOFTWARE.
  */
 
-const Base = require('../Base');
-
-module.exports = class PartialChannel extends Base {
+/**
+ * Error to throw if a method isn't overrided
+ */
+module.exports = class NotOverridedError extends Error {
   /**
-   * Creates a new [PartialChannel] instance
-   * @param {import('../../gateway/WebSocketClient')} client The WebSocket client
-   * @param {import('discord-api-types/v8').APIPartialChannel} data The data supplied
+   * Error to throw if a method isn't over-rided
+   * @param {string} klazz The class
+   * @param {string} method The method
    */
-  constructor(client, data) {
-    super(data.id);
+  constructor(klazz, method) {
+    super(`Method "${klazz}#${method}" wasn't overrided, please override it.`);
 
-    /**
-     * The client itself
-     * @type {import('../../gateway/WebSocketClient')}
-     */
-    this.client = client;
-
-    /**
-     * The channel name
-     * @type {?string}
-     */
-    this.name = data.name;
-  }
-
-  /**
-   * Fetches and returns the news channel
-   * @returns {Promise<import('../channel/NewsChannel')>}
-   */
-  fetch() {
-    return this.client.getChannel(this.id);
+    this.name = 'NotOverridedError';
   }
 };

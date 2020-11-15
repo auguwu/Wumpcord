@@ -40,7 +40,7 @@ const onGuildUpdate = function ({ d: data }) {
     return;
   }
 
-  this.client.insert('guild', new Guild(this.client, data));
+  this.client.guilds.add(guild);
   this.client.emit('guildUpdate', guild, new Guild(this.client, data));
 };
 

@@ -47,11 +47,12 @@ const onGuildEmojisUpdate = function ({ d: data }) {
     return;
   }
 
-  const oldEmojis = guild.emojis;
-  const collection = new Collection();
-
-  data.emojis.map(emoji => collection.set(emoji.id, new GuildEmoji(this.client, emoji)));
-  guild.emojis.merge(collection);
+  const oldEmojis = guild.emojis.cache; // keep old cache
+  for (let i = 0; i < data.emojis.length; i++) {
+    const emoji = data.emojis[i];
+    const emote = new GuildEmoji(this.client, { guild_id: data.guild_id, ...emoji }); // eslint-disable-line
+    guild.emojis.add(emote);
+  }
 
   this.client.emit('guildEmojisUpdate', Array.from(oldEmojis.values()), data.emojis.map(emoji => new GuildEmoji(this.client, emoji)));
 };

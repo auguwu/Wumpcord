@@ -97,7 +97,7 @@ module.exports = class GuildInvite {
      * The inviter who created this invite
      * @type {?import('./User')}
      */
-    this.inviter = this.client.canCache('user') ? this.client.users.get(data.inviter.id) || new (require('./User'))(this.client, data.inviter) : null;
+    this.inviter = this.client.users.add(new (require('./User'))(this.client, data.inviter));
   }
 
   /**

@@ -28,6 +28,7 @@ const WebSocket      = require('ws');
 const { Guild }      = require('../entities');
 const EventBus       = require('../util/EventBus');
 const Util           = require('../util/Util');
+const GuildStore = require('../stores/GuildStore');
 
 /** @type {typeof import('erlpack') | undefined} */
 let Erlpack = undefined;
@@ -106,7 +107,7 @@ module.exports = class WebSocketShard extends EventBus {
     /**
      * Collection or a number of the guilds for this shard
      */
-    this.guilds = client.canCache('guild') ? new Collection() : 0;
+    this.guilds = new GuildStore(client);
 
     /**
      * If we acked an heartbeat previously
@@ -453,15 +454,10 @@ module.exports = class WebSocketShard extends EventBus {
       case Constants.OPCodes.Event: {
         if (this.status === Constants.ShardStatus.WaitingForGuilds && data.t === Constants.GatewayEvents.GuildCreate) {
           this.unavailableGuilds.delete(data.d.id);
-          if (this.client.canCache('guild')) {
-            const packet = new Guild(this.client, data.d);
+          const packet = new Guild(this.client, data.d);
 
-            this.guilds.set(packet.id, packet);
-            this.client.insert('guild', packet);
-          } else {
-            this.guilds++;
-            this.client.guilds++;
-          }
+          this.guilds.add(packet.id, packet);
+          this.client.guilds.add(packet);
 
           this.checkReady();
         } else {
@@ -515,9 +511,6 @@ module.exports = class WebSocketShard extends EventBus {
         this.acked = true;
         this.lastReceived = new Date().getTime();
         this.debug('Received heartbeat back! Connection is stable.');
-
-        // Let's see if this works?
-        this._heartbeatInterval.unref();
       } break;
 
       default: {

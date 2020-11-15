@@ -45,15 +45,13 @@ class DMChannel extends BaseChannel {
      * The user we are having a chat with
      * @type {import('../User')}
      */
-    this.recipient = new (require('../User'))(this.client, data.recipients[0]);
+    this.recipient = client.users.add(data.recipients[0]);
 
     /**
      * The client that is passed in
      * @private
      */
     this.client = client;
-
-    client.insert('user', this.recipient);
   }
 }
 

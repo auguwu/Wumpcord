@@ -87,7 +87,7 @@ module.exports = class Emoji extends Base {
    * Returns the guild or `null` if not cached
    */
   get guild() {
-    return this.client.guilds.get(this.guildID) || null;
+    return this.client.guilds.get(this.guildID);
   }
 
   /**

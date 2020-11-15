@@ -53,14 +53,14 @@ class GroupChannel extends BaseChannel {
        * The recipients of this Group channel
        * @type {Collection<import('../User')> | null}
        */
-      this.recipients = client.canCache('user') ? new Collection() : null;
+      this.recipients = [];
 
       for (let i = 0; i < data.recipients.length; i++) {
         const recipient = data.recipients[i];
         const user = new (require('../User'))(this.client, recipient);
 
-        if (client.canCache('user')) this.recipients.set(user.id, user);
-        this.client.insert('user', user);
+        this.recipients.push(user);
+        this.client.users.add(user);
       }
     }
   }

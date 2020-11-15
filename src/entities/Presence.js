@@ -78,13 +78,13 @@ module.exports = class Presence extends Base {
      * The current game
      * @type {GamePresence}
      */
-    this.current = data.activities[0] || null;
+    this.current = data.activities[0];
 
     /**
      * The current user or `null` if not cached
      * @type {import('./User') | null}
      */
-    this.user = this.client.users ? this.client.users.get(data.user.id) : new (require('./User'))(this.client, data.user);
+    this.user = this.client.users.add(new (require('./User'))(this.client, data.user));
 
     if (data.activities) {
       if (this.client.canCache('presence:activity')) {
