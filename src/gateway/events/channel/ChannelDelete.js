@@ -47,7 +47,7 @@ const onChannelDelete = function ({ d: data }) {
   }
 
   const channel = BaseChannel.from(this.client, data);
-  if (guild.channels.has(channel.id)) guild.channels.delete(channel.id);
+  if (guild.channels.cache.has(channel.id)) guild.channels.cache.delete(channel.id);
 
   this.client.emit('channelDelete', channel);
 };

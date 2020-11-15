@@ -20,35 +20,33 @@
  * SOFTWARE.
  */
 
-const Base = require('../Base');
+const BaseStore = require('./BaseStore');
+const GuildEmoji = require('../entities/Emoji');
 
-module.exports = class PartialChannel extends Base {
+/** @extends {BaseStore<GuildEmoji>} */
+module.exports = class GuildEmojiStore extends BaseStore {
   /**
-   * Creates a new [PartialChannel] instance
-   * @param {import('../../gateway/WebSocketClient')} client The WebSocket client
-   * @param {import('discord-api-types/v8').APIPartialChannel} data The data supplied
+   * Creates a new [GuildEmojisStore] store
+   * @param {import('../gateway/WebSocketClient')} client The WebSocket client
    */
-  constructor(client, data) {
-    super(data.id);
-
-    /**
-     * The client itself
-     * @type {import('../../gateway/WebSocketClient')}
-     */
-    this.client = client;
-
-    /**
-     * The channel name
-     * @type {?string}
-     */
-    this.name = data.name;
+  constructor(client) {
+    super(
+      client,
+      GuildEmoji,
+      client.canCache('emoji'),
+      true
+    );
   }
 
   /**
-   * Fetches and returns the news channel
-   * @returns {Promise<import('../channel/NewsChannel')>}
+   * Fetches a [GuildEmoji] and possibly caches it
+   * @param {string} guildID The guild's ID
+   * @param {string} emojiID The emoji's ID
    */
-  fetch() {
-    return this.client.getChannel(this.id);
+  fetch(guildID, emojiID) {
+    return this.client.rest.dispatch({
+      endpoint: `/guilds/${guildID}/emojis/${emojiID}`,
+      method: 'GET'
+    }).then(data => this.add(new GuildEmoji(this.client, { guild_id: guildID, ...data }))); // eslint-disable-line
   }
 };

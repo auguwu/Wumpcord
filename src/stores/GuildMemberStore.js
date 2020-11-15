@@ -20,35 +20,31 @@
  * SOFTWARE.
  */
 
-const Base = require('../Base');
+const GuildMember = require('../entities/GuildMember');
+const BaseStore = require('./BaseStore');
 
-module.exports = class PartialChannel extends Base {
+/** @extends {BaseStore<GuildMember>} */
+module.exports = class GuildMemberStore extends BaseStore {
   /**
-   * Creates a new [PartialChannel] instance
-   * @param {import('../../gateway/WebSocketClient')} client The WebSocket client
-   * @param {import('discord-api-types/v8').APIPartialChannel} data The data supplied
+   * Creates a new [GuildMemberStore] instance
+   * @param {import('../gateway/WebSocketClient')} client The WebSocket client instance
    */
-  constructor(client, data) {
-    super(data.id);
-
-    /**
-     * The client itself
-     * @type {import('../../gateway/WebSocketClient')}
-     */
-    this.client = client;
-
-    /**
-     * The channel name
-     * @type {?string}
-     */
-    this.name = data.name;
+  constructor(client) {
+    super(
+      client,
+      GuildMember,
+      client.canCache('member'),
+      true
+    );
   }
 
   /**
-   * Fetches and returns the news channel
-   * @returns {Promise<import('../channel/NewsChannel')>}
+   * Fetches new data for a [GuildMember] and updates cache in real-time
+   * @param {string} guildID The guild's ID
+   * @param {string} memberID The member's ID
    */
-  fetch() {
-    return this.client.getChannel(this.id);
+  fetch(guildID, memberID) {
+    return this.client.getGuildMember(guildID, memberID)
+      .then(member => this.add(member));
   }
 };

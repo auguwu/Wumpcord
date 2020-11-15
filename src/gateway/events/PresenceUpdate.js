@@ -1,4 +1,3 @@
-const { User } = require('../../entities');
 /**
  * Copyright (c) 2020 August
  *
@@ -22,6 +21,7 @@ const { User } = require('../../entities');
  */
 
 const Presence = require('../../entities/Presence');
+const { User } = require('../../entities');
 
 /**
  * Function to call when a presence has been updated
@@ -59,7 +59,7 @@ const onPresenceUpdate = function ({ d: data }) {
     return;
   }
 
-  guild.presences.set(data.user.id, new Presence(this.client, data));
+  guild.presences.add(new Presence(this.client, data));
   this.client.emit('presenceUpdate', oldPresence, new Presence(this.client, data));
 };
 

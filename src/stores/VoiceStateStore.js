@@ -20,35 +20,23 @@
  * SOFTWARE.
  */
 
-const Base = require('../Base');
+const VoiceState = require('../entities/VoiceState');
+const BaseStore = require('./BaseStore');
 
-module.exports = class PartialChannel extends Base {
+/** @extends {BaseStore<VoiceState>} */
+module.exports = class VoiceStateStore extends BaseStore {
   /**
-   * Creates a new [PartialChannel] instance
-   * @param {import('../../gateway/WebSocketClient')} client The WebSocket client
-   * @param {import('discord-api-types/v8').APIPartialChannel} data The data supplied
+   * Creates a new [VoiceStateStore] instance
+   * @param {import('../gateway/WebSocketClient')} client The WebSocket client instance
    */
-  constructor(client, data) {
-    super(data.id);
-
-    /**
-     * The client itself
-     * @type {import('../../gateway/WebSocketClient')}
-     */
-    this.client = client;
-
-    /**
-     * The channel name
-     * @type {?string}
-     */
-    this.name = data.name;
+  constructor(client) {
+    super(
+      client,
+      VoiceState,
+      client.canCache('voice:state'),
+      true
+    );
   }
 
-  /**
-   * Fetches and returns the news channel
-   * @returns {Promise<import('../channel/NewsChannel')>}
-   */
-  fetch() {
-    return this.client.getChannel(this.id);
-  }
+  // can't fetch voice states
 };

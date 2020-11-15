@@ -50,11 +50,11 @@ const onChannelUpdate = function ({ d: data }) {
   const oldChannel = guild.channels.get(channel.id);
   if (!oldChannel) {
     this.debug(`Channel "${data.id}" is possibly uncached, emitting data anyway`);
-    this.client.emit('channelUpdate', null, channel);
+    this.client.emit('channelUpdate', { id: data.id }, channel);
     return;
   }
 
-  guild.channels.set(channel.id, channel); // update
+  guild.channels.add(channel);
   this.client.emit('channelUpdate', oldChannel, channel);
 };
 

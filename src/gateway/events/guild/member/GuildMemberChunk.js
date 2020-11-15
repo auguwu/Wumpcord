@@ -21,6 +21,7 @@
  */
 
 const { Collection } = require('@augu/immutable');
+const Presence = require('../../../../entities/Presence');
 
 /**
  * Function to call when we receive a chunk of members
@@ -41,10 +42,14 @@ const onGuildMemberChunk = function ({ d: data }) {
   const members = new Collection();
   for (const member of data.members) {
     members.set(member.user.id, member);
-    guild.members.set(member.user.id, member);
+    guild.members.add(member);
   }
 
-  if (data.presences) this.client.emit('warn', 'Received presences, this is a WIP.');
+  if (data.presences) {
+    for (let i = 0; i < data.presences.length; i++) {
+      guild.presences.add(new Presence(this.client, data.presences[i]));
+    }
+  }
 
   this.client.emit('guildMemberChunk', members, guild, {
     count: data.chunk_count,

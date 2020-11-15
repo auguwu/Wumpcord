@@ -63,7 +63,7 @@ class GuildMember extends Base {
      * The user itself
      * @type {import('./User')}
      */
-    this.user = this.client.canCache('user') ? this.client.users.get(data.user.id) || new (require('./User'))(this.client, data) : new (require('./User'))(this.client, data);
+    this.user = this.client.users.add(new (require('./User'))(this.client, data.user));
 
     /**
      * Date when the user has booted

@@ -54,7 +54,7 @@ const onGuildMemberUpdate = function ({ d: data }) {
   }
 
   const newMember = new GuildMember(this.client, data);
-  guild.members.set(newMember.user.id, newMember);
+  guild.members.add(newMember);
 
   this.client.emit('guildMemberUpdate', member, newMember);
 };

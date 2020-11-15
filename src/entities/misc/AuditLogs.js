@@ -31,12 +31,6 @@ module.exports = class AuditLogs {
    */
   constructor(client, data) {
     /**
-     * The list of entries available, if they can be cached
-     * @type {Collection<AuditLogEntry>}
-     */
-    this.entries = client.canCache('audit:entries') ? new Collection() : null;
-
-    /**
      * The client instance
      * @private
      * @type {import('../../gateway/WebSocketClient')}
@@ -69,11 +63,15 @@ module.exports = class AuditLogs {
      */
     this.webhooks = data.webhooks || [];
 
-    if (this.client.canCache('audit:entries')) {
-      for (let i = 0; i < data.audit_log_entries.length; i++) {
-        const entry = data.audit_log_entries[i];
-        this.entries.set(entry.id, new AuditLogEntry(this.client, entry));
-      }
+    /**
+     * The entries available
+     * @type {AuditLogEntry[]}
+     */
+    this.entries = [];
+
+    for (let i = 0; i < data.audit_log_entries.length; i++) {
+      const entry = data.audit_log_entries[i];
+      this.entries.set(entry.id, new AuditLogEntry(this.client, entry));
     }
   }
 

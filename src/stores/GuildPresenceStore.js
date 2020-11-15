@@ -20,35 +20,23 @@
  * SOFTWARE.
  */
 
-const Base = require('../Base');
+const Presence = require('../entities/Presence');
+const BaseStore = require('./BaseStore');
 
-module.exports = class PartialChannel extends Base {
+/** @extends {BaseStore<Presence>} */
+module.exports = class GuildPresenceStore extends BaseStore {
   /**
-   * Creates a new [PartialChannel] instance
-   * @param {import('../../gateway/WebSocketClient')} client The WebSocket client
-   * @param {import('discord-api-types/v8').APIPartialChannel} data The data supplied
+   * Creates a new [GuildPresenceStore] instance
+   * @param {import('../gateway/WebSocketClient')} client The WebSocket client instance
    */
-  constructor(client, data) {
-    super(data.id);
-
-    /**
-     * The client itself
-     * @type {import('../../gateway/WebSocketClient')}
-     */
-    this.client = client;
-
-    /**
-     * The channel name
-     * @type {?string}
-     */
-    this.name = data.name;
+  constructor(client) {
+    super(
+      client,
+      Presence,
+      client.canCache('presence'),
+      true
+    );
   }
 
-  /**
-   * Fetches and returns the news channel
-   * @returns {Promise<import('../channel/NewsChannel')>}
-   */
-  fetch() {
-    return this.client.getChannel(this.id);
-  }
+  // presence store can't fetch stuff :(
 };

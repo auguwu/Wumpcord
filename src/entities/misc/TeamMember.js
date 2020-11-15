@@ -51,7 +51,7 @@ module.exports = class TeamMember {
      */
     this.user = this.client.canCache('user')
       ? this.client.users.get(data.user.id) || new (require('../User'))(this.client, data.user)
-      : null;
+      : new User(this.client, data.user);
 
     /**
      * The membership state

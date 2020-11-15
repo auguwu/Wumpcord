@@ -20,35 +20,34 @@
  * SOFTWARE.
  */
 
-const Base = require('../Base');
+const BaseChannel = require('../entities/BaseChannel');
+const BaseStore = require('./BaseStore');
 
-module.exports = class PartialChannel extends Base {
+/**
+ * @extends {BaseStore<BaseChannel>}
+ */
+module.exports = class ChannelStore extends BaseStore {
   /**
-   * Creates a new [PartialChannel] instance
-   * @param {import('../../gateway/WebSocketClient')} client The WebSocket client
-   * @param {import('discord-api-types/v8').APIPartialChannel} data The data supplied
+   * Represents a store to hold channels
+   * @param {import('../gateway/WebSocketClient')} client The WebSocket client
    */
-  constructor(client, data) {
-    super(data.id);
-
-    /**
-     * The client itself
-     * @type {import('../../gateway/WebSocketClient')}
-     */
-    this.client = client;
-
-    /**
-     * The channel name
-     * @type {?string}
-     */
-    this.name = data.name;
+  constructor(client) {
+    super(
+      client,
+      BaseChannel,
+      client.canCache('channel'),
+      true
+    );
   }
 
   /**
-   * Fetches and returns the news channel
-   * @returns {Promise<import('../channel/NewsChannel')>}
+   * Fetches a channel from Discord and possibly caches it
+   * @param {string} id The ID of the channel
    */
-  fetch() {
-    return this.client.getChannel(this.id);
+  fetch(id) {
+    return this
+      .client
+      .getChannel(id)
+      .then(channel => this.add(channel));
   }
 };

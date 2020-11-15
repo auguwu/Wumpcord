@@ -119,9 +119,7 @@ class Message extends Base {
     /**
      * The author
      */
-    this.author = data.author && this.client.canCache('user')
-      ? this.client.users.get(data.author.id) || new (require('./User'))(this.client, data.author)
-      : null;
+    this.author = data.author ? this.client.users.add(new (require('./User'))(this.client, data.author)) : null;
 
     /**
      * The guild's ID
@@ -154,7 +152,7 @@ class Message extends Base {
     }
 
     // Insert if not in cache
-    this.client.insert('user', this.author);
+    if (this.author !== null) this.client.users.add(this.author);
 
     // add this message to `edits`
     this.edits.set(this.id, this);
@@ -174,50 +172,46 @@ class Message extends Base {
   async getGuild() {
     if (this.guild) return this.guild;
 
-    try {
-      const data = await this.client.rest.dispatch({
-        endpoint: Endpoints.guild(this.guildID, true),
-        method: 'get'
-      });
+    const data = await this.client.rest.dispatch({
+      endpoint: Endpoints.guild(this.guildID, true),
+      method: 'get'
+    });
 
-      const guild = new Guild(this.client, data);
-      this.client.insert('guild', guild);
+    const guild = new Guild(this.client, data);
+    this.client.guilds.add(guild);
 
-      /**
-       * The guild of this message
-       * @type {Guild}
-       */
-      this.guild = guild;
+    /**
+     * The guild of this message
+     * @type {Guild}
+     */
+    this.guild = guild;
 
-      if (this.client.options.getAllUsers) {
-        if (
-          this.client.options.populatePresences &&
-          !(this.client.intents & Constants.GatewayIntents.guildPresences)
-        ) {
-          this.client.emit('debug', 'Missing `guildPresences` intent');
-          return guild;
-        }
-
-        const members = await this.guild.fetchMembers({
-          limit: guild.maxMembers,
-          presences: this.client.options.populatePresences && (this.client.intents & Constants.GatewayIntents.guildPresences),
-          query: '',
-          time: 120e3,
-          nonce: Date.now().toString(16),
-          force: false,
-          userIds: []
-        });
-
-        if (!members) {
-          this.client.emit('debug', 'Couldn\'t fetch member list, skipping...');
-          return guild;
-        }
+    if (this.client.options.getAllUsers) {
+      if (
+        this.client.options.populatePresences &&
+        !(this.client.intents & Constants.GatewayIntents.guildPresences)
+      ) {
+        this.client.emit('debug', 'Missing `guildPresences` intent');
+        return guild;
       }
 
-      return guild;
-    } catch(ex) {
-      return null;
+      const members = await this.guild.fetchMembers({
+        limit: guild.maxMembers,
+        presences: this.client.options.populatePresences && (this.client.intents & Constants.GatewayIntents.guildPresences),
+        query: '',
+        time: 120e3,
+        nonce: Date.now().toString(16),
+        force: false,
+        userIds: []
+      });
+
+      if (!members) {
+        this.client.emit('debug', 'Couldn\'t fetch member list, skipping...');
+        return guild;
+      }
     }
+
+    return guild;
   }
 
   /**
@@ -225,27 +219,24 @@ class Message extends Base {
    * @returns {Promise<import('./channel/TextChannel') | null>}
    */
   async getChannel() {
+    //if (this.client.channels.cache.has(this.channelID)) return this.client.channels.get(this.channelID);
     if (this.channel) return this.channel;
 
-    try {
-      const data = await this.client.rest.dispatch({
-        endpoint: Endpoints.channel(this.channelID),
-        method: 'get'
-      });
+    const data = await this.client.rest.dispatch({
+      endpoint: Endpoints.channel(this.channelID),
+      method: 'get'
+    });
 
-      const channel = BaseChannel.from(this.client, data);
-      this.client.insert('channel', channel);
+    const channel = BaseChannel.from(this.client, data);
+    this.client.channels.add(channel);
 
-      /**
-       * The current channel of this [Message]
-       * @type {import('./channel/TextChannel')}
-       */
-      this.channel = channel;
+    /**
+     * The current channel of this [Message]
+     * @type {import('./channel/TextChannel')}
+     */
+    this.channel = channel;
 
-      return channel;
-    } catch(ex) {
-      return null;
-    }
+    return channel;
   }
 
   /**

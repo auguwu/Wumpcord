@@ -2,6 +2,5 @@ node_modules/
 .ignore/
 test/
 
-package-*.json
 *.lock
 *.log

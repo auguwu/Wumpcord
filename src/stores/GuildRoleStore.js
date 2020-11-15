@@ -20,35 +20,43 @@
  * SOFTWARE.
  */
 
-const Base = require('../Base');
+const GuildRole = require('../entities/Role');
+const BaseStore = require('./BaseStore');
 
-module.exports = class PartialChannel extends Base {
+/**
+ * @extends {BaseStore<GuildRole>}
+ */
+module.exports = class GuildRoleStore extends BaseStore {
   /**
-   * Creates a new [PartialChannel] instance
-   * @param {import('../../gateway/WebSocketClient')} client The WebSocket client
-   * @param {import('discord-api-types/v8').APIPartialChannel} data The data supplied
+   * Creates a new [GuildRoleStore] instance
+   * @param {import('../gateway/WebSocketClient')} client The WebSocket client instance
    */
-  constructor(client, data) {
-    super(data.id);
-
-    /**
-     * The client itself
-     * @type {import('../../gateway/WebSocketClient')}
-     */
-    this.client = client;
-
-    /**
-     * The channel name
-     * @type {?string}
-     */
-    this.name = data.name;
+  constructor(client) {
+    super(
+      client,
+      GuildRole,
+      client.canCache('member:role'),
+      true
+    );
   }
 
   /**
-   * Fetches and returns the news channel
-   * @returns {Promise<import('../channel/NewsChannel')>}
+   * Fetches new data from Discord and possibly caches it
+   * @param {string} guildID The guild's ID
+   * @param {string} roleID The role's ID
    */
-  fetch() {
-    return this.client.getChannel(this.id);
+  fetch(guildID, roleID) {
+    return this.client.rest.dispatch({
+      endpoint: `/guilds/${guildID}/roles`,
+      method: 'GET'
+    }).then(roles => {
+      const foundRole = roles.find(role => role.id === roleID);
+      if (foundRole) {
+        this.add(foundRole);
+        return new GuildRole(this.client, { guild_id: guildID, ...foundRole }); // eslint-disable-line camelcase
+      }
+
+      return null;
+    });
   }
 };

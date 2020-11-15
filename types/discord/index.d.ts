@@ -21,14 +21,15 @@
  */
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
+/* eslint-disable @typescript-eslint/array-type */
 /* eslint-disable camelcase */
 
 /**
  * Namespace for all Discord-related objects that don't bleed into the `core` module
  */
 
+import { Collection } from '@augu/immutable';
 import * as discord from 'discord-api-types/v8';
-import { Tracing } from 'trace_events';
 import * as core from '../core';
 
 // Gateway-related content
@@ -47,7 +48,9 @@ export interface SessionStartLimit {
   total: number;
 }
 
+type AnyGuildChannel = TextChannel | VoiceChannel | StoreChannel | NewsChannel;
 type AnyChannel = TextChannel | DMChannel | GroupChannel | VoiceChannel | StoreChannel | NewsChannel;
+type EditGuildRoleOptions = CreateRoleOptions;
 
 // Extendable objects
 interface Editable {
@@ -85,6 +88,54 @@ interface CreateMessageOptions {
 interface MessageFile {
   name?: string;
   file: core.Multipart | Buffer;
+}
+
+interface FetchGuildMembersOptions {
+  presences?: boolean;
+  userIds?: string[];
+  limit?: number;
+  nonce?: string;
+  query?: string;
+  force?: boolean;
+  time?: number;
+}
+
+interface BanOptions {
+  reason?: string;
+  days?: number;
+}
+
+interface PermissionOverwriteObject {
+  allow: number;
+  deny: number;
+  type: 'role' | 'member';
+  id: string;
+}
+
+interface CreateChannelOptions {
+  permissionOverwrites?: Array<PermissionOverwriteObject>;
+  ratelimitPerUser?: number;
+  userLimit?: number;
+  position?: number;
+  parentID?: string;
+}
+
+interface EditGuildOptions {}
+
+interface EditGuildMemberOptions {}
+
+interface CreateRoleOptions {}
+
+interface GuildPruneOptions {}
+
+interface FetchGuildAuditLogsOptions {}
+
+interface CreateEmojiOptions {}
+
+interface ModifyEmojiOptions {
+  roles?: string[];
+  name?: string;
+  id: string;
 }
 
 // Discord API objects made for Wumpcord
@@ -157,4 +208,107 @@ export class BotUser extends User {
   public verified: boolean;
 }
 
+export class Emoji extends Base {
+  constructor(client: core.Client, data: discord.APIEmoji);
 
+  public requireColons: boolean;
+  public available: boolean;
+  public animated: boolean;
+  public guildID: string;
+  public managed: boolean;
+  public name: string;
+
+  public get mention(): string;
+  public get guild(): Guild | null;
+}
+
+export class UnavailableGuild extends Base {
+  constructor(data: discord.APIUnavailableGuild);
+
+  public unavailable: boolean;
+}
+
+export class Guild extends UnavailableGuild {
+  constructor(client: core.Client, data: discord.APIGuild);
+
+  // Stores
+  public voiceStates: core.VoiceStateStore;
+  public presences: core.PresenceStore;
+  public channels: core.ChannelStore;
+  public members: core.GuildMemberStore;
+  public emojis: core.GuildEmojiStore;
+  public roles: core.GuildRoleStore;
+
+  // Data
+  public defaultMessageNotifications: number;
+  public publicUpdatesChannelID: string;
+  public explicitContentFilter: number;
+  public systemChannelFlags: number;
+  public verificationLevel: number;
+  public discoverySplash?: string;
+  public systemChannelID?: string;
+  public widgetChannelID?: string;
+  public applicationID?: string;
+  public maxStreamUsers: number;
+  public rulesChannelID: string;
+  public afkChannelID?: string;
+  public vanityCodeUrl: string | null;
+  public widgetEnabled: boolean;
+  public description?: string;
+  public maxPresences: number;
+  public memberCount: number;
+  public afkTimeout?: number;
+  public maxMembers: number;
+  public boostTier: number;
+  public boosters: number;
+  public mfaLevel: number;
+  public features: core.Constants.GuildFeatures[];
+  public shardID: number;
+  public ownerID: string;
+  public banner?: string;
+  public splash?: string;
+  public region: string;
+  public icon?: string;
+  public name: string;
+
+  // Getters
+  public get shard(): core.WebSocketShard | null;
+  public get owner(): User | null;
+
+  // Functions
+  public fetchMembers(options?: FetchMembersOptions): Promise<Collection<GuildMember>>;
+  public delete(): Promise<void>;
+  public ban(userID: string, options?: BanMemberOptions): Promise<void>;
+  public unban(userID: string): Promise<void>;
+  public createChannel(options: CreateChannelOptions): Promise<BaseChannel>;
+  public getRegions(): Promise<Array<VoiceRegion>>;
+  public getRegionIds(): string;
+  public getPreview(): Promise<GuildPreview>;
+  public getChannels(): Promise<Array<BaseChannel>>;
+  public fetchMember(memberID: string): Promise<GuildMember>;
+  public edit(options: EditGuildOptions): Promise<this>;
+  public modifyChannelPosition(id: string, pos: number): Promise<void>;
+  public editMember(memberID: string, options: EditGuildMemberOptions): Promise<void>;
+  public addRole(memberID: string, roleID: string): Promise<void>;
+  public removeRole(memberID: string, roleID: string): Promise<void>;
+  public kickMember(memberID: string): Promise<void>;
+  public getBans(): Promise<Array<GuildBan>>;
+  public getRoles(): Promise<Array<Role>>;
+  public createRole(options: CreateRoleOptions): Promise<Role>;
+  public deleteRole(roleID: string): Promise<void>;
+  public modifyRole(roleID: string, options: EditGuildRoleOptions): Promise<void>;
+  public modifyRolePosition(roleID: string, pos: number): Promise<void>;
+  public prune(options: GuildPruneOptions): Promise<void>;
+  public getInvites(): Promise<Array<GuildInvite>>;
+  public getAuditLogs(options?: FetchGuildAuditLogsOptions): Promise<AuditLogs>;
+  public getEmojis(): Promise<Array<Emoji>>;
+  public getEmoji(id: string): Promise<Emoji>;
+  public modifyEmoji(options: ModifyEmojiOptions): Promise<Emoji>;
+  public deleteEmoji(id: string): Promise<void>;
+  public getWebhooks(): Promise<Webhook>;
+
+  /**
+   * Function is not implemented, do not use.
+   */
+  public createEmoji(): void;
+}

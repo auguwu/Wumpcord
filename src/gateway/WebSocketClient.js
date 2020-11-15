@@ -32,6 +32,10 @@ const VoiceRegion     = require('../entities/VoiceRegion');
 const { Endpoints }   = require('../Constants');
 const GuildMember     = require('../entities/GuildMember');
 const Application     = require('../entities/Application');
+const Template        = require('../entities/Template');
+
+const ChannelStore = require('../stores/ChannelStore');
+const GuildStore = require('../stores/GuildStore');
 
 /**
  * Represents a client for handling all WebSocket shard connections
@@ -60,7 +64,7 @@ module.exports = class WebSocketClient extends EventBus {
      * the bot can see, use `Client#fetchChannel` to get the channel
      * and possibly cache it
      *
-     * @type {Collection<import('../entities/BaseChannel')> | null}
+     * @type {ChannelStore}
      */
     this.channels = null;
 
@@ -96,7 +100,7 @@ module.exports = class WebSocketClient extends EventBus {
      * the bot is currently in, use `Client#fetchGuild` to get the guild
      * and possibly cache it
      *
-     * @type {Collection<import('../entities/Guild')> | null}
+     * @type {GuildStore}
      */
     this.guilds = null;
 
@@ -299,7 +303,7 @@ module.exports = class WebSocketClient extends EventBus {
     }
 
     /** @type {Promise<Array<Collection<import('../entities/GuildMember')>>>} */
-    const promises = this.guilds.map(guild => {
+    const promises = this.guilds.cache.map(guild => {
       if (!guild.unavailable) {
         if (this.options.populatePresences && !(this.intents & Constants.GatewayIntents.guildPresences)) {
           this.emit('debug', 'Missing `guildPresences` intent');
@@ -323,18 +327,12 @@ module.exports = class WebSocketClient extends EventBus {
     await Promise
       .all(promises)
       .then(members => members.map(collection => {
-        if (collection.some(member => !this.users.has(member.user.id))) {
-          const uncached = collection.filter(member => !this.users.has(member.user.id));
-          this.emit('debug', `Received ${uncached.length} uncached members`);
+        if (!collection) return;
 
-          if (this.canCache('member')) {
-            for (let i = 0; i < uncached.length; i++) {
-              const member = uncached[i];
-              const user = new (require('../entities/User'))(this, member.user);
-
-              this.insert('user', user);
-            }
-          }
+        this.emit('debug', `[Debug => Guild Members] Now caching possibly ${collection.size} members`);
+        for (const member of collection.values()) {
+          const user = new (require('../entities/User'))(this, member.user);
+          this.users.add(user);
         }
       }));
   }
@@ -345,10 +343,9 @@ module.exports = class WebSocketClient extends EventBus {
   dispose() {
     this.emit('debug', 'Reaching EOL status, closing...');
 
-    // something is returning a number, TODO
-    if (this.guilds && this.guilds instanceof Collection) this.guilds.clear();
-    if (this.channels) this.channels.clear();
-    if (this.users) this.users.clear();
+    this.users.cache.clear();
+    this.guilds.cache.clear();
+    this.channels.cache.clear();
 
     for (const shard of this.shards.values()) shard.disconnect(false);
     this.emit('debug', 'Disposed, goodbye.');
@@ -511,6 +508,18 @@ module.exports = class WebSocketClient extends EventBus {
       endpoint: '/oauth2/applications/@me',
       method: 'GET'
     }).then((data) => new Application(this, data));
+  }
+
+  /**
+   * Returns a guild template
+   * @param {string} code The code to use
+   * @returns {Promise<Template>} The template details
+   */
+  getGuildTemplate(code) {
+    return this.rest.dispatch({
+      endpoint: `/guilds/templates/${code}`,
+      method: 'GET'
+    }).then(data => new Template(this, data));
   }
 
   toString() {
