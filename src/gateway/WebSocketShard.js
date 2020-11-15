@@ -444,11 +444,13 @@ module.exports = class WebSocketShard extends EventBus {
       return;
     }
 
-    this.debug(`Received OP ${data.op} from Discord using strategy ${this.strategy}`);
+    this.debug(`Received OP ${data.op} ("${Util.getKey(Constants.OPCodes, data.op) || 'Unknown'}") from Discord using strategy ${this.strategy}`);
     if (data.s !== null && data.s > this.seq) {
       this.debug(`Received new sequence number: ${data.s}`);
       this.seq = data.s;
     }
+
+    if (data.op === Constants.OPCodes.Event) this.debug(`Received event "${data.t}" (seq: ${data.s})`);
 
     switch (data.op) {
       case Constants.OPCodes.Event: {
@@ -514,17 +516,7 @@ module.exports = class WebSocketShard extends EventBus {
       } break;
 
       default: {
-        if (this.status === Constants.ShardStatus.WaitingForGuilds && data.t === Constants.GatewayEvents.GuildCreate) {
-          this.unavailableGuilds.delete(data.d.id);
-          if (this.client.canCache('guild')) {
-            this.guilds.set(data.d.id, new Guild(this.client, { shard_id: this.id, ...data.d }));
-            this.client.insert('guild', new Guild(this.client, { shard_id: this.id, ...data.d }));
-          }
-
-          this.checkReady();
-        } else {
-          this.emit('event', this.id, data);
-        }
+        this.emit('event', this.id, data);
       } break;
     }
   }
