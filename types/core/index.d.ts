@@ -58,6 +58,7 @@ type PermissionObject = {
   [x in Constants.KeyedPermissions]?: boolean;
 };
 
+type CachableObject<T> = Collection<T> | null;
 type TypedObject<K extends string | number | symbol, V = unknown> = { [x in K]: V };
 type PackStrategy = (...args: any[]) => string;
 type UnpackStrategy = (...args: any[]) => any;

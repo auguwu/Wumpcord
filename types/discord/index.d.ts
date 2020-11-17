@@ -30,6 +30,7 @@
 
 import { Collection } from '@augu/immutable';
 import * as discord from 'discord-api-types/v8';
+import { UserInfo } from 'os';
 import * as core from '../core';
 
 // Gateway-related content
@@ -136,6 +137,25 @@ interface ModifyEmojiOptions {
   roles?: string[];
   name?: string;
   id: string;
+}
+
+interface PresencePacket {
+  client_status: RawClientStatus;
+  activities: Array<discord.GatewayActivity>;
+  status: 'online' | 'offline' | 'dnd' | 'away';
+  user: discord.APIUser;
+}
+
+interface RawClientStatus {
+  desktop?: boolean;
+  mobile?: boolean;
+  web?: boolean;
+}
+
+interface ClientStatus {
+  desktop: boolean;
+  mobile: boolean;
+  website: boolean;
 }
 
 // Discord API objects made for Wumpcord
@@ -358,4 +378,56 @@ export class GuildMember extends Base {
   public undeafen(reason?: string): Promise<void>;
   public switch(channelID: string, reason?: string): Promise<void>;
   public getDMChannel(): Promise<DMChannel>;
+}
+
+export class Message extends Base {
+  constructor(client: core.Client, data: discord.APIMessage);
+
+  public editedTimestamp?: Date;
+  public mentionEveryone: boolean;
+  public mentionRoles: GuildRoleStore;
+  public attachments: core.CachableObject<Attachment>;
+  public channelID: string;
+  public mentions: UserStore;
+  public stickers: Sticker[];
+  public content: string;
+  public guildID: string;
+  public member?: GuildMember;
+  public author: User;
+  public embeds: discord.APIEmbed[];
+  public edits: Collection<Message>;
+  public flags: number;
+  public tts: boolean;
+
+  public get edited(): Message | null;
+
+  public deleteReactions(): Promise<void>;
+  public getReactions(reaction: string | Emoji, options?: GetMessageReactionOptions): Promise<Array<User>>;
+  public getChannel(): Promise<AnyGuildChannel>;
+  public crosspost(): Promise<Message>;
+  public getGuild(): Promise<Guild>;
+  public paginate(options?: core.PaginationBuilderOptions): Promise<core.PaginationBuilder>;
+  public unreact(reaction: string | Emoji, userID?: string): Promise<void>;
+  public delete(): Promise<void>;
+  public react(reaction: string | Emoji, userID?: string): Promise<void>;
+  public unpin(): Promise<void>;
+  public edit(content: string | CreateMessageOptions, options?: CreateMessageOptions): Promise<Message>;
+  public pin(): Promise<void>;
+}
+
+export class PermissionOverwrite extends Base {
+  constructor(data: discord.APIOverwrite);
+
+  public permissions: core.Permissions;
+  public type: 'role' | 'member';
+}
+
+export class Presence extends Base {
+  constructor(client: core.Client, data: PresencePacket);
+
+  public clientStatus: ClientStatus;
+  public activities: core.CachableObject<Activity>;
+  public current?: Activity;
+  public status: 'online' | 'offline' | 'dnd' | 'away';
+  public user: User;
 }
