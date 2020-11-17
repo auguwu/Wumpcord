@@ -47,8 +47,8 @@ const getContent = (client, content, options) => {
   else if (options && typeof options === 'object') {
     // We received a file array, let's parse it
     if (Array.isArray(options)) {
-      if (options.some(Util.isMessageFile)) {
-        const items = options.filter(Util.isMessageFile);
+      if (options.some(item => !Util.isMessageFile(item))) {
+        const items = options.filter(item => !Util.isMessageFile(item));
 
         // yeams :froger:
         throw new SyntaxError(`${items.length} items weren't a Buffer or an object`);
@@ -82,9 +82,9 @@ const getContent = (client, content, options) => {
     }
   } else if (typeof content === 'object') {
     // We received a file array, let's parse it
-    if (Array.isArray(options)) {
-      if (content.some(Util.isMessageFile)) {
-        const items = options.filter(Util.isMessageFile);
+    if (Array.isArray(content)) {
+      if (content.some(item => !Util.isMessageFile(item))) {
+        const items = options.filter(item => !Util.isMessageFile(item));
 
         // yeams :froger:
         throw new SyntaxError(`${items.length} items weren't a Buffer or an object`);
@@ -106,7 +106,7 @@ const getContent = (client, content, options) => {
       multipart = new Multipart();
       headers['Content-Type'] = `multipart/form-data; boundary=${multipart.boundary}`;
 
-      multipart.append(name, options.file, name);
+      multipart.append(name, content.file, name);
       data = multipart.finish();
     } else {
       if (Object.hasOwnProperty.call(data, 'content')) throw new TypeError('Property "content" is already populated');

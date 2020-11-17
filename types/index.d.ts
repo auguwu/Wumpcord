@@ -7,7 +7,10 @@
  *     - August (Chris) <august@augu.dev>
  */
 
-export * as commands from './commands';
+//export * as clustering from './clustering';
+//export * as commands from './commands';
+//export * as oauth2 from './oauth2';
+
 export * from './core';
 
 /**

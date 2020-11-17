@@ -433,8 +433,8 @@ module.exports = class WebSocketClient extends EventBus {
       .then((data) => {
         const member = new GuildMember(this, data);
         if (this.canCache('guild')) {
-          const guild = this.guilds.get(guildID);
-          if (guild && this.canCache('member')) guild.members.set(member.id, member);
+          const guild = this.guilds.get(memberID);
+          if (guild) guild.members.add(member);
         }
 
         return member;

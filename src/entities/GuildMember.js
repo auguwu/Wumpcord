@@ -20,11 +20,12 @@
  * SOFTWARE.
  */
 
-const { Collection } = require('@augu/immutable');
 const TextableChannel = require('./wrappable/TextableChannel');
 const Base = require('./Base');
 const Permissions = require('../util/Permissions');
 const Constants = require('../Constants');
+
+const GuildRoleStore = require('../stores/GuildRoleStore');
 
 /**
  * Represents a Guild member
@@ -47,9 +48,9 @@ class GuildMember extends Base {
 
     /**
      * List of roles, if cachable
-     * @type {Collection<import('./Role')>}
+     * @type {GuildRoleStore}
      */
-    this.roles = client.canCache('member:role') ? new Collection() : null;
+    this.roles = new GuildRoleStore(client);
 
     this.patch(data);
   }
@@ -112,16 +113,14 @@ class GuildMember extends Base {
      * @private
      * @type {import('./Guild')}
      */
-    this._guild = this.client.canCache('guild') ? this.client.guilds.get(data.guild_id) || null : null;
+    this._guild = this.client.guilds.get(this.id);
 
     if (data.roles) {
-      if (this.client.canCache('member:role') && this.client.canCache('guild')) {
-        for (let i = 0; i < data.roles.length; i++) {
-          const roleID = data.roles[i];
-          const guild = this.client.guilds.get(this.guildID);
+      for (let i = 0; i < data.roles.length; i++) {
+        const roleID = data.roles[i];
+        const guild = this.client.guilds.get(this.guildID);
 
-          if (guild) this.roles.set(roleID, guild.roles.get(roleID) || null);
-        }
+        if (guild) this.roles.add(guild.roles.get(roleID));
       }
     }
   }
@@ -136,16 +135,21 @@ class GuildMember extends Base {
   }
 
   /**
+   * Private method to populate [GuildMember._guild] if not defined
+   */
+  async _populateGuild() {
+    if (!this._guild) {
+      this._guild = await this.client.guilds.fetch(this.id);
+    }
+  }
+
+  /**
    * Bans this member from this guild, if the guild isn't cached
    * we do a REST request to fetch the guild
    * @param {import('./Guild').BanOptions} opts The options to use
    */
   async ban(opts = {}) {
-    if (!this._guild) {
-      const guild = await this.client.getGuild(this.guildID);
-      this._guild = guild;
-    }
-
+    await this._populateGuild();
     return this._guild.ban(this.id, opts);
   }
 
@@ -154,11 +158,7 @@ class GuildMember extends Base {
    * we do a REST request to fetch the guild
    */
   async unban() {
-    if (!this._guild) {
-      const guild = await this.client.getGuild(this.guildID);
-      this._guild = guild;
-    }
-
+    await this._populateGuild();
     return this._guild.unban(this.id);
   }
 
@@ -167,14 +167,9 @@ class GuildMember extends Base {
    * and the properties of this [GuildMember] or throws a REST
    * error if anything occurs.
    */
-  fetch() {
-    return this.client.rest.dispatch({
-      endpoint: `/guilds/${this.guildID}/members/${this.id}`,
-      method: 'GET'
-    }).then((data) => {
-      this.patch(data);
-      return this;
-    });
+  async fetch() {
+    await this._populateGuild();
+    return this._guild.members.fetch(this.guildID, this.id);
   }
 
   /**
@@ -215,11 +210,7 @@ class GuildMember extends Base {
    * cached (if we can) or a REST error thrown
    */
   async edit(opts) {
-    if (!this._guild) {
-      const guild = await this.client.getGuild(this.guildID);
-      this._guild = guild;
-    }
-
+    await this._populateGuild();
     return this._guild.editMember(this.id, opts);
   }
 
@@ -232,11 +223,7 @@ class GuildMember extends Base {
    * @param {string} [reason] The reason to put in audit logs
    */
   async addRole(roleID, reason) {
-    if (!this._guild) {
-      const guild = await this.client.getGuild(this.guildID);
-      this._guild = guild;
-    }
-
+    await this._populateGuild();
     return this._guild.addRole(this.id, roleID, reason);
   }
 
@@ -250,10 +237,7 @@ class GuildMember extends Base {
    * @param {string} [reason] The reason to put in audit logs
    */
   async removeRole(roleID, reason) {
-    if (!this._guild) {
-      const guild = await this.client.getGuild(this.guildID);
-      this._guild = guild;
-    }
+    await this._populateGuild();
 
     const id = typeof roleID === 'string' ? roleID : roleID.id;
     return this._guild.removeRole(this.id, id, reason);
@@ -269,11 +253,7 @@ class GuildMember extends Base {
    * @param {string} [reason] The reason to put in audit logs
    */
   async setNick(nick, reason) {
-    if (!this._guild) {
-      const guild = await this.client.getGuild(this.guildID);
-      this._guild = guild;
-    }
-
+    await this._populateGuild();
     return this._guild.editMember(this.id, { nick }, reason);
   }
 
@@ -285,11 +265,7 @@ class GuildMember extends Base {
    * @param {string} [reason] A reason to put in audit logs
    */
   async mute(reason) {
-    if (!this._guild) {
-      const guild = await this.client.getGuild(this.guildID);
-      this._guild = guild;
-    }
-
+    await this._populateGuild();
     return this._guild.editMember(this.id, { mute: true }, reason);
   }
 
@@ -301,11 +277,7 @@ class GuildMember extends Base {
    * @param {string} [reason] A reason to put in audit logs
    */
   async unmute(reason) {
-    if (!this._guild) {
-      const guild = await this.client.getGuild(this.guildID);
-      this._guild = guild;
-    }
-
+    await this._populateGuild();
     return this._guild.editMember(this.id, { mute: false }, reason);
   }
 
@@ -317,11 +289,7 @@ class GuildMember extends Base {
    * @param {string} [reason] A reason to put in audit logs
    */
   async deafen(reason) {
-    if (!this._guild) {
-      const guild = await this.client.getGuild(this.guildID);
-      this._guild = guild;
-    }
-
+    await this._populateGuild();
     return this._guild.editMember(this.id, { deaf: true }, reason);
   }
 
@@ -333,12 +301,8 @@ class GuildMember extends Base {
    * @param {string} [reason] A reason to put in audit logs
    */
   async undeafen(reason) {
-    if (!this._guild) {
-      const guild = await this.client.getGuild(this.guildID);
-      this._guild = guild;
-    }
-
-    return this._guild.editMember(this.id, { deaf: true }, reason);
+    await this._populateGuild();
+    return this._guild.editMember(this.id, { deaf: false }, reason);
   }
 
   /**
@@ -351,15 +315,12 @@ class GuildMember extends Base {
    * @param {string} [reason] The reason to put in audit logs
    */
   async switch(channelID, reason) {
-    if (!this._guild) {
-      const guild = await this.client.getGuild(this.guildID);
-      this._guild = guild;
-    }
+    await this._populateGuild();
 
     /** @type {import('./channel/VoiceChannel')} */
-    let channel = this.client.canCache('channel') ? this.client.channels.get(channelID) : null;
+    let channel = this.client.channels.get(channelID);
     if (!channel) {
-      const chan = await this.client.getChannel(channelID);
+      const chan = await this.client.channels.fetch(channelID);
       channel = chan;
     }
 

@@ -462,20 +462,20 @@ class Guild extends UnavailableGuild {
         delete_message_days: options.days,
         reason: options.reason
       }
-    })
-      .then(() => true);
+    });
   }
 
   /**
    * Unbans a member from this [Guild]
    * @param {string} userID The user's ID
+   * @param {string} [reason] The reason to put in audit logs
    */
-  unban(userID) {
+  unban(userID, reason) {
     return this.client.rest.dispatch({
+      auditLogReason: reason,
       endpoint: Endpoints.Guild.ban(this.id, userID),
       method: 'DELETE'
-    })
-      .then(() => true);
+    });
   }
 
   /**
@@ -717,10 +717,11 @@ class Guild extends UnavailableGuild {
    *
    * @param {string} memberID The member ID
    * @param {EditGuildMemberOptions} opts The options to update the guild member
+   * @param {string} [reason] The reason to put in audit logs
    * @returns {Promise<GuildMember>} Returns the guild member's patched data
    * or an error thrown for valdiation/REST-related errors
    */
-  async editMember(memberID, opts) {
+  async editMember(memberID, opts, reason) {
     /** @type {GuildMember} */
     let member;
     if (!this.members.has(memberID)) {
@@ -746,6 +747,7 @@ class Guild extends UnavailableGuild {
     if (opts.channelID && typeof opts.channelID !== 'string') throw new TypeError(`Expected \`string\`, but gotten ${typeof opts.channelID}`);
 
     return this.client.rest.dispatch({
+      auditLogReason: reason,
       endpoint: Endpoints.Guild.member(this.id, member.id),
       method: 'PATCH',
       data: {

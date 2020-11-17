@@ -312,3 +312,50 @@ export class Guild extends UnavailableGuild {
    */
   public createEmoji(): void;
 }
+
+export class GuildInvite extends Base {
+  constructor(client: core.Client, data: discord.APIInvite);
+
+  public createdAt: Date;
+  public temporary: boolean;
+  public maxUses: number;
+  public inviter: core.User;
+  public channel: core.PartialEntity<AnyGuildChannel>;
+  public maxAge: number;
+  public guild: core.PartialEntity<Guild>;
+  public uses: number;
+  public code: string;
+
+  public delete(): Promise<void>;
+  public fetch(): Promise<this>;
+}
+
+export class GuildMember extends Base {
+  constructor(client: core.Client, data: discord.APIGuildMember);
+
+  public hoistedRoleID: string | null;
+  public boostedAt: Date | null;
+  public joinedAt: Date;
+  public deafend: boolean;
+  public guildID: string;
+  public roles: core.GuildRoleStore;
+  public muted: boolean;
+  public nick?: string;
+  public user: core.User;
+
+  public get hoistedRole(): core.GuildRole | null;
+  public get permission(): core.Permissions;
+  public ban(opts?: BanOptions): Promise<void>;
+  public unban(): Promise<void>;
+  public fetch(): Promise<this>;
+  public edit(opts: EditGuildMemberOptions): Promise<void>;
+  public addRole(roleID: string, reason?: string): Promise<void>;
+  public removeRole(roleID: string | core.GuildRole, reason?: string): Promise<void>;
+  public setNick(nick: string, reason?: string): Promise<void>;
+  public mute(reason?: string): Promise<void>;
+  public unmute(reason?: string): Promise<void>;
+  public deafen(reason?: string): Promise<void>;
+  public undeafen(reason?: string): Promise<void>;
+  public switch(channelID: string, reason?: string): Promise<void>;
+  public getDMChannel(): Promise<DMChannel>;
+}

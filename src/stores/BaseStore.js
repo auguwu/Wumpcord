@@ -96,7 +96,11 @@ module.exports = class BaseStore {
    */
   add(data) {
     const existing = this.get(data.id);
-    if (existing && existing.patch) existing.patch(data);
+    if (existing && existing.patch) {
+      existing.patch(data);
+      if (this.canCache) this.cache.set(data.id, existing);
+    }
+
     if (existing) return existing;
 
     const obj = data instanceof this.holdable

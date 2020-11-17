@@ -24,7 +24,6 @@ const EmbedBuilder = require('./entities/utilities/EmbedBuilder');
 const Permissions = require('./util/Permissions');
 const { version } = require('../package.json');
 const Constants = require('./Constants');
-const commands = require('./commands');
 const Client = require('./gateway/WebSocketClient');
 const Util = require('./util/Util');
 
@@ -35,7 +34,6 @@ module.exports = {
   Constants,
   Client,
   version,
-  commands,
   Permissions,
   Util,
   EmbedBuilder

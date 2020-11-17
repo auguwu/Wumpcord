@@ -149,6 +149,7 @@ module.exports = class RESTClient {
         resolve,
         reject,
         opts: {
+          auditLogReason: Util.get('auditLogReason', undefined, opts),
           endpoint: opts.endpoint,
           headers: Util.get('headers', {}, opts),
           method: opts.method || 'GET',
@@ -200,6 +201,10 @@ module.exports = class RESTClient {
       bucket.opts.headers['Content-Type'] = 'application/json';
     }
 
+    if (bucket.opts.auditLogReason !== undefined) {
+      bucket.opts.headers['X-Audit-Log-Reason'] = encodeURIComponent(bucket.opts.auditLogReason);
+    }
+
     return new Promise((resolve, reject) => {
       this.http.request({
         method: bucket.opts.method,
@@ -249,13 +254,13 @@ module.exports = class RESTClient {
            * Emitted when the REST client has reached a ratelimited state
            * @fires restRatelimit
            */
-          this.client.emit('restRatelimit', {
+          this.client.emit('restRatelimit', new DiscordRatelimitError({
             retryAfter: (Date.now() - Number(Math.floor(resp.headers['x-ratelimit-reset']))) * 1000,
             endpoint: bucket.opts.endpoint,
             global: Boolean(resp.headers['x-ratelimit-global']),
             method: bucket.opts.method,
-            reset: Number(Math.floor(resp.headers['x-ratelimit-reset']))
-          });
+            resetTime: Number(Math.floor(resp.headers['x-ratelimit-reset']))
+          }));
 
           this.ratelimited = true;
           await Util.sleep(resp.headers['retry-after']);
@@ -315,6 +320,7 @@ module.exports = class RESTClient {
  * @prop {DispatchOptions} opts The dispatched options
  *
  * @typedef {object} DispatchOptions
+ * @prop {string} [auditLogReason] The audit log reason
  * @prop {string} endpoint The endpoint
  * @prop {import('@augu/orchid').HttpMethod} method The http method to use
  * @prop {any} [data] The data to use
