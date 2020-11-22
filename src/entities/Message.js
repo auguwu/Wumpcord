@@ -475,6 +475,24 @@ class Message extends Base {
       .then(data => new Message(this.client, data));
   }
 
+  /**
+   * Replies to a user's message
+   * @param {string | CreateMessageOptions | import('../..').MessageFile[]} content The content to send
+   * @param {CreateMessageOptions | import('../..').MessageFile[]} [options] The options to use
+   */
+  async reply(content, options) {
+    const sendable = typeof content === 'object' && !Util.isMessageFile(content) ? {
+      reply: { messageID: this.id }
+    } : {
+      reply: { messageID: this.id }, ...options
+    };
+
+    if (typeof content === 'string') sendable.content = content;
+    if (!this.channel) await this.getChannel();
+
+    return this.channel.send(sendable);
+  }
+
   toString() {
     return `[Message "${this.content}" (${this.id})]`;
   }
