@@ -75,6 +75,7 @@ const getContent = (client, content, options) => {
     } else {
       if (Object.hasOwnProperty.call(data, 'content')) throw new TypeError('Property "content" is already populated');
 
+      if (options.hasOwnProperty('reply')) data.message_reference = { channel_id: options.reply.channelID, guild_id: options.reply.guildID, message_id: options.reply.messageID }; //eslint-disable-line camelcase
       if (options.hasOwnProperty('content')) data.content = options.content;
       if (options.hasOwnProperty('embed')) data.embed = resolveEmbed(options.embed);
       if (options.hasOwnProperty('mentions')) data.allowed_mentions = Util.formatAllowedMentions(client.options.allowedMentions, options.mentions); // eslint-disable-line camelcase
@@ -111,6 +112,7 @@ const getContent = (client, content, options) => {
     } else {
       if (Object.hasOwnProperty.call(data, 'content')) throw new TypeError('Property "content" is already populated');
 
+      if (content.hasOwnProperty('reply')) data.message_reference = { channel_id: content.reply.channelID, message_id: content.reply.messageID, guild_id: content.reply.guildID }; //eslint-disable-line camelcase
       if (content.hasOwnProperty('content')) data.content = content.content;
       if (content.hasOwnProperty('embed')) data.embed = resolveEmbed(content.embed);
       if (content.hasOwnProperty('mentions')) data.allowed_mentions = Util.formatAllowedMentions(client.options.allowedMentions, content.mentions); // eslint-disable-line camelcase

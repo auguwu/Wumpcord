@@ -138,6 +138,14 @@ class Message extends Base {
      */
     this.stickers = (data.stickers || []).map(data => new Sticker(data));
 
+    if (data.message_reference !== undefined) {
+      /**
+       * The referenced message
+       * @type {import('discord-api-types/v8').APIMessageReference}
+       */
+      this.reference = data.message_reference;
+    }
+
     if (data.attachments) {
       /**
        * The list of attachments
@@ -151,11 +159,22 @@ class Message extends Base {
       }
     }
 
-    // Insert if not in cache
-    if (this.author !== null) this.client.users.add(this.author);
-
     // add this message to `edits`
     this.edits.set(this.id, this);
+  }
+
+  /**
+   * Returns the referenced message, if any
+   * @returns {Message?}
+   */
+  get referencedMessage() {
+    if (!this.reference) throw new TypeError('This [Message] instance wasn\'t a replied message.');
+    if (!this.client.channels.cache.has(this.reference.channel_id) || !this.reference.message_id) return null;
+
+    const channel = this.client.channels.cache.get(this.reference.channel_id);
+    if (channel.type !== 'text') throw new TypeError('The channel that is being reference wasn\'t a text channel');
+
+    return channel.messages.cache.get(this.reference.message_id);
   }
 
   /**
