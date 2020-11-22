@@ -130,7 +130,7 @@ module.exports = class Utilities {
   static formatAllowedMentions(options, allowed) {
     if (!allowed) return options.allowedMentions;
 
-    const result = { parse: [] };
+    const result = { parse: [], replied_user: Boolean(allowed.reply) }; //eslint-disable-line camelcase
     if (allowed.everyone) result.parse.push('everyone');
 
     if (allowed.roles === true) result.parse.push('roles');
