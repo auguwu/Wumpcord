@@ -132,12 +132,6 @@ class Message extends Base {
      */
     this.edits = new Collection();
 
-    /**
-     * List of stickers available
-     * @type {Sticker[]}
-     */
-    this.stickers = (data.stickers || []).map(data => new Sticker(data));
-
     if (data.message_reference !== undefined) {
       /**
        * The referenced message

@@ -158,6 +158,18 @@ interface ClientStatus {
   website: boolean;
 }
 
+interface TemplatePacket {
+  serialized_source_guild: core.PartialEntity<Guild>;
+  source_guild_id: string;
+  description?: string;
+  usage_count: number;
+  updated_at: string;
+  created_at: string;
+  creator_id: string;
+  creator: discord.APIUser;
+  is_dirty?: boolean;
+}
+
 // Discord API objects made for Wumpcord
 export class Activity {
   constructor(data: discord.GatewayActivity);
@@ -389,7 +401,6 @@ export class Message extends Base {
   public attachments: core.CachableObject<Attachment>;
   public channelID: string;
   public mentions: UserStore;
-  public stickers: Sticker[];
   public content: string;
   public guildID: string;
   public member?: GuildMember;
@@ -408,6 +419,7 @@ export class Message extends Base {
   public getGuild(): Promise<Guild>;
   public paginate(options?: core.PaginationBuilderOptions): Promise<core.PaginationBuilder>;
   public unreact(reaction: string | Emoji, userID?: string): Promise<void>;
+  public reply(content: string | CreateMessageOptions | MessageFile[], options?: CreateMessageOptions | MessageFile[]): Promise<Message>;
   public delete(): Promise<void>;
   public react(reaction: string | Emoji, userID?: string): Promise<void>;
   public unpin(): Promise<void>;
@@ -431,3 +443,118 @@ export class Presence extends Base {
   public status: 'online' | 'offline' | 'dnd' | 'away';
   public user: User;
 }
+
+export class Role extends Base {
+  constructor(client: core.Client, data: discord.APIRole);
+
+  public permissions: core.Permissions;
+  public mentionable: boolean;
+  public position: number;
+  public managed: boolean;
+  public hoisted: boolean;
+  public guildID: string;
+  public color: number;
+  public name: string;
+
+  public get guild(): Guild | null;
+  public get hex(): string | null;
+  public get rgb(): [r: number, g: number, b: number];
+}
+
+export class Team extends Base {
+  constructor(client: core.Client, data: discord.APITeam);
+
+  public members: TeamMember[];
+  public owner: User | null;
+  public icon?: string;
+  public name: string;
+}
+
+export class Template {
+  constructor(client: core.Client, data: TemplatePacket);
+
+  public description?: string;
+  public usageCount: number;
+  public creatorID: string;
+  public name: string;
+  public code: string;
+}
+
+/*
+module.exports = class Template {
+  /**
+   * Patches this [Template] instance
+   * @param {any} data The data
+   */
+  patch(data) {
+    /**
+     * The creator's ID
+     * @type {string}
+     */
+    this.creatorID = data.creator_id;
+
+    /**
+     * When the template was created at
+     * @type {Date}
+     */
+    this.createdAt = new Date(data.created_at);
+
+    /**
+     * When the template was updated at
+     * @type {Date}
+     */
+    this.updatedAt = new Date(data.updated_at);
+
+    /**
+     * The sourced guild's ID that the template was created in
+     * @type {string}
+     */
+    this.sourceGuildID = data.source_guild_id;
+
+    /**
+     * If the template is unsynced or not
+     * @type {boolean}
+     */
+    this.dirty = Boolean(data.is_dirty);
+
+    /**
+     * The creator's data if cached
+     * @type {User}
+     */
+    this.creator = this.client.users.add(new User(this.client, data.creator));
+
+    /**
+     * The sourced guild's data if cached
+     * @type {Guild}
+     */
+    this.sourceGuild = this.client.canCache('guild')
+      ? this.client.guilds.get(this.sourceGuildID) || new Guild(this.client, data.serialized_source_guild)
+      : new Guild(this.client, data.serialized_source_guild);
+  }
+
+  /**
+   * Fetches this [Template] to return new data
+   */
+  fetch() {
+    return this.client.rest.dispatch({
+      endpoint: `/guilds/templates/${this.code}`,
+      method: 'GET'
+    }).then((data) => {
+      this.patch(data);
+      return this;
+    });
+  }
+
+  /**
+   * Returns the template URL
+   */
+  get url() {
+    return `https://discord.new/${code}`;
+  }
+
+  toString() {
+    return `[Template "https://discord.new/${this.code}"]`;
+  }
+};
+
+*/
