@@ -374,13 +374,7 @@ module.exports = class WebSocketClient extends EventBus {
       endpoint: Endpoints.user(id),
       method: 'GET'
     })
-      .then((data) => {
-        const user = new User(this, data);
-
-        this.insert('user', user);
-        return user;
-      })
-      .catch(() => null);
+      .then((data) => new User(this, data));
   }
 
   /**
@@ -393,12 +387,7 @@ module.exports = class WebSocketClient extends EventBus {
       endpoint: Endpoints.guild(id, true),
       method: 'GET'
     })
-      .then((data) => {
-        const guild = new Guild(this, data);
-
-        this.insert('guild', guild);
-        return guild;
-      });
+      .then((data) => new Guild(this, data));
   }
 
   /**
@@ -411,12 +400,7 @@ module.exports = class WebSocketClient extends EventBus {
       endpoint: Endpoints.channel(id),
       method: 'GET'
     })
-      .then((data) => {
-        const channel = BaseChannel.from(this, data);
-
-        this.insert('channel', channel);
-        return channel;
-      });
+      .then((data) => BaseChannel.from(this, data));
   }
 
   /**

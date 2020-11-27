@@ -58,7 +58,7 @@ module.exports = class Presence extends Base {
      * The activities that the user is playing
      * @type {Collection<Activity> | null}
      */
-    this.activities = client.canCache('presence:activity') ? new Collection() : null;
+    this.activities = new Collection();
 
     this.patch(data);
   }
@@ -78,7 +78,7 @@ module.exports = class Presence extends Base {
      * The current game
      * @type {GamePresence}
      */
-    this.current = data.activities[0];
+    this.current = data.activities.length ? new Activity(data.activities[0]) : null;
 
     /**
      * The current user or `null` if not cached
@@ -87,11 +87,9 @@ module.exports = class Presence extends Base {
     this.user = this.client.users.add(new (require('./User'))(this.client, data.user));
 
     if (data.activities) {
-      if (this.client.canCache('presence:activity')) {
-        for (let i = 0; i < data.activities.length; i++) {
-          const activity = data.activities[i];
-          this.activities.set(activity.id, new Activity(activity));
-        }
+      for (let i = 0; i < data.activities.length; i++) {
+        const activity = data.activities[i];
+        this.activities.set(activity.id, new Activity(activity));
       }
     }
   }

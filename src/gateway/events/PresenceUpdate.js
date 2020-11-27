@@ -20,47 +20,17 @@
  * SOFTWARE.
  */
 
-const Presence = require('../../entities/Presence');
-const { User } = require('../../entities');
+const PresenceUpdateEvent = require('../../events/PresenceUpdateEvent');
 
 /**
  * Function to call when a presence has been updated
  * @type {import('.').EventCallee}
  */
-const onPresenceUpdate = function ({ d: data }) {
-  if (!this.client.canCache('presence') || !this.client.canCache('presence:activity')) {
-    this.debug(`User "${data.user.id}" has updated their presence but can't be cachable, sending data without caching`);
-    this.client.emit('presenceUpdate', null, new Presence(this.client, data));
-    return;
-  }
+const onPresenceUpdate = async function ({ d: data }) {
+  const event = new PresenceUpdateEvent(this, data);
+  await event.process();
 
-  if (!this.client.canCache('user') || !this.client.canCache('guild')) {
-    this.debug(`User "${data.user.id}" has updated their presence but guilds or users can't be cached, sending data without user data`);
-    this.client.emit('presenceUpdate', null, new Presence(this.client, data));
-    return;
-  }
-
-  const guild = this.client.guilds.get(data.guild_id);
-  const oldPresence = guild.presences.get(data.user.id) || null;
-  let user = this.client.users.get(data.user.id);
-
-  if (!user) return;
-  if (!user && data.user.username) {
-    const u = new User(this.client, data.user);
-    this.client.insert('user', u);
-
-    user = u;
-  }
-
-  if (user.id !== data.user.id) return;
-  if (oldPresence === null) {
-    this.debug(`Presence wasn't cached for user "${data.user.id}", sending partial data`);
-    this.client.emit('presenceUpdate', null, new Presence(this.client, data));
-    return;
-  }
-
-  guild.presences.add(new Presence(this.client, data));
-  this.client.emit('presenceUpdate', oldPresence, new Presence(this.client, data));
+  this.client.emit('presenceUpdate', event);
 };
 
 module.exports = onPresenceUpdate;
