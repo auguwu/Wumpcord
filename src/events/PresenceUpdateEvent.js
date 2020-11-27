@@ -27,19 +27,12 @@ const { User } = require('../entities');
 /** @extends {BaseEvent<import('discord-api-types/v8').GatewayPresenceUpdateDispatch['d']>} */
 module.exports = class PresenceUpdateEvent extends BaseEvent {
   /**
-   * Gets the presence that was emitted
-   * @returns {Presence}
-   */
-  get() {
-    return new Presence(this.client, this.data);
-  }
-
-  /**
    * Gets the current guild
    * @returns {Promise<import('../entities/Guild')>}
    */
   getGuild() {
     if (!this.data.guild_id) throw new TypeError('`guild_id` was undefined, unable to get guild');
+    if (this.client.guilds.has(this.data.guild_id)) return this.client.guilds.get(this.data.guild_id);
 
     return this.client.guilds.fetch(this.data.guild_id);
   }
@@ -49,14 +42,16 @@ module.exports = class PresenceUpdateEvent extends BaseEvent {
    * @returns {Promise<import('../entities/User')>}
    */
   getUser() {
+    if (this.client.users.has(this.data.user.id)) return this.client.users.get(this.data.user.id);
+
     return this.client.users.fetch(this.data.user.id);
   }
 
   /**
-   * Returns the old presence
+   * Returns the presence that was updated
    */
-  get old() {
-    return this._old || null;
+  get new() { // im still shocked this can be a getter
+    return new Presence(this.client, this.data);
   }
 
   async process() {
@@ -84,7 +79,7 @@ module.exports = class PresenceUpdateEvent extends BaseEvent {
     if (old === null)
       this.shard.debug(`Presence wasn't cached for user ${user.tag}, [PresenceUpdateEvent.getOldPresence] will return nothing`);
 
-    this._old = old;
+    this.old = old || undefined;
     guild.presences.add(this.get());
   }
 };

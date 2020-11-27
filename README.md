@@ -2,8 +2,6 @@
 > :rowboat: **| Flexible, type-safe, and lightweight Discord API library**
 
 ## Features
-- Not cached by default
-  - Everything is not cached by default (guilds, users, etc), you'll have to enable it with the stuff you want cached.
 - Command Handling
   - Too lazy to code your own command handler? Wumpcord will supply you with an en-riching commands API!
 - Extra utilities
@@ -106,20 +104,6 @@ client.on('message', (message) => {
 
 client.start();
 ```
-
-## Caching
-Caching in Wumpcord is easy to understand until you actually implement it, there are many stuff you can cache but they must be opt using `ClientOptions.cacheType`. If the cache type is disabled or set to `none`, everything under that will be considered `null` or a Collection of key-value pairs of that specific cache
-
-- Guilds (`guild`)
-- Users (`user`)
-- Channels (`channel`)
-- Members (`member`)
-- Member Roles (`member:role`)
-- Voice State (`voice:state`)
-- Emojis (`emoji`)
-- Messages (`message`)
-- Presences (`presence`)
-- User Typings (`typings`)
 
 ## Commands
 This is the documentation of the Commands API, provided by Wumpcord.
