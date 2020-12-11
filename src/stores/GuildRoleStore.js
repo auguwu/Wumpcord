@@ -35,7 +35,6 @@ module.exports = class GuildRoleStore extends BaseStore {
     super(
       client,
       GuildRole,
-      client.canCache('member:role'),
       true
     );
   }

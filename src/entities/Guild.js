@@ -404,9 +404,7 @@ class Guild extends UnavailableGuild {
           }
         }
 
-        if (this.client.canCache('member')) {
-          this.members.cache = members;
-        }
+        this.members.cache = members;
 
         if (limit && (members ? members.size >= limit : true)) {
           clearTimeout(timeout);

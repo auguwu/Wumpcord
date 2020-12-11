@@ -35,7 +35,6 @@ module.exports = class ChannelMessageStore extends BaseStore {
     super(
       client,
       Message,
-      client.canCache('message'),
       true
     );
   }

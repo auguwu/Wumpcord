@@ -33,7 +33,6 @@ module.exports = class UserStore extends BaseStore {
     super(
       client,
       User,
-      client.canCache('user'),
       true
     );
   }

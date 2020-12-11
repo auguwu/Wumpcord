@@ -20,22 +20,40 @@
  * SOFTWARE.
  */
 
-const Presence = require('../entities/Presence');
-const BaseStore = require('./BaseStore');
+const BaseEvent = require('./BaseEvent');
+const Message = require('../entities/Message');
 
-/** @extends {BaseStore<Presence>} */
-module.exports = class GuildPresenceStore extends BaseStore {
+/** @extends {BaseEvent<import('discord-api-types/v8').GatewayMessageCreateDispatch['d']>} */
+module.exports = class MessageCreateEvent extends BaseEvent {
   /**
-   * Creates a new [GuildPresenceStore] instance
-   * @param {import('../gateway/WebSocketClient')} client The WebSocket client instance
+   * Gets and caches the channel the message is in
+   * @returns {Promise<import('..').TextableChannel>}
    */
-  constructor(client) {
-    super(
-      client,
-      Presence,
-      true
-    );
+  getChannel() {
+    return this.client.channels.fetch(this.data.channel_id);
   }
 
-  // presence store can't fetch stuff :(
+  /**
+   * Gets and caches the guild the message is in
+   * @returns {Promise<import('../entities/Guild')>}
+   */
+  getGuild() {
+    if (!this.data.guild_id) throw new Error('[guild_id] was not populated.');
+
+    return this.client.guilds.fetch(this.data.guild_id);
+  }
+
+  async process() {
+    const message = new Message(this.client, this.data);
+    const channel = await this.getChannel(); // cache it
+
+    if (channel !== null && channel.type === 'text') {
+      message.patch(this.data);
+      channel.messages.add(message);
+
+      this.client.channels.cache.set(channel.id, channel);
+    }
+
+    this.ref = message;
+  }
 };

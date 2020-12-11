@@ -36,6 +36,7 @@ const Template        = require('../entities/Template');
 
 const ChannelStore = require('../stores/ChannelStore');
 const GuildStore = require('../stores/GuildStore');
+const UserStore = require('../stores/UserStore');
 
 /**
  * Represents a client for handling all WebSocket shard connections
@@ -66,7 +67,7 @@ module.exports = class WebSocketClient extends EventBus {
      *
      * @type {ChannelStore}
      */
-    this.channels = null;
+    this.channels = new ChannelStore(this);
 
     /**
      * The options that the user defined
@@ -83,7 +84,6 @@ module.exports = class WebSocketClient extends EventBus {
       getAllUsers: true,
       shardCount: 'auto',
       strategy: 'json',
-      cache: 'none',
       ws: {
         guildSubscriptions: false,
         largeThreshold: 250,
@@ -102,7 +102,7 @@ module.exports = class WebSocketClient extends EventBus {
      *
      * @type {GuildStore}
      */
-    this.guilds = null;
+    this.guilds = new GuildStore(this);
 
     /**
      * Any users typing in a channel
@@ -128,13 +128,10 @@ module.exports = class WebSocketClient extends EventBus {
     this.token = opts.token;
 
     /**
-     * The user cache or or `null` if it's not cachable,
-     * if you wanna retrieve information and possibly cache it,
-     * you must use `Client#fetchUser/1` function
-     *
-     * @type {Collection<import('../entities/User')> | null}
+     * The user cache, you can use [UserStore.fetch] if not cached
+     * @type {UserStore}
      */
-    this.users = null;
+    this.users = new UserStore(this);
 
     /**
      * The REST client to use
@@ -244,19 +241,6 @@ module.exports = class WebSocketClient extends EventBus {
   }
 
   /**
-   * Function to check if we can cache `type`
-   * @param {import('../Constants').CacheType} type The type to check if we can cache
-   * @arity Wumpcord.WebSocketClient.canCache/1
-   */
-  canCache(type) {
-    if (this.options.cache === 'all') return true;
-    else if (this.options.cache === 'none') return false;
-    else if (Array.isArray(this.options.cache) && this.options.cache.includes(type)) return true;
-    else if (this.options.cache === type) return true;
-    else return false;
-  }
-
-  /**
    * Sets the status for all shards
    * @param {'online' | 'offline' | 'idle' | 'dnd'} status The status to use
    * @param {import('./WebSocketShard').SendActivityOptions} opts The options to use
@@ -292,11 +276,6 @@ module.exports = class WebSocketClient extends EventBus {
    * Retrieves a list of requested guild members
    */
   async requestGuildMembers() {
-    if (!this.canCache('guild') || !this.canCache('member')) {
-      this.emit('debug', 'Guild cache is disabled, not populating user cache');
-      return;
-    }
-
     if (!(this.intents & Constants.GatewayIntents.guildMembers)) {
       this.emit('debug', 'Missing `guildMembers` intent, skipping');
       return;

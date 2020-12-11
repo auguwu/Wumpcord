@@ -20,28 +20,17 @@
  * SOFTWARE.
  */
 
-const { Message } = require('../../../entities');
+const MessageCreateEvent = require('../../../events/MessageCreateEvent');
 
 /**
  * Received when a message has been created
  * @type {import('..').EventCallee}
  */
 const onMessageCreate = async function ({ d: data }) {
-  const message = new Message(this.client, data);
-  const channel = await message.getChannel();
+  const event = new MessageCreateEvent(this, data);
+  await event.process();
 
-  if (channel !== null && channel.type === 'text') {
-    if (!this.client.canCache('message')) this.debug('Can\'t cache messages, `messageDelete` and `messageUpdate` will only emit partial IDs');
-    if (!this.client.canCache('channel')) this.debug('Can\'t cache channels, `messageDelete` and `messageUpdate` will only emit partial IDs');
-
-    message.patch(data);
-    channel.messages.add(message);
-    this.client.channels.cache.set(channel.id, channel); // force push it
-  }
-
-  // populate guild
-  await message.getGuild();
-  this.client.emit('message', message);
+  this.client.emit('message', event);
 };
 
 module.exports = onMessageCreate;

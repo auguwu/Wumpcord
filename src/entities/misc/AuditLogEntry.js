@@ -63,7 +63,7 @@ module.exports = class AuditLogEntry extends Base {
      * The user who did the audit log
      * @type {import('../User') | null}
      */
-    this.user = this.client.canCache('user') ? this.client.users.get(data.user_id) || null : null;
+    this.user = this.client.users.get(data.user_id) || null;
 
     /**
      * The reason of the audit log change
@@ -98,7 +98,13 @@ module.exports = class AuditLogEntry extends Base {
          * The channel that it occured in
          * @type {import('../BaseChannel') | null}
          */
-        this.channel = this.client.canCache('channel') ? this.client.channels.get(data.options.channel_id) : null;
+        this.channel = this.client.channels.get(data.options.channel_id);
+
+        /**
+         * The channel ID
+         * @type {string}
+         */
+        this.channelID = data.options.channel_id;
       }
 
       if ([AuditLogActions.MessageUnpin, AuditLogActions.MessagePin].includes(this.actionType)) {
@@ -106,13 +112,13 @@ module.exports = class AuditLogEntry extends Base {
          * The message that was targeted
          * @type {import('../Message') | null}
          */
-        this.message = this.client.canCache('message')
-          ? this.channel !== null
-            ? this.channel.type === 'text'
-              ? this.channel.messages.get(data.options.message_id)
-              : null
-            : null
-          : null;
+        this.message = this.channel !== null && this.channel.type === 'text' ? this.channel.messages.get(data.options.message_id) : null;
+        
+        /**
+         * The message ID
+         * @type {string}
+         */
+        this.messageID = data.options.message_id;
       }
 
       if ([

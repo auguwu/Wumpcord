@@ -36,17 +36,11 @@ const onReady = function (shard, { d: data }) {
   shard.client.user = new BotUser(shard.client, data.user);
   shard.sessionID = data.session_id;
 
+  shard.client.voiceConnections = new Collection();
   shard.client.channels = new ChannelStore(shard.client);
+  shard.client.typings = new Collection();
   shard.client.guilds = new GuildStore(shard.client);
   shard.client.users = new UserStore(shard.client);
-
-  if (shard.client.options.cacheType === 'all') {
-    shard.client.voiceConnections = new Collection();
-    shard.client.typings = new Collection();
-  } else {
-    shard.client.voiceConnections = shard.client.canCache('voice:conenction') ? new Collection() : null;
-    shard.client.typings = shard.client.canCache('typing') ? new Collection() : null;
-  }
 
   shard.client.users.add(new BotUser(shard.client, data.user));
   shard.unavailableGuilds = new Set(data.guilds.map(s => s.id));

@@ -33,7 +33,6 @@ module.exports = class GuildMemberStore extends BaseStore {
     super(
       client,
       GuildMember,
-      client.canCache('member'),
       true
     );
   }

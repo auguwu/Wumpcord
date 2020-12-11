@@ -49,29 +49,6 @@ module.exports = {
   GatewayVersion: 8,
 
   /**
-   * Avaliable cache types to use
-   * @type {CacheType[]}
-   */
-  CacheType: [
-    'guild',
-    'user',
-    'channel',
-    'member',
-    'member:role',
-    'voice',
-    'attachments',
-    'overwrites',
-    'emoji',
-    'message',
-    'presence',
-    'presence:activity',
-    'typing',
-    'invites',
-    'voice:connections',
-    'audit:entries'
-  ],
-
-  /**
    * Available image formats
    */
   ImageFormats: [

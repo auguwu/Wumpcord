@@ -27,18 +27,6 @@ const Message = require('../../../entities/Message');
  * @type {import('..').EventCallee}
  */
 const onMessageUpdate = function ({ d: data }) {
-  if (!this.client.canCache('channel')) {
-    this.debug('Received `messageUpdate` but channel cache is not enabled, still emitting with partial ID');
-    this.client.emit('messageUpdate', null, { id: data.id });
-    return;
-  }
-
-  if (!this.client.canCache('message')) {
-    this.debug('Received `messageUpdate` but message cache is not enabled, still emitting with partial ID');
-    this.client.emit('messageUpdate', null, { id: data.id });
-    return;
-  }
-
   /** @type {import('../../../entities/channel/TextChannel')} */
   const channel = this.client.channels.get(data.channel_id);
   if (!channel || channel.type !== 'text') {

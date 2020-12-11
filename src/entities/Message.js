@@ -31,6 +31,8 @@ const Sticker = require('./Sticker');
 const Emoji = require('./Emoji');
 const Util = require('../util/Util');
 const PaginationBuilder = require('./utilities/PaginationBuilder');
+const UserStore = require('../stores/UserStore');
+const GuildRoleStore = require('../stores/GuildRoleStore');
 
 /**
  * Represents a [Discord] message
@@ -77,13 +79,13 @@ class Message extends Base {
      * The roles that were mentioned
      * @type {Collection<Role> | number}
      */
-    this.mentionRoles = this.client.canCache('member:role') ? new Collection() : 0;
+    this.mentionRoles = new GuildRoleStore(this.client);
 
     /**
      * The users that were mentioned
-     * @type {Collection<Role> | number}
+     * @type {UserStore}
      */
-    this.mentions = this.client.canCache('user') ? new Collection() : 0;
+    this.mentions = new UserStore(this.client);
 
     /**
      * The member instance, call [Message.getGuild] to populate it

@@ -33,10 +33,9 @@ module.exports = class BaseStore {
    * Creates a new [BaseStore] instance
    * @param {import('../gateway/WebSocketClient')} client The client to use
    * @param {T} holdable The holdable object to use
-   * @param {boolean} cache If we should populate [BaseStore.cache] or not
    * @param {boolean} [injectClient=true] If we should inject `client` when creating a new holdable structure
    */
-  constructor(client, holdable, cache, injectClient = true) {
+  constructor(client, holdable, injectClient = true) {
     /**
      * The [WebSocketClient] to use
      * @type {import('../gateway/WebSocketClient')}
@@ -62,12 +61,6 @@ module.exports = class BaseStore {
      * @type {boolean}
      */
     this.injectClient = injectClient;
-
-    /**
-     * If we should cache properties
-     * @type {boolean}
-     */
-    this.canCache = cache;
   }
 
   /**
@@ -103,15 +96,15 @@ module.exports = class BaseStore {
 
     if (existing) return existing;
 
-    const obj = data instanceof this.holdable
-      ? data
-      : this.injectClient
-        ? new this.holdable(this.client, data)
-        : new this.holdable(data);
+    try {
+      const obj = this.injectClient ? new this.holdable(this.client, data) : new this.holdable(data);
+      this.cache.set(obj.id, obj);
 
-    if (this.canCache) this.cache.set(data.id, obj);
-
-    return obj;
+      return obj;
+    } catch(ex) {
+      this.cache.set(data.id, data);
+      return data;
+    }
   }
 
   /**

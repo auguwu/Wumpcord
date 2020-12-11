@@ -28,11 +28,6 @@ const Presence = require('../../../../entities/Presence');
  * @type {import('.').EventCallee}
  */
 const onGuildMemberChunk = function ({ d: data }) {
-  if (!this.client.canCache('guild')) {
-    this.client.emit('warn', 'Cannot do member chunk because possibly uncaching');
-    return;
-  }
-
   const guild = this.client.guilds.get(data.guild_id);
   if (!guild) {
     this.client.emit('warn', `Guild "${data.guild_id}" is possibly uncached, skipping`);

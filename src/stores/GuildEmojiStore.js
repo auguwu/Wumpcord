@@ -33,7 +33,6 @@ module.exports = class GuildEmojiStore extends BaseStore {
     super(
       client,
       GuildEmoji,
-      client.canCache('emoji'),
       true
     );
   }

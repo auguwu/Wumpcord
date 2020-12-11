@@ -33,7 +33,6 @@ module.exports = class VoiceStateStore extends BaseStore {
     super(
       client,
       VoiceState,
-      client.canCache('voice:state'),
       true
     );
   }
