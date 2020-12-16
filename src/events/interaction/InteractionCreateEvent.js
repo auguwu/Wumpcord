@@ -78,7 +78,7 @@ module.exports = class InteractionCreateEvent extends BaseEvent {
     const {
       data: commandInfo,
       guild_id: guildID,
-      channel_id: channelID,
+      channel_id: channelID
     } = this.data;
 
     // get and cache them
