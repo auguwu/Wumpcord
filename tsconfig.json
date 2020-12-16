@@ -9,6 +9,6 @@
     "noImplicitAny": false,
     "moduleResolution": "node",
     "declaration": false,
-    "types": ["node"]
+    "types": ["@types/node"]
   }
 }
