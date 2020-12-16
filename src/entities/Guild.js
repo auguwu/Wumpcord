@@ -399,9 +399,7 @@ class Guild extends UnavailableGuild {
         if (chunk.nonce !== nonce) return;
 
         for (const member of all.values()) {
-          if (this.client.canCache('member')) {
-            members.set(member.user.id, new Member(this.client, { guild_id: this.id, ...member }));
-          }
+          members.set(member.user.id, new Member(this.client, { guild_id: this.id, ...member }));
         }
 
         this.members.cache = members;

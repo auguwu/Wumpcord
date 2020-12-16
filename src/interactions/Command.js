@@ -20,7 +20,44 @@
  * SOFTWARE.
  */
 
+const Option = require('./Options');
+const Base = require('../entities/base');
+
 /**
  * Represents a parent or subcommand to run a interaction command with Discord
  */
-module.exports = class InteractionCommand {};
+module.exports = class InteractionCommand extends Base {
+  /**
+   * Creates a new [InteractionCommand] instance
+   * @param {InteractionCommandMetadata} data The data supplied from Discord
+   */
+  constructor(data) {
+    super(data.id);
+
+    this.patch(data);
+  }
+
+  /**
+   * Patches the data
+   * @param {InteractionCommandMetadata} data The data supplied from Discord
+   */
+  patch(data) {
+    /**
+     * The command's description
+     * @type {string}
+     */
+    this.description = data.description;
+
+    /**
+     * The command's options
+     * @type {any}
+     */
+    this.options = data.options?.map(option => new Option(option)) ?? [];
+
+    /**
+     * The name of the command
+     * @type {string}
+     */
+    this.name = data.name;
+  }
+};

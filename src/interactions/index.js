@@ -20,24 +20,14 @@
  * SOFTWARE.
  */
 
-const InteractionBuilder = require('./InteractionBuilder');
-const InteractionHandler = require('./InteractionHandler');
-const { verify } = require('./utils');
+const InteractionHelper = require('./InteractionHelper');
+const Command = require('./Command');
 
 /**
- * Package for creating interactions with Wumpcord, bundled in.
- * Supports http and https.
- *
- * This package exports the following classes and functions:
- *
- * - Wumpcord.Interactions.InteractionBuilder
- * - Wumpcord.Interactions.InteractionHandler
- * - Wumpcord.Interactions.verify
- *
  * @package Wumpcord.Interactions
+ * @description Interaction package to use Discord's [Slash Commands](https://discord.com/developers/docs/interactions/slash-commands) API.
  */
 module.exports = {
-  InteractionBuilder,
-  InteractionHandler,
-  verify
+  InteractionHelper,
+  Command
 };
