@@ -20,42 +20,17 @@
  * SOFTWARE.
  */
 
-const { BaseChannel } = require('../../../entities');
+const ChannelUpdateEvent = require('../../../events/channel/ChannelUpdateEvent');
 
 /**
  * Function to call when a channel has been updated in a guild
  * @type {import('..').EventCallee}
  */
 const onChannelUpdate = function ({ d: data }) {
-  if (!this.client.canCache('guild')) {
-    this.debug('Can\'t cache guilds, emitting partial data anyway');
-    this.client.emit('channelUpdate', null, BaseChannel.from(this.client, data));
-    return;
-  }
+  const event = new ChannelUpdateEvent(this, data);
+  event.process();
 
-  if (!this.client.canCache('channel')) {
-    this.debug('Can\'t cache channels, emitting partial data anyway');
-    this.client.emit('channelUpdate', null, BaseChannel.from(this.client, data));
-    return;
-  }
-
-  const guild = this.client.guilds.get(data.guild_id);
-  if (!guild) {
-    this.debug(`Guild "${data.guild_id}" is possibly uncached, emitting data anyway`);
-    this.client.emit('channelUpdate', null, BaseChannel.from(this.client, data));
-    return;
-  }
-
-  const channel = BaseChannel.from(this.client, data);
-  const oldChannel = guild.channels.get(channel.id);
-  if (!oldChannel) {
-    this.debug(`Channel "${data.id}" is possibly uncached, emitting data anyway`);
-    this.client.emit('channelUpdate', { id: data.id }, channel);
-    return;
-  }
-
-  guild.channels.add(channel);
-  this.client.emit('channelUpdate', oldChannel, channel);
+  this.client.emit('channelUpdate', event);
 };
 
 module.exports = onChannelUpdate;

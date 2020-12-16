@@ -20,36 +20,19 @@
  * SOFTWARE.
  */
 
-const BaseChannel = require('../../../entities/BaseChannel');
+const ChannelCreateEvent = require('../../../events/channel/ChannelCreateEvent');
 
 /**
  * Function to call when a channel has been created in a guild
  * @type {import('..').EventCallee}
  */
 const onChannelCreate = function ({ d: data }) {
-  if (!this.client.canCache('guild')) {
-    this.debug('Can\'t cache guilds, emitting partial data anyway');
-    this.client.emit('channelCreate', BaseChannel.from(this.client, data));
-    return;
-  }
+  console.log(data);
 
-  if (!this.client.canCache('channel')) {
-    this.debug('Can\'t cache channels, emitting partial data anyway');
-    this.client.emit('channelCreate', BaseChannel.from(this.client, data));
-    return;
-  }
+  const event = new ChannelCreateEvent(this, data);
+  event.process();
 
-  const guild = this.client.guilds.get(data.guild_id);
-  if (!guild) {
-    this.debug(`Guild "${data.guild_id}" is possibly uncached, emitting data anyway`);
-    this.client.emit('channelCreate', BaseChannel.from(this.client, data));
-    return;
-  }
-
-  const channel = BaseChannel.from(this.client, data);
-  guild.channels.add(channel);
-
-  this.client.emit('channelCreate', channel);
+  this.client.emit('channelCreate', event);
 };
 
 module.exports = onChannelCreate;

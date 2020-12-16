@@ -43,8 +43,12 @@ module.exports = class MessageCreateEvent extends BaseEvent {
     return this.client.guilds.fetch(this.data.guild_id);
   }
 
+  get() {
+    return new Message(this.client, this.data);
+  }
+
   async process() {
-    const message = new Message(this.client, this.data);
+    const message = this.get();
     const channel = await this.getChannel(); // cache it
 
     if (channel !== null && channel.type === 'text') {
@@ -54,6 +58,10 @@ module.exports = class MessageCreateEvent extends BaseEvent {
       this.client.channels.cache.set(channel.id, channel);
     }
 
-    this.ref = message;
+    try {
+      await this.getGuild();
+    } catch {
+      // noop
+    }
   }
 };

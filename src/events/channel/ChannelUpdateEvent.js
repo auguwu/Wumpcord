@@ -20,18 +20,49 @@
  * SOFTWARE.
  */
 
-const VoiceState = require('../entities/VoiceState');
-const BaseStore = require('./BaseStore');
+const BaseEvent = require('../BaseEvent');
+const Channel = require('../../entities/BaseChannel');
 
-/** @extends {BaseStore<VoiceState>} */
-module.exports = class VoiceStateStore extends BaseStore {
-  /**
-   * Creates a new [VoiceStateStore] instance
-   * @param {import('../gateway/WebSocketClient')} client The WebSocket client instance
-   */
-  constructor(client) {
-    super(client, VoiceState);
+/**
+ * @extends {BaseEvent<import('discord-api-types/v8').GatewayChannelUpdateDispatch['d']>}
+ */
+module.exports = class ChannelUpdateEvent extends BaseEvent {
+  get old() {
+    return this.$refs.old;
   }
 
-  // can't fetch voice states
+  get new() {
+    return this.$refs.new || Channel.from(this.client, this.data);
+  }
+
+  process() {
+    const guild = this.client.guilds.get(this.data.guild_id);
+    if (!guild) {
+      this.shard.debug(`Missing guild attributes (id: ${this.data.guild_id})`);
+      this.$refs = {
+        old: null,
+        new: Channel.from(this.client, this.data)
+      };
+
+      return;
+    }
+
+    const updated = Channel.from(this.client, data);
+    const old = guild.channels.get(this.data.id);
+    if (!old) {
+      this.shard.debug(`Missing old channel attributes (id: ${this.data.id})`);
+      this.$refs = {
+        old: null,
+        new: Channel.from(this.client, this.data)
+      };
+
+      return;
+    }
+
+    guild.channels.add(updated);
+    this.$refs = {
+      old,
+      new: updated
+    };
+  }
 };

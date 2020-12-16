@@ -40,8 +40,7 @@ module.exports = class BaseEvent {
 
     /**
      * The shard that this event is being emitted from
-     * @private
-     * @type {import('../gateway/WebSocketClient')}
+     * @type {import('../gateway/WebSocketShard')}
      */
     this.shard = shard;
 

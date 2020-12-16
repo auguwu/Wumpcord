@@ -32,11 +32,7 @@ module.exports = class ChannelMessageStore extends BaseStore {
    * @param {import('../gateway/WebSocketClient')} client The WebSocket client
    */
   constructor(client) {
-    super(
-      client,
-      Message,
-      true
-    );
+    super(client, Message);
   }
 
   /**

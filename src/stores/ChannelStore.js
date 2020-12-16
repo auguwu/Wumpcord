@@ -32,11 +32,7 @@ module.exports = class ChannelStore extends BaseStore {
    * @param {import('../gateway/WebSocketClient')} client The WebSocket client
    */
   constructor(client) {
-    super(
-      client,
-      BaseChannel,
-      true
-    );
+    super(client, BaseChannel);
   }
 
   /**

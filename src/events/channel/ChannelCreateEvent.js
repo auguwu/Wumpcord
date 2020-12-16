@@ -20,18 +20,30 @@
  * SOFTWARE.
  */
 
-const VoiceState = require('../entities/VoiceState');
-const BaseStore = require('./BaseStore');
+const BaseEvent = require('../BaseEvent');
+const Channel = require('../../entities/BaseChannel');
 
-/** @extends {BaseStore<VoiceState>} */
-module.exports = class VoiceStateStore extends BaseStore {
+/**
+ * @extends {BaseEvent<import('discord-api-types/v8').GatewayChannelCreateDispatch['d']>}
+ */
+module.exports = class ChannelCreateEvent extends BaseEvent {
   /**
-   * Creates a new [VoiceStateStore] instance
-   * @param {import('../gateway/WebSocketClient')} client The WebSocket client instance
+   * Caches and returns the created channel
+   * @returns {Promise<Channel>}
    */
-  constructor(client) {
-    super(client, VoiceState);
+  get() {
+    return this.client.channels.fetch(this.data.id);
   }
 
-  // can't fetch voice states
+  process() {
+    const guild = this.client.guilds.get(this.data.guild_id);
+    if (!guild) {
+      this.shard.debug(`Missing guild attributes (id: ${this.data.guild_id}), emitting anyway.`);
+      return;
+    }
+
+    const channel = Channel.from(this.client, this.data);
+    this.client.channels.add(channel);
+    guild.channels.add(channel);
+  }
 };

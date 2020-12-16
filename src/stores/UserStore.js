@@ -21,7 +21,6 @@
  */
 
 const BaseStore = require('./BaseStore');
-const User = require('../entities/User');
 
 /** @extends {BaseStore<User>} */
 module.exports = class UserStore extends BaseStore {
@@ -30,11 +29,7 @@ module.exports = class UserStore extends BaseStore {
    * @param {import('../gateway/WebSocketClient')} client The client instance
    */
   constructor(client) {
-    super(
-      client,
-      User,
-      true
-    );
+    super(client, require('../entities/User'));
   }
 
   /**

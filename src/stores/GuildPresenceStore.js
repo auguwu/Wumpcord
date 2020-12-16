@@ -30,11 +30,7 @@ module.exports = class GuildPresenceStore extends BaseStore {
    * @param {import('../gateway/WebSocketClient')} client The WebSocket client instance
    */
   constructor(client) {
-    super(
-      client,
-      Presence,
-      true
-    );
+    super(client, Presence);
   }
 
   // presence store can't fetch stuff :(

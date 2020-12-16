@@ -30,11 +30,7 @@ module.exports = class GuildEmojiStore extends BaseStore {
    * @param {import('../gateway/WebSocketClient')} client The WebSocket client
    */
   constructor(client) {
-    super(
-      client,
-      GuildEmoji,
-      true
-    );
+    super(client, GuildEmoji);
   }
 
   /**

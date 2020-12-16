@@ -30,11 +30,7 @@ module.exports = class GuildMemberStore extends BaseStore {
    * @param {import('../gateway/WebSocketClient')} client The WebSocket client instance
    */
   constructor(client) {
-    super(
-      client,
-      GuildMember,
-      true
-    );
+    super(client, GuildMember);
   }
 
   /**
