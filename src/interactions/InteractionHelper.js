@@ -45,9 +45,15 @@ module.exports = class InteractionHelper {
      * The list of guild commands available, use `InteractionHelper.getGuildCommands`
      * to add to the cache
      *
-     * @type {Collection<Collection<Command>>}
+     * @type {Collection<Command>}
      */
     this.guildCommands = new Collection();
+
+    /**
+     * All of the commands available (global and guild)
+     * @type {Collection<Command>}
+     */
+    this.commands = new Collection();
 
     /**
      * The client instance
@@ -73,8 +79,9 @@ module.exports = class InteractionHelper {
       endpoint: `/applications/${this.id}/commands`,
       method: 'GET'
     }).then(data => data.map(d => {
-      const command = new Command(d);
+      const command = new Command({ is_guild: false, ...d }); // eslint-disable-line camelcase
       this.globalCommands.set(d.id, command);
+      this.commands.set(d.id, command);
 
       return command;
     }));
@@ -90,8 +97,9 @@ module.exports = class InteractionHelper {
       method: 'GET'
     })
       .then(data => data.map(d => {
-        const command = new Command(d);
+        const command = new Command({ is_guild: true, ...d }); // eslint-disable-line camelcase
         this.guildCommands.set(d.id, command);
+        this.commands.set(d.id, command);
 
         return command;
       }))

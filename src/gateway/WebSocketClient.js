@@ -21,6 +21,7 @@
  */
 
 const { User, Guild, BaseChannel, Message } = require('../entities');
+const InteractionHelper = require('../interactions/InteractionHelper');
 const ShardingManager = require('./ShardingManager');
 const { Collection }  = require('@augu/immutable');
 const Constants       = require('../Constants');
@@ -61,6 +62,11 @@ module.exports = class WebSocketClient extends EventBus {
     this.lastShardID = 1;
 
     /**
+     * The interaction helper, this will return `null` if not enabled
+     */
+    this.interactions = null;
+
+    /**
      * The channels cache or `null` if it's not cachable
      * the bot can see, use `Client#fetchChannel` to get the channel
      * and possibly cache it
@@ -80,6 +86,7 @@ module.exports = class WebSocketClient extends EventBus {
         roles: false,
         users: false
       },
+      interactions: false,
       disabledEvents: [],
       getAllUsers: true,
       shardCount: 'auto',
@@ -145,10 +152,17 @@ module.exports = class WebSocketClient extends EventBus {
      */
     this.user = undefined;
 
-    this.once('ready', () => {
+    this.once('ready', async () => {
       if (this.options.getAllUsers) {
-        this.emit('debug', 'Now requesting all guild members and possibly caching them...');
-        this.requestGuildMembers();
+        this.emit('debug', '[Debug => Get All Users] Now requesting all guild members and possibly caching them...');
+        await this.requestGuildMembers();
+      }
+
+      if (this.options.interactions) {
+        this.emit('debug', '[Debug => Interactions] Interactions are enabled, created a interaction helper!');
+        this.interactions = new InteractionHelper(this, this.user.id);
+
+        await this.interactions.getGlobalCommands();
       }
     });
   }

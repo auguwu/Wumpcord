@@ -20,50 +20,17 @@
  * SOFTWARE.
  */
 
-const Option = require('./Options');
-const Base = require('../entities/base');
+const InteractionCreateEvent = require('../../../events/interaction/InteractionCreateEvent');
 
 /**
- * Represents a parent or subcommand to run a interaction command with Discord
+ * Received when a interaction event has emitted
+ * @type {import('..').EventCallee}
  */
-module.exports = class InteractionCommand extends Base {
-  /**
-   * Creates a new [InteractionCommand] instance
-   * @param {InteractionCommandMetadata} data The data supplied from Discord
-   */
-  constructor(data) {
-    super(data.id);
+const onInteractionCreate = async function ({ d: data }) {
+  const event = new InteractionCreateEvent(this, data);
+  await event.process();
 
-    this.patch(data);
-  }
-
-  /**
-   * Patches the data
-   * @param {InteractionCommandMetadata} data The data supplied from Discord
-   */
-  patch(data) {
-    /**
-     * The command's description
-     * @type {string}
-     */
-    this.description = data.description;
-
-    /**
-     * The command's options
-     * @type {Option[]}
-     */
-    this.options = !data.options.length ? [] : data.options.map(o => new Option(o));
-
-    /**
-     * If the command is a guild command or not
-     * @type {boolean}
-     */
-    this.isGuild = data.is_guild || false;
-
-    /**
-     * The name of the command
-     * @type {string}
-     */
-    this.name = data.name;
-  }
+  this.client.emit('interactionReceive', event);
 };
+
+module.exports = onInteractionCreate;

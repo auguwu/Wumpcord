@@ -38,6 +38,7 @@ module.exports = {
   GUILD_EMOJIS_UPDATE: require('./guild/emoji/GuildEmojisUpdate'),
   CHANNEL_PINS_UPDATE: require('./channel/ChannelPinsUpdate'),
   VOICE_STATE_UPDATE: require('./VoiceStateUpdate'),
+  INTERACTION_CREATE: require('./interaction/InteractionCreate'),
   GUILD_ROLE_CREATE: require('./guild/role/GuildRoleCreate'),
   GUILD_ROLE_UPDATE: require('./guild/role/GuildRoleUpdate'),
   GUILD_ROLE_DELETE: require('./guild/role/GuildRoleDelete'),
