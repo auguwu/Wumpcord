@@ -20,9 +20,15 @@
  * SOFTWARE.
  */
 
+const { sign } = require('tweetnacl');
+
 /**
  * Verifies the request from Discord
+ * @param {DiscordVerifyOptions} options The options to verify a request to Discord
  */
-exports.verify = () => {
-  // noop
-};
+exports.verify = (options) =>
+  sign.detached.verify(
+    Buffer.from(options.timestamp + options.body),
+    Buffer.from(options.signature, 'hex'),
+    Buffer.from(options.pubKey, 'hex')
+  );

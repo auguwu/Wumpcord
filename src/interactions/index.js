@@ -20,6 +20,10 @@
  * SOFTWARE.
  */
 
+const InteractionBuilder = require('./InteractionBuilder');
+const InteractionHandler = require('./InteractionHandler');
+const { verify } = require('./utils');
+
 /**
  * Package for creating interactions with Wumpcord, bundled in.
  * Supports http and https.
@@ -27,10 +31,13 @@
  * This package exports the following classes and functions:
  *
  * - Wumpcord.Interactions.InteractionBuilder
- * - Wumpcord.Interactions.InteractionCreator
  * - Wumpcord.Interactions.InteractionHandler
  * - Wumpcord.Interactions.verify
  *
  * @package Wumpcord.Interactions
  */
-module.exports = Object.create(null);
+module.exports = {
+  InteractionBuilder,
+  InteractionHandler,
+  verify
+};

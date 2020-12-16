@@ -20,7 +20,41 @@
  * SOFTWARE.
  */
 
+const { verify } = require('./utils');
+const EventBus = require('../util/EventBus');
+
 /**
  * Subclass to handle all requests from Discord
  */
-module.exports = class InteractionHandler {};
+module.exports = class InteractionHandler extends EventBus {
+  /**
+   * Creates a new [InteractionHandler] instance
+   * @param {import('./InteractionBuilder')} builder The builder instance
+   */
+  constructor(builder) {
+    super();
+
+    /**
+     * The builder instance
+     * @private
+     * @type {import('./InteractionBuilder')}
+     */
+    this.builder = builder;
+  }
+
+  /**
+   * Handles the request from Discord -> Us
+   * @param {import('http').IncomingMessage} req The request from Discord
+   * @param {import('http').ServerResponse} res The response instance
+   */
+  async handle(req, res) {
+    // noop
+  }
+};
+
+// headers from discord docs
+/*
+const signature = req.get('X-Signature-Ed25519');
+const timestamp = req.get('X-Signature-Timestamp');
+const body = req.rawBody; // rawBody is expected to be a string, not raw bytes
+*/
