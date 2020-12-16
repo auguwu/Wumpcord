@@ -27,10 +27,18 @@ const InteractionCreateEvent = require('../../../events/interaction/InteractionC
  * @type {import('..').EventCallee}
  */
 const onInteractionCreate = async function ({ d: data }) {
-  const event = new InteractionCreateEvent(this, data);
-  await event.process();
+  switch (data.type) {
+    case 1:
+      this.debug('Received ping event for interaction.');
+      break;
 
-  this.client.emit('interactionReceive', event);
+    case 2: {
+      const event = new InteractionCreateEvent(this, data);
+      await event.process();
+
+      this.client.emit('interactionReceive', event);
+    } break;
+  }
 };
 
 module.exports = onInteractionCreate;

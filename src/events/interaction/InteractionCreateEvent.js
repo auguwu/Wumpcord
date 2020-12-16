@@ -66,11 +66,19 @@ module.exports = class InteractionCreateEvent extends BaseEvent {
     return this.$refs.guild;
   }
 
+  /**
+   * Returns the interaction message
+   * @returns {Message}
+   */
+  get message() {
+    return this.$refs.message;
+  }
+
   async process() {
     const {
       data: commandInfo,
       guild_id: guildID,
-      channel_id: channelID
+      channel_id: channelID,
     } = this.data;
 
     // get and cache them
@@ -90,6 +98,9 @@ module.exports = class InteractionCreateEvent extends BaseEvent {
     await this.client.interactions.getGlobalCommands();
     await this.client.interactions.getGuildCommands(guild.id);
 
+    // before we do the command stuff, we need to ack a interaction receive event
+    await this.client.interactions.createInteractionResponse(this.data.id, this.token, 5);
+
     // get the command by the cache id
     const command = this.client.interactions.commands.get(commandInfo.id);
     if (!command) {
@@ -101,8 +112,7 @@ module.exports = class InteractionCreateEvent extends BaseEvent {
 
     // now we emit the interaction message event
     const { userMentions, roleMentions, content } = this._format();
-
-    const message = new Message(this.client, {
+    this.$refs.message = new Message(this.client, {
       id: null,
       type: 0,
       timestamp: new Date().toISOString(),
@@ -123,8 +133,6 @@ module.exports = class InteractionCreateEvent extends BaseEvent {
         id: this.member.user.id
       }
     });
-
-    this.client.emit('interactionMessage', message);
   }
 
   /**

@@ -227,4 +227,56 @@ module.exports = class InteractionHelper {
       throw error;
     });
   }
+
+  /**
+   * Create a interaction response
+   * @param {string} id The interaction's ID
+   * @param {string} token The interaction's token
+   * @param {number} type The type
+   * @param {any} [data] The data
+   */
+  createInteractionResponse(id, token, type, data) {
+    return this.client.rest.dispatch({
+      endpoint: `/interactions/${id}/${token}/callback`,
+      method: 'post',
+      data: {
+        type,
+        data
+      }
+    });
+  }
+
+  /**
+   * Deletes the interaction message
+   * @param {string} token The interaction token
+   * @param {number} type The type
+   * @param {any} [data] The data
+   */
+  deleteOriginalInteraction(token, type, data) {
+    return this.client.rest.dispatch({
+      endpoint: `/webhooks/${this.id}/${token}/messages/@original`,
+      method: 'DELETE',
+      data: {
+        type,
+        data
+      }
+    });
+  }
+
+  /**
+   * Edits the original interaction
+   * @param {string} token The interaction token
+   * @param {number} type The type
+   * @param {any} [data] The data
+   */
+  editOriginalInteraction(token, type, data) {
+    return this.client.rest.dispatch({
+      endpoint: `/webhooks/${this.id}/${token}/messages/@original`,
+      method: 'PATCH',
+      data: {
+        type,
+        data
+      }
+    });
+  }
 };
