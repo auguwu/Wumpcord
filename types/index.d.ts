@@ -11,6 +11,7 @@
 //export * as commands from './commands';
 //export * as oauth2 from './oauth2';
 
+export * from './core/interactions';
 export * from './core';
 
 /**

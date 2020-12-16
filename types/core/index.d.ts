@@ -25,6 +25,7 @@
 import { ClientOptions as WebSocketClientOptions } from 'ws';
 import { HttpClient, HttpMethod } from '@augu/orchid';
 import { Collection, Queue } from '@augu/immutable';
+import { interactions } from './interactions';
 
 import {
   SessionStartLimit,
@@ -46,13 +47,6 @@ import {
   BotUser
 } from '../discord';
 
-type CacheType = 'guild' | 'user' | 'channel'
-  | 'member' | 'member:role' | 'voice'
-  | 'attachments' | 'overwrites' | 'emoji'
-  | 'message' | 'presence' | 'presence:activity'
-  | 'typing' | 'invites' | 'voice:connections'
-  | 'audit:entries';
-
 type ImageFormats = 'jpg' | 'png' | 'webp' | 'jpeg' | 'gif';
 type PermissionObject = {
   [x in Constants.KeyedPermissions]?: boolean;
@@ -68,11 +62,11 @@ type PartialEntity<T> = T | TypedObject<'id', string>;
 interface ClientOptions {
   populatePresences?: boolean;
   allowedMentions?: AllowedMentions;
+  interations?: boolean;
   getAllUsers?: boolean;
   disabledEvents?: Constants.Event[];
   shardCount?: 'auto' | number;
   strategy?: 'etf' | 'json';
-  cache?: CacheType | CacheType[];
   token: string;
   ws?: WebSocketOptions;
 }
@@ -246,7 +240,6 @@ export namespace Constants {
   export const StrategyTypes: string[];
   export const UnrecoverableCodes: number[];
   export const GatewayVersion: number;
-  export const CacheType: CacheType[];
   export const ImageFormats: ImageFormats[];
   export const RestVersion: number;
   export const UserAgent: string;
@@ -500,6 +493,7 @@ export class Client extends EventBus<WebSocketClientEvents> {
 
   public voiceConnections: Collection<any> | null;
   public lastShardID: number;
+  public interactions: interactions.InteractionHelper | null;
   public provider: any;
   public channels: Collection<BaseChannel> | null;
   public options: ClientOptions;
@@ -516,7 +510,6 @@ export class Client extends EventBus<WebSocketClientEvents> {
   public connect(): Promise<void>;
   public getBotGateway(): Promise<BotGateway>;
   public getGateway(): Promise<Gateway>;
-  public canCache(type: ClientOptions['cache']): boolean;
   public setStatus(status: ActivityType, opts: SendActivityOptions): void;
   public insert<T>(type: 'guild' | 'user' | 'channel' | 'voice', packet: T): void;
   public requestGuildMembers(): Promise<void>;

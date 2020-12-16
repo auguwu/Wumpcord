@@ -113,7 +113,7 @@ module.exports = class AuditLogEntry extends Base {
          * @type {import('../Message') | null}
          */
         this.message = this.channel !== null && this.channel.type === 'text' ? this.channel.messages.get(data.options.message_id) : null;
-        
+
         /**
          * The message ID
          * @type {string}
