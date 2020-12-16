@@ -87,9 +87,6 @@ module.exports = class BaseStore {
 
     if (existing) return existing;
 
-    console.log('object', data);
-    console.log('holdable', this.holdable);
-
     if (data instanceof this.holdable) {
       this.cache.set(data.id, data);
       return data;

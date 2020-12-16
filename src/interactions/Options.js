@@ -20,41 +20,55 @@
  * SOFTWARE.
  */
 
-const { verify } = require('./utils');
-const EventBus = require('../util/EventBus');
-
 /**
- * Subclass to handle all requests from Discord
+ * Represents a option of a [InteractionCommand] instance
  */
-module.exports = class InteractionHandler extends EventBus {
+module.exports = class CommandInteractionOption {
   /**
-   * Creates a new [InteractionHandler] instance
-   * @param {import('./InteractionBuilder')} builder The builder instance
+   * Creates a new [CommandInteractionOption] instance
+   * @param {CommandInteractionOptionMetadata} data The data supplied from Discord
    */
-  constructor(builder) {
-    super();
+  constructor(data) {
+    /**
+     * The option's description
+     * @type {string}
+     */
+    this.description = data.description;
 
     /**
-     * The builder instance
-     * @private
-     * @type {import('./InteractionBuilder')}
+     * If the option is required or not
+     * @type {boolean}
      */
-    this.builder = builder;
-  }
+    this.required = data.required || false;
 
-  /**
-   * Handles the request from Discord -> Us
-   * @param {import('http').IncomingMessage} req The request from Discord
-   * @param {import('http').ServerResponse} res The response instance
-   */
-  async handle(req, res) {
-    // noop
+    /**
+     * The choices available
+     * @type {CommandInteractionOptionChoice[]}
+     */
+    this.choices = data.choices || [];
+
+    /**
+     * The options of this command
+     * @type {CommandInteractionOption[]}
+     */
+    this.options = data.options?.map(option => new this.constructor(option)) ?? [];
+
+    /**
+     * The first required option for the user to complete
+     * @type {boolean}
+     */
+    this.default = data.default || false;
+
+    /**
+     * The name of the option
+     * @type {string}
+     */
+    this.name = data.name;
+
+    /**
+     * The option's type
+     * @type {string}
+     */
+    this.type = data.type;
   }
 };
-
-// headers from discord docs
-/*
-const signature = req.get('X-Signature-Ed25519');
-const timestamp = req.get('X-Signature-Timestamp');
-const body = req.rawBody; // rawBody is expected to be a string, not raw bytes
-*/

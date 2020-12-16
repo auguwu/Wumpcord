@@ -21,6 +21,7 @@
  */
 
 const EmbedBuilder = require('./entities/utilities/EmbedBuilder');
+const interactions = require('./interactions');
 const Permissions = require('./util/Permissions');
 const { version } = require('../package.json');
 const Constants = require('./Constants');
@@ -36,7 +37,8 @@ module.exports = {
   version,
   Permissions,
   Util,
-  EmbedBuilder
+  EmbedBuilder,
+  interactions
 };
 
 /**
