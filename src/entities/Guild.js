@@ -26,6 +26,7 @@ const UnavailableGuild = require('./UnavailableGuild');
 const { Collection } = require('@augu/immutable');
 const VoiceState = require('./VoiceState');
 const BaseChannel = require('./BaseChannel');
+const VoiceChannel = require('./channel/VoiceChannel');
 const Presence = require('./Presence');
 const Member = require('./GuildMember');
 const Role = require('./Role');
@@ -40,14 +41,7 @@ const { toCamelCase } = require('../util/Util');
 const AuditLogs = require('./misc/AuditLogs');
 const DynamicWrapper = require('./wrappable/DynamicImage');
 const NotImplementedError = require('../exceptions/NotImplementedError');
-const Webhook = require('./Webhook');
-
-const GuildVoiceStateStore = require('../stores/VoiceStateStore');
-const GuildPresenceStore = require('../stores/GuildPresenceStore');
-const GuildMemberStore = require('../stores/GuildMemberStore');
-const GuildEmojiStore = require('../stores/GuildEmojiStore');
-const GuildRoleStore = require('../stores/GuildRoleStore');
-const ChannelStore = require('../stores/ChannelStore');
+const VoiceConnection = require('../voice/VoiceConnection');
 
 /**
  * Represents a Discord guild
@@ -63,39 +57,39 @@ class Guild extends UnavailableGuild {
 
     /**
      * The channels cache or `null` if not cachable
-     * @type {ChannelStore}
+     * @type {Collection<import('./BaseChannel')> | null}
      */
-    this.channels = new ChannelStore(client);
+    this.channels = client.canCache('channel') ? new Collection() : null;
 
     /**
      * The members cache or `null` if not cachable
-     * @type {GuildMemberStore}
+     * @type {Collection<import('./GuildMember')> | null}
      */
-    this.members = new GuildMemberStore(client);
+    this.members = client.canCache('member') ? new Collection() : null;
 
     /**
      * The role cache or `null` if not cachable
-     * @type {GuildRoleStore}
+     * @type {Collection<import('./Role')> | null}
      */
-    this.roles = new GuildRoleStore(client);
+    this.roles = client.canCache('member:role') ? new Collection() : null;
 
     /**
      * The emoji cache or `null` if not cachable
-     * @type {GuildEmojiStore}
+     * @type {Collection<import('./Emoji')> | null}
      */
-    this.emojis = new GuildEmojiStore(client);
+    this.emojis = client.canCache('emoji') ? new Collection() : null;
 
     /**
      * The voice state cache or `null` if not cachable
-     * @type {GuildVoiceStateStore}
+     * @type {Collection<import('./VoiceState')> | null}
      */
-    this.voiceStates = new GuildVoiceStateStore(client);
+    this.voiceStates = client.canCache('voice:state') ? new Collection() : null;
 
     /**
      * The presence cache or `null` if not cachable
-     * @type {GuildPresenceStore}
+     * @type {Collection<import('./Presence') | null>}
      */
-    this.presences = new GuildPresenceStore(client);
+    this.presences = client.canCache('presence') ? new Collection() : null;
 
     /**
      * The client instance
@@ -104,13 +98,19 @@ class Guild extends UnavailableGuild {
      */
     this.client = client;
 
+    /**
+     * A voice connection
+     * @type {import('../voice/VoiceConnection') | null}
+     */
+    this.voiceConnection = null;
+
     // Calls "patch" to add more metadata
     this.patch(data);
   }
 
   /**
    * Populates everything else from Discord to this [Guild] instance
-   * @param {import('discord-api-types/v8').APIGuild} data The data
+   * @param {GuildPacket} data The data
    */
   patch(data) {
     /**
@@ -276,6 +276,18 @@ class Guild extends UnavailableGuild {
     this.publicUpdatesChannelID = data.public_updates_channel_id;
 
     /**
+     * If embedding is enabled in this [Guild]
+     * @type {boolean}
+     */
+    this.embedEnabled = data.embed_enabled;
+
+    /**
+     * The embed channel ID, returns `null` if the [Guild.embedEnabled] is false
+     * @type {?string}
+     */
+    this.embedChannelID = data.embed_channel_id;
+
+    /**
      * The guild's name
      * @type {string}
      */
@@ -285,7 +297,7 @@ class Guild extends UnavailableGuild {
      * Full member count
      * @type {number}
      */
-    this.memberCount = data.member_count || this.memberCount || 0;
+    this.memberCount = data.member_count || this.memberCount;
 
     /**
      * The shard ID
@@ -294,47 +306,59 @@ class Guild extends UnavailableGuild {
     this.shardID = data.shard_id || 0;
 
     if (data.emojis) {
-      for (let i = 0; i < data.emojis.length; i++) {
-        const emoji = data.emojis[i];
-        this.emojis.add(new Emoji(this.client, { guild_id: this.id, ...emoji }));
+      if (this.client.canCache('emoji')) {
+        for (let i = 0; i < data.emojis.length; i++) {
+          const emoji = data.emojis[i];
+          this.emojis.set(emoji.id, new Emoji(this.client, { guild_id: this.id, ...emoji }));
+        }
       }
     }
 
     if (data.roles) {
-      for (let i = 0; i < data.roles.length; i++) {
-        const role = data.roles[i];
-        this.roles.add(new Role(this.client, { guild_id: this.id, ...role }));
+      if (this.client.canCache('member:role')) {
+        for (let i = 0; i < data.roles.length; i++) {
+          const role = data.roles[i];
+          this.roles.set(role.id, new Role(this.client, { guild_id: this.id, ...role }));
+        }
       }
     }
 
     if (data.channels) {
-      for (let i = 0; i < data.channels.length; i++) {
-        const d = data.channels[i];
-        const c = BaseChannel.from(this.client, { guild_id: this.id, ...d });
+      if (this.client.canCache('channel')) {
+        for (let i = 0; i < data.channels.length; i++) {
+          const channel = data.channels[i];
+          const type = BaseChannel.from(this.client, channel);
 
-        this.client.channels.add(c);
-        this.channels.add(c);
+          this.channels.set(type.id, type);
+          this.client.insert('channel', type); // insert if not in the cache
+        }
       }
     }
 
     if (data.members) {
-      for (let i = 0; i < data.members.length; i++) {
-        const member = data.members[i];
-        this.members.add(new Member(this.client, { guild_id: this.id, ...member }));
+      if (this.client.canCache('member')) {
+        for (let i = 0; i < data.members.length; i++) {
+          const member = data.members[i];
+          this.members.set(member.id, new Member(this.client, { guild_id: this.id, ...member }));
+        }
       }
     }
 
     if (data.voice_states) {
-      for (let i = 0; i < data.voice_states.length; i++) {
-        const state = data.voice_states[i];
-        this.voiceStates.add(new VoiceState(this.client, state));
+      if (this.client.canCache('voice:state')) {
+        for (let i = 0; i < data.voice_states.length; i++) {
+          const state = data.voice_states[i];
+          this.voiceStates.set(state.id, new VoiceState(this.client, state));
+        }
       }
     }
 
     if (data.presences) {
-      for (let i = 0; i < data.presences.length; i++) {
-        const presence = data.presences[i];
-        this.presences.add(new Presence(this.client, presence));
+      if (this.client.canCache('presence')) {
+        for (let i = 0; i < data.presences.length; i++) {
+          const presence = data.presences[i];
+          this.presences.set(presence.user.id, new Presence(this.client, presence));
+        }
       }
     }
 
@@ -356,7 +380,7 @@ class Guild extends UnavailableGuild {
   get owner() {
     if (!this.client.canCache('user')) return null;
 
-    return this.client.users.get(this.ownerID);
+    return this.client.users.get(this.ownerID) || null;
   }
 
   /**
@@ -374,7 +398,7 @@ class Guild extends UnavailableGuild {
     userIds: []
   }) {
     return new Promise((resolve, reject) => {
-      if (this.memberCount === this.members.size && !limit && !presences && !query && !userIds && !force) return resolve(this.members.cache);
+      if (this.memberCount === this.members.size && !limit && !presences && !query && !userIds && !force) return resolve(this.members);
 
       if (nonce.length > 32) return reject(new RangeError('Nonce length was over 32.'));
       if (!this.shard) return reject(new Error(`Shard #${this.shardID} doesn't exist`));
@@ -388,6 +412,7 @@ class Guild extends UnavailableGuild {
         limit: limit || this.maxMembers
       });
 
+      const guildMembers = this.client.canCache('member') ? new Collection() : null; // this gets merged
       const members = new Collection(); // this gets resolved
       const timeout = setTimeout(() => {
         clearTimeout(timeout);
@@ -400,11 +425,14 @@ class Guild extends UnavailableGuild {
 
         for (const member of all.values()) {
           if (this.client.canCache('member')) {
-            members.set(member.user.id, new Member(this.client, { guild_id: this.id, ...member }));
+            members.set(member.user.id, member);
+            guildMembers.set(member.user.id, new Member(this.client, { guild_id: this.id, ...member }));
           }
         }
 
-        this.members.cache = members;
+        if (this.client.canCache('member')) {
+          this.members = guildMembers;
+        }
 
         if (limit && (members ? members.size >= limit : true)) {
           clearTimeout(timeout);
@@ -433,7 +461,8 @@ class Guild extends UnavailableGuild {
     return this.client.rest.dispatch({
       endpoint: Endpoints.guild(this.id),
       method: 'DELETE'
-    }).then(() => true);
+    }).then(() => true)
+      .catch(() => false);
   }
 
   /**
@@ -460,20 +489,22 @@ class Guild extends UnavailableGuild {
         delete_message_days: options.days,
         reason: options.reason
       }
-    });
+    })
+      .then(() => true)
+      .catch(() => false);
   }
 
   /**
    * Unbans a member from this [Guild]
    * @param {string} userID The user's ID
-   * @param {string} [reason] The reason to put in audit logs
    */
-  unban(userID, reason) {
+  unban(userID) {
     return this.client.rest.dispatch({
-      auditLogReason: reason,
       endpoint: Endpoints.Guild.ban(this.id, userID),
       method: 'DELETE'
-    });
+    })
+      .then(() => true)
+      .catch(() => false);
   }
 
   /**
@@ -526,7 +557,8 @@ class Guild extends UnavailableGuild {
         nsfw: opts.nsfw || false
       }
     })
-      .then(() => true);
+      .then(() => true)
+      .catch(() => false);
   }
 
   /**
@@ -538,7 +570,8 @@ class Guild extends UnavailableGuild {
       endpoint: Endpoints.Guild.voiceRegions(this.id),
       method: 'get'
     })
-      .then((regions) => regions.map(region => new VoiceRegion(region)));
+      .then((regions) => regions.map(region => new VoiceRegion(region)))
+      .catch(() => []);
   }
 
   /**
@@ -547,7 +580,8 @@ class Guild extends UnavailableGuild {
    */
   getRegionIds() {
     return this.getRegions()
-      .then(regions => regions.map(region => region.id));
+      .then(regions => regions.map(region => region.id))
+      .catch(() => []);
   }
 
   /**
@@ -559,7 +593,8 @@ class Guild extends UnavailableGuild {
       endpoint: `/guilds/${this.id}/preview`,
       method: 'get'
     })
-      .then((preview) => preview === null ? null : new GuildPreview(preview));
+      .then((preview) => preview === null ? null : new GuildPreview(preview))
+      .catch(() => null);
   }
 
   /**
@@ -574,7 +609,8 @@ class Guild extends UnavailableGuild {
       endpoint: Endpoints.Guild.channels(this.id),
       method: 'get'
     })
-      .then((channels) => channels.map(channel => BaseChannel.from(this.client, channel)));
+      .then((channels) => channels.map(channel => BaseChannel.from(this.client, channel)))
+      .catch(() => []);
   }
 
   /**
@@ -583,7 +619,12 @@ class Guild extends UnavailableGuild {
    * @returns {Promise<GuildMember>} The member instance or `null` if a REST error occured
    */
   fetchMember(memberID) {
-    return this.members.fetch(this.id, memberID);
+    return this.client.rest.dispatch({
+      endpoint: Endpoints.Guild.member(this.id, memberID),
+      method: 'GET'
+    })
+      .then((data) => new GuildMember(this.client, data))
+      .catch(() => null);
   }
 
   /**
@@ -661,6 +702,9 @@ class Guild extends UnavailableGuild {
       .then((data) => {
         this.patch(data);
         return this;
+      })
+      .catch(error => {
+        throw error;
       });
   }
 
@@ -705,7 +749,8 @@ class Guild extends UnavailableGuild {
         id: channel.id
       }))
     })
-      .then(() => true);
+      .then(() => true)
+      .catch(() => false);
   }
 
   /**
@@ -715,14 +760,13 @@ class Guild extends UnavailableGuild {
    *
    * @param {string} memberID The member ID
    * @param {EditGuildMemberOptions} opts The options to update the guild member
-   * @param {string} [reason] The reason to put in audit logs
    * @returns {Promise<GuildMember>} Returns the guild member's patched data
    * or an error thrown for valdiation/REST-related errors
    */
-  async editMember(memberID, opts, reason) {
+  async editMember(memberID, opts) {
     /** @type {GuildMember} */
     let member;
-    if (!this.members.has(memberID)) {
+    if (!this.members || !this.members.has(memberID)) {
       member = await this.fetchMember(memberID);
     } else {
       member = this.members.get(memberID);
@@ -745,7 +789,6 @@ class Guild extends UnavailableGuild {
     if (opts.channelID && typeof opts.channelID !== 'string') throw new TypeError(`Expected \`string\`, but gotten ${typeof opts.channelID}`);
 
     return this.client.rest.dispatch({
-      auditLogReason: reason,
       endpoint: Endpoints.Guild.member(this.id, member.id),
       method: 'PATCH',
       data: {
@@ -774,7 +817,7 @@ class Guild extends UnavailableGuild {
     /** @type {Role} */
     let role;
 
-    if (!this.members.has(memberID)) {
+    if (!this.members || !this.members.has(memberID)) {
       member = await this.fetchMember(memberID);
     } else {
       member = this.members.get(memberID);
@@ -793,7 +836,8 @@ class Guild extends UnavailableGuild {
       endpoint: Endpoints.Guild.memberRole(this.id, member.id, role.id),
       method: 'PUT'
     })
-      .then(() => true);
+      .then(() => true)
+      .catch(() => false);
   }
 
   /**
@@ -812,7 +856,7 @@ class Guild extends UnavailableGuild {
     /** @type {Role} */
     let role;
 
-    if (!this.members.has(memberID)) {
+    if (!this.members || !this.members.has(memberID)) {
       member = await this.fetchMember(memberID);
     } else {
       member = this.members.get(memberID);
@@ -831,7 +875,8 @@ class Guild extends UnavailableGuild {
       endpoint: Endpoints.Guild.memberRole(this.id, member.id, role.id),
       method: 'DELETE'
     })
-      .then(() => true);
+      .then(() => true)
+      .catch(() => false);
   }
 
   /**
@@ -845,7 +890,7 @@ class Guild extends UnavailableGuild {
   async kickMember(memberID) {
     /** @type {GuildMember} */
     let member;
-    if (!this.members.has(memberID)) {
+    if (!this.members || !this.members.has(memberID)) {
       member = await this.fetchMember(memberID);
     } else {
       member = this.members.get(memberID);
@@ -856,7 +901,8 @@ class Guild extends UnavailableGuild {
       endpoint: Endpoints.Guild.member(this.id, member.id),
       method: 'DELETE'
     })
-      .then(() => true);
+      .then(() => true)
+      .catch(() => false);
   }
 
   /**
@@ -868,7 +914,8 @@ class Guild extends UnavailableGuild {
       endpoint: Endpoints.Guild.bans(this.id),
       method: 'GET'
     })
-      .then((bans) => bans.map(ban => new GuildBan(client, { guild_id: this.id, ...ban })));
+      .then((bans) => bans.map(ban => new GuildBan(client, { guild_id: this.id, ...ban })))
+      .catch(() => []);
   }
 
   /**
@@ -881,7 +928,8 @@ class Guild extends UnavailableGuild {
       endpoint: Endpoints.Guild.roles(this.id),
       method: 'GET'
     })
-      .then((roles) => roles.map(role => new Role(this.client, role)));
+      .then((roles) => roles.map(role => new Role(this.client, role)))
+      .catch(() => []);
   }
 
   /**
@@ -926,7 +974,8 @@ class Guild extends UnavailableGuild {
       .then((role) => {
         if (this.client.canCache('member:role')) this.roles.set(role.id, new Role(this.client, role));
         return new Role(this.client, role);
-      });
+      })
+      .catch(() => null);
   }
 
   /**
@@ -946,7 +995,8 @@ class Guild extends UnavailableGuild {
       endpoint: Endpoints.Guild.role(this.id, found.id),
       method: 'DELETE'
     })
-      .then(() => true);
+      .then(() => true)
+      .catch(() => false);
   }
 
   /**
@@ -995,7 +1045,8 @@ class Guild extends UnavailableGuild {
         name: opts.name
       }
     })
-      .then(() => true);
+      .then(() => true)
+      .catch(() => false);
   }
 
   /**
@@ -1037,7 +1088,8 @@ class Guild extends UnavailableGuild {
         id: role.id
       }))
     })
-      .then(() => true);
+      .then(() => true)
+      .catch(() => false);
   }
 
   /**
@@ -1083,7 +1135,8 @@ class Guild extends UnavailableGuild {
       endpoint: Endpoints.Guild.invites(this.id),
       method: 'GET'
     })
-      .then((invites) => invites.map(invite => new GuildInvite(this.client, invite)));
+      .then((invites) => invites.map(invite => new GuildInvite(this.client, invite)))
+      .catch(() => []);
   }
 
   /**
@@ -1216,18 +1269,26 @@ class Guild extends UnavailableGuild {
     return this.client.rest.dispatch({
       endpoint: `/guilds/${this.id}/emojis/${id}`,
       method: 'DELETE'
-    }).then(() => {}); // eslint-disable-line
+    }).then(() => {});
   }
 
   /**
-   * Returns all the webhooks created in every guild channel
-   * @returns {Promise<Webhook[]>}
+   * Joins a voice channel
+   * @param {String | import('./channel/VoiceChannel')} channel The voice channel
+   * @param {{ deaf: boolean, mute: boolean }} Whether to deafen and/or mute upon connecting.
    */
-  getWebhooks() {
-    return this.client.rest.dispatch({
-      endpoint: `/guilds/${this.id}/webhooks`,
-      method: 'get'
-    }).then(data => data.map(d => new Webhook(this.client, d)));
+  async joinChannel(channel, { deaf, mute } = { deaf: false, mute: false }) {
+    if (!this.client.canCache('channel')) return null;
+    if (typeof channel === 'string') channel = await this.client.getChannel(channel);
+    if (!(channel instanceof VoiceChannel)) throw new Error('Attempt to connect to a non voice channel!');
+    this.voiceConnection = new VoiceConnection(this, channel);
+    this.shard.send(4, {
+      guild_id: this.id,
+      channel_id: channel.id,
+      self_mute: mute,
+      self_deaf: deaf
+    });
+    await this.voiceConnection.ready;
   }
 
   toString() {
