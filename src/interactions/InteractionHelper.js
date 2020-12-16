@@ -72,7 +72,12 @@ module.exports = class InteractionHelper {
     return this.client.rest.dispatch({
       endpoint: `/applications/${this.id}/commands`,
       method: 'GET'
-    }).then(data => data.map(command => new Command(command)));
+    }).then(data => data.map(d => {
+      const command = new Command(d);
+      this.globalCommands.set(d.id, command);
+
+      return command;
+    }));
   }
 
   /**
@@ -84,7 +89,12 @@ module.exports = class InteractionHelper {
       endpoint: `/applications/${this.id}/guilds/${guildID}/commands`,
       method: 'GET'
     })
-      .then(data => data.map(command => new Command(command)))
+      .then(data => data.map(d => {
+        const command = new Command(d);
+        this.guildCommands.set(d.id, command);
+
+        return command;
+      }))
       .catch(error => {
         if (error.message.indexOf('Missing Access') !== -1) throw new TypeError('Application must be invited in guild using the "applications.commands" scope.');
 
@@ -98,13 +108,15 @@ module.exports = class InteractionHelper {
    * @param {any} metadata The command's metadata
    */
   createGuildCommand(guildID, metadata) {
+    if (this.guildCommands.size > 50) throw new TypeError('Reached limit of global commands.');
+
     return this.client.rest.dispatch({
       endpoint: `/applications/${this.id}/guilds/${guildID}/commands`,
       method: 'POST',
       data: metadata
     }).then(data => {
       const command = new Command(data);
-      this.guildCommands.set(metadata.name, command);
+      this.guildCommands.set(metadata.id, command);
 
       return command;
     });
@@ -115,15 +127,96 @@ module.exports = class InteractionHelper {
    * @param {any} metadata The command's metadata
    */
   createGlobalCommand(metadata) {
+    if (this.globalCommands.size > 50) throw new TypeError('Reached limit of global commands.');
+
     return this.client.rest.dispatch({
       endpoint: `/applications/${this.id}/commands`,
       method: 'POST',
       data: metadata
     }).then(data => {
       const command = new Command(data);
-      this.globalCommands.set(metadata.name, command);
+      this.globalCommands.set(metadata.id, command);
 
       return command;
+    });
+  }
+
+  /**
+   * Edits a global command
+   * @param {string} id The command's ID
+   * @param {any} metadata The command's metadata
+   */
+  editGlobalCommand(id, metadata) {
+    return this.client.rest.dispatch({
+      endpoint: `/applications/${this.id}/commands/${id}`,
+      method: 'PATCH',
+      data: metadata
+    }).then(data => {
+      if (this.globalCommands.has(data.id)) {
+        const command = this.globalCommands.get(data.id);
+        command.patch(data);
+
+        this.globalCommands.set(data.id, command);
+        return command;
+      }
+
+      this.globalCommands.delete(data.id);
+      const command = new Command(data);
+      this.globalCommands.set(data.id, command);
+      return command;
+    });
+  }
+
+  /**
+   * Edit the guild's command metadata
+   * @param {string} guildID The guild's ID
+   * @param {any} metadata The command's metadata
+   */
+  editGuildCommand(guildID, commandID, metadata) {
+    return this.client.rest.dispatch({
+      endpoint: `/applications/${this.id}/guilds/${guildID}/commands/${commandID}`,
+      method: 'patch',
+      data: metadata
+    }).then(data => {
+      if (this.guildCommands.has(data.id)) {
+        const command = this.globalCommands.get(data.id);
+        command.patch(data);
+
+        this.globalCommands.set(data.id, command);
+        return command;
+      }
+
+      this.guildCommands.delete(data.id);
+      const command = new Command(data);
+      this.guildCommands.set(data.id, command);
+      return command;
+    });
+  }
+
+  /**
+   * Deletes a global command
+   * @param {string} id The command's ID
+   */
+  deleteGlobalCommand(id) {
+    return this.client.rest.dispatch({
+      endpoint: `/applications/${this.id}/commands/${id}`,
+      method: 'delete'
+    });
+  }
+
+  /**
+   * Deletes a guild command
+   * @param {string} guildID The guild's ID
+   * @param {string} commandID The command's ID
+   */
+  deleteGuildCommand(guildID, commandID) {
+    return this.client.rest.dispatch({
+      endpoint: `/applications/${this.id}/guilds/${guildID}/commands/${commandID}`,
+      method: 'delete'
+    }).catch(error => {
+      if (error.message.indexOf('Missing Access') !== -1) throw new SyntaxError('Unable to delete a guild command?');
+
+      throw error;
     });
   }
 };
