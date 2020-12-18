@@ -26,6 +26,7 @@ import { ClientOptions as WebSocketClientOptions } from 'ws';
 import { HttpClient, HttpMethod } from '@augu/orchid';
 import { Collection, Queue } from '@augu/immutable';
 import { interactions } from './interactions';
+import { events } from './events';
 
 import {
   SessionStartLimit,
@@ -45,7 +46,7 @@ import {
   MemberChunk,
   MessageFile,
   BotUser
-} from '../discord';
+} from './discord';
 
 type ImageFormats = 'jpg' | 'png' | 'webp' | 'jpeg' | 'gif';
 type PermissionObject = {
@@ -58,6 +59,7 @@ type PackStrategy = (...args: any[]) => string;
 type UnpackStrategy = (...args: any[]) => any;
 type ActivityType = 'online' | 'offline' | 'idle' | 'dnd';
 type PartialEntity<T> = T | TypedObject<'id', string>;
+type MaybePromise<T> = T | Promise<T>;
 
 interface ClientOptions {
   populatePresences?: boolean;
@@ -160,8 +162,8 @@ interface WebSocketClientEvents {
   messageReactionRemoveAll(message: PartialEntity<Message>, emoji: GuildEmoji): void;
   messageReactionRemove(message: PartialEntity<Message>, user: PartialEntity<User>, emoji: GuildEmoji): void;
   messageReactionAdd(message: PartialEntity<Message>, user: PartialEntity<User>, emoji: GuildEmoji): void;
-  messageDeleteBulk(message: Array<PartialEntity<Message>>): void; // eslint-disable-line
-  messageCreate(message: Message): void;
+  messageDeleteBulk(event: events.MessageDeleteBulkEvent): void;
+  messageCreate(event: events.MessageCreateEvent): void;
   messageDelete(message: PartialEntity<Message>): void;
   messageUpdate(old: PartialEntity<Message>, now?: Message): void;
 
