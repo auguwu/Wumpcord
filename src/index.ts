@@ -20,18 +20,4 @@
  * SOFTWARE.
  */
 
-const VoiceState = require('../entities/VoiceState');
-const BaseStore = require('./BaseStore');
-
-/** @extends {BaseStore<VoiceState>} */
-module.exports = class VoiceStateStore extends BaseStore {
-  /**
-   * Creates a new [VoiceStateStore] instance
-   * @param {import('../gateway/WebSocketClient')} client The WebSocket client instance
-   */
-  constructor(client) {
-    super(client, VoiceState);
-  }
-
-  // can't fetch voice states
-};
+console.log('hello, world!');

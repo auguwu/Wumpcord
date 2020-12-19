@@ -1,6 +1,5 @@
-old_*/
 node_modules/
-.ignore/
+build/
 test/
 
 *.lock
