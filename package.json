@@ -7,6 +7,7 @@
   "author": "Chris \"August\" Hernandez <august@augu.dev>",
   "repository": "https://github.com/auguwu/Wumpcord",
   "types": "./types/index.d.ts",
+  "funding": "https://github.com/auguwu/Wumpcord?sponsor=1",
   "maintainers": [
     "Chris \"August\" Hernandez <august@augu.dev>",
     "John \"Ice\" Burke <john@widgetbot.io>"
@@ -16,7 +17,8 @@
   },
   "scripts": {
     "prepare": "npm run lint",
-    "lint": "eslint src --ext .ts --fix"
+    "lint": "eslint src --ext .ts --fix",
+    "test": "jest --config jest.config.js"
   },
   "dependencies": {
     "@augu/immutable": "0.6.0",

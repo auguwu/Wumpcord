@@ -20,8 +20,17 @@
  * SOFTWARE.
  */
 
+const { exec } = require('child_process');
+const { join } = require('path');
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 async function main() {
-  // noop
+  console.log('[release] Preparing for release...');
+  await sleep(3000);
+
+  console.log('[release] Running `npm publish`...');
+  const proc = exec('npm publish', { cwd: join(__dirname, '..') });
 }
 
 main();
