@@ -1,0 +1,9 @@
+{
+  "metadata": {
+    "name": "Wumpcord",
+    "description": "Flexible and type-safe Discord API library without any overhead."
+  },
+  "pages": {
+    "/": "./index.md"
+  }
+}

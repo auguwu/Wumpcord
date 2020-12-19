@@ -1,5 +1,5 @@
 # Wumpcord
-> :rowboat: **| Flexible, type-safe, and lightweight Discord API library made in TypeScript**
+> :rowboat: **Flexible, type-safe, and lightweight Discord API library made in TypeScript**
 
 ## Features
 - Command Handling
