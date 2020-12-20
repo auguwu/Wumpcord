@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import type { HttpResponse, HttpRequest } from '@augu/orchid';
+import type { HttpResponse } from '@augu/orchid';
 import Util from '../util';
 
 interface RatelimitInfo {
@@ -46,10 +46,11 @@ export default class RatelimitBucket {
 
   /**
    * Handles ratelimiting
+   * @param endpoint The endpoint
    * @param res The response from the http request
    * @returns Promise of ratelimit info (because we hit a 429) or `null` if we aren't being ratelimited.
    */
-  handle(req: HttpRequest, res: HttpResponse) {
+  handle(endpoint: string, res: HttpResponse) {
     return new Promise<RatelimitInfo>(async (resolve) => {
       const resetTime = Number(res.headers['x-ratelimit-reset']);
       const serverDate = res.headers.date;
@@ -59,7 +60,7 @@ export default class RatelimitBucket {
       this.remaining = remaining ? Number(remaining) : 0;
 
       // view https://github.com/discordapp/discord-api-docs/issues/182
-      if (req.url.pathname.includes('reactions'))
+      if (endpoint.includes('reactions'))
         this.resetTime = new Date(serverDate!).getTime() - getAPIOffset(serverDate!) + 250;
 
       if (res.headers.hasOwnProperty('x-ratelimit-global')) {
