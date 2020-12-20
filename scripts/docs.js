@@ -101,7 +101,7 @@ async function main() {
   }
 
   if (errors.length) {
-    log(`Received ${errors.length} report${errors.length > 1 ? 's' : ''} from TypeScript, fix these before running this script.`);
+    log(`Received ${errors.length} report${errors.length > 1 ? 's' : ''} from TypeScript, fix these before running this script:`);
     errors.forEach((error, index) => {
       const filePath = error.file ? `[${error.file}]` : '[unknown path]';
       console.error(`${index === 0 ? '\n' : ''}${filePath} ${error.message}`);

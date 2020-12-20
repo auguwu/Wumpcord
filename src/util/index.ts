@@ -20,40 +20,36 @@
  * SOFTWARE.
  */
 
-import { HttpClient, HttpMethod } from '@augu/orchid';
-import RatelimitedError from '../errors/RatelimitedError';
-import DiscordRestError from '../errors/DiscordRestError';
-import DiscordAPIError from '../errors/DiscordAPIError';
-import RatelimitBucket from './RatelimitBucket';
-import * as Constants from '../Constants';
-import { Queue } from '@augu/immutable';
-import FormData from 'form-data';
-import Util from '../util';
+/**
+ * A resolvable thing
+ */
+export type Resolvable<T> = T | T[];
 
 /**
- * Represents a dispatched request
+ * All utilities available to Wumpcord
  */
-interface RequestDispatch {
-  /** The headers to send out */
-  headers?: { [x: string]: any };
+export default class Util {
+  constructor() {
+    throw new SyntaxError('This class isn\'t supposed to be a constructable class, refrain from using `new`.');
+  }
 
-  /** The endpoint to make the request to */
-  endpoint: string;
+  /**
+   * Gets a value from a object if it exists, if it doesn't, it'll use the provided [defaultValue].
+   * @param obj The object to get the value from
+   * @param prop The property to get the value from
+   * @param defaultValue A default value, if provided
+   * @returns The value if it exists or the [defaultValue] if it doesn't
+   */
+  static get<T extends object, K extends keyof T>(obj: T, prop: K, defaultValue: T[K]): T[K] {
+    if (obj.hasOwnProperty(prop)) return obj[prop];
+    else return defaultValue;
+  }
 
-  /** The http method verb to use */
-  method: HttpMethod;
-
-  /** Any data to send to Discord */
-  data?: any;
-}
-
-/**
- * Represents a class to handle requests to Discord
- */
-export default class RestClient {
-  /** The last time the rest client has dispatched a request (when [RestClient.dispatch] was called) */
-  public lastDispatchedAt: number = -1;
-
-  /** If we are being ratelimited or not */
-  public ratelimited: boolean = false;
+  /**
+   * Halts the process asynchronously for an amount of time
+   * @param ms The amount of milliseconds to halt
+   */
+  static sleep(ms: number) {
+    return new Promise<unknown>(resolve => setTimeout(resolve, ms));
+  }
 }
