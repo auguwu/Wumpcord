@@ -29,7 +29,7 @@ export type Listener = (...args: any[]) => void;
  * Represents a default type for the event bus
  */
 interface DefaultEventBusMap {
-  [x: string]: Listener[];
+  [x: string]: Listener;
 }
 
 /**
@@ -40,7 +40,7 @@ export default class EventBus<T extends object = DefaultEventBusMap> {
   private maxListeners: number = 250;
 
   /** The actual listener map */
-  private listeners: T = {} as any;
+  private listeners: { [x: string]: Listener[] } = {};
 
   /**
    * Emits a event from the callstack
@@ -51,7 +51,7 @@ export default class EventBus<T extends object = DefaultEventBusMap> {
   emit<K extends keyof T>(event: K, ...args: any[]) {
     if (!(event in this.listeners)) return false;
 
-    const listeners = this.listeners[event] as any;
+    const listeners = this.listeners[event as string];
     if (!listeners.length) return false;
 
     for (let i = 0; i < listeners.length; i++) {
@@ -68,12 +68,12 @@ export default class EventBus<T extends object = DefaultEventBusMap> {
    * @param listener The listener
    */
   on<K extends keyof T>(event: K, listener: T[K]) {
-    const listeners = (this.listeners[event] || []) as unknown as Listener[];
+    const listeners = this.listeners[event as string] || [];
     if (listeners.length > this.maxListeners) throw new TypeError(`Reached max event listeners in event '${event}' (${listeners.length})`);
 
     listeners.push(listener as any);
 
-    this.listeners[event] = listeners as any;
+    this.listeners[event as string] = listeners;
     return this;
   }
 
@@ -100,13 +100,13 @@ export default class EventBus<T extends object = DefaultEventBusMap> {
   remove<K extends keyof T>(event: K, listener: T[K]) {
     if (!this.listeners.hasOwnProperty(event)) return false;
 
-    const listeners = this.listeners[event] as unknown as Listener[];
+    const listeners = this.listeners[event as string];
     if (!listeners.length) return false;
 
     const index = listeners.indexOf(listener as any);
     if (index !== -1) listeners.splice(index, 1);
 
-    this.listeners[event] = listeners as any;
+    this.listeners[event as string] = listeners as any;
     return true;
   }
 
@@ -127,7 +127,7 @@ export default class EventBus<T extends object = DefaultEventBusMap> {
    */
   size<K extends keyof T>(event?: K) {
     if (event) {
-      return this.listeners[event] ? (this.listeners[event] as unknown as any[]).length : 0;
+      return this.listeners[event as string] ? this.listeners[event as string].length : 0;
     } else {
       return Object.keys(this.listeners).length;
     }

@@ -20,4 +20,24 @@
  * SOFTWARE.
  */
 
-export default class ShardManager {}
+import { Collection } from '@augu/immutable';
+import type WebSocketClient from './WebSocketClient';
+import WebSocketShard from './WebSocketShard';
+
+export default class ShardManager extends Collection<WebSocketShard> {
+  /** Reference for creating a [WebSocketShard] */
+  private client: WebSocketClient;
+
+  constructor(client: WebSocketClient) {
+    super();
+
+    this.client = client;
+  }
+
+  /**
+   * Returns the avg. ping of all shards
+   */
+  get ping() {
+    return this.filter(shard => shard.ping !== -1).reduce((a, b) => b.ping + a, 0);
+  }
+}
