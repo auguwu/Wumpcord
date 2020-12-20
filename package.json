@@ -39,6 +39,7 @@
     "@augu/eslint-config": "1.9.0",
     "@types/jest": "26.0.19",
     "@types/node": "14.14.14",
+    "@types/ws": "^7.4.0",
     "@typescript-eslint/eslint-plugin": "4.10.0",
     "@typescript-eslint/parser": "4.10.0",
     "discord-api-types": "0.11.1",
