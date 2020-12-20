@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import { HttpClient, HttpMethod } from '@augu/orchid';
+import { HttpClient, HttpMethod, middleware } from '@augu/orchid';
 import DiscordRestError from '../errors/DiscordRestError';
 import DiscordAPIError from '../errors/DiscordAPIError';
 import RatelimitBucket from './RatelimitBucket';
@@ -92,6 +92,7 @@ export default class RestClient {
     this.client = client;
     this.locked = false;
     this.http = new HttpClient({
+      middleware: [middleware.forms()],
       defaults: {
         baseUrl: `${Constants.RestUrl}/v${Constants.RestVersion}`,
         headers: {
