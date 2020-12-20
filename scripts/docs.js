@@ -74,43 +74,10 @@ async function main() {
     emitDecoratorMetadata: true
   });
 
-  log('Created TypeScript program, getting diagnostic errors...');
-
-  const checker = program.getTypeChecker();
   const sources = program.getSourceFiles();
-  const result = program.emit();
+  const checker = program.getTypeChecker();
 
-  const errors = [];
-  const diagnostics = ts.getPreEmitDiagnostics(program).concat(result.diagnostics);
-
-  for (let i = 0; i < diagnostics.length; i++) {
-    const diagnostic = diagnostics[i];
-    if (diagnostic.file) {
-      const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
-      const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
-      errors.push({
-        message,
-        file: `${diagnostic.file.fileName}:${line + 1}:${character + 1}`
-      });
-    } else {
-      errors.push({
-        message: ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'),
-        file: null
-      });
-    }
-  }
-
-  if (errors.length) {
-    log(`Received ${errors.length} report${errors.length > 1 ? 's' : ''} from TypeScript, fix these before running this script:`);
-    errors.forEach((error, index) => {
-      const filePath = error.file ? `[${error.file}]` : '[unknown path]';
-      console.error(`${index === 0 ? '\n' : ''}${filePath} ${error.message}`);
-    });
-
-    process.exit(1);
-  }
-
-  log(`Received no diagnostics! Now reviewing ${sources.length} source files.`);
+  log(`Reviewing ${sources.length} source files.`);
 
   for (let i = 0; i < sources.length; i++) {
     const sourceFile = sources[i];

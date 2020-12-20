@@ -20,17 +20,45 @@
  * SOFTWARE.
  */
 
+const { promises: fs } = require('fs');
 const { exec } = require('child_process');
 const { join } = require('path');
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const log = (message) => process.stdout.write(`[release] ${message}\n`);
 
 async function main() {
   console.log('[release] Preparing for release...');
   await sleep(3000);
 
-  console.log('[release] Running `npm publish`...');
-  const proc = exec('npm publish', { cwd: join(__dirname, '..') });
+  log('linting files...');
+  try {
+    await require('./lint');
+    await sleep(1500);
+  } catch(ex) {
+    log(ex.message);
+    process.exit(1);
+  }
+
+  log('running tests...');
+  try {
+    await require('./test');
+    await sleep(1500);
+  } catch(ex) {
+    log(ex.message);
+    process.exit(1);
+  }
+
+  log('re-building typings for documentation...');
+  try {
+    await require('./docs');
+    await sleep(1500);
+  } catch(ex) {
+    log(ex.message);
+    process.exit(1);
+  }
+
+  log('prepared everything for release.');
 }
 
 main();

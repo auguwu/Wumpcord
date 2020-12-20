@@ -46,7 +46,7 @@ export default class Permission {
    * Returns a JSON structure of all the permissions available to this class
    */
   toJSON() {
-    const json: { [x: string]: boolean } = {};
+    const json = {};
     for (const key of Object.keys(Permissions)) {
       if (!key.startsWith('all')) {
         if (this.allow & Permissions[key])

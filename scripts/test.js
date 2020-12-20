@@ -20,50 +20,22 @@
  * SOFTWARE.
  */
 
-// todo: this file
 const { runCLI } = require('@jest/core');
 const { join } = require('path');
-const leeks = require('leeks.js');
-
-let original;
-function closeAndReopen() {
-  original = console;
-  console = {
-    log: null,
-    warn: null,
-    error: null,
-    debug: null,
-    info: null
-  };
-
-  //process.stdout.write(null);
-  process.stdout.end();
-
-  return () => {
-    console = original;
-    console.log('test');
-  };
-}
 
 /**
  * Runs the `test` script
  * @param {boolean} ci If we are in CI mode
  */
 async function main(ci) {
-  const reopen = closeAndReopen();
-
   try {
-    const { results, globalConfig } = await runCLI({
+    await runCLI({
       ci,
       config: join(__dirname, '..', 'jest.config.js'),
       projects: [process.cwd()],
       silent: true
     }, [process.cwd()]); // HOW THE FUCK DO YOU GET PRINTED WHAT????
-
-    reopen();
-    console.log(results);
   } catch(ex) {
-    reopen();
     console.error(ex);
   }
 }

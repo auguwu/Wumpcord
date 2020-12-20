@@ -20,8 +20,31 @@
  * SOFTWARE.
  */
 
+const { exec } = require('child_process');
+const { join } = require('path');
+
+const log = (message) => process.stdout.write(`[build] ${message}\n`);
+
 async function main() {
-  // noop
+  log('starting build...');
+
+  const child = exec('tsc', { cwd: join(__dirname, '..') });
+  log(`started child process as ${child.pid}`);
+
+  let success = true;
+  child.stdout.on('data', chunk => log(chunk));
+  child.on('error', error => {
+    log('unable to build source');
+    log(error.stack);
+
+    success = false;
+  });
+
+  child.once('exit', (code, signal) => {
+    success = code === 0;
+
+    log(`\`tsc\` has closed with code ${code}${signal ? ` with signale "${signal}"` : ''}, success: ${success ? 'yes' : 'no'}`);
+  });
 }
 
 main();

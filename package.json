@@ -6,8 +6,9 @@
   "license": "MIT",
   "author": "Chris \"August\" Hernandez <august@augu.dev>",
   "repository": "https://github.com/auguwu/Wumpcord",
-  "types": "./types/index.d.ts",
+  "types": "./build/types/index.d.ts",
   "funding": "https://github.com/auguwu/Wumpcord?sponsor=1",
+  "files": ["build/"],
   "maintainers": [
     "Chris \"August\" Hernandez <august@augu.dev>",
     "John \"Ice\" Burke <john@widgetbot.io>"
@@ -17,8 +18,11 @@
   },
   "scripts": {
     "prepare": "npm run lint",
-    "lint": "eslint src --ext .ts --fix",
-    "test": "jest --config jest.config.js"
+    "release": "rm -rf build && node scripts/release.js && npm run build && npm publish",
+    "docgen": "node scripts/docs.js",
+    "build": "rm -rf build && node scripts/build.js",
+    "lint": "node scripts/build.js",
+    "test": "node scripts/test.js"
   },
   "dependencies": {
     "@augu/immutable": "0.6.0",

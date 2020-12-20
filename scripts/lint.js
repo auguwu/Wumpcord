@@ -33,6 +33,7 @@ async function main() {
     fix: true
   });
 
+  log('linting files from `src`...');
   const results = await linter.lintFiles('src');
   const errors = results.reduce((acc, curr) => acc + curr.errorCount, 0);
   const warnings = results.reduce((acc, curr) => acc + curr.warningCount, 0);
