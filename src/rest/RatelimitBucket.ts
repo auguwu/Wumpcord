@@ -23,7 +23,7 @@
 import type { HttpResponse } from '@augu/orchid';
 import Util from '../util';
 
-interface RatelimitInfo {
+export interface RatelimitInfo {
   ratelimited: boolean;
   remaining: number;
   resetTime: number;

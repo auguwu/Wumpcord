@@ -52,4 +52,20 @@ export default class Util {
   static sleep(ms: number) {
     return new Promise<unknown>(resolve => setTimeout(resolve, ms));
   }
+
+  /**
+   * Merges 2 objects into one
+   * @param given The given object
+   * @param def The default object
+   */
+  static merge<T, U>(given: T, def: U): U {
+    if (!given) return def;
+    for (const key in def) {
+      if (!Object.hasOwnProperty.call(given, key) || given[key as string] === undefined) given[key as string] = def[key];
+      else if (given[key as string] === Object(given[key as string])) given[key as string] = Util.merge(def[key], given[key as string]);
+    }
+
+    // @ts-ignore shut up
+    return given;
+  }
 }

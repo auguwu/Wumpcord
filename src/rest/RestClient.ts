@@ -25,6 +25,7 @@ import DiscordRestError from '../errors/DiscordRestError';
 import DiscordAPIError from '../errors/DiscordAPIError';
 import RatelimitBucket from './RatelimitBucket';
 import * as Constants from '../Constants';
+import type Client from '../gateway/WebSocketClient';
 import { Queue } from '@augu/immutable';
 import FormData from 'form-data';
 import Util from '../util';
@@ -40,7 +41,7 @@ interface RequestDispatch<T = unknown> {
   reject(error?: any): void;
 
   /** The headers to send out */
-  headers: { [x: string]: any };
+  headers?: { [x: string]: any };
 
   /** The endpoint to make the request to */
   endpoint: string;
@@ -72,7 +73,7 @@ export default class RestClient {
   private requests: Queue<RequestDispatch>;
 
   /** The client to use */
-  private client: any;
+  private client: Client;
 
   /** If we are locked from making anymore requests */
   public locked: boolean;
@@ -84,7 +85,7 @@ export default class RestClient {
    * Represents a class to handle requests to Discord
    * @param client The client to use
    */
-  constructor(client: any) {
+  constructor(client: Client) {
     this.lastDispatchedAt = -1;
     this.ratelimited = false;
     this.lastCallAt = -1;
@@ -152,7 +153,7 @@ export default class RestClient {
     const bucket = new RatelimitBucket();
     let form: FormData | undefined = undefined;
 
-    if (!['get', 'GET', 'head', 'HEAD'].includes(request.method) && !request.headers.hasOwnProperty('Content-Type'))
+    if (!['get', 'GET', 'head', 'HEAD'].includes(request.method) && !request.headers!.hasOwnProperty('Content-Type'))
       request.headers!['Content-Type'] = 'application/json';
 
     if (request.file) {
@@ -165,7 +166,7 @@ export default class RestClient {
       }
 
       if (request.data) form.append('payload_json', JSON.stringify(request.data), { filename: 'payload_json' });
-      request.headers['Content-Type'] = form.getHeaders();
+      request.headers!['Content-Type'] = form.getHeaders();
     }
 
     return new Promise((resolve, reject) => this.http.request({

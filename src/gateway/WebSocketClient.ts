@@ -20,7 +20,8 @@
  * SOFTWARE.
  */
 
-import type { ClientOptions, NullableClientOptions } from '../types';
+import type * as discord from 'discord-api-types/v8';
+import type * as types from '../types';
 import * as Constants from '../Constants';
 import { Collection } from '@augu/immutable';
 import ShardManager from './ShardingManager';
@@ -31,6 +32,12 @@ import Util from '../util';
 //import type * as events from '../events';
 
 interface WebSocketClientEvents {
+  restCall(props: types.RestCallProperties): void;
+  restUnavailable(): void;
+  restEmpty(): void;
+
+  debug(message: string): void;
+  error(error: Error): void;
   ready(): void;
 }
 
@@ -44,11 +51,14 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
   /** The interactions helper, this will return `null` if it's not enabled */
   public interactions: any;
 
+  /** The gateway URL to connect all shards to */
+  public gatewayURL!: string;
+
   /** The channel cache available, this will be a empty Collection if not enabled. */
   public channels: any;
 
   /** The client options available to this WebSocket client. */
-  public options: ClientOptions;
+  public options: types.ClientOptions;
 
   /** The user typing cache if available, this will be a empty Collection if not enabled. */
   public typings: Collection<any>;
@@ -78,13 +88,36 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
    * Handles everything related to Discord and is the entrypoint to your Discord bot.
    * @param options The options available to this context
    */
-  constructor(options: NullableClientOptions) {
+  constructor(options: types.NullableClientOptions) {
     super();
 
     this.voiceConnections = null;
     this.interactions = null;
     this.channels = null;
-    this.options = Util.merge(options, {});
+    this.options = Util.merge<types.NullableClientOptions, types.ClientOptions>(options, {
+      populatePresences: false,
+      allowedMentions: {
+        everyone: false,
+        roles: false,
+        users: false
+      },
+      interactions: false,
+      disabledEvents: [],
+      getAllUsers: false,
+      shardCount: 'auto',
+      strategy: 'json',
+      cache: [],
+      token: options.token,
+      ws: {
+        guildSubscriptions: true,
+        largeThreshold: 250,
+        connectTimeout: 30000,
+        clientOptions: undefined,
+        compress: false,
+        intents: [],
+        tries: undefined
+      }
+    });
     this.typings = new Collection();
     this.shards = new ShardManager(this);
     this.guilds = null;
@@ -106,5 +139,97 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
         await this.interactions.getGlobalCommands();
       }
     });
+  }
+
+  // Private Methods
+  debug(title: string, message: string) {
+    this.emit('debug', `[Debug => ${title}] ${message}`);
+  }
+
+  /**
+   * Connects this [WebSocketClient] to the gateway
+   */
+  async connect() {
+    const shardInfo = await this.getShardInfo();
+
+    this.gatewayURL = `${shardInfo.url}/?v=${Constants.GatewayVersion}&encoding=${this.options.strategy}`;
+
+    if (this.options.shardCount === 'auto')
+      this.options.shardCount = shardInfo.shards;
+
+    this.debug('Session Limit', shardInfo.session ? `${shardInfo.session.remaining}/${shardInfo.session.total}` : 'Not auto-sharding.');
+
+    for (let i = 0; i < (this.options.shardCount === 1 ? 1 : this.options.shardCount - 1); i++) {
+      await this.shards.spawn(i, this.options.strategy);
+      await Util.sleep(5000);
+    }
+  }
+
+  /**
+   * Returns the intents by it's numeric value
+   */
+  get intents() {
+    if (typeof this.options.ws.intents === 'undefined') return Constants.GatewayIntents.guilds | Constants.GatewayIntents.guildMessages;
+    else if (typeof this.options.ws.intents === 'number') return this.options.ws.intents;
+    else {
+      let intents = 0;
+      for (let i = 0; i < this.options.ws.intents.length; i++) {
+        const intent = this.options.ws.intents[i];
+        if (typeof intent === 'number') {
+          intents |= intent;
+        } else {
+          if (!Constants.GatewayIntents.hasOwnProperty(intent)) continue;
+          intents |= Constants.GatewayIntents[intent];
+        }
+      }
+
+      return intents;
+    }
+  }
+
+  /**
+   * Returns the bot's gateway information
+   */
+  getBotGateway() {
+    return this.rest.dispatch<discord.APIGatewayBotInfo>({
+      endpoint: '/bot/gateway',
+      method: 'get'
+    });
+  }
+
+  /**
+   * Returns the gateway information
+   */
+  getGateway() {
+    return this.rest.dispatch<discord.APIGatewayInfo>({
+      endpoint: '/gateway',
+      method: 'get'
+    });
+  }
+
+  /**
+   * Returns the shard information
+   */
+  async getShardInfo(): Promise<types.ShardInfo> {
+    const data = this.options.shardCount === 'auto' ?
+      await this.getBotGateway() :
+      await this.getGateway();
+
+    if (!data.url || (this.options.shardCount === 'auto' && !(<any> data).shards))
+      throw new TypeError('Unable to retrieve shard information');
+
+    const session: discord.APIGatewaySessionStartLimit | undefined = data.hasOwnProperty('session_start_limit') ? (<any> data).session_start_limit : undefined;
+    if (session !== undefined && session.remaining <= 0) {
+      const error = new Error('Exceeded the amount of tries to connect');
+
+      this.emit('error', error);
+      return Promise.reject(error);
+    }
+
+    return {
+      session,
+      shards: this.options.shardCount === 'auto' ? (<any> data).shards : this.options.shardCount,
+      url: data.url
+    };
   }
 }

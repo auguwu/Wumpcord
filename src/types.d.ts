@@ -24,6 +24,8 @@
 import type { TextChannel, VoiceChannel, StoreChannel, NewsChannel, GroupChannel, DMChannel, CategoryChannel } from './models';
 import type { ClientOptions as WebSocketClientOptions } from 'ws';
 import type { GatewayEvent, Cachable, GatewayIntent } from './Constants';
+import type { RatelimitInfo } from './rest/RatelimitBucket';
+import type { HttpMethod } from '@augu/orchid';
 import type * as discord from 'discord-api-types/v8';
 
 /** Represents a guild textable channel */
@@ -149,4 +151,24 @@ export interface MessageContentOptions {
 
   /** If we should use Text to Speech on this message */
   tts?: boolean;
+}
+
+export interface RestCallProperties {
+  /** The ratelimit information details */
+  ratelimitInfo: RatelimitInfo;
+
+  /** If the request was successful or not */
+  successful: boolean;
+
+  /** The endpoint we made a request to */
+  endpoint: string;
+
+  /** The http method verb we used */
+  method: HttpMethod;
+
+  /** The body payload from Discord */
+  body: string;
+
+  /** The ping of when the request was dispatched / called */
+  ping: number;
 }
