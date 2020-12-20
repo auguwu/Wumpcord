@@ -4,6 +4,8 @@
     "description": "Flexible and type-safe Discord API library without any overhead."
   },
   "pages": {
+    "/classes/*": "./classes.md",
+    "/types/*": "./types.md",
     "/": "./index.md"
   }
 }
