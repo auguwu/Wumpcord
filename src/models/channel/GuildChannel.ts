@@ -20,6 +20,12 @@
  * SOFTWARE.
  */
 
-import GuildChannel from './GuildChannel';
+import type WebSocketClient from '../../gateway/WebSocketClient';
+import type { APIChannel } from 'discord-api-types/v8';
+import { Channel } from '../Channel';
 
-export class VoiceChannel extends GuildChannel {}
+export default class GuildChannel extends Channel {
+  constructor(client: WebSocketClient, data: APIChannel) {
+    super(data);
+  }
+}

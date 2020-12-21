@@ -218,18 +218,15 @@ export enum ChannelTypes {
   Store
 }
 
-export function convertNumberToChannelType(num: number) {
-  switch (num) {
-    case 0: return 'text';
-    case 1: return 'dm';
-    case 2: return 'voice';
-    case 3: return 'group';
-    case 4: return 'category';
-    case 5: return 'news';
-    case 6: return 'store';
-    default: return '<unknown>';
-  }
-}
+export const ChannelTypesObject = {
+  0: 'text',
+  1: 'dm',
+  2: 'voice',
+  3: 'group',
+  4: 'category',
+  5: 'news',
+  6: 'store'
+} as const;
 
 export enum UserFlags {
   None,

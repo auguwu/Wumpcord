@@ -20,6 +20,10 @@
  * SOFTWARE.
  */
 
-import GuildChannel from './GuildChannel';
-
-export class VoiceChannel extends GuildChannel {}
+export * from './CategoryChannel';
+export * from './GroupChannel';
+export * from './StoreChannel';
+export * from './VoiceChannel';
+export * from './NewsChannel';
+export * from './TextChannel';
+export * from './DMChannel';

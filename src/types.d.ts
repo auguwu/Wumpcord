@@ -22,8 +22,8 @@
 /* eslint-disable camelcase */
 
 import type { TextChannel, VoiceChannel, StoreChannel, NewsChannel, GroupChannel, DMChannel, CategoryChannel } from './models';
-import type { GatewayEvent, Cachable, GatewayIntent, ActivityStatus } from './Constants';
 import type { ClientOptions as WebSocketClientOptions } from 'ws';
+import type { GatewayEvent, Cachable, GatewayIntent } from './Constants';
 import type { RatelimitInfo } from './rest/RatelimitBucket';
 import type { HttpMethod } from '@augu/orchid';
 import type * as discord from 'discord-api-types/v8';
@@ -36,6 +36,9 @@ export type TextableChannel = TextChannel | GroupChannel | DMChannel | NewsChann
 
 /** Represents all guild channels */
 export type AnyGuildChannel = TextChannel | VoiceChannel | NewsChannel | StoreChannel | CategoryChannel;
+
+/** Represents all channel types */
+export type AnyChannel = TextChannel | VoiceChannel | CategoryChannel | DMChannel | GroupChannel | NewsChannel | StoreChannel;
 
 /** Represents a object that all properties are gonna be undefined */
 export type NullableObject<T extends object> = {

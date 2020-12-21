@@ -21,12 +21,24 @@
  */
 
 import type { APIAuditLog } from 'discord-api-types/v8';
-import WebSocketClient from '../../gateway/WebSocketClient';
-import Base from '../Base';
+import type WebSocketClient from '../../gateway/WebSocketClient';
+import AuditLogEntry from './AuditLogEntry';
 
 export default class AuditLogs {
+  /** List of intergrations affected in the audit logs */
+  public integrations!: any[];
+
   /** The [WebSocketClient] attached */
   private client: WebSocketClient;
+
+  /** List of webhooks affected in the audit logs */
+  public webhooks!: any[];
+
+  /** List of available entries */
+  public entries!: AuditLogEntry[];
+
+  /** Any users affected in the audit logs */
+  public users!: any[];
 
   /**
    * Creates a new [AuditLogEntry] instance
@@ -39,6 +51,9 @@ export default class AuditLogs {
   }
 
   private patch(data: APIAuditLog) {
-    // noop
+    this.integrations = data.integrations;
+    this.webhooks = data.webhooks;
+    this.entries = data.audit_log_entries.map(data => new AuditLogEntry(this.client, data));
+    this.users = data.users;
   }
 }
