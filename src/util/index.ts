@@ -68,4 +68,16 @@ export default class Util {
     // @ts-ignore shut up
     return given;
   }
+
+  /**
+   * Finds a object's key from it's initial value
+   * @param obj The object
+   * @param key The key to find
+   * @returns The value found or `null` if not specified
+   */
+  static getKey<T extends object, K extends keyof T>(obj: T, key: T[K]): K {
+    return Object
+      .keys(obj)
+      .find(val => obj[val] === key) as unknown as K;
+  }
 }

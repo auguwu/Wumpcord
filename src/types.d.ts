@@ -22,8 +22,8 @@
 /* eslint-disable camelcase */
 
 import type { TextChannel, VoiceChannel, StoreChannel, NewsChannel, GroupChannel, DMChannel, CategoryChannel } from './models';
+import type { GatewayEvent, Cachable, GatewayIntent, ActivityStatus } from './Constants';
 import type { ClientOptions as WebSocketClientOptions } from 'ws';
-import type { GatewayEvent, Cachable, GatewayIntent } from './Constants';
 import type { RatelimitInfo } from './rest/RatelimitBucket';
 import type { HttpMethod } from '@augu/orchid';
 import type * as discord from 'discord-api-types/v8';
@@ -48,6 +48,15 @@ export type NullableClientOptions = NullableObject<ClientOptions> & { token: str
 /** Represents of how a Discord message is constructed */
 export type MessageContent = string | MessageContentOptions | MessageFile | MessageFile[];
 
+/** Represents a serialization strategy to use */
+export type Serializable = (...args: any[]) => string | Buffer;
+
+/** Represents a deserialization strategy to use */
+export type Deserializable<T = unknown> = (...args: any[]) => T;
+
+/** Represents all of the online statuses to set */
+export type OnlineStatus = 'online' | 'offline' | 'idle' | 'dnd';
+
 /** Represents a file to send to Discord */
 export interface MessageFile {
   /** The name of the file, it'll default to `file.png` if not found. */
@@ -61,6 +70,9 @@ export interface MessageFile {
 export interface ClientOptions {
   /** If we should populate presences when requesting for all guild members */
   populatePresences: boolean;
+
+  /** The reconnection timeout */
+  reconnectTimeout: number;
 
   /** Object of allowed mentions, this will be overrided if [MessageContent.mentions] is `null` or `undefined`. */
   allowedMentions: AllowedMentions;
@@ -171,4 +183,11 @@ export interface RestCallProperties {
 
   /** The ping of when the request was dispatched / called */
   ping: number;
+}
+
+export interface SendActivityOptions {
+  name: string;
+  type: number;
+  url?: string;
+  afk?: boolean;
 }

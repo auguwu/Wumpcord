@@ -86,7 +86,7 @@ export enum ActivityStatus {
   Playing,
   Streaming,
   Listening,
-  // 3 is deprecated (Watching)
+  // 3 is hidden (Watching)
   Custom = 4,
   Competing
 }

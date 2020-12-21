@@ -101,6 +101,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
         roles: false,
         users: false
       },
+      reconnectTimeout: 7000,
       interactions: false,
       disabledEvents: [],
       getAllUsers: false,

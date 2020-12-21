@@ -20,8 +20,8 @@
  * SOFTWARE.
  */
 
-import { Collection } from '@augu/immutable';
 import type WebSocketClient from './WebSocketClient';
+import { Collection } from '@augu/immutable';
 import WebSocketShard from './WebSocketShard';
 
 export default class ShardManager extends Collection<WebSocketShard> {
@@ -39,5 +39,18 @@ export default class ShardManager extends Collection<WebSocketShard> {
    */
   get ping() {
     return this.filter(shard => shard.ping !== -1).reduce((a, b) => b.ping + a, 0);
+  }
+
+  /**
+   * Connects a shard to Discord
+   * @param id The shard's ID
+   */
+  connect(id: number) {
+    if (!this.has(id)) return;
+
+    const shard = this.get(id)!;
+    if (shard.status === 'connected') return;
+
+    return this.spawn(shard.id, shard.strategy);
   }
 }

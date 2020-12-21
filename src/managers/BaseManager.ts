@@ -21,6 +21,7 @@
  */
 
 import { Collection } from '@augu/immutable';
+import type Client from '../gateway/WebSocketClient';
 
 /**
  * Represents a manager for handling entity cache
@@ -30,7 +31,7 @@ export default class BaseManager<T> {
   private holdable: any;
 
   /** The client to use */
-  private client: any;
+  private client: Client;
 
   /** The cache */
   public cache: Collection<T>;
@@ -40,7 +41,7 @@ export default class BaseManager<T> {
    * @param client The client to use
    * @param holdable The holdable object
    */
-  constructor(client: any, holdable: any) {
+  constructor(client: Client, holdable: any) {
     this.holdable = holdable;
     this.client = client;
     this.cache = new Collection();
@@ -65,26 +66,26 @@ export default class BaseManager<T> {
 
   /**
    * Adds a new object to the cache
-   * @param {any} data The data supplied from Discord
-   * @returns {T} The cached object or a new instance of it
+   * @param data The data supplied from Discord
+   * @returns The cached object or a new instance of it
    */
-  add(data: any): T {
+  add(data: any) {
     const existing = this.get(data.id) as any;
     if (existing && existing.patch) {
       existing.patch(data);
       this.cache.set(data.id, existing);
     }
 
-    if (existing) return existing;
+    if (existing) return existing as T;
 
     if (data instanceof this.holdable) {
       this.cache.set(data.id, data);
-      return data;
+      return data as T;
     } else {
       const obj = new this.holdable(this.client, data);
       this.cache.set(obj.id, obj);
 
-      return obj;
+      return obj as T;
     }
   }
 
