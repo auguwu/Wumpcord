@@ -57,6 +57,9 @@ export type Deserializable<T = unknown> = (...args: any[]) => T;
 /** Represents all of the online statuses to set */
 export type OnlineStatus = 'online' | 'offline' | 'idle' | 'dnd';
 
+/** Represents a Promise-value or not */
+export type MaybePromise<T> = Promise<T> | T;
+
 /** Represents a file to send to Discord */
 export interface MessageFile {
   /** The name of the file, it'll default to `file.png` if not found. */

@@ -19,3 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+export * from './interaction';
+export * from './presence';
+export * from './message';
+export * from './invites';
+export * from './channel';
+export * from './guild';
+export * from './voice';
+
+export * from './WebhooksUpdateEvent';
+export * from './TypingStartEvent';
+export * from './ResumeEvent';
+export * from './ReadyEvent';
