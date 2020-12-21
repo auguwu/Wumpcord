@@ -32,10 +32,19 @@ import Util from '../util';
 //import type * as events from '../events';
 
 interface WebSocketClientEvents {
+  // Gateway
+  shardClose(id: number, error: Error, recoverable: boolean): void;
+  shardError(id: number, error: Error): void;
+  shardDisconnect(id: number): void;
+  shardSpawn(id: number): void;
+  shardReady(id: number): void;
+
+  // REST
   restCall(props: types.RestCallProperties): void;
   restUnavailable(): void;
   restEmpty(): void;
 
+  // Normal
   debug(message: string): void;
   error(error: Error): void;
   ready(): void;

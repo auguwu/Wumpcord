@@ -21,6 +21,7 @@
  */
 
 import type WebSocketClient from './WebSocketClient';
+import type * as types from '../types';
 import { Collection } from '@augu/immutable';
 import WebSocketShard from './WebSocketShard';
 
@@ -41,6 +42,33 @@ export default class ShardManager extends Collection<WebSocketShard> {
     return this.filter(shard => shard.ping !== -1).reduce((a, b) => b.ping + a, 0);
   }
 
+  toString() {
+    return `[ShardManager (${this.size} shards)]`;
+  }
+
+  /**
+   * Spawns a new shard
+   * @param id The ID
+   * @param strategy The serialization strategy
+   */
+  spawn(id: number, strategy: types.ClientOptions['strategy']) {
+    if (this.has(id)) {
+      const shard = this.get(id)!;
+      return shard.connect();
+    }
+
+    const shard = new WebSocketShard(this.client, id, strategy);
+    shard
+      .on('disconnect', (id) => this.client.emit('shardDisconnect', id))
+      .on('establish', (id)  => this.client.emit('shardSpawn', id))
+      .on('debug', (id, msg) => this.client.debug(`Shard #${id}`, msg))
+      .on('error', (id, error) => this.client.emit('shardError', id, error))
+      .on('close', (id, error, recoverable) => this.client.emit('shardClose', id, error, recoverable))
+      .on('ready', (id) => this.client.emit('shardReady', id));
+
+    return shard.connect();
+  }
+
   /**
    * Connects a shard to Discord
    * @param id The shard's ID
@@ -52,5 +80,18 @@ export default class ShardManager extends Collection<WebSocketShard> {
     if (shard.status === 'connected') return;
 
     return this.spawn(shard.id, shard.strategy);
+  }
+
+  /**
+   * Disposes a shard
+   * @param id The shard's ID
+   */
+  dispose(id: number) {
+    if (!this.has(id)) return;
+
+    const shard = this.get(id)!;
+    if (shard.status === 'dead') return;
+
+    return shard.disconnect(false);
   }
 }
