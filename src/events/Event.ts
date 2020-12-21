@@ -34,13 +34,13 @@ export default class Event<D extends object, Refs extends object = {}> {
   private client: WebSocketClient;
 
   /** The WebSocket shard that is handling this event */
-  private shard: WebSocketShard;
+  public shard: WebSocketShard;
 
   /** The references attached to this [Event] */
-  private $refs: Refs;
+  public $refs: Refs;
 
   /** The data payload from Discord */
-  private data: D;
+  public data: D;
 
   /**
    * Represents a event from Discord and handles everything
