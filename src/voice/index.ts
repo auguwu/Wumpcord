@@ -20,4 +20,7 @@
  * SOFTWARE.
  */
 
-import type WebSocketClient from '../../gateway/WebSocketClient';
+/**
+ * Voice package for Wumpcord
+ */
+export default Object.create(null);
