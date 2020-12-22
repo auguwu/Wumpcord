@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+import { Cachable, CacheTypes } from '../Constants';
 import { Collection } from '@augu/immutable';
 import type Client from '../gateway/WebSocketClient';
 import type Base from '../models/Base';
@@ -31,6 +32,9 @@ export default class BaseManager<T extends Base<{}>> {
   /** The holdable object to construct with [BaseManager.add] */
   private holdable: any;
 
+  /** The cache type of this [BaseManager] */
+  private cacheType: Cachable;
+
   /** The client to use */
   public client: Client;
 
@@ -40,12 +44,29 @@ export default class BaseManager<T extends Base<{}>> {
   /**
    * Represents a manager for handling entity cache
    * @param client The client to use
+   * @param cacheType The cache type that this [BaseManager] represents
    * @param holdable The holdable object
    */
-  constructor(client: Client, holdable: any) {
+  constructor(client: Client, cacheType: Cachable, holdable: any) {
+    if (cacheType === 'all' || cacheType === 'none') throw new TypeError('`cacheType` can\'t be `all` or `none`.');
+    if (!CacheTypes.includes(cacheType)) throw new TypeError(`Cache type \`${cacheType}\` is not a valid cache type.`);
+
+    this.cacheType = cacheType;
     this.holdable = holdable;
     this.client = client;
     this.cache = new Collection();
+  }
+
+  /**
+   * If we are allowed to cache the object in this [BaseManager]
+   */
+  get canCache() {
+    if (this.client.options.cache === 'none') return false;
+    if (this.client.options.cache === 'all') return true;
+
+    return Array.isArray(this.client.options.cache)
+      ? this.client.options.cache.includes(this.cacheType)
+      : this.client.options.cache === this.cacheType;
   }
 
   /**
@@ -80,11 +101,11 @@ export default class BaseManager<T extends Base<{}>> {
     if (existing) return existing;
 
     if (data instanceof this.holdable) {
-      this.cache.set(data.id, data);
+      if (this.canCache) this.cache.set(data.id, data);
       return data;
     } else {
       const obj = new this.holdable(this.client, data);
-      this.cache.set(obj.id, obj);
+      if (this.canCache) this.cache.set(obj.id, obj);
 
       return obj;
     }
@@ -125,6 +146,6 @@ export default class BaseManager<T extends Base<{}>> {
   }
 
   toString() {
-    return `[wumpcord.Manager<${(this.holdable.constructor as typeof Function).name}>]`;
+    return `[wumpcord.Manager<${(this.holdable.constructor as typeof Function).name}, ${this.cacheType}>]`;
   }
 }

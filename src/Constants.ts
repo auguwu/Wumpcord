@@ -54,7 +54,19 @@ export type GatewayIntent = 'guilds' | 'guildMembers' | 'guildBans' | 'guildEmoj
 /**
  * List of cachable objects that are "heavy"
  */
-export type Cachable = 'guild' | 'user' | 'channel' | 'presence' | 'message' | 'voice:connection' | 'member' | 'member:role';
+export type Cachable = 'guild' | 'user' | 'channel' | 'presence' | 'message' | 'voice:connection'
+  | 'member' | 'member:role' | 'all' | 'none';
+
+export const CacheTypes: Cachable[] = [
+  'voice:connection',
+  'member:role',
+  'presence',
+  'message',
+  'channel',
+  'member',
+  'guild',
+  'user'
+];
 export const StrategyTypes = ['etf', 'json'];
 export const UnrecoverableCodes = [
   1005, // no idea

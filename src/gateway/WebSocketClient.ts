@@ -119,7 +119,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
       getAllUsers: false,
       shardCount: 'auto',
       strategy: 'json',
-      cache: [],
+      cache: 'none',
       token: options.token,
       ws: {
         guildSubscriptions: true,
