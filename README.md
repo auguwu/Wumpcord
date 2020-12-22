@@ -2,10 +2,10 @@
 > :rowboat: **Flexible, type-safe, and lightweight Discord API library made in TypeScript**
 
 ## Features
-- Command Handling
-  - Too lazy to code your own command handler? Wumpcord will supply you with an en-riching commands API!
-- Extra utilities
-  - Too lazy to make your own utilities (Reaction Menus, etc) or don't wanna add dependencies? Well, Wumpcord fully supports any utility you desire that other libraries don't, out of the box!
+- No over-head with memory: Tired of caching useless things? Wumpcord doesn't cache what you don't need since it's opt-in.
+- Command Handling: Tired of using a command handler to add extra dependencies? Wumpcord has that built-in, similar API to discord.js-commando.
+- Clustering Support: Tired of adding [clustering](https://nodejs.org/api/cluster.html) to your bot? Wumpcord has clustering support built-in.
+- Extra Utilities: Wumpcord bundles in with extra utilities like a Reaction Handler and a Message Collector.
 
 ## Need Support?
 You can join the server below and join in #support under the **Wumpcord** category
@@ -23,4 +23,4 @@ Coming Soon.
 None at the moment.
 
 ## License
-**Wumpcord** is released under the MIT License. Read [here](/LICENSE) for more information.
+**Wumpcord** is released under the [MIT](/LICENSE) License. <3
