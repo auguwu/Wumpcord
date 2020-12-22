@@ -40,7 +40,7 @@ export default class EventBus<T extends object = DefaultEventBusMap> {
   private maxListeners: number = 250;
 
   /** The actual listener map */
-  private listeners: { [x: string]: Listener[] } = {};
+  private listeners: T = {} as any;
 
   /**
    * Emits a event from the callstack
@@ -71,7 +71,7 @@ export default class EventBus<T extends object = DefaultEventBusMap> {
     const listeners = this.listeners[event as string] || [];
     if (listeners.length > this.maxListeners) throw new TypeError(`Reached max event listeners in event '${event}' (${listeners.length})`);
 
-    listeners.push(listener as any);
+    listeners.push(listener);
 
     this.listeners[event as string] = listeners;
     return this;
@@ -103,10 +103,10 @@ export default class EventBus<T extends object = DefaultEventBusMap> {
     const listeners = this.listeners[event as string];
     if (!listeners.length) return false;
 
-    const index = listeners.indexOf(listener as any);
+    const index = listeners.indexOf(listener);
     if (index !== -1) listeners.splice(index, 1);
 
-    this.listeners[event as string] = listeners as any;
+    this.listeners[event as string] = listeners;
     return true;
   }
 

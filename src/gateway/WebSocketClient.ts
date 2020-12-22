@@ -29,6 +29,8 @@ import RestClient from '../rest/RestClient';
 import EventBus from '../util/EventBus';
 import Util from '../util';
 
+import ChannelManager from '../managers/ChannelManager';
+
 //import type * as events from '../events';
 
 interface WebSocketClientEvents {
@@ -64,7 +66,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
   public gatewayURL!: string;
 
   /** The channel cache available, this will be a empty Collection if not enabled. */
-  public channels: any;
+  public channels: ChannelManager;
 
   /** The client options available to this WebSocket client. */
   public options: types.ClientOptions;
@@ -102,7 +104,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
 
     this.voiceConnections = null;
     this.interactions = null;
-    this.channels = null;
+    this.channels = new ChannelManager(this);
     this.options = Util.merge<types.NullableClientOptions, types.ClientOptions>(options, {
       populatePresences: false,
       allowedMentions: {

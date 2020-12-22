@@ -51,6 +51,9 @@ export type NullableClientOptions = NullableObject<ClientOptions> & { token: str
 /** Represents of how a Discord message is constructed */
 export type MessageContent = string | MessageContentOptions | MessageFile | MessageFile[];
 
+/** Represents of how a Discord message is constructed, without the `string` property */
+export type MessageContentOpts = MessageContentOptions | MessageFile | MessageFile[];
+
 /** Represents a serialization strategy to use */
 export type Serializable = (...args: any[]) => string | Buffer;
 

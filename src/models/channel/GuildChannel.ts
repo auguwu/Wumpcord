@@ -20,12 +20,73 @@
  * SOFTWARE.
  */
 
+import type PermissionOverwrite from '../PermissionOverwrite';
 import type WebSocketClient from '../../gateway/WebSocketClient';
 import type { APIChannel } from 'discord-api-types/v8';
 import { Channel } from '../Channel';
+import { Collection } from '@augu/immutable';
 
 export default class GuildChannel extends Channel {
+  /** List of permission overwrites for this [GuildChannel] */
+  public permissionOverwrites!: Collection<PermissionOverwrite>;
+
+  /** The parent category's ID, this is `null` if [GuildChannel] is a [CategoryChannel] or doesn't have a parent */
+  public parentID!: string | null;
+
+  /** The sorting position the channel is in */
+  public position!: number;
+
+  /** The guild ID this [GuildChannel] is attached to */
+  public guildID!: string;
+
+  /** The WebSocket client attached */
+  public client: WebSocketClient;
+
+  /** The guild that this [GuildChannel] is attached to */
+  public guild!: any;
+
+  /** The name of this [GuildChannel] instance */
+  public name!: string;
+
+  /** If the channel is marked NSFW or not */
+  public nsfw!: boolean;
+
+  /**
+   * Creates a new [GuildChannel] instance
+   * @param client The WebSocket client attached
+   * @param data The data supplied from Discord
+   */
   constructor(client: WebSocketClient, data: APIChannel) {
     super(data);
+
+    this.guildID = data.guild_id!;
+    this.client = client;
+
+    this.patch(data);
+  }
+
+  patch(data: APIChannel) {
+    super.patch(data);
+
+    this.permissionOverwrites = new Collection();
+
+    if (data.position !== undefined)
+      this.position = data.position;
+
+    if (data.parent_id !== undefined)
+      this.parentID = data.parent_id;
+
+    if (data.name !== undefined)
+      this.name = data.name;
+
+    if (data.nsfw !== undefined)
+      this.nsfw = data.nsfw ?? false;
+
+    if (data.permission_overwrites !== undefined) {
+      for (let i = 0; i < data.permission_overwrites.length; i++) {
+        const overwrite = data.permission_overwrites[i];
+        this.permissionOverwrites.set(overwrite.id, new PermissionOverwrite(overwrite));
+      }
+    }
   }
 }

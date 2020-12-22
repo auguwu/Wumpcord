@@ -102,7 +102,7 @@ export default class AuditLogEntry extends Base<APIAuditLogEntry> {
         AuditLogAction.MessageDelete
       ].includes(this.actionType)) {
         this.channelID = data.options.channel_id;
-        this.channel = null;
+        this.channel = undefined;
       }
 
       if ([AuditLogAction.MessageUnpin, AuditLogAction.MessagePin].includes(this.actionType)) {

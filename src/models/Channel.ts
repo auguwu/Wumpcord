@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import { TextChannel, DMChannel, NewsChannel, GroupChannel, StoreChannel, VoiceChannel, CategoryChannel } from './channel';
+import { TextChannel, DMChannel, NewsChannel, GroupChannel, StoreChannel, VoiceChannel, CategoryChannel } from './channel/index';
 import type { APIPartialChannel } from 'discord-api-types/v8';
 import type WebSocketClient from '../gateway/WebSocketClient';
 import type { AnyChannel } from '../types';

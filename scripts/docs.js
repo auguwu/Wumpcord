@@ -77,7 +77,7 @@ async function main() {
   const sources = program.getSourceFiles();
   const checker = program.getTypeChecker();
 
-  log(`Reviewing ${sources.length} source files.`);
+  log(`Reviewing ${sources.length} source files...`);
 
   for (let i = 0; i < sources.length; i++) {
     const sourceFile = sources[i];
@@ -94,10 +94,23 @@ async function main() {
  * @param {ts.Node} node
  * @param {ts.TypeChecker} checker
  * @param {any} results
+ * @param {boolean} [child=false] If the node is a children component
  */
-function visit(node, checker, results) {
+function visit(
+  node,
+  checker,
+  results,
+  child = false
+) {
   const children = node.getChildren();
-  if (children.length > 0) ts.forEachChild(node, (n) => visit(n, checker, results));
+  if (children.length > 0) ts.forEachChild(node, (n) => visit(n, checker, results, true));
+
+  if (child) {
+    const parentEl = findParent(node, results);
+    if (parentEl === null) return;
+
+    // console.log(`parent element for node: ${parentEl[0]}`, '\n', parentEl[1]);
+  }
 
   if (ts.isClassDeclaration(node)) {
     const name = node.name.getText() || '<anonymous class>';
@@ -184,5 +197,44 @@ function visit(node, checker, results) {
     results.types.push(result);
   }
 }
+
+/**
+ * Finds the parent element
+ * @param {ts.Node} node The node to check
+ * @returns {[type: 'class' | 'interface' | 'type', name: string | undefined] | null} Tuple array of [type, name]
+ * or `null` if the parent isn't found or is anonymous
+ */
+const findParent = (node, result) => {
+  if (!node.parent) return null;
+
+  const file = node.getSourceFile();
+
+  //console.log(`[${file.fileName}] parent: ${ts.SyntaxKind[node.parent?.kind]}`);
+  //console.log(`[${file.fileName}] node:   ${ts.SyntaxKind[node.kind]}`);
+
+  if (ts.isClassDeclaration(node.parent)) console.log(`found class def: ${node.parent.name.escapedText}`);
+
+  /*
+  const parent = node.parent;
+  if (ts.isClassDeclaration(parent)) {
+    const name = node.name.escapedText || '<anonymous>';
+    if (name === '<anonymous>') return null;
+
+    return ['class', result.classes.find(klass => klass.name === name)];
+  } else if (ts.isInterfaceDeclaration(parent)) {
+    const name = node.name.escapedText || '<anonymous>';
+    if (name === '<anonymous>') return null;
+
+    return ['interface', result.interfaces.find(klass => klass.name === name)];
+  } else if (ts.isTypeAliasDeclaration(parent)) {
+    const name = node.name.escapedText || '<anonymous>';
+    if (name === '<anonymous>') return null;
+
+    return ['type', result.types.find(klass => klass.name === name)];
+  } else {
+    return null;
+  }
+  */
+};
 
 main();

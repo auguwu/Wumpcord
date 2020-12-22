@@ -20,40 +20,27 @@
  * SOFTWARE.
  */
 
-import type { APIChannel } from 'discord-api-types/v8';
-import type WebSocketClient from '../../gateway/WebSocketClient';
-import { Channel } from '../Channel';
+import type WebSocketClient from '../gateway/WebSocketClient';
+import { Channel } from '../models';
+import BaseManager from './BaseManager';
 
-export class DMChannel extends Channel {
-  /** Represents the last message ID, useful for fetching messages in this channel */
-  public lastMessageID!: string;
-
-  /** List of recipients that are in this group DM */
-  public recipient!: any;
-
-  /** The [WebSocket] client attached to this [GroupChannel] */
-  private client: WebSocketClient;
+export default class ChannelManager extends BaseManager<Channel> {
+  /**
+   * Creates a new [ChannelManager] instance
+   * @param client The [WebSocketClient] attached to it
+   */
+  constructor(client: WebSocketClient) {
+    super(client, Channel);
+  }
 
   /**
-   * Creates a new [DMChannel] instance
-   * @param client The [WebSocket] client attached
-   * @param data The data from Discord
+   * Fetches a channel from Discord and caches it if we can
+   * @param id The channel's ID
    */
-  constructor(client: WebSocketClient, data: APIChannel) {
-    super(data);
-
-    this.client = client;
-    this.patch(data);
-  }
-
-  patch(data: APIChannel) {
-    super.patch(data);
-
-    this.lastMessageID = data.last_message_id!;
-    this.recipient = data.recipients![0];
-  }
-
-  toString() {
-    return `[wumpcord.DMChannel<${this.recipient.tag}>]`;
+  fetch(id: string) {
+    return this.client.rest.dispatch({
+      endpoint: `/channels/${id}`,
+      method: 'GET'
+    }).then(data => Channel.from(this.client, data));
   }
 }

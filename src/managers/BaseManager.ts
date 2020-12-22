@@ -22,16 +22,17 @@
 
 import { Collection } from '@augu/immutable';
 import type Client from '../gateway/WebSocketClient';
+import type Base from '../models/Base';
 
 /**
  * Represents a manager for handling entity cache
  */
-export default class BaseManager<T> {
+export default class BaseManager<T extends Base<{}>> {
   /** The holdable object to construct with [BaseManager.add] */
   private holdable: any;
 
   /** The client to use */
-  private client: Client;
+  public client: Client;
 
   /** The cache */
   public cache: Collection<T>;
@@ -69,23 +70,23 @@ export default class BaseManager<T> {
    * @param data The data supplied from Discord
    * @returns The cached object or a new instance of it
    */
-  add(data: any) {
-    const existing = this.get(data.id) as any;
+  add(data: any): T {
+    const existing = this.get(data.id);
     if (existing && existing.patch) {
       existing.patch(data);
       this.cache.set(data.id, existing);
     }
 
-    if (existing) return existing as T;
+    if (existing) return existing;
 
     if (data instanceof this.holdable) {
       this.cache.set(data.id, data);
-      return data as T;
+      return data;
     } else {
       const obj = new this.holdable(this.client, data);
       this.cache.set(obj.id, obj);
 
-      return obj as T;
+      return obj;
     }
   }
 
@@ -98,7 +99,6 @@ export default class BaseManager<T> {
     let id: string;
 
     if (typeof idOrInstance === 'string') id = idOrInstance;
-    // @ts-ignore I know what I am doing.
     else if (idOrInstance instanceof this.holdable) id = idOrInstance.id;
     else throw new TypeError(`Expecting \`string\` or \`T\`, received ${typeof idOrInstance === 'object' ? 'array' : typeof idOrInstance}`);
 
@@ -114,7 +114,6 @@ export default class BaseManager<T> {
     let id: string;
 
     if (typeof idOrInstance === 'string') id = idOrInstance;
-    // @ts-ignore I know what I am doing.
     else if (idOrInstance instanceof this.holdable) id = idOrInstance.id;
     else throw new TypeError(`Expecting \`string\` or \`T\`, received ${typeof idOrInstance === 'object' ? 'array' : typeof idOrInstance}`);
 
@@ -123,5 +122,9 @@ export default class BaseManager<T> {
 
   valueOf() {
     return this.cache;
+  }
+
+  toString() {
+    return `[wumpcord.Manager<${(this.holdable.constructor as typeof Function).name}>]`;
   }
 }

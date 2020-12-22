@@ -27,7 +27,7 @@ import type * as types from '../types';
 /**
  * Represents a event from Discord and handles everything
  * @template D The data object structure
- * @template Refs The references
+ * @template Refs The references available in this event's context
  */
 export default class Event<D extends object, Refs extends object = {}> {
   /** The WebSocket client attached */

@@ -20,6 +20,50 @@
  * SOFTWARE.
  */
 
-import GuildChannel from './GuildChannel';
+/* eslint-disable camelcase */
 
-export class NewsChannel extends GuildChannel {}
+import type { RESTPostAPIChannelMessageJSONBody, APIMessage } from 'discord-api-types/v8';
+import type { MessageContent, MessageContentOpts } from '../../types';
+import { TextChannel } from './TextChannel';
+import { Message } from '../Message';
+import Util from '../../util';
+
+interface FollowedChannel {
+  channel_id: string;
+  webhook_id: string;
+}
+
+export class NewsChannel extends TextChannel {
+  /**
+   * Follows this [NewsChannel] to a different channel
+   * @param channelID The channel's ID
+   * @returns The result, if it was a success or not
+   */
+  follow(channelID: string) {
+    return this.client.rest.dispatch<FollowedChannel, { webhook_channel_id: string }>({
+      endpoint: `/channels/${this.id}/followers`,
+      method: 'post',
+      data: {
+        webhook_channel_id: channelID
+      }
+    });
+  }
+
+  /**
+   * Crossposts a message to all the followers who subscribed to this [NewsChannel]
+   * @param messageID The message ID to crosspost
+   * @param content The content to send out
+   * @param options Any additional options, if needed
+   * @returns A new [Message] instance indicating it was sent
+   */
+  crosspost(messageID: string, content: MessageContent, options?: MessageContentOpts) {
+    const data = Util.getMessageContent(this.client, content, options);
+
+    return this.client.rest.dispatch<APIMessage, RESTPostAPIChannelMessageJSONBody>({
+      endpoint: `/channels/${this.id}/messages/${messageID}/crosspost`,
+      headers: data.headers,
+      method: 'post',
+      data: data.body
+    }).then(data => new Message(this.client, data));
+  }
+}

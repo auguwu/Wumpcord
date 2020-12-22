@@ -20,13 +20,17 @@
  * SOFTWARE.
  */
 
+import type { AnyGuildChannel } from '../../types';
 import GuildChannel from './GuildChannel';
 
 export class CategoryChannel extends GuildChannel {
   /**
    * Returns the childern list of this [CategoryChannel]
    */
-  get children(): GuildChannel[] {
-    return [];
+  get children() {
+    return this.client.channels.cache.filter((channel) =>
+      (channel.hasOwnProperty('parentID') && (channel as GuildChannel).parentID !== null) &&
+      (channel as GuildChannel).parentID === this.id
+    ) as AnyGuildChannel[];
   }
 }

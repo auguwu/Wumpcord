@@ -20,6 +20,39 @@
  * SOFTWARE.
  */
 
+import type WebSocketClient from '../../gateway/WebSocketClient';
+import type { APIChannel } from 'discord-api-types/v8';
 import GuildChannel from './GuildChannel';
 
-export class TextChannel extends GuildChannel {}
+export class TextChannel extends GuildChannel {
+  /** The ratelimit per user, how long they can send a message */
+  public ratelimitPerUser!: number;
+
+  /** The channel's topic */
+  public topic!: string | null;
+
+  /**
+   * Creates a new [TextChannel] instance
+   * @param client The [WebSocketClient] attached
+   * @param data The data supplied from Discord
+   */
+  constructor(client: WebSocketClient, data: APIChannel) {
+    super(client, data);
+
+    this.patch(data);
+  }
+
+  patch(data: APIChannel) {
+    super.patch(data);
+
+    if (data.rate_limit_per_user !== undefined)
+      this.ratelimitPerUser = data.rate_limit_per_user;
+
+    if (data.topic !== undefined)
+      this.topic = data.topic;
+  }
+
+  toString() {
+    return `[wumpcord.TextChannel<${this.name}>]`;
+  }
+}

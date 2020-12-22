@@ -20,6 +20,52 @@
  * SOFTWARE.
  */
 
+import type { APIChannel } from 'discord-api-types/v8';
+import type WebSocketClient from '../../gateway/WebSocketClient';
 import { Channel } from '../Channel';
 
-export class GroupChannel extends Channel {}
+export class GroupChannel extends Channel {
+  /** Represents the last message ID, useful for fetching messages in this channel */
+  public lastMessageID!: string;
+
+  /** List of recipients that are in this group DM */
+  public recipients!: any[];
+
+  /** The owner's ID, who-ever created the group DM */
+  public ownerID!: string;
+
+  /** The [WebSocket] client attached to this [GroupChannel] */
+  private client: WebSocketClient;
+
+  /** The name of the group DM */
+  public name!: string;
+
+  /** The group DM's icon */
+  public icon!: string | null;
+
+  /**
+   * Creates a new [GroupChannel] instance
+   * @param client The [WebSocket] client attached
+   * @param data The data from Discord
+   */
+  constructor(client: WebSocketClient, data: APIChannel) {
+    super(data);
+
+    this.client = client;
+    this.patch(data);
+  }
+
+  patch(data: APIChannel) {
+    super.patch(data);
+
+    this.lastMessageID = data.last_message_id!;
+    this.recipients = data.recipients!;
+    this.ownerID = data.owner_id!;
+    this.name = data.name!;
+    this.icon = data.icon!;
+  }
+
+  toString() {
+    return `[wumpcord.GroupChannel "${this.name}"]`;
+  }
+}

@@ -122,7 +122,7 @@ export default class RestClient {
    * Dispatch a request to Discord
    * @param options The request options
    */
-  dispatch<T = unknown>(options: Omit<RequestDispatch<T>, 'resolve' | 'reject'>) {
+  dispatch<T, D = unknown>(options: Omit<RequestDispatch<D>, 'resolve' | 'reject'>) {
     return new Promise<T>((resolve, reject) => {
       const request: RequestDispatch = {
         resolve,
