@@ -109,6 +109,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
       populatePresences: false,
       allowedMentions: {
         everyone: false,
+        replied: false,
         roles: false,
         users: false
       },

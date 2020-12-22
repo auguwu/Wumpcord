@@ -20,10 +20,11 @@
  * SOFTWARE.
  */
 
-/**
- * A resolvable thing
- */
-export type Resolvable<T> = T | T[];
+/* eslint-disable camelcase */
+
+import type { AllowedMentions, MessageContent, MessageContentOptions, MessageFile } from '../types';
+import type WebSocketClient from '../gateway/WebSocketClient';
+import * as discord from 'discord-api-types/v8';
 
 /**
  * All utilities available to Wumpcord
@@ -79,5 +80,110 @@ export default class Util {
     return Object
       .keys(obj)
       .find(val => obj[val] === key) as unknown as K;
+  }
+
+  /**
+   * Formats a message to a body that we can send
+   * @param client The client for [MessageContent.mentions]
+   * @param content The content to send
+   * @param options Any additional options, if needed
+   */
+  static formatMessage(client: WebSocketClient, content: MessageContent, options?: MessageContentOptions) {
+    const data: discord.RESTPostAPIChannelMessageJSONBody & { file?: MessageFile | MessageFile[] } = {};
+
+    if (!options && (typeof content !== 'string' || typeof content !== 'object'))
+      throw new TypeError('`content` must be a `string` or `MessageContent`');
+
+    if (typeof content === 'object' && (options !== undefined && typeof options === 'object'))
+      throw new TypeError('Conflicting message contents, choose one or the other.');
+
+    if (typeof content === 'string' && !options) {
+      data.content = content;
+      return data;
+    } else if (typeof content === 'object' && !options) {
+      if (content.attachments !== undefined)
+        data.file = content.attachments;
+
+      if (content.mentions !== undefined)
+        data.allowed_mentions = this.formatAllowedMentions(content.mentions, client);
+
+      if (content.content !== undefined)
+        data.content = data.content;
+
+      if (content.embed !== undefined)
+        data.embed = content.embed;
+
+      if (content.reply !== undefined)
+        data.message_reference = { message_id: content.reply };
+
+      if (content.tts !== undefined)
+        data.tts = Boolean(data.tts);
+    } else if (typeof content === 'string' && options) {
+      data.content = content;
+
+      if (options.attachments !== undefined)
+        data.file = options.attachments;
+
+      if (options.mentions !== undefined)
+        data.allowed_mentions = this.formatAllowedMentions(options.mentions, client);
+
+      if (options.embed !== undefined)
+        data.embed = options.embed;
+
+      if (options.reply !== undefined)
+        data.message_reference = { message_id: options.reply };
+
+      if (options.tts !== undefined)
+        data.tts = Boolean(data.tts);
+    } else if (options !== undefined) {
+      if (options.attachments !== undefined)
+        data.file = options.attachments;
+
+      if (options.mentions !== undefined)
+        data.allowed_mentions = this.formatAllowedMentions(options.mentions, client);
+
+      if (options.content !== undefined)
+        data.content = options.content;
+
+      if (options.embed !== undefined)
+        data.embed = options.embed;
+
+      if (options.reply !== undefined)
+        data.message_reference = { message_id: options.reply };
+
+      if (options.tts !== undefined)
+        data.tts = Boolean(data.tts);
+    } else {
+      throw new SyntaxError('Missing message content, embed, or file');
+    }
+
+    return data;
+  }
+
+  static formatAllowedMentions(mentions: AllowedMentions, client: WebSocketClient): discord.APIAllowedMentionsSend {
+    const data: discord.APIAllowedMentionsSend = {
+      replied_user: mentions?.replied ?? client.options.allowedMentions.replied,
+      parse: []
+    };
+
+    if (!mentions) {
+      if (client.options.allowedMentions.everyone === true) data.parse!.push(discord.AllowedMentionsTypes.Everyone);
+      if (client.options.allowedMentions.roles === true) data.parse!.push(discord.AllowedMentionsTypes.Role);
+      if (client.options.allowedMentions.users === true) data.parse!.push(discord.AllowedMentionsTypes.User);
+
+      if (Array.isArray(client.options.allowedMentions.roles)) data.roles = client.options.allowedMentions.roles;
+      if (Array.isArray(client.options.allowedMentions.users)) data.users = client.options.allowedMentions.users;
+
+      return data;
+    }
+
+    if (mentions.everyone === true) data.parse!.push(discord.AllowedMentionsTypes.Everyone);
+    if (mentions.roles === true) data.parse!.push(discord.AllowedMentionsTypes.Role);
+    if (mentions.users === true) data.parse!.push(discord.AllowedMentionsTypes.User);
+
+    if (Array.isArray(mentions.roles)) data.roles = mentions.roles;
+    if (Array.isArray(mentions.users)) data.users = mentions.users;
+
+    return data;
   }
 }

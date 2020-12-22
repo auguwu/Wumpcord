@@ -26,6 +26,7 @@ import DiscordAPIError from '../errors/DiscordAPIError';
 import RatelimitBucket from './RatelimitBucket';
 import * as Constants from '../Constants';
 import type Client from '../gateway/WebSocketClient';
+import * as types from '../types';
 import { Queue } from '@augu/immutable';
 import FormData from 'form-data';
 import Util from '../util';
@@ -50,7 +51,7 @@ interface RequestDispatch<T = unknown> {
   method: HttpMethod;
 
   /** A file packet to send to Discord */
-  file?: any[];
+  file?: types.MessageFile | types.MessageFile[];
 
   /** Any data to send to Discord */
   data?: T;
@@ -158,11 +159,16 @@ export default class RestClient {
 
     if (request.file) {
       form = new FormData();
-      for (let i = 0; i < request.file.length; i++) {
-        const file = request.file[i];
-        if (!file.name) file.name = 'file.png';
+      if (Array.isArray(request.file)) {
+        for (let i = 0; i < request.file.length; i++) {
+          const file = request.file[i];
+          if (!file.name) file.name = 'file.png';
 
-        form.append(file.name, file.file, { filename: file.name });
+          form.append(file.name, file.file, { filename: file.name });
+        }
+      } else {
+        if (!request.file.name) request.file.name = 'file.png';
+        form.append(request.file.name, request.file.file, { filename: request.file.name });
       }
 
       if (request.data) form.append('payload_json', JSON.stringify(request.data), { filename: 'payload_json' });

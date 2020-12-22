@@ -23,7 +23,7 @@
 /* eslint-disable camelcase */
 
 import type { RESTPostAPIChannelMessageJSONBody, APIMessage } from 'discord-api-types/v8';
-import type { MessageContent, MessageContentOpts } from '../../types';
+import type { MessageContent, MessageContentOptions } from '../../types';
 import { TextChannel } from './TextChannel';
 import { Message } from '../Message';
 import Util from '../../util';
@@ -56,14 +56,18 @@ export class NewsChannel extends TextChannel {
    * @param options Any additional options, if needed
    * @returns A new [Message] instance indicating it was sent
    */
-  crosspost(messageID: string, content: MessageContent, options?: MessageContentOpts) {
-    const data = Util.getMessageContent(this.client, content, options);
+  crosspost(messageID: string, content: MessageContent, options?: MessageContentOptions) {
+    const data = Util.formatMessage(this.client, content, options);
+    const file = data.file;
+
+    // delete it so it doesn't bleed when sending
+    delete data.file;
 
     return this.client.rest.dispatch<APIMessage, RESTPostAPIChannelMessageJSONBody>({
       endpoint: `/channels/${this.id}/messages/${messageID}/crosspost`,
-      headers: data.headers,
       method: 'post',
-      data: data.body
+      file,
+      data
     }).then(data => new Message(this.client, data));
   }
 }

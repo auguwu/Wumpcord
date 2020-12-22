@@ -49,10 +49,7 @@ export type NullableObject<T extends object> = {
 export type NullableClientOptions = NullableObject<ClientOptions> & { token: string };
 
 /** Represents of how a Discord message is constructed */
-export type MessageContent = string | MessageContentOptions | MessageFile | MessageFile[];
-
-/** Represents of how a Discord message is constructed, without the `string` property */
-export type MessageContentOpts = MessageContentOptions | MessageFile | MessageFile[];
+export type MessageContent = string | MessageContentOptions;
 
 /** Represents a serialization strategy to use */
 export type Serializable = (...args: any[]) => string | Buffer;
@@ -139,6 +136,9 @@ export interface AllowedMentions {
   /** If we should allow the bot to ping @everyone/@here */
   everyone?: boolean;
 
+  /** If we should ping the user we replied with the message reference */
+  replied?: boolean;
+
   /** Boolean value of `true` if we should parse every role as a mentionable ping or an Array of role ids */
   roles?: boolean | string[];
 
@@ -158,6 +158,9 @@ export interface ShardInfo {
 }
 
 export interface MessageContentOptions {
+  /** List of attachments to send to Discord */
+  attachments?: MessageFile | MessageFile[];
+
   /** List of allowed mentions to use, if this is `undefined`, it'll default to the client options' allowed mentions */
   mentions?: AllowedMentions;
 
