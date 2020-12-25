@@ -20,35 +20,24 @@
  * SOFTWARE.
  */
 
-import { APIOverwrite, OverwriteType } from 'discord-api-types';
-import Permission from '../util/Permissions';
-import Base from './Base';
+import type WebSocketClient from '../gateway/WebSocketClient';
+import type { APIUser } from 'discord-api-types';
+import BaseManager from './BaseManager';
+import { User } from '../models';
 
-export class PermissionOverwrite extends Base<APIOverwrite> {
-  /** List of permissions available for this [PermissionOverwrite] */
-  public permissions!: Permission;
-
-  /** The overwrite type */
-  public type!: 'role' | 'member';
+export default class UserManager extends BaseManager<User> {
+  constructor(client: WebSocketClient) {
+    super(client, 'user', User);
+  }
 
   /**
-   * Creates a new [PermissionOverwrite] instance
-   * @param data The data from Discord
+   * Fetches a channel from Discord and caches it if we can
+   * @param id The channel's ID
    */
-  constructor(data: APIOverwrite) {
-    super(data.id);
-
-    this.patch(data);
-  }
-
-  patch(data: APIOverwrite) {
-    super.patch(data);
-
-    this.permissions = new Permission(data.allow, data.deny);
-    this.type = data.type === OverwriteType.Role ? 'role' : 'member';
-  }
-
-  toString() {
-    return `[wumpcord.PermissionOverwrite<T: ${this.type}>]`;
+  fetch(id: string) {
+    return this.client.rest.dispatch<APIUser>({
+      endpoint: `/users/${id}`,
+      method: 'GET'
+    }).then(data => this.add(new User(this.client, data)));
   }
 }

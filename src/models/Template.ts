@@ -20,35 +20,10 @@
  * SOFTWARE.
  */
 
-import { APIOverwrite, OverwriteType } from 'discord-api-types';
-import Permission from '../util/Permissions';
-import Base from './Base';
+import type { APITemplate } from 'discord-api-types';
+import type WebSocketClient from '../gateway/WebSocketClient';
 
-export class PermissionOverwrite extends Base<APIOverwrite> {
-  /** List of permissions available for this [PermissionOverwrite] */
-  public permissions!: Permission;
-
-  /** The overwrite type */
-  public type!: 'role' | 'member';
-
-  /**
-   * Creates a new [PermissionOverwrite] instance
-   * @param data The data from Discord
-   */
-  constructor(data: APIOverwrite) {
-    super(data.id);
-
-    this.patch(data);
-  }
-
-  patch(data: APIOverwrite) {
-    super.patch(data);
-
-    this.permissions = new Permission(data.allow, data.deny);
-    this.type = data.type === OverwriteType.Role ? 'role' : 'member';
-  }
-
-  toString() {
-    return `[wumpcord.PermissionOverwrite<T: ${this.type}>]`;
-  }
+export class Template {
+  /** The description of the template */
+  public description!: string;
 }

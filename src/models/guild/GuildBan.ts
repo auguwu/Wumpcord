@@ -62,6 +62,6 @@ export default class GuildBan {
   }
 
   toString() {
-    return `[wumpcord.GuildBan "${this.user.tag} | ${this.reason ?? '<nothing>'}"]`;
+    return `[wumpcord.GuildBan<U: ${this.user.tag}${this.reason ? `, R: ${this.reason}` : ''}>]`;
   }
 }

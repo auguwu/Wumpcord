@@ -30,6 +30,7 @@ import EventBus from '../util/EventBus';
 import Util from '../util';
 
 import ChannelManager from '../managers/ChannelManager';
+import UserManager from '../managers/UserManager';
 
 //import type * as events from '../events';
 
@@ -87,7 +88,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
   public token!: string;
 
   /** The user cache if available, this will be a empty Collection if not enabled. */
-  public users: any;
+  public users: UserManager;
 
   /** The rest client for creating requests to Discord's REST API. */
   public rest: RestClient;
@@ -134,7 +135,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
     this.typings = new Collection();
     this.shards = new ShardManager(this);
     this.guilds = null;
-    this.users = null;
+    this.users = new UserManager(this);
     this.rest = new RestClient(this);
     this.user = null;
 

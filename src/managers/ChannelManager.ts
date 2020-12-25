@@ -41,6 +41,6 @@ export default class ChannelManager extends BaseManager<Channel> {
     return this.client.rest.dispatch({
       endpoint: `/channels/${id}`,
       method: 'GET'
-    }).then(data => Channel.from(this.client, data));
+    }).then(data => this.add(Channel.from(this.client, data)));
   }
 }
