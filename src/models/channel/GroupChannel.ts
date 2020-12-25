@@ -20,16 +20,22 @@
  * SOFTWARE.
  */
 
-import type { APIChannel } from 'discord-api-types/v8';
+import type { APIChannel, APIMessage, RESTPostAPIChannelMessageJSONBody } from 'discord-api-types/v8';
+import type { MessageContent, MessageContentOptions } from '../../types';
 import type WebSocketClient from '../../gateway/WebSocketClient';
 import { Channel } from '../Channel';
+import { User } from '../User';
+import Util from '../../util';
 
 export class GroupChannel extends Channel {
+  /** The last pinned message's timestamp */
+  public lastPinTimestamp!: string | null;
+
   /** Represents the last message ID, useful for fetching messages in this channel */
-  public lastMessageID!: string;
+  public lastMessageID!: string | null;
 
   /** List of recipients that are in this group DM */
-  public recipients!: any[];
+  public recipients!: User[];
 
   /** The owner's ID, who-ever created the group DM */
   public ownerID!: string;
@@ -58,11 +64,42 @@ export class GroupChannel extends Channel {
   patch(data: APIChannel) {
     super.patch(data);
 
-    this.lastMessageID = data.last_message_id!;
-    this.recipients = data.recipients!;
-    this.ownerID = data.owner_id!;
-    this.name = data.name!;
-    this.icon = data.icon!;
+    if (data.last_message_id !== undefined)
+      this.lastMessageID = data.last_message_id;
+
+    if (data.last_pin_timestamp !== undefined)
+      this.lastPinTimestamp = data.last_pin_timestamp;
+
+    if (data.owner_id !== undefined)
+      this.ownerID = data.owner_id;
+
+    if (data.name !== undefined)
+      this.name = data.name;
+
+    if (data.icon !== undefined)
+      this.icon = data.icon;
+
+    this.recipients = data.recipients!.map(data => this.client.users.add(new User(this.client, data)));
+  }
+
+  /**
+   * Sends a message in this DM channel
+   * @param content The message content
+   * @param options Any additional options to send
+   */
+  send(content: MessageContent, options?: MessageContentOptions) {
+    const data = Util.formatMessage(this.client, content, options);
+    const file = data.file;
+
+    // delete it so it doesn't bleed when sending
+    delete data.file;
+
+    return this.client.rest.dispatch<APIMessage, RESTPostAPIChannelMessageJSONBody>({
+      endpoint: `/channels/${this.id}/messages`,
+      method: 'POST',
+      file,
+      data
+    }).then(data => new Message(this.client, data));
   }
 
   toString() {
