@@ -20,4 +20,35 @@
  * SOFTWARE.
  */
 
-export default class SelfUser {}
+import type WebSocketClient from '../gateway/WebSocketClient';
+import type { APIUser } from 'discord-api-types';
+import { User } from './User';
+
+export default class SelfUser extends User {
+  /** If the user has MFA enabled (why do bots have this) */
+  public mfaEnabled!: boolean;
+
+  /** If the bot is verified or not */
+  public verified!: boolean;
+
+  /**
+   * Creates a new [SelfUser] instance
+   * @param client The [WebSocketClient] attached
+   * @param data The data supplied from Discord
+   */
+  constructor(client: WebSocketClient, data: APIUser) {
+    super(client, data);
+
+    this.patch(data);
+  }
+
+  patch(data: APIUser) {
+    super.patch(data);
+
+    if (data.mfa_enabled !== undefined)
+      this.mfaEnabled = data.mfa_enabled;
+
+    if (data.verified !== undefined)
+      this.verified = data.verified;
+  }
+}
