@@ -25,6 +25,10 @@ export * from './presence';
 export * from './message';
 export * from './util';
 
+export { default as GuildInvite } from './guild/GuildInvite';
+export { default as GuildMember } from './guild/GuildMember';
+export { default as GuildEmoji } from './guild/GuildEmoji';
+export { default as GuildRole } from './guild/GuildRole';
 export * from './PermissionOverwrite';
 export * from './VoiceRegion';
 export * from './VoiceState';

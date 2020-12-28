@@ -20,15 +20,90 @@
  * SOFTWARE.
  */
 
-import type { GatewayPresenceUpdate } from 'discord-api-types';
+import { GatewayPresenceUpdate, PresenceUpdateStatus } from 'discord-api-types';
+import type WebSocketClient from '../../gateway/WebSocketClient';
+import { User } from '../User';
+import Activity from './Activity';
 import Base from '../Base';
+import Util from '../../util';
 
-interface ClientStatus {
-  desktop: boolean;
-  mobile: boolean;
-  web: boolean;
-}
+type ClientStatus = {
+  [P in 'desktop' | 'mobile' | 'web']: PresenceUpdateStatus;
+};
 
 export default class Presence extends Base<GatewayPresenceUpdate> {
+  /** The client status available for this [Presence] */
+  public clientStatus!: ClientStatus;
 
+  /** List of activities this user beholds */
+  public activities!: Activity[];
+
+  /** The current status (online, idle, dnd, offline) */
+  public status!: 'offline' | 'online' | 'idle' | 'dnd';
+
+  /** The [WebSocketClient] attached to this [Presence] */
+  private client: WebSocketClient;
+
+  /** The guild that the presence was emitted in */
+  public guildID!: string;
+
+  /** The user that holds this [Presence] */
+  public user!: User;
+
+  /**
+   * Creates a new [Presence] instance
+   * @param client The [WebSocketClient] attached
+   * @param data The data supplied from Discord
+   */
+  constructor(client: WebSocketClient, data: GatewayPresenceUpdate) {
+    super(data.user.id);
+
+    this.client = client;
+    this.patch(data);
+  }
+
+  patch(data: GatewayPresenceUpdate) {
+    if (data.client_status !== undefined)
+      this.clientStatus = {
+        desktop: Util.get(data.client_status, 'desktop', PresenceUpdateStatus.Offline)!,
+        mobile: Util.get(data.client_status, 'mobile', PresenceUpdateStatus.Offline)!,
+        web: Util.get(data.client_status, 'web', PresenceUpdateStatus.Offline)!
+      };
+
+    if (data.guild_id !== undefined)
+      this.guildID = data.guild_id;
+
+    if (data.status !== undefined)
+      this.status = data.status as any;
+
+    if (data.user !== undefined)
+      this.user = this.client.users.add(new User(this.client, <any> data.user));
+
+    if (data.activities !== undefined) {
+      for (let i = 0; i < data.activities.length; i++) {
+        const activity = data.activities[i];
+        this.activities.push(new Activity(activity));
+      }
+    }
+  }
+
+  /** Returns the guild that this [Presence] was emitted in, if any. */
+  get guild() {
+    return this.client.guilds.get(this.guildID);
+  }
+
+  toString() {
+    const current = this.activities.length ? this.activities[0] : null;
+
+    // this looks nasty help
+    const suffix = this.guild && current
+      ? `, G: ${this.guild.name}, C: ${current.name}`
+      : this.guild !== null && current === null
+        ? `, G: ${this.guild.name}`
+        : this.guild === null && current !== null
+          ? `, C: ${current.name}`
+          : '';
+
+    return `[wumpcord.GuildPresence<U: ${this.user.tag}${suffix}]`;
+  }
 }
