@@ -20,11 +20,4 @@
  * SOFTWARE.
  */
 
-import type WebSocketClient from '../../gateway/WebSocketClient';
-import type { APIEmoji } from 'discord-api-types';
-import Base from '../Base';
 
-export default class GuildEmoji extends Base<APIEmoji> {
-  public requireColons!: boolean;
-  public managed!: boolean;
-}
