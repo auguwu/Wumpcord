@@ -21,25 +21,19 @@
  */
 
 import type WebSocketClient from '../gateway/WebSocketClient';
-import type { APIRole } from 'discord-api-types';
-import DiscordRestError from '../errors/DiscordRestError';
+import type { APIEmoji } from 'discord-api-types';
+import { GuildEmoji } from '../models';
 import BaseManager from './BaseManager';
-import GuildRole from '../models/guild/GuildRole';
 
-export default class GuildRoleManager extends BaseManager<GuildRole> {
+export default class GuildEmojiManager extends BaseManager<GuildEmoji> {
   constructor(client: WebSocketClient) {
-    super(client, 'member:role', GuildRole);
+    super(client, 'guild:emoji', GuildEmoji);
   }
 
-  fetch(guildID: string, roleID: string) {
-    return this.client.rest.dispatch<APIRole[]>({
-      endpoint: `/guilds/${guildID}/roles`,
+  fetch(guildID: string, emojiID: string) {
+    return this.client.rest.dispatch<APIEmoji>({
+      endpoint: `/guilds/${guildID}/emojis/${emojiID}`,
       method: 'GET'
-    }).then(data => {
-      const role = data.find(role => role.id === roleID);
-      if (!role) throw new DiscordRestError(404, `Role "${roleID}" was not found in guild "${guildID}"`);
-
-      return this.add(new GuildRole(this.client, { guild_id: guildID, ...role })); // eslint-disable-line camelcase
-    });
+    }).then(data => this.add(new GuildEmoji(this.client, { guild_id: guildID, ...data }))); // eslint-disable-line camelcase
   }
 }

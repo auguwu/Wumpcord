@@ -22,9 +22,63 @@
 
 import type WebSocketClient from '../../gateway/WebSocketClient';
 import type { APIEmoji } from 'discord-api-types';
+import { User } from '../User';
 import Base from '../Base';
 
-export default class GuildEmoji extends Base<APIEmoji> {
+interface DiscordEmoji extends APIEmoji {
+  guild_id: string; // eslint-disable-line camelcase
+}
+
+export default class GuildEmoji extends Base<DiscordEmoji> {
   public requireColons!: boolean;
+  public available!: boolean;
+  public animated!: boolean;
   public managed!: boolean;
+  public guildID!: string;
+  private client: WebSocketClient;
+  public name!: string | null;
+  public user!: User;
+
+  constructor(client: WebSocketClient, data: DiscordEmoji) {
+    super(data.id!);
+
+    this.client = client;
+    this.patch(data);
+  }
+
+  patch(data: DiscordEmoji) {
+    if (data.require_colons !== undefined)
+      this.requireColons = data.require_colons;
+
+    if (data.available !== undefined)
+      this.available = data.available;
+
+    if (data.animated !== undefined)
+      this.animated = data.animated;
+
+    if (data.managed !== undefined)
+      this.managed = data.managed;
+
+    if (data.guild_id !== undefined)
+      this.guildID = data.guild_id;
+
+    if (data.user !== undefined)
+      this.user = this.client.users.add(new User(this.client, data.user));
+
+    if (data.name !== undefined)
+      this.name = data.name;
+  }
+
+  get mention() {
+    const prefix = this.animated ? 'a:' : ':';
+    return `<${prefix}:${this.name}:${this.id}>`;
+  }
+
+  get guild() {
+    return this.client.guilds.get(this.guildID);
+  }
+
+  toString() {
+    return `[wumpcord.GuildEmoji<E: ${this.mention}${this.guild ? `, G: ${this.guild.name}` : ''}>]`;
+  }
 }
