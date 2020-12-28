@@ -20,7 +20,13 @@
  * SOFTWARE.
  */
 
-import type { GatewayActivity, GatewayActivityTimestamps, GatewayActivityParty, GatewayActivityEmoji, ActivityType } from 'discord-api-types';
+import type {
+  GatewayActivity,
+  GatewayActivityTimestamps,
+  GatewayActivityParty,
+  GatewayActivityEmoji,
+  ActivityType
+} from 'discord-api-types';
 
 export default class Activity {
   /** The timestamps available for this [Activity] */
