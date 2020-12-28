@@ -22,7 +22,7 @@
 
 import type WebSocketClient from '../../gateway/WebSocketClient';
 import type { APIUser } from 'discord-api-types/v8';
-import User from '../User';
+import { User } from '../User';
 
 interface GuildBanProperties {
   reason?: string;
@@ -55,7 +55,7 @@ export default class GuildBan {
 
   private patch(data: GuildBanProperties) {
     this.userID = data.user.id;
-    this.user = this.client.users.get(data.user.id) || new User(this.client, data.user);
+    this.user = this.client.users.add(new User(this.client, data.user));
 
     if (data.reason !== undefined)
       this.reason = data.reason;

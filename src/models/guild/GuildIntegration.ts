@@ -22,8 +22,8 @@
 
 import type { APIGuildIntegration } from 'discord-api-types/v8';
 import type WebSocketClient from '../../gateway/WebSocketClient';
+import { User } from '../User';
 import Base from '../Base';
-import User from '../User';
 
 interface GuildIntegrationAccount {
   name: string;
