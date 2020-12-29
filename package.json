@@ -24,7 +24,7 @@
     "lint": "eslint src --ext .js --fix"
   },
   "dependencies": {
-    "@augu/immutable": "0.6.0",
+    "@augu/immutable": "0.6.1",
     "@augu/orchid": "1.8.1",
     "discord-api-types": "0.10.0",
     "ws": "7.4.1"
