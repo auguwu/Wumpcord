@@ -20,13 +20,29 @@
  * SOFTWARE.
  */
 
-const generate = require('./util/generate');
+const { join } = require('path');
+const typedoc = require('typedoc');
 
-const log = (message) => process.stdout.write(`[docs] ${message}\n`);
-async function main() {
-  log('generating sources...');
+const log = (message) => process.stdout.write(`[docs:generate] ${message}\n`);
 
-  await generate();
+async function generate() {
+  log('initalising typedoc...');
+  const app = new typedoc.Application();
+  app.options.addReader(new typedoc.TSConfigReader());
+  app.options.addReader(new typedoc.TypeDocReader());
+
+  app.bootstrap({
+    entryPoints: ['test/**/*.ts']
+  });
+
+  log('bootstrapped project, now getting reflections');
+  const project = app.convert();
+  if (project) {
+    log('received reflections, now outputing it to scripts/generated/docs.json');
+
+    const outputDir = join(__dirname, '..', 'generated');
+    await app.generateJson(project, join(outputDir, 'docs.json'));
+  }
 }
 
-main();
+module.exports = generate;
