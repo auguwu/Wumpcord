@@ -29,7 +29,6 @@ import type Client from './WebSocketClient';
 import WebSocket from 'ws';
 import EventBus from '../util/EventBus';
 import Util from '../util';
-import { timeStamp } from 'console';
 
 let Erlpack: typeof import('erlpack');
 try {

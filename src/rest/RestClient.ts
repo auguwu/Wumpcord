@@ -27,7 +27,7 @@ import RatelimitBucket from './RatelimitBucket';
 import * as Constants from '../Constants';
 import type Client from '../gateway/WebSocketClient';
 import * as types from '../types';
-import { Queue } from '@augu/immutable';
+import { Queue } from '@augu/collections';
 import FormData from 'form-data';
 import Util from '../util';
 
@@ -116,7 +116,8 @@ export default class RestClient {
    * If the rest client is busy or not
    */
   get busy() {
-    return this.requests.size() !== 0;
+    // @ts-ignore
+    return this.requests.items.length !== 0;
   }
 
   /**

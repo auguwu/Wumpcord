@@ -21,7 +21,7 @@
  */
 
 import { Cachable, CacheTypes } from '../Constants';
-import { Collection } from '@augu/immutable';
+import { Collection } from '@augu/collections';
 import type Client from '../gateway/WebSocketClient';
 import type Base from '../models/Base';
 
@@ -39,7 +39,7 @@ export default class BaseManager<T extends Base<{}>> {
   public client: Client;
 
   /** The cache */
-  public cache: Collection<T>;
+  public cache: Collection<string, T>;
 
   /**
    * Represents a manager for handling entity cache

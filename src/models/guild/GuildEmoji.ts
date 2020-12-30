@@ -26,7 +26,7 @@ import { User } from '../User';
 import Base from '../Base';
 
 interface DiscordEmoji extends APIEmoji {
-  guild_id: string; // eslint-disable-line camelcase
+  guild_id?: string; // eslint-disable-line camelcase
 }
 
 export default class GuildEmoji extends Base<DiscordEmoji> {

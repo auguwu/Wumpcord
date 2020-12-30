@@ -23,7 +23,7 @@
 import type * as discord from 'discord-api-types/v8';
 import type * as types from '../types';
 import * as Constants from '../Constants';
-import { Collection } from '@augu/immutable';
+import { Collection } from '@augu/collections';
 import ShardManager from './ShardingManager';
 import RestClient from '../rest/RestClient';
 import EventBus from '../util/EventBus';
@@ -73,7 +73,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
   public options: types.ClientOptions;
 
   /** The user typing cache if available, this will be a empty Collection if not enabled. */
-  public typings: Collection<any>;
+  public typings: Collection<string, any>;
 
   /** The guild cache available, this will be a empty Collection if not enabled. */
   public guilds: any;

@@ -29,7 +29,7 @@
     "test": "node scripts/test.js"
   },
   "dependencies": {
-    "@augu/immutable": "0.6.0",
+    "@augu/collections": "1.0.1",
     "@augu/orchid": "1.8.1",
     "erlpack": "0.1.3",
     "form-data": "3.0.0",

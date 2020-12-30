@@ -21,6 +21,7 @@
  */
 
 import type { APIGuildPreview, GuildFeature } from 'discord-api-types';
+import type WebSocketClient from '../../gateway/WebSocketClient';
 import { CDNUrl } from '../../Constants';
 import GuildEmoji from './GuildEmoji';
 import Base from '../Base';
@@ -43,6 +44,7 @@ export default class GuildPreview extends Base<APIGuildPreview> {
 
   /** The splash UUID, it's `null` if not populated */
   public splash!: string | null;
+  private client: WebSocketClient;
 
   /** List of guild emojis available when displayed */
   public emojis!: GuildEmoji[];
@@ -57,9 +59,10 @@ export default class GuildPreview extends Base<APIGuildPreview> {
    * Creates a new [GuildPreview] instance
    * @param data The data from Discord
    */
-  constructor(data: APIGuildPreview) {
+  constructor(client: WebSocketClient, data: APIGuildPreview) {
     super(data.id);
 
+    this.client = client;
     this.patch(data);
   }
 
@@ -70,7 +73,7 @@ export default class GuildPreview extends Base<APIGuildPreview> {
     this.approximateMemberCount = data.approximate_member_count;
     this.discoverySplash = data.discovery_splash;
     this.features = data.features;
-    this.emojis = data.emojis.map(emote => new GuildEmoji(emote));
+    this.emojis = data.emojis.map(emote => new GuildEmoji(this.client, emote));
     this.icon = data.icon;
     this.name = data.name;
   }

@@ -20,15 +20,15 @@
  * SOFTWARE.
  */
 
-import type PermissionOverwrite from '../PermissionOverwrite';
 import type WebSocketClient from '../../gateway/WebSocketClient';
+import { PermissionOverwrite } from '../PermissionOverwrite';
 import type { APIChannel } from 'discord-api-types/v8';
+import { Collection } from '@augu/collections';
 import { Channel } from '../Channel';
-import { Collection } from '@augu/immutable';
 
 export default class GuildChannel extends Channel {
   /** List of permission overwrites for this [GuildChannel] */
-  public permissionOverwrites!: Collection<PermissionOverwrite>;
+  public permissionOverwrites!: Collection<string, PermissionOverwrite>;
 
   /** The parent category's ID, this is `null` if [GuildChannel] is a [CategoryChannel] or doesn't have a parent */
   public parentID!: string | null;

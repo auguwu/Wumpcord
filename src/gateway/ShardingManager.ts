@@ -22,10 +22,10 @@
 
 import type WebSocketClient from './WebSocketClient';
 import type * as types from '../types';
-import { Collection } from '@augu/immutable';
+import { Collection } from '@augu/collections';
 import WebSocketShard from './WebSocketShard';
 
-export default class ShardManager extends Collection<WebSocketShard> {
+export default class ShardManager extends Collection<number, WebSocketShard> {
   /** Reference for creating a [WebSocketShard] */
   private client: WebSocketClient;
 
