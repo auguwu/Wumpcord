@@ -4,7 +4,7 @@
 ## Features
 - No over-head with memory: Tired of caching useless things? Wumpcord doesn't cache what you don't need since it's opt-in.
 - Command Handling: Tired of using a command handler to add extra dependencies? Wumpcord has that built-in, similar API to discord.js-commando.
-- Clustering Support: Tired of adding [clustering](https://nodejs.org/api/cluster.html) to your bot? Wumpcord has clustering support built-in.
+- Clustering Support: Tired of build your own [clustering](https://nodejs.org/api/cluster.html) library to your bot? Wumpcord has clustering support built-in with a modular system to plug-in-play methods with IPC and Redis Pub/Sub support.
 - Extra Utilities: Wumpcord bundles in with extra utilities like a Reaction Handler and a Message Collector.
 
 ## Need Support?
