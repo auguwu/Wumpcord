@@ -25,6 +25,7 @@
 import type { AllowedMentions, MessageContent, MessageContentOptions, MessageFile } from '../types';
 import type WebSocketClient from '../gateway/WebSocketClient';
 import * as discord from 'discord-api-types/v8';
+import { Readable } from 'stream';
 
 /**
  * All utilities available to Wumpcord
@@ -185,5 +186,23 @@ export default class Util {
     if (Array.isArray(mentions.users)) data.users = mentions.users;
 
     return data;
+  }
+
+  static isReadableStream(stream: unknown): stream is Readable {
+    return stream instanceof Readable && typeof stream.read === 'function';
+  }
+
+  static readableToBuffer(stream: Readable) {
+    return new Promise<Buffer>((resolve, reject) => {
+      const buffers: Buffer[] = [];
+
+      stream.on('error', reject);
+      stream.on('data', buffer => buffers.push(buffer));
+      stream.once('end', () => resolve(Buffer.concat(buffers)));
+    });
+  }
+
+  static isObject(value: unknown): value is object {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
   }
 }

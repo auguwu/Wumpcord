@@ -20,4 +20,4 @@
  * SOFTWARE.
  */
 
-export default class VoiceState {}
+export class VoiceState {}

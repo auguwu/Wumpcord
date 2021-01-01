@@ -20,4 +20,6 @@
  * SOFTWARE.
  */
 
-export default class EmbedBuilder {}
+export { default as ReactionCollector } from './ReactionCollector';
+export { default as MessageCollector } from './MessageCollector';
+export { default as EmbedBuilder } from './EmbedBuilder';

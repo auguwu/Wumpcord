@@ -22,8 +22,73 @@
 
 import type { APITemplate } from 'discord-api-types';
 import type WebSocketClient from '../gateway/WebSocketClient';
+import { Guild } from './Guild';
 
 export class Template {
-  /** The description of the template */
-  public description!: string;
+  public sourceGuildID!: string;
+  public description!: string | null;
+  public sourceGuild!: Guild;
+  public usageCount!: number;
+  public createdAt!: Date;
+  public updatedAt!: Date;
+  public creatorID!: string;
+  public unsynced!: boolean;
+  private client: WebSocketClient;
+  public code!: string;
+  public name!: string;
+
+  constructor(client: WebSocketClient, data: APITemplate) {
+    this.client = client;
+    this.patch(data);
+  }
+
+  private patch(data: APITemplate) {
+    if (data.serialized_source_guild !== undefined)
+      this.sourceGuild = this.client.guilds.add(new Guild(this.client, data.serialized_source_guild));
+
+    if (data.source_guild_id !== undefined)
+      this.sourceGuildID = data.source_guild_id;
+
+    if (data.updated_at !== undefined)
+      this.updatedAt = new Date(data.updated_at);
+
+    if (data.created_at !== undefined)
+      this.createdAt = new Date(data.created_at);
+
+    if (data.description !== undefined)
+      this.description = data.description;
+
+    if (data.creator_id !== undefined)
+      this.creatorID = data.creator_id;
+
+    if (data.usage_count !== undefined)
+      this.usageCount = data.usage_count;
+
+    if (data.is_dirty !== undefined)
+      this.unsynced = Boolean(data.is_dirty);
+
+    if (data.code !== undefined)
+      this.code = data.code;
+
+    if (data.name !== undefined)
+      this.name = data.name;
+  }
+
+  fetch() {
+    return this.client.rest.dispatch<APITemplate>({
+      endpoint: `/guilds/templates/${this.code}`,
+      method: 'GET'
+    }).then(data => {
+      this.patch(data);
+      return this;
+    });
+  }
+
+  get url() {
+    return `https://discord.new/${this.code}`;
+  }
+
+  toString() {
+    return `[wumpcord.Template<${this.url}>]`;
+  }
 }

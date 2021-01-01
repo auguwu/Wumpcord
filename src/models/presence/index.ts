@@ -20,4 +20,5 @@
  * SOFTWARE.
  */
 
-export default class EmbedBuilder {}
+export { default as Presence } from './Presence';
+export { default as Activity } from './Activity';

@@ -24,7 +24,7 @@ import type WebSocketClient from '../gateway/WebSocketClient';
 import type { APIUser } from 'discord-api-types';
 import { User } from './User';
 
-export default class SelfUser extends User {
+export class SelfUser extends User {
   /** If the user has MFA enabled (why do bots have this) */
   public mfaEnabled!: boolean;
 
