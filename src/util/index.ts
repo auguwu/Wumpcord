@@ -24,7 +24,7 @@
 
 import type { AllowedMentions, MessageContent, MessageContentOptions, MessageFile } from '../types';
 import type WebSocketClient from '../gateway/WebSocketClient';
-import * as discord from 'discord-api-types/v8';
+import * as discord from 'discord-api-types';
 import { Readable } from 'stream';
 
 /**
@@ -204,5 +204,15 @@ export default class Util {
 
   static isObject(value: unknown): value is object {
     return typeof value === 'object' && value !== null && !Array.isArray(value);
+  }
+
+  static hasNaclInstalled() {
+    try {
+      require('tweetnacl');
+
+      return true;
+    } catch(ex) {
+      return false;
+    }
   }
 }
