@@ -20,3 +20,20 @@
  * SOFTWARE.
  */
 
+import { APIMessage } from 'discord-api-types';
+import type WebSocketClient from '../gateway/WebSocketClient';
+import { Message } from '../models';
+import BaseManager from './BaseManager';
+
+export default class ChannelMessagesManager extends BaseManager<Message> {
+  constructor(client: WebSocketClient) {
+    super(client, 'message', Message);
+  }
+
+  fetch(channelID: string, messageID: string) {
+    return this.client.rest.dispatch<APIMessage>({
+      endpoint: `/channels/${channelID}/messages/${messageID}`,
+      method: 'GET'
+    }).then((data) => this.add(new Message(this.client, data)));
+  }
+}

@@ -20,3 +20,20 @@
  * SOFTWARE.
  */
 
+import type { APIGuildMember } from 'discord-api-types';
+import type WebSocketClient from '../gateway/WebSocketClient';
+import { GuildMember } from '../models';
+import BaseManager from './BaseManager';
+
+export default class GuildMemberManager extends BaseManager<GuildMember> {
+  constructor(client: WebSocketClient) {
+    super(client, 'member', GuildMember);
+  }
+
+  fetch(guildID: string, memberID: string) {
+    return this.client.rest.dispatch<APIGuildMember>({
+      endpoint: `/guilds/${guildID}/members/${memberID}`,
+      method: 'GET'
+    }).then((data) => this.add(new GuildMember(this.client, data)));
+  }
+}

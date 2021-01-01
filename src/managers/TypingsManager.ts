@@ -20,3 +20,15 @@
  * SOFTWARE.
  */
 
+import type WebSocketClient from '../gateway/WebSocketClient';
+import type { UserTyping } from '../types';
+import BaseManager from './BaseManager';
+
+// @ts-ignore You can use it without a `Base` class, but yea...
+export default class TypingsManager extends BaseManager<UserTyping> {
+  constructor(client: WebSocketClient) {
+    super(client, 'user:typings', null);
+  }
+
+  // User Typings can't be fetched, so let's not override it
+}

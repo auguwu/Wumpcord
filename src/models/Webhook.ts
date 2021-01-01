@@ -33,6 +33,7 @@ interface ModifyWebhookOptions {
   channelID?: string;
   image?: Buffer | Readable;
   name?: string;
+  auth?: boolean;
 }
 
 interface SendWebhookMessageOptions extends MessageContentOptions {
@@ -110,6 +111,12 @@ export default class Webhook extends Base<APIWebhook> {
     if (options.channelID && typeof options.channelID !== undefined)
       throw new TypeError(`[options.channelID] requires a \`string\` but received ${typeof options.channelID}`);
 
+    if (options.auth && typeof options.auth !== 'boolean')
+      throw new TypeError(`[options.auth] requires a \`boolean\` value, but received ${typeof options.auth}`);
+
+    if (options.auth === true && options.channelID !== undefined)
+      throw new TypeError('[options.auth | options.channelID] Can\'t use `channelID` and `auth` at the same time. (https://discord.com/developers/docs/resources/webhook#modify-webhook-with-token)');
+
     let image: Buffer | undefined = undefined;
     if (options.image !== undefined) {
       if (Util.isReadableStream(options.image)) image = await Util.readableToBuffer(options.image);
@@ -118,7 +125,7 @@ export default class Webhook extends Base<APIWebhook> {
 
     let file: MessageFile | undefined = image !== undefined ? { file: image } : undefined;
     return this.client.rest.dispatch<APIWebhook, RESTPatchAPIWebhookJSONBody>({
-      endpoint: `/webhooks/${this.id}`,
+      endpoint: `/webhooks/${this.id}${options.auth ? `/${this.token}` : ''}`,
       method: 'GET',
       file,
       data: {

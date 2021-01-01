@@ -55,11 +55,14 @@ export type GatewayIntent = 'guilds' | 'guildMembers' | 'guildBans' | 'guildEmoj
  * List of cachable objects that are "heavy"
  */
 export type Cachable = 'guild' | 'user' | 'channel' | 'presence' | 'message' | 'voice:connection'
-  | 'member' | 'member:role' | 'all' | 'none' | 'guild:emoji' | 'guild:voices';
+  | 'member' | 'member:role' | 'all' | 'none' | 'guild:emoji' | 'guild:voices' | 'user:typings';
 
 export const CacheTypes: Cachable[] = [
   'voice:connection',
   'member:role',
+  'guild:voices',
+  'guild:emoji',
+  'user:typings',
   'presence',
   'message',
   'channel',

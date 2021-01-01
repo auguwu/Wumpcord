@@ -20,36 +20,23 @@
  * SOFTWARE.
  */
 
-import type { APITeam } from 'discord-api-types';
-import type WebSocketClient from '../../gateway/WebSocketClient';
-import Member from './TeamMember';
-import Base from '../Base';
+import type { APIAttachment } from 'discord-api-types';
+import Base from './Base';
 
-export default class Team extends Base<APITeam> {
-  public members!: Member[];
-  public ownerID!: string;
-  private client: WebSocketClient;
-  public icon!: string | null;
+export class Attachment extends Base<APIAttachment> {
+  public proxyUrl: string;
+  public height: number | null;
+  public width: number | null;
+  public size: number;
+  public url: string;
 
-  constructor(client: WebSocketClient, data: APITeam) {
+  constructor(data: APIAttachment) {
     super(data.id);
 
-    this.client = client;
-    this.patch(data);
-  }
-
-  patch(data: APITeam) {
-    if (data.owner_user_id !== undefined)
-      this.ownerID = data.owner_user_id;
-
-    if (data.members !== undefined)
-      this.members = data.members.map(member => new Member(this.client, member));
-
-    if (data.icon !== undefined)
-      this.icon = data.icon;
-  }
-
-  toString() {
-    return `[wumpcord.Team<ID: ${this.id}>]`;
+    this.proxyUrl = data.proxy_url;
+    this.height = data.height;
+    this.width = data.width;
+    this.size = data.size;
+    this.url = data.url;
   }
 }
