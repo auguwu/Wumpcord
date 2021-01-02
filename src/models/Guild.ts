@@ -21,12 +21,13 @@
  */
 /* eslint-disable camelcase */
 
+import type { AnyChannel, AnyGuildChannel } from '../types';
+import { GuildFeature, OPCodes } from '../Constants';
 import GuildVoiceStateManager from '../managers/GuildVoiceStateManager';
 import type WebSocketClient from '../gateway/WebSocketClient';
 import GuildPresenceManager from '../managers/GuildPresencesManager';
 import GuildMemberManager from '../managers/GuildMemberManager';
 import GuildEmojiManager from '../managers/GuildEmojiManager';
-import { GuildFeature, OPCodes } from '../Constants';
 import GuildRoleManager from '../managers/GuildRoleManager';
 import GuildIntegration from './guild/GuildIntegration';
 import { Collection } from '@augu/collections';
@@ -51,6 +52,8 @@ import {
   RESTGetAPIGuildChannelsResult,
   RESTGetAPIGuildPreviewResult,
   RESTGetAPIGuildVoiceRegionsResult,
+  RESTPatchAPIGuildChannelPositionsJSONBody,
+  RESTPatchAPIGuildJSONBody,
   RESTPostAPIGuildChannelJSONBody,
   RESTPutAPIGuildBanJSONBody
 } from 'discord-api-types';
@@ -540,14 +543,119 @@ export class Guild extends Base<IGuild> {
     }).then(data => data !== null ? new GuildPreview(this.client, data) : null);
   }
 
-  getChannels() {
+  getChannels<T extends AnyChannel = AnyChannel>() {
     return this.client.rest.dispatch<RESTGetAPIGuildChannelsResult>({
       endpoint: `/guilds/${this.id}/channels`,
       method: 'GET'
-    }).then(channels => channels.map(data => Channel.from(this.client, data)));
+    }).then(channels => channels.map(data => Channel.from(this.client, data)) as unknown as T[]);
   }
 
   getGuildMember(memberID: string) {
     return this.members.fetch(this.id, memberID);
+  }
+
+  async modify(opts: ModifyGuildOptions) {
+    if (!opts) throw new TypeError('Missing options object, refer to the documentation: https://docs.augu.dev/Wumpcord/Types/EditGuildOptions');
+    if (!Object.keys(opts).length) throw new TypeError('Must include something to update');
+
+    // Throw an error if this is a WIP
+    if (opts.icon) throw new Error('This option isn\'t available in this context');
+    const regions = await this.getRegionIds();
+
+    // now it's time for checking the object for incoinsisent data
+    // this is where the part I want to kill myself but hey
+    // I like pain so like \o/
+    if (opts.name && typeof opts.name !== 'string') throw new TypeError(`Expected \`string\`, gotten ${typeof opts.name}`);
+    if (opts.ownerID && typeof opts.ownerID !== 'string') throw new TypeError(`Expected \`string\`, but gotten ${typeof opts.ownerID}`);
+    if (opts.afkChannelID && typeof opts.afkChannelID !== 'string') throw new TypeError(`Expected \`string\`, but gotten ${typeof opts.afkChannelID}`);
+    if (opts.systemChannelID && typeof opts.systemChannelID !== 'string') throw new TypeError(`Expected \`string\`, but gotten ${typeof opts.systemChannelID}`);
+    if (opts.afkChannelTimeout && (typeof opts.afkChannelTimeout !== 'number' || Number.isNaN(opts.afkChannelID))) throw new TypeError(`Expected \`number\`, but gotten ${typeof opts.afkChannelID}`);
+
+    if (opts.splash) {
+      if (!this.features.includes('INVITE_SPLASH')) throw new TypeError(`Guild "${this.name}" doesn't have the INVITE_SPLASH feature`);
+      throw new TypeError('`splash` in `opts` is not available in this context.');
+    }
+
+    if (opts.banner) {
+      if (!this.features.includes('BANNER')) throw new TypeError(`Guild "${this.name}" doesn't have the BANNER feature`);
+      throw new TypeError('`banner` in `opts` is not available in this context.');
+    }
+
+    if (opts.region) {
+      if (typeof opts.region !== 'string') throw new TypeError(`Expected \`string\`, gotten ${typeof opts.region}`);
+      if (!regions.includes(opts.region)) throw new TypeError(`Region "${opts.region}" wasn't a valid region (${ids.join(', ')})`);
+    }
+
+    if (opts.verificationLevel) {
+      if (typeof opts.verificationLevel !== 'number' || Number.isNaN(opts.verificationLevel)) throw new TypeError(`Expected \`number\`, but gotten ${typeof opts.verificationLevel}`);
+      if (opts.verificationLevel < 0) throw new TypeError('Verification Level must be higher or equal to 5');
+      if (opts.verificationLevel > 5) throw new TypeError('Verification Level must be lower or equal to 5');
+    }
+
+    if (opts.defaultMessageNotifications) {
+      if (typeof opts.defaultMessageNotifications !== 'number' || Number.isNaN(opts.defaultMessageNotifications)) throw new TypeError(`Expected \`number\`, but gotten ${typeof opts.defaultMessageNotifications}`);
+      if (opts.defaultMessageNotifications < 0) throw new TypeError('Default Message Notifications must be higher or equal to 1');
+      if (opts.defaultMessageNotifications > 1) throw new TypeError('Default Message Notifications must be lower or equal to 1');
+    }
+
+    if (opts.explicitContentFilter) {
+      if (typeof opts.explicitContentFilter !== 'number' || Number.isNaN(opts.explicitContentFilter)) throw new TypeError(`Expected \`number\`, but gotten ${typeof opts.explicitContentFilter}`);
+      if (opts.explicitContentFilter < 0) throw new TypeError('Explicit Content Filter must be higher or equal to 2');
+      if (opts.explicitContentFilter > 2) throw new TypeError('Explicit Content Filter must be lower or equal to 2');
+    }
+
+    return this.client.rest.dispatch<APIGuild, RESTPatchAPIGuildJSONBody>({
+      endpoint: `/guilds/${this.id}`,
+      method: 'PATCH',
+      data: {
+        default_message_notifications: opts.defaultMessageNotifications,
+        explicit_content_filter: opts.explicitContentFilter,
+        system_channel_id: opts.systemChannelID,
+        afk_channel_id: opts.afkChannelID,
+        afk_timeout: opts.afkChannelTimeout,
+        owner_id: opts.ownerID,
+        region: opts.region,
+        name: opts.name
+      }
+    }).then(data => {
+      this.patch({ shard_id: this.shardID, ...data });
+      return this;
+    });
+  }
+
+  async modifyChannelPosition(id: string, pos: number) {
+    if (!id || !pos) throw new TypeError('Missing `id` or `pos` properties');
+    if (typeof id !== 'string') throw new TypeError(`Expected \`string\`, gotten ${typeof id}`);
+    if (typeof pos !== 'number' || Number.isNaN(pos)) throw new TypeError(`Expected \`number\`, gotten ${typeof pos}`);
+
+    const channels = await this.getChannels<AnyGuildChannel>();
+    const channel = channels.find(chan => chan.id === id);
+
+    if (!channel || !['text', 'voice', 'category', 'news', 'store'].includes(channel.type)) throw new TypeError(`Channel "${id}" doesn't exist or the type isn't text, voice, category, news, or store`);
+    if (channel.position === pos) return Promise.resolve();
+
+    const min = Math.min(pos, channel.position);
+    const max = Math.max(pos, channel.position);
+    const sorted = channels.filter(chan =>
+      chan.type === channel.type
+        && min <= chan.position
+        && chan.position <= max
+        && chan.id !== id
+    ).sort((chan1, chan2) => chan1.position - chan2.position);
+
+    if (pos > channel.position) {
+      sorted.push(channel);
+    } else {
+      sorted.unshift(channel);
+    }
+
+    return this.client.rest.dispatch<void, RESTPatchAPIGuildChannelPositionsJSONBody>({
+      endpoint: `/guilds/${this.id}/channels`,
+      method: 'PATCH',
+      data: sorted.map((channel, index) => ({
+        position: index + min,
+        id: channel.id
+      }))
+    });
   }
 }
