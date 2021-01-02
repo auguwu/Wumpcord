@@ -34,7 +34,7 @@ export default class UnavailableGuild extends Base<IUnavailableGuild> {
   constructor(data: IUnavailableGuild) {
     super(data.id);
 
-    this.unavailable = data.unavailable;
+    this.unavailable = true;
     this.shardID = data.shard_id;
   }
 }
