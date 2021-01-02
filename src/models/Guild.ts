@@ -22,7 +22,7 @@
 /* eslint-disable camelcase */
 
 import type { AnyChannel, AnyGuildChannel } from '../types';
-import { GuildFeature, OPCodes } from '../Constants';
+import { AuditLogAction, GuildFeature, OPCodes } from '../Constants';
 import GuildVoiceStateManager from '../managers/GuildVoiceStateManager';
 import type WebSocketClient from '../gateway/WebSocketClient';
 import GuildPresenceManager from '../managers/GuildPresencesManager';
@@ -33,11 +33,13 @@ import GuildIntegration from './guild/GuildIntegration';
 import { Collection } from '@augu/collections';
 import ChannelManager from '../managers/ChannelManager';
 import { VoiceState } from './VoiceState';
+import { Presence } from './presence';
 import GuildPreview from './guild/GuildPreview';
 import GuildMember from './guild/GuildMember';
-import { Presence } from './presence';
+import GuildInvite from './guild/GuildInvite';
 import { Readable } from 'stream';
 import { Channel } from './Channel';
+import AuditLogs from './audits/AuditLogs';
 import GuildEmoji from './guild/GuildEmoji';
 import GuildRole from './guild/GuildRole';
 import GuildBan from './guild/GuildBan';
@@ -46,16 +48,33 @@ import Base from './Base';
 import Util from '../util';
 
 import {
+  APIEmoji,
   APIGuild,
   APIGuildWelcomeScreen,
+  APIRole,
   GatewayRequestGuildMembersData,
+  RESTGetAPIAuditLogResult,
+  RESTGetAPIGuildBansResult,
   RESTGetAPIGuildChannelsResult,
+  RESTGetAPIGuildEmojiResult,
+  RESTGetAPIGuildEmojisResult,
+  RESTGetAPIGuildInvitesResult,
   RESTGetAPIGuildPreviewResult,
+  RESTGetAPIGuildRolesResult,
   RESTGetAPIGuildVoiceRegionsResult,
+  RESTGetAPIGuildWebhooksResult,
   RESTPatchAPIGuildChannelPositionsJSONBody,
+  RESTPatchAPIGuildEmojiJSONBody,
   RESTPatchAPIGuildJSONBody,
+  RESTPatchAPIGuildMemberJSONBody,
+  RESTPatchAPIGuildRoleJSONBody,
+  RESTPatchAPIGuildRolePositionsJSONBody,
   RESTPostAPIGuildChannelJSONBody,
-  RESTPutAPIGuildBanJSONBody
+  RESTPostAPIGuildEmojiJSONBody,
+  RESTPostAPIGuildPruneJSONBody,
+  RESTPostAPIGuildRoleJSONBody,
+  RESTPutAPIGuildBanJSONBody,
+  RESTPutAPIGuildMemberJSONBody
 } from 'discord-api-types';
 
 interface IGuild extends APIGuild {
@@ -142,14 +161,19 @@ interface FetchAuditLogsOptions {
 
 interface CreateEmojiOptions {
   roles?: string[];
-  image?: Readable | Buffer;
-  name?: string;
+  image: ImageData;
+  name: string;
 }
 
 interface ModifyEmojiOptions {
-  roles?: string;
+  roles?: string[];
   name?: string;
   id: string;
+}
+
+interface ImageData {
+  content: Buffer | Readable;
+  type?: 'jpg' | 'png' | 'gif';
 }
 
 type EditGuildRoleOptions = CreateRoleOptions;
@@ -554,6 +578,90 @@ export class Guild extends Base<IGuild> {
     return this.members.fetch(this.id, memberID);
   }
 
+  getRoles() {
+    return this.client.rest.dispatch<RESTGetAPIGuildRolesResult>({
+      endpoint: `/guilds/${this.id}/roles`,
+      method: 'GET'
+    }).then(roles => roles.map(role => this.roles.add(new GuildRole(this.client, { guild_id: this.id, ...role }))));
+  }
+
+  getBans() {
+    return this.client.rest.dispatch<RESTGetAPIGuildBansResult>({
+      endpoint: `/guilds/${this.id}/bans`,
+      method: 'GET'
+    }).then(bans => bans.map(ban => new GuildBan(this.client, {
+      reason: ban.reason ?? undefined,
+      user: ban.user
+    })));
+  }
+
+  getInvites() {
+    return this.client.rest.dispatch<RESTGetAPIGuildInvitesResult>({
+      endpoint: `/guilds/${this.id}/invites`,
+      method: 'GET'
+    }).then(invites => invites.map(invite => new GuildInvite(this.client, <any> invite)));
+  }
+
+  getAuditLogs(opts: FetchAuditLogsOptions = { limit: 50 }) {
+    if (opts && !Util.isObject(opts)) throw new TypeError(`Expected \`object\`, but received ${typeof opts}`);
+
+    if (opts.actionType) {
+      if (typeof opts.actionType !== 'number' || Number.isNaN(opts.actionType))
+        throw new TypeError(`[opts.actionType] Expected \`number\` but gotten ${typeof opts.actionType === 'number' ? 'not a number' : typeof opts.actionType}`);
+
+      const values = Object.values(AuditLogAction);
+      if (!values.includes(opts.actionType))
+        throw new TypeError(`Audit log action "${opts.actionType}" doesn't exist`);
+    }
+
+    if (opts.limit) {
+      if (typeof opts.limit !== 'number') throw new TypeError(`Expected \`number\`, but gotten ${typeof opts.limit}`);
+
+      const int = Number(opts.limit);
+      if (isNaN(int)) throw new TypeError(`"${opts.limit}" was not a number`);
+      if (int < 0 || int > 100) throw new TypeError(`"${int}" can't go <0 or >100`);
+    }
+
+    if (opts.before && typeof opts.before !== 'string') throw new TypeError(`Expected \`number\`, but gotten ${typeof opts.before}`);
+
+    let url = `/guilds/${this.id}/audit-logs`;
+    const query = Util.objectToQuery({
+      action_type: opts.actionType!,
+      before: opts.before!,
+      limit: opts.limit!
+    });
+
+    if (query !== null) url += query;
+
+    return this.client.rest.dispatch<RESTGetAPIAuditLogResult>({
+      endpoint: url,
+      method: 'GET'
+    }).then(data => new AuditLogs(this.client, data));
+  }
+
+  getEmojis() {
+    return this.client.rest.dispatch<RESTGetAPIGuildEmojisResult>({
+      endpoint: `/guilds/${this.id}/emojis`,
+      method: 'GET'
+    }).then(data =>
+      data.map(emoji => this.emojis.add(new GuildEmoji(this.client, { guild_id: this.id, ...emoji })))
+    );
+  }
+
+  getEmoji(id: string) {
+    return this.client.rest.dispatch<RESTGetAPIGuildEmojiResult>({
+      endpoint: `/guilds/${this.id}/emojis/${id}`,
+      method: 'GET'
+    }).then(data => this.emojis.add(new GuildEmoji(this.client, { guild_id: this.id, ...data })));
+  }
+
+  getWebhooks() {
+    return this.client.rest.dispatch<RESTGetAPIGuildWebhooksResult>({
+      endpoint: `/guilds/${this.id}/webhooks`,
+      method: 'GET'
+    }).then(data => data.map(webhook => new Webhook(this.client, webhook)));
+  }
+
   async modify(opts: ModifyGuildOptions) {
     if (!opts) throw new TypeError('Missing options object, refer to the documentation: https://docs.augu.dev/Wumpcord/Types/EditGuildOptions');
     if (!Object.keys(opts).length) throw new TypeError('Must include something to update');
@@ -656,6 +764,301 @@ export class Guild extends Base<IGuild> {
         position: index + min,
         id: channel.id
       }))
+    });
+  }
+
+  async modifyMember(
+    memberID: string,
+    opts: ModifyGuildMemberOptions,
+    reason?: string
+  ) {
+    let member: GuildMember | null;
+    if (!this.members.has(memberID)) {
+      member = await this.getGuildMember(memberID);
+    } else {
+      member = this.members.get(memberID);
+    }
+
+    if (member === undefined || member === null)
+      throw new TypeError(`Member "${memberID}" doesn't exist in guild ${this.name}`);
+
+    if (opts.nick && typeof opts.nick !== 'string') throw new TypeError(`Expected \`string\`, but gotten ${typeof opts.nick}`);
+    if (opts.mute && typeof opts.mute !== 'boolean') throw new TypeError(`Expected \`boolean\`, but gotten ${typeof opts.mute}`);
+    if (opts.deaf && typeof opts.deaf !== 'boolean') throw new TypeError(`Expected \`boolean\`, but gotten ${typeof opts.deaf}`);
+    if (opts.roles) {
+      if (!Array.isArray(opts.roles)) throw new TypeError(`Expected \`array\`, but gotten ${typeof opts.roles}`);
+      if (opts.roles.some(roleID => typeof roleID !== 'string')) {
+        const roles = opts.roles.filter(roleID => typeof roleID !== 'string');
+        throw new TypeError(`${roles.length} roles were not a string`);
+      }
+    }
+
+    if (opts.channelID && typeof opts.channelID !== 'string') throw new TypeError(`Expected \`string\`, but gotten ${typeof opts.channelID}`);
+
+    return this.client.rest.dispatch<void, RESTPatchAPIGuildMemberJSONBody>({
+      auditLogReason: reason,
+      endpoint: `/guilds/${this.id}/members/${member.id}`,
+      method: 'PATCH',
+      data: {
+        channel_id: opts.channelID,
+        roles: opts.roles,
+        mute: opts.mute,
+        deaf: opts.deaf,
+        nick: opts.nick
+      }
+    });
+  }
+
+  async addRole(memberID: string, roleID: string, reason?: string) {
+    let member: GuildMember | null;
+    let role: GuildRole | null;
+
+    if (!this.members.has(memberID)) {
+      member = await this.getGuildMember(memberID);
+    } else {
+      member = this.members.get(memberID);
+    }
+
+    if (!this.roles.has(roleID)) {
+      role = await this.roles.fetch(this.id, roleID);
+    } else {
+      role = this.roles.get(roleID);
+    }
+
+    if (!member) throw new TypeError(`Member "${memberID}" was not found in this guild`);
+    if (!role) throw new TypeError(`Role "${roleID}" doesn't exist in this guild`);
+
+    return this.client.rest.dispatch<void>({
+      auditLogReason: reason,
+      endpoint: `/guilds/${this.id}/members/${member.id}/${role.id}`,
+      method: 'PUT'
+    });
+  }
+
+  async removeRole(memberID: string, roleID: string, reason?: string) {
+    let member: GuildMember | null;
+    let role: GuildRole | null;
+
+    if (!this.members.has(memberID)) {
+      member = await this.getGuildMember(memberID);
+    } else {
+      member = this.members.get(memberID);
+    }
+
+    if (!this.roles.has(roleID)) {
+      role = await this.roles.fetch(this.id, roleID);
+    } else {
+      role = this.roles.get(roleID);
+    }
+
+    if (!member) throw new TypeError(`Member "${memberID}" was not found in this guild`);
+    if (!role) throw new TypeError(`Role "${roleID}" doesn't exist in this guild`);
+
+    return this.client.rest.dispatch<void>({
+      endpoint: `/guilds/${this.id}/members/${member.id}/${role.id}`,
+      method: 'DELETE'
+    });
+  }
+
+  async kickMember(memberID: string, reason?: string) {
+    let member: GuildMember | null;
+    if (!this.members.has(memberID)) {
+      member = await this.getGuildMember(memberID);
+    } else {
+      member = this.members.get(memberID);
+    }
+
+    if (member === undefined || member === null)
+      throw new TypeError(`Member "${memberID}" doesn't exist in guild ${this.name}`);
+
+    return this.client.rest.dispatch<void>({
+      auditLogReason: reason,
+      endpoint: `/guilds/${this.id}/members/${member.id}`,
+      method: 'DELETE'
+    });
+  }
+
+  createRole(opts: CreateRoleOptions) {
+    if (!opts) throw new TypeError('Missing `opts` object');
+    if (!Util.isObject(opts)) return new TypeError(`Expected \`object\`, but received ${typeof opts}`);
+
+    if (opts.name && typeof opts.name !== 'string') throw new TypeError(`Expected \`string\`, but received ${typeof opts.name}`);
+    if (opts.color && (typeof opts.color !== 'number' || typeof opts.color !== 'string')) throw new TypeError(`Expected \`string\` or \`number\`, but received ${typeof opts.color}`);
+    if (opts.hoistable && typeof opts.hoistable !== 'boolean') throw new TypeError(`Expected \`boolean\`, but received ${typeof opts.hoistable}`);
+    if (opts.mentionable && typeof opts.mentionable !== 'boolean') throw new TypeError(`Expected \`boolean\`, but received ${typeof opts.mentionable}`);
+    if (opts.permissions && typeof opts.permissions !== 'number') throw new TypeError(`Expected \`number\`, but recieved ${typeof opts.permissions}`);
+
+    let color!: number;
+    if (opts.color) {
+      if (typeof opts.color === 'string') {
+        color = parseInt(opts.color.replace('#', ''), 16);
+      } else {
+        color = opts.color;
+      }
+    }
+
+    return this.client.rest.dispatch<APIRole, RESTPostAPIGuildRoleJSONBody>({
+      endpoint: `/guilds/${this.id}/roles`,
+      method: 'POST',
+      data: {
+        permissions: String(opts.permissions),
+        mentionable: opts.mentionable,
+        color,
+        hoist: opts.hoistable,
+        name: opts.name
+      }
+    }).then(role => this.roles.add(new GuildRole(this.client, { guild_id: this.id, ...role })));
+  }
+
+  deleteRole(roleID: string, reason?: string) {
+    return this.client.rest.dispatch<void>({
+      auditLogReason: reason,
+      endpoint: `/guilds/${this.id}/roles/${roleID}`,
+      method: 'DELETE'
+    });
+  }
+
+  modifyRole(roleID: string, opts: EditGuildRoleOptions, reason?: string) {
+    if (!opts) throw new TypeError('Missing `opts` object');
+    if (!Util.isObject(opts)) return new TypeError(`Expected \`object\`, but received ${typeof opts}`);
+
+    if (opts.name && typeof opts.name !== 'string') throw new TypeError(`Expected \`string\`, but received ${typeof opts.name}`);
+    if (opts.color && (typeof opts.color !== 'number' || typeof opts.color !== 'string')) throw new TypeError(`Expected \`string\` or \`number\`, but received ${typeof opts.color}`);
+    if (opts.hoistable && typeof opts.hoistable !== 'boolean') throw new TypeError(`Expected \`boolean\`, but received ${typeof opts.hoistable}`);
+    if (opts.mentionable && typeof opts.mentionable !== 'boolean') throw new TypeError(`Expected \`boolean\`, but received ${typeof opts.mentionable}`);
+    if (opts.permissions && typeof opts.permissions !== 'number') throw new TypeError(`Expected \`number\`, but recieved ${typeof opts.permissions}`);
+
+    let color!: number;
+    if (opts.color) {
+      if (typeof opts.color === 'string') {
+        color = parseInt(opts.color.replace('#', ''), 16);
+      } else {
+        color = opts.color;
+      }
+    }
+
+    return this.client.rest.dispatch<APIRole, RESTPatchAPIGuildRoleJSONBody>({
+      auditLogReason: reason,
+      endpoint: `/guilds/${this.id}/roles/${roleID}`,
+      method: 'PATCH',
+      data: {
+        permissions: String(opts.permissions),
+        mentionable: opts.mentionable,
+        color,
+        hoist: opts.hoistable,
+        name: opts.name
+      }
+    });
+  }
+
+  async modifyRolePosition(roleID: string, pos: number) {
+    const roles = await this.getRoles();
+    const role = roles.find(role => role.id === roleID);
+
+    if (!role) throw new TypeError(`Role with ID "${roleID}" was not found`);
+    if (role.position === pos) return Promise.resolve();
+
+    const min = Math.min(pos, role.position);
+    const max = Math.max(pos, role.position);
+    const sorted = roles.filter(role =>
+      min <= role.position &&
+      role.position <= max &&
+      role.id !== roleID
+    ).sort((role1, role2) => role1.position - role2.position);
+
+    if (pos > role.position) {
+      sorted.push(role);
+    } else {
+      sorted.unshift(role);
+    }
+
+    return this.client.rest.dispatch<void, RESTPatchAPIGuildRolePositionsJSONBody>({
+      endpoint: `/guilds/${this.id}/roles`,
+      method: 'PATCH',
+      data: sorted.map((role, index) => ({
+        position: index + min,
+        id: role.id,
+      }))
+    });
+  }
+
+  prune(opts?: GuildPruneOptions) {
+    const options = Util.merge(opts, { days: 7 })!;
+
+    if (options.computed && typeof options.computed !== 'boolean') throw new TypeError(`Expected \`boolean\`, but received ${typeof options.computed}`);
+    if (options.roles) {
+      if (!Array.isArray(options.roles)) throw new TypeError(`Expected \`array\`, but received ${typeof options.roles}`);
+      if (options.roles.some(role => typeof role !== 'string')) {
+        const roles = options.roles.filter(role => typeof role !== 'string');
+        throw new TypeError(`${roles.length} roles weren't a string`);
+      }
+    }
+
+    return this.client.rest.dispatch<void, RESTPostAPIGuildPruneJSONBody>({
+      endpoint: `/guilds/${this.id}/prune`,
+      method: 'POST',
+      data: {
+        compute_prune_count: options.computed,
+        include_roles: options.roles,
+        days: options.days
+      }
+    });
+  }
+
+  async createEmoji(options: CreateEmojiOptions) {
+    if (!options) throw new TypeError('Missing `options` object');
+    if (!Util.isObject(options)) throw new TypeError(`Expecting \`object\`, but received ${typeof options === 'object' ? 'array' : options}`);
+    if (Object.keys(options).length === 0) throw new TypeError('No keys were provided to create an emoji.');
+
+    if (!options.name || !options.image)
+      throw new TypeError('[options] Requires \'name\' and \'image\'');
+
+    if (options.name && typeof options.name !== 'string') throw new TypeError(`Expected \`string\`, but received ${typeof options.name}`);
+    if (options.roles && !Array.isArray(options.roles)) throw new TypeError(`Expected \`array\`, but received ${typeof options.roles}`);
+    if (options.image && (!Util.isReadableStream(options.image.content) || !Buffer.isBuffer(options.image.content)))
+      throw new TypeError(`[options.image] Expected a readable stream or \`Buffer\`, gotten ${typeof options}`);
+
+    let image: Buffer | undefined = undefined;
+    if (Util.isReadableStream(options.image.content)) {
+      image = await Util.readableToBuffer(options.image.content);
+    } else {
+      image = options.image.content;
+    }
+
+    return this.client.rest.dispatch<APIEmoji, RESTPostAPIGuildEmojiJSONBody>({
+      endpoint: `/guilds/${this.id}/emojis`,
+      method: 'POST',
+      data: {
+        roles: options.roles,
+        image: Util.bufferToBase64(image, options.image?.type ?? 'png'),
+        name: options.name
+      }
+    });
+  }
+
+  modifyEmoji(options: ModifyEmojiOptions) {
+    if (!options) throw new TypeError('Missing `options` object');
+    if (!Util.isObject(options)) throw new TypeError(`Expecting \`object\`, but received ${typeof options === 'object' ? 'array' : options}`);
+    if (!options.id) throw new TypeError('Missing the emoji\'s ID.');
+    if (Object.keys(options).length === 0) throw new TypeError('No keys were provided to modify an emoji.');
+    if (typeof options.id !== 'string') throw new TypeError(`Expected \`string\`, but gotten ${typeof options.id}`);
+    if (options.name && typeof options.name !== 'string') throw new TypeError(`Expected \`string\`, but received ${typeof options.name}`);
+    if (options.roles && !Array.isArray(options.roles)) throw new TypeError(`Expected \`array\`, but received ${typeof options.roles}`);
+
+    return this.client.rest.dispatch<APIEmoji, RESTPatchAPIGuildEmojiJSONBody>({
+      endpoint: `/guilds/${this.id}/emojis/${options.id}`,
+      method: 'PATCH',
+      data: {
+        roles: options.roles,
+        name: options.name
+      }
+    });
+  }
+
+  deleteEmoji(id: string) {
+    return this.client.rest.dispatch<void>({
+      endpoint: `/guilds/${this.id}/emojis/${id}`,
+      method: 'DELETE'
     });
   }
 }

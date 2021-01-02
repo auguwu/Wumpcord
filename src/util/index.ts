@@ -215,4 +215,27 @@ export default class Util {
       return false;
     }
   }
+
+  static objectToQuery<T extends object = object>(obj: T) {
+    let url = '';
+    if (!Object.keys(obj).length) throw new TypeError('Missing key-value pairs in `obj`');
+
+    const entries = Object.entries(obj);
+    for (let i = 0; i < entries.length; i++) {
+      const prefix = i === 0 ? '?' : '&';
+      const [k, v] = entries[i];
+
+      // Skip on undefined, null, or empty string values
+      if (v === undefined || v === null || v === '') continue;
+
+      url += `${prefix}${k}=${v}`;
+    }
+
+    return url;
+  }
+
+  static bufferToBase64(image: Buffer, type?: 'png' | 'jpg' | 'gif') {
+    const base64 = image.toString('base64');
+    return `data:image/${type ?? 'png'};base64,${base64}`;
+  }
 }
