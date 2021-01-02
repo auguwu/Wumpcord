@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+import { GuildMember, SelfUser, User } from '../models';
 import type * as discord from 'discord-api-types/v8';
 import type * as types from '../types';
 import * as Constants from '../Constants';
@@ -30,6 +31,7 @@ import EventBus from '../util/EventBus';
 import Util from '../util';
 
 import ChannelManager from '../managers/ChannelManager';
+import GuildManager from '../managers/GuildManager';
 import UserManager from '../managers/UserManager';
 
 //import type * as events from '../events';
@@ -76,7 +78,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
   public typings: Collection<string, any>;
 
   /** The guild cache available, this will be a empty Collection if not enabled. */
-  public guilds: any;
+  public guilds: GuildManager;
 
   /** The shard manager available to this context. */
   public shards: ShardManager;
@@ -94,7 +96,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
   public rest: RestClient;
 
   /** The self user instance */
-  public user!: any;
+  public user!: SelfUser;
 
   /**
    * Handles everything related to Discord and is the entrypoint to your Discord bot.
@@ -106,7 +108,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
     this.voiceConnections = null;
     this.interactions = null;
     this.channels = new ChannelManager(this);
-    this.options = Util.merge<types.NullableClientOptions, types.ClientOptions>(options, {
+    this.options = Util.merge<types.ClientOptions>(<any> options, {
       populatePresences: false,
       allowedMentions: {
         everyone: false,
@@ -134,10 +136,9 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
     });
     this.typings = new Collection();
     this.shards = new ShardManager(this);
-    this.guilds = null;
+    this.guilds = new GuildManager(this);
     this.users = new UserManager(this);
     this.rest = new RestClient(this);
-    this.user = null;
 
     Object.defineProperty(this, 'token', { value: options.token });
     this.once('ready', async () => {
@@ -245,5 +246,49 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
       shards: this.options.shardCount === 'auto' ? (<any> data).shards : this.options.shardCount,
       url: data.url
     };
+  }
+
+  async requestGuildMembers() {
+    if (!(this.intents & Constants.GatewayIntents.guildMembers)) {
+      this.debug('Get Guild Members', 'Missing `guildMembers` intent, skipping');
+      return;
+    }
+
+    const promises = this.guilds.cache.map<Promise<Collection<string, GuildMember> | null>>(guild => {
+      if (!guild.unavailable) {
+        if (this.options.populatePresences && !(this.intents & Constants.GatewayIntents.guildPresences)) {
+          this.debug('Get Guild Members | Populate Presences', 'Missing `guildPresences` intent');
+          this.options.populatePresences = false;
+        }
+
+        return guild.fetchMembers({
+          limit: guild.maxMembers,
+          presences: this.options.populatePresences,
+          query: '',
+          time: 120e3,
+          nonce: Date.now().toString(16),
+          force: false,
+          ids: []
+        });
+      } else {
+        return Promise.resolve(null);
+      }
+    });
+
+    await Promise.all(promises).then(members => {
+      if (members === null) return;
+
+      members.map(collection => {
+        if (!collection) return;
+
+        this.debug('Get Guild Members', `Populating ${collection.size} members if possible...`);
+        if (this.users.canCache) {
+          for (const member of collection.values()) {
+            const user = new User(this, member.user);
+            this.users.add(user);
+          }
+        }
+      });
+    });
   }
 }

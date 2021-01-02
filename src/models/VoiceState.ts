@@ -20,4 +20,67 @@
  * SOFTWARE.
  */
 
-export class VoiceState {}
+import type { GatewayVoiceState } from 'discord-api-types';
+
+interface SelfVoiceState {
+  stream: boolean;
+  video: boolean;
+  deaf: boolean;
+  mute: boolean;
+}
+
+interface ServerVoiceState {
+  deaf: boolean;
+  mute: boolean;
+}
+
+export class VoiceState {
+  public channelID!: string | null;
+  public sessionID!: string;
+  public suppress!: boolean;
+  public memberID!: string;
+  public guildID!: string;
+  public userID!: string;
+  public server: ServerVoiceState;
+  public self: SelfVoiceState;
+
+  constructor(data: GatewayVoiceState) {
+    this.server = {
+      deaf: false,
+      mute: false
+    };
+
+    this.self = {
+      stream: false,
+      video: false,
+      deaf: false,
+      mute: false
+    };
+
+    this.patch(data);
+  }
+
+  private patch(data: GatewayVoiceState) {
+    if (data.session_id !== undefined)
+      this.sessionID = data.session_id;
+
+    if (data.suppress !== undefined)
+      this.suppress = data.suppress;
+
+    if (data.user_id !== undefined)
+      this.userID = data.user_id;
+
+    if (data.guild_id !== undefined)
+      this.guildID = data.guild_id;
+
+    if (data.channel_id !== undefined)
+      this.channelID = data.channel_id;
+
+    if (data.self_mute !== undefined) this.self.mute = data.self_mute;
+    if (data.self_deaf !== undefined) this.self.deaf = data.self_deaf;
+    if (data.self_video !== undefined) this.self.video = data.self_video;
+    if (data.self_stream !== undefined) this.self.stream = data.self_stream;
+    if (data.mute !== undefined) this.server.mute = data.mute;
+    if (data.deaf !== undefined) this.server.deaf = data.deaf;
+  }
+}

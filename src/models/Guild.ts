@@ -98,7 +98,7 @@ interface FetchGuildMembersOptions {
   ids?: string[];
 }
 
-interface GuildBanOptions {
+export interface GuildBanOptions {
   reason?: string;
   days?: number;
 }
@@ -131,7 +131,7 @@ interface ModifyGuildOptions {
   name?: string;
 }
 
-interface ModifyGuildMemberOptions {
+export interface ModifyGuildMemberOptions {
   channelID?: string;
   roles?: string[];
   deaf?: boolean;
@@ -358,7 +358,7 @@ export class Guild extends Base<IGuild> {
     if (data.voice_states !== undefined) {
       for (let i = 0; i < data.voice_states.length; i++) {
         const voiceState = data.voice_states[i];
-        this.voiceStates.add(new VoiceState(this.client, { guild_id: this.id, ...voiceState }));
+        this.voiceStates.add(new VoiceState({ guild_id: this.id, ...voiceState }));
       }
     }
 
@@ -381,7 +381,7 @@ export class Guild extends Base<IGuild> {
     if (data.members !== undefined) {
       for (let i = 0; i < data.members.length; i++) {
         const member = data.members[i];
-        this.members.add(new GuildMember(this.client, member));
+        this.members.add(new GuildMember(this.client, { guild_id: this.id, ...member }));
       }
     }
 
@@ -691,7 +691,7 @@ export class Guild extends Base<IGuild> {
 
     if (opts.region) {
       if (typeof opts.region !== 'string') throw new TypeError(`Expected \`string\`, gotten ${typeof opts.region}`);
-      if (!regions.includes(opts.region)) throw new TypeError(`Region "${opts.region}" wasn't a valid region (${ids.join(', ')})`);
+      if (!regions.includes(opts.region)) throw new TypeError(`Region "${opts.region}" wasn't a valid region (${regions.join(', ')})`);
     }
 
     if (opts.verificationLevel) {
@@ -1060,5 +1060,9 @@ export class Guild extends Base<IGuild> {
       endpoint: `/guilds/${this.id}/emojis/${id}`,
       method: 'DELETE'
     });
+  }
+
+  toString() {
+    return `[wumpcord.Guild<${this.name}>]`;
   }
 }

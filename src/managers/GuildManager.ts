@@ -20,20 +20,33 @@
  * SOFTWARE.
  */
 
-import type { APIGuildMember } from 'discord-api-types';
 import type WebSocketClient from '../gateway/WebSocketClient';
-import { GuildMember } from '../models';
+import type { APIGuild } from 'discord-api-types';
+import UnavailableGuild from '../models/guild/UnavailableGuild';
 import BaseManager from './BaseManager';
+import { Guild } from '../models';
 
-export default class GuildMemberManager extends BaseManager<GuildMember> {
+export default class GuildManager extends BaseManager<Guild> {
   constructor(client: WebSocketClient) {
-    super(client, 'member', GuildMember);
+    super(client, 'channel', Guild);
   }
 
-  fetch(guildID: string, memberID: string) {
-    return this.client.rest.dispatch<APIGuildMember>({
-      endpoint: `/guilds/${guildID}/members/${memberID}`,
+  fetch(id: string) {
+    return this.client.rest.dispatch<APIGuild>({
+      endpoint: `/channels/${id}`,
       method: 'GET'
-    }).then((data) => this.add(new GuildMember(this.client, { guild_id: guildID, ...data }))); // eslint-disable-line camelcase
+    }).then(data => {
+      const shard = this.client.shards.filter(shard => shard.guilds.has(data.id));
+      let shardID: number = 0;
+
+      if (shard.length > 0) shardID = shard[0].id;
+      if (data.unavailable !== undefined && data.unavailable === true) return this.add(new UnavailableGuild({
+        shard_id: shardID, // eslint-disable-line camelcase
+        unavailable: true,
+        id: data.id
+      }));
+
+      return this.add(new Guild(this.client, { shard_id: shardID, ...data })); // eslint-disable-line camelcase
+    });
   }
 }
