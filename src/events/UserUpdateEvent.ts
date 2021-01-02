@@ -20,14 +20,38 @@
  * SOFTWARE.
  */
 
-export * from './interaction';
-export * from './presence';
-export * from './message';
-export * from './invites';
-export * from './channel';
-export * from './guild';
-export * from './voice';
+import type { GatewayUserUpdateDispatchData } from 'discord-api-types';
+import type { PartialEntity } from '../types';
+import { User } from '../models';
+import Event from './Event';
 
-export * from './WebhooksUpdateEvent';
-export * from './TypingStartEvent';
-export * from './UserUpdateEvent';
+interface UserUpdateReferences {
+  user: PartialEntity<User>;
+  old?: PartialEntity<User>;
+}
+
+export class UserUpdateEvent extends Event<GatewayUserUpdateDispatchData, UserUpdateReferences> {
+  get old() {
+    return this.$refs.old;
+  }
+
+  get user() {
+    return this.$refs.user;
+  }
+
+  process() {
+    const user = this.client.users.get(this.data.id);
+    if (!user) {
+      this.shard.debug('Unable to emit \'userUpdate\': Missing cached user, emitting anyway');
+      this.$refs = { old: undefined, user: new User(this.client, this.data) };
+
+      return;
+    }
+
+    const updated = this.client.users.add(new User(this.client, this.data));
+    this.$refs = {
+      old: user,
+      user: updated
+    };
+  }
+}

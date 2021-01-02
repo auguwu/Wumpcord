@@ -63,6 +63,9 @@ export type OnlineStatus = 'online' | 'offline' | 'idle' | 'dnd';
 /** Represents a Promise-value or not */
 export type MaybePromise<T> = Promise<T> | T;
 
+/** Represents a partial entity */
+export type PartialEntity<T> = T | { id: string };
+
 /** Represents a file to send to Discord */
 export interface MessageFile {
   /** The name of the file, it'll default to `file.png` if not found. */
@@ -208,7 +211,7 @@ export interface UserTyping {
   lastTimestamp: Date;
   elapsedTime: number;
   timeout: NodeJS.Timeout;
-  channel: TextableChannel;
+  channel: PartialEntity<TextableChannel>;
   since: Date;
-  user: User;
+  user: PartialEntity<User>;
 }

@@ -27,7 +27,7 @@ import type * as types from '../types';
 import * as Constants from '../Constants';
 import GuildManager from '../managers/GuildManager';
 import type Client from './WebSocketClient';
-import { Guild } from '../models';
+import { Guild, SelfUser } from '../models';
 import WebSocket from 'ws';
 import EventBus from '../util/EventBus';
 import Util from '../util';
@@ -43,6 +43,7 @@ try {
 
 interface WebSocketShardEvents {
   close(id: number, error: Error, recoverable: boolean): void;
+  resume(id: number, replayed: number): void;
   debug(id: number, message: string): void;
   error(id: number, error: Error): void;
   disconnect(id: number): void;
@@ -156,7 +157,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
     return this.strategy === 'etf' ? Erlpack.unpack : JSON.parse;
   }
 
-  private debug(message: string) {
+  debug(message: string) {
     this.emit('debug', this.id, message);
   }
 
@@ -466,7 +467,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
     this.emit('error', this.id, error);
   }
 
-  private _onMessage(packet: WebSocket.Data) {
+  private async _onMessage(packet: WebSocket.Data) {
     const data = this._serialize(packet);
     if (data === null) {
       this.emit('error', this.id, new Error('Received nullified data packet, skipping'));
@@ -498,7 +499,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
 
           this._checkReady();
         } else {
-          this._wsEvent(data as any);
+          await this._wsEvent(data as any);
         }
       } break;
 
@@ -567,8 +568,25 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
     });
   }
 
-  private _wsEvent(data: discord.GatewayDispatchPayload) {
-    // noop
+  private async _wsEvent(data: discord.GatewayDispatchPayload) {
+    switch (data.t) {
+      case 'READY': {
+        if (!this.client.user) this.client.user = new SelfUser(this.client, data.d.user);
+
+        this.sessionID = data.d.session_id;
+        this.client.users.add(this.client.user);
+        this.unavailableGuilds = new Set(data.d.guilds.map(r => r.id));
+        this.status = Constants.ShardStatus.WaitingForGuilds;
+        this._checkReady();
+      } break;
+
+      case 'RESUMED': {
+        this.debug(`Session "${this.sessionID}" was replayed ${this.seq === -1 ? 'no' : (data.s - this.seq).toLocaleString()} events.`);
+
+        const replayed = this.seq === -1 ? 0 : (data.s - this.seq);
+        this.emit('resume', this.id, replayed);
+      } break;
+    }
   }
 
   toString() {

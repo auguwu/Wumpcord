@@ -31,13 +31,13 @@ import type * as types from '../types';
  */
 export default class Event<D extends object, Refs extends object = {}> {
   /** The WebSocket client attached */
-  private client: WebSocketClient;
+  public client: WebSocketClient;
 
   /** The WebSocket shard that is handling this event */
   public shard: WebSocketShard;
 
   /** The references attached to this [Event] */
-  public $refs: Refs;
+  public $refs!: Refs;
 
   /** The data payload from Discord */
   public data: D;
@@ -51,8 +51,17 @@ export default class Event<D extends object, Refs extends object = {}> {
     // @ts-ignore Yes it is private, but I want to access it.
     this.client = shard.client;
     this.shard  = shard;
-    this.$refs  = {} as Refs;
     this.data   = data;
+
+    // Make $refs immutable if set once
+    Object.defineProperty(this, '$refs', {
+      get: () => ({}),
+      set: (data: Refs) => {
+        if (Object.isFrozen(data)) return data;
+
+        return Object.freeze(data);
+      }
+    });
   }
 
   process(): types.MaybePromise<void> {
