@@ -41,6 +41,9 @@ interface RequestDispatch<T = unknown> {
   /** The error that was thrown */
   reject(error?: any): void;
 
+  /** discord is bullshit so this is here because yes i mean- The audit log reason to show up */
+  auditLogReason?: string;
+
   /** The headers to send out */
   headers?: { [x: string]: any };
 
@@ -153,10 +156,13 @@ export default class RestClient {
    */
   async _executeRequest(request: RequestDispatch) {
     const bucket = new RatelimitBucket();
-    let form: FormData | undefined = undefined;
 
+    let form: FormData | undefined = undefined;
     if (!['get', 'GET', 'head', 'HEAD'].includes(request.method) && !request.headers!.hasOwnProperty('Content-Type'))
       request.headers!['Content-Type'] = 'application/json';
+
+    if (request.auditLogReason !== undefined)
+      request.headers!['X-Audit-Log-Reason'] = encodeURIComponent(request.auditLogReason);
 
     if (request.file) {
       form = new FormData();

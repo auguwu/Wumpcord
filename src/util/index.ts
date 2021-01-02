@@ -60,7 +60,7 @@ export default class Util {
    * @param given The given object
    * @param def The default object
    */
-  static merge<T, U>(given: T, def: U): U {
+  static merge<T>(given: T, def: T): T {
     if (!given) return def;
     for (const key in def) {
       if (!Object.hasOwnProperty.call(given, key) || given[key as string] === undefined) given[key as string] = def[key];

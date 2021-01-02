@@ -26,9 +26,10 @@ import type WebSocketClient from '../gateway/WebSocketClient';
 import GuildPresenceManager from '../managers/GuildPresencesManager';
 import GuildMemberManager from '../managers/GuildMemberManager';
 import GuildEmojiManager from '../managers/GuildEmojiManager';
-import { GuildFeature } from '../Constants';
+import { GuildFeature, OPCodes } from '../Constants';
 import GuildRoleManager from '../managers/GuildRoleManager';
 import GuildIntegration from './guild/GuildIntegration';
+import { Collection } from '@augu/collections';
 import ChannelManager from '../managers/ChannelManager';
 import { VoiceState } from './VoiceState';
 import GuildPreview from './guild/GuildPreview';
@@ -43,9 +44,15 @@ import Webhook from './Webhook';
 import Base from './Base';
 import Util from '../util';
 
-import type {
+import {
   APIGuild,
-  APIGuildWelcomeScreen
+  APIGuildWelcomeScreen,
+  GatewayRequestGuildMembersData,
+  RESTGetAPIGuildChannelsResult,
+  RESTGetAPIGuildPreviewResult,
+  RESTGetAPIGuildVoiceRegionsResult,
+  RESTPostAPIGuildChannelJSONBody,
+  RESTPutAPIGuildBanJSONBody
 } from 'discord-api-types';
 
 interface IGuild extends APIGuild {
@@ -53,8 +60,8 @@ interface IGuild extends APIGuild {
 }
 
 interface PartialPermissionOverwrite {
-  allow: number;
-  deny: number;
+  allow: string;
+  deny: string;
   type: 'role' | 'member';
   id: string;
 }
@@ -82,7 +89,7 @@ interface CreateChannelOptions {
   position?: number;
   bitrate?: number;
   topic?: string;
-  nsfw?: string;
+  nsfw?: boolean;
   type: number;
   name: string;
 }
@@ -187,9 +194,9 @@ export class Guild extends Base<IGuild> {
   public joinedAt!: Date;
   public shardID!: number;
   public ownerID!: string;
+  public isOwner!: boolean;
   public banner!: string | null;
   public region!: string;
-  public owner!: boolean;
   public large!: boolean;
   public icon!: string | null;
   public name!: string;
@@ -308,7 +315,7 @@ export class Guild extends Base<IGuild> {
       this.region = data.region;
 
     if (data.owner !== undefined)
-      this.owner = data.owner;
+      this.isOwner = data.owner;
 
     if (data.large !== undefined)
       this.large = data.large;
@@ -338,6 +345,8 @@ export class Guild extends Base<IGuild> {
     if (data.channels !== undefined) {
       for (let i = 0; i < data.channels.length; i++) {
         const channel = data.channels[i];
+
+        this.client.channels.add(Channel.from(this.client, channel));
         this.channels.add(Channel.from(this.client, channel));
       }
     }
@@ -362,5 +371,183 @@ export class Guild extends Base<IGuild> {
         this.roles.add(new GuildRole(this.client, { guild_id: this.id, ...role }));
       }
     }
+  }
+
+  get shard() {
+    return this.client.shards.get(this.shardID);
+  }
+
+  get owner() {
+    return this.ownerID !== undefined ? this.client.users.get(this.ownerID) : null;
+  }
+
+  fetchMembers({
+    presences,
+    limit,
+    query,
+    time,
+    nonce,
+    force,
+    ids
+  }: FetchGuildMembersOptions = {
+    presences: false,
+    limit: this.maxMembers,
+    query: '',
+    time: 120e3,
+    nonce: Date.now().toString(16),
+    force: false,
+    ids: []
+  }) {
+    return new Promise<Collection<string, GuildMember>>((resolve, reject) => {
+      if (
+        this.memberCount === this.members.cache.size &&
+        !limit &&
+        !presences &&
+        !query &&
+        !ids &&
+        !force
+      ) return resolve(this.members.cache);
+
+      if (nonce && nonce.length > 32) return reject(new RangeError('Nonce length was over 32'));
+      if (this.shard === undefined) return reject(new Error(`Shard #${this.shardID} doesn't exist...?`));
+
+      this.shard.send<GatewayRequestGuildMembersData>(OPCodes.GetGuildMembers, {
+        user_ids: ids,
+        presences,
+        query: query || '',
+        nonce,
+        limit: limit || this.maxMembers,
+        guild_id: this.id
+      });
+
+      const members = new Collection<string, GuildMember>();
+      const timeout = setTimeout(() => {
+        clearTimeout(timeout);
+        return reject(new Error(`Unable to fetch guild members in ${time}ms`));
+      }, time!);
+
+      const handler = () => {
+        // todo this :eyes:
+      };
+
+      this.client.on('guildMemberChunk', handler);
+    });
+  }
+
+  delete() {
+    if (this.ownerID !== this.client.user.id)
+      throw new TypeError('Bot isn\'t a owner of this guild.');
+
+    return this.client.rest.dispatch({
+      endpoint: `/guilds/${this.id}`,
+      method: 'DELETE'
+    });
+  }
+
+  ban(userID: string, opts: GuildBanOptions = {}) {
+    const options = Util.merge(opts, { days: 7 });
+
+    if (options.days !== undefined && options.days > 7) throw new TypeError('Message deletion days must range from 0-7 (default: 7)');
+    if (options.reason !== undefined) {
+      if (typeof options.reason !== 'string') throw new TypeError('`reason` has to be a string');
+      if (options.reason === '') throw new TypeError('`reason` can\'t be an empty string');
+    }
+
+    return this.client.rest.dispatch<void, RESTPutAPIGuildBanJSONBody>({
+      endpoint: `/guilds/${this.id}/bans/${userID}`,
+      method: 'PUT',
+      data: {
+        delete_message_days: options.days,
+        reason: options.reason
+      }
+    });
+  }
+
+  unban(userID: string, reason?: string) {
+    return this.client.rest.dispatch<void>({
+      auditLogReason: reason,
+      endpoint: `/guilds/${this.id}/bans/${userID}`,
+      method: 'DELETE'
+    });
+  }
+
+  createChannel(opts: CreateChannelOptions) {
+    if (typeof opts === 'undefined' || typeof opts !== 'object') throw new TypeError('`opts` is not defiend or it\'s not an object');
+    if (!opts.hasOwnProperty('name') || !opts.hasOwnProperty('type')) throw new TypeError('Missing `opts.name` and `opts.type` in Guild#createChannel');
+
+    // type-checking for text channels
+    if (opts.type === 0) {
+      if (opts.topic) {
+        if (typeof opts.topic !== 'string') throw new TypeError('`opts.topic` was not a string');
+        if (opts.topic === '' || opts.topic.length < 2 || opts.topic.length > 1024) throw new TypeError('`opts.topic` is empty, or the length is under 2 / over 1024 chars');
+      }
+
+      if (opts.ratelimitPerUser) {
+        if (typeof opts.ratelimitPerUser !== 'number') throw new TypeError('`opts.ratelimitPerUser` was not a number');
+        if (Number.isNaN(opts.ratelimitPerUser)) throw new TypeError('`opts.ratelimitPerUser` was not a number');
+        if (opts.ratelimitPerUser < 0 || opts.ratelimitPerUser > 21600) throw new TypeError('`opts.ratelimitPerUser` is under 0 / over 21600');
+      }
+    } else if (opts.type === 2) { // type checking for voice channels
+      if (opts.bitrate) {
+        if (typeof opts.bitrate !== 'number') throw new TypeError('`opts.bitrate` was not a number');
+        if (Number.isNaN(opts.bitrate)) throw new TypeError('`opts.bitrate` was not a number');
+        if (opts.bitrate < 8000 || opts.bitrate > 96000) throw new TypeError('`opts.bitrate` was under 8kbps / over 96kbps');
+      }
+
+      if (opts.userLimit) {
+        if (typeof opts.userLimit !== 'number') throw new TypeError('`opts.userLimit` was not a number');
+        if (Number.isNaN(opts.userLimit)) throw new TypeError('`opts.userLimit` was not a number');
+        if (opts.userLimit < 0 || opts.userLimit > 100) throw new TypeError('`opts.userLimit` was under 0 / over 100 users');
+      }
+    }
+
+    return this.client.rest.dispatch<void, RESTPostAPIGuildChannelJSONBody>({
+      endpoint: `/guilds/${this.id}/channels`,
+      method: 'POST',
+      data: {
+        name: opts.name,
+        type: opts.type,
+        topic: opts.topic,
+        bitrate: opts.bitrate,
+        user_limit: opts.userLimit,
+        ratelimit_per_user: opts.ratelimitPerUser,
+        position: opts.position,
+        // @ts-ignore fuck off
+        permission_overwrites: opts.permissionOverwrites,
+        parent_id: opts.parentID,
+        nsfw: opts.nsfw || false
+      }
+    });
+  }
+
+  getRegions() {
+    return this.client.rest.dispatch<RESTGetAPIGuildVoiceRegionsResult>({
+      endpoint: `/guilds/${this.id}/regions`,
+      method: 'GET'
+    });
+  }
+
+  getRegionIds() {
+    return this
+      .getRegions()
+      .then(regions => regions.map(r => r.id));
+  }
+
+  getPreview() {
+    return this.client.rest.dispatch<RESTGetAPIGuildPreviewResult>({
+      endpoint: `/guilds/${this.id}/preview`,
+      method: 'GET'
+    }).then(data => data !== null ? new GuildPreview(this.client, data) : null);
+  }
+
+  getChannels() {
+    return this.client.rest.dispatch<RESTGetAPIGuildChannelsResult>({
+      endpoint: `/guilds/${this.id}/channels`,
+      method: 'GET'
+    }).then(channels => channels.map(data => Channel.from(this.client, data)));
+  }
+
+  getGuildMember(memberID: string) {
+    return this.members.fetch(this.id, memberID);
   }
 }

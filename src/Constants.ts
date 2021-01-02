@@ -115,6 +115,7 @@ export enum OPCodes {
   // 5 is a mystery
   Resume = 6,
   Reconnect,
+  GetGuildMembers,
   InvalidSession,
   Hello,
   HeartbeatAck,
