@@ -25,10 +25,14 @@
 import type * as discord from 'discord-api-types/v8';
 import type * as types from '../types';
 import * as Constants from '../Constants';
+import GuildManager from '../managers/GuildManager';
 import type Client from './WebSocketClient';
+import { Guild } from '../models';
 import WebSocket from 'ws';
 import EventBus from '../util/EventBus';
 import Util from '../util';
+
+import * as events from '../events';
 
 let Erlpack: typeof import('erlpack');
 try {
@@ -43,6 +47,7 @@ interface WebSocketShardEvents {
   error(id: number, error: Error): void;
   disconnect(id: number): void;
   establish(id: number): void;
+  ready(id: number, unavailable: Set<string>): void;
   ready(id: number): void;
 }
 
@@ -52,6 +57,9 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
 
   /** The reconnection timeout */
   private _reconnectTimeout?: NodeJS.Timeout;
+
+  /** The ready timeout */
+  private _readyTimeout?: NodeJS.Timeout;
 
   /** List of unavailable guilds known to this shard */
   public unavailableGuilds: Set<string>;
@@ -75,7 +83,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
   private rejecter?: (error: any) => void;
 
   /** The closing sequence number */
-  private closeSeq?: number;
+  public closeSeq?: number;
 
   /** The serialization strategy to use when encoding/decoding packets */
   public strategy: types.ClientOptions['strategy'];
@@ -87,7 +95,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
   public status: 'connected' | 'handshaking' | 'nearly' | 'dead' | 'waiting_for_guilds';
 
   /** Guild cache for this shard, this is disabled if not provided. */
-  public guilds: any;
+  public guilds: GuildManager;
 
   /** If we acked a heartbeat response for not */
   private acked: boolean;
@@ -121,6 +129,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
     this.strategy = strategy;
     this.status = Constants.ShardStatus.Dead;
     this.client = client;
+    this.guilds = new GuildManager(client);
     this.acked = true;
     this.seq = -1;
     this.id = id;
@@ -249,6 +258,47 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
     });
   }
 
+  _checkReady() {
+    if (this._readyTimeout) clearTimeout(this._readyTimeout);
+    if (!this.unavailableGuilds) {
+      this.debug('Received all guilds from Discord, marking as ready');
+
+      this.status = Constants.ShardStatus.Connected;
+      this.emit('ready', this.id);
+
+      if (
+        this.client.shards.size !== this.client.options.shardCount ||
+        this.client.shards.some(s => s.status !== Constants.ShardStatus.Connected)
+      ) return;
+
+      this.resolver?.(null);
+      this.resolver = undefined;
+
+      this.client.ready = true;
+      this.client.emit('ready');
+      return;
+    }
+
+    this._readyTimeout = setTimeout(() => {
+      this.debug(`Didn't receive anymore guild packets in the last 15 seconds, marking as connected with ${this.unavailableGuilds.size} unavailable guilds`);
+      this._readyTimeout = undefined;
+
+      this.status = Constants.ShardStatus.Connected;
+      this.emit('ready', this.id, this.unavailableGuilds);
+
+      if (
+        this.client.shards.size !== this.client.options.shardCount ||
+        this.client.shards.some(s => s.status !== Constants.ShardStatus.Connected)
+      ) return;
+
+      this.resolver?.(null);
+      this.resolver = undefined;
+
+      this.client.ready = true;
+      this.client.emit('ready');
+    }, 15000);
+  }
+
   private _hardReset() {
     this.sessionID = undefined;
     this.seq = -1;
@@ -277,7 +327,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
   private _createConnection() {
     this.debug('Creating a new WebSocket connection...');
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       this.ws = new WebSocket(this.client.gatewayURL, this.client.options.ws.clientOptions);
 
       this.ws.on('message', this._onMessage.bind(this));
@@ -442,9 +492,9 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
           const guild = d as discord.GatewayGuildCreateDispatchData;
           this.unavailableGuilds.delete(guild.id);
 
-          // const g = new Guild(this.client, guild);
-          // this.guilds.add(g);
-          // this.client.guilds.add(g);
+          const g = new Guild(this.client, { shard_id: this.id, ...guild });
+          this.guilds.add(g);
+          this.client.guilds.add(g);
 
           this._checkReady();
         } else {
@@ -515,10 +565,6 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
       token: this.client.token,
       seq: this.seq
     });
-  }
-
-  private _checkReady() {
-    // noop
   }
 
   private _wsEvent(data: discord.GatewayDispatchPayload) {

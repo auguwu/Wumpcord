@@ -34,7 +34,7 @@ import ChannelManager from '../managers/ChannelManager';
 import GuildManager from '../managers/GuildManager';
 import UserManager from '../managers/UserManager';
 
-//import type * as events from '../events';
+import type * as events from '../events';
 
 interface WebSocketClientEvents {
   // Gateway
@@ -75,7 +75,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
   public options: types.ClientOptions;
 
   /** The user typing cache if available, this will be a empty Collection if not enabled. */
-  public typings: Collection<string, any>;
+  public typings: Collection<string, types.UserTyping>;
 
   /** The guild cache available, this will be a empty Collection if not enabled. */
   public guilds: GuildManager;

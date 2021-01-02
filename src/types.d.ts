@@ -21,7 +21,7 @@
  */
 /* eslint-disable camelcase */
 
-import type { TextChannel, VoiceChannel, StoreChannel, NewsChannel, GroupChannel, DMChannel, CategoryChannel } from './models';
+import type { TextChannel, VoiceChannel, StoreChannel, NewsChannel, GroupChannel, DMChannel, CategoryChannel, User } from './models';
 import type { ClientOptions as WebSocketClientOptions } from 'ws';
 import type { GatewayEvent, Cachable, GatewayIntent } from './Constants';
 import type { RatelimitInfo } from './rest/RatelimitBucket';
@@ -202,4 +202,13 @@ export interface SendActivityOptions {
   type: number;
   url?: string;
   afk?: boolean;
+}
+
+export interface UserTyping {
+  lastTimestamp: Date;
+  elapsedTime: number;
+  timeout: NodeJS.Timeout;
+  channel: TextableChannel;
+  since: Date;
+  user: User;
 }
