@@ -36,7 +36,7 @@ import UserManager from '../managers/UserManager';
 
 import type * as events from '../events';
 
-interface WebSocketClientEvents {
+interface WebSocketClientEvents extends EntityEvents {
   // Gateway
   shardClose(id: number, error: Error, recoverable: boolean): void;
   shardError(id: number, error: Error): void;
@@ -52,7 +52,14 @@ interface WebSocketClientEvents {
   // Normal
   debug(message: string): void;
   error(error: Error): void;
+  ready(unavailable: Set<string>): void;
   ready(): void;
+}
+
+interface EntityEvents {
+  webhooksUpdate(event: events.WebhooksUpdateEvent): void;
+  typingStart(event: events.TypingStartEvent): void;
+  userUpdate(event: events.UserUpdateEvent): void;
 }
 
 /**

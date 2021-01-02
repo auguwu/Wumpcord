@@ -22,12 +22,12 @@
 
 /* eslint-disable camelcase */
 
+import { Guild, SelfUser } from '../models';
 import type * as discord from 'discord-api-types/v8';
 import type * as types from '../types';
 import * as Constants from '../Constants';
 import GuildManager from '../managers/GuildManager';
 import type Client from './WebSocketClient';
-import { Guild, SelfUser } from '../models';
 import WebSocket from 'ws';
 import EventBus from '../util/EventBus';
 import Util from '../util';
@@ -43,13 +43,12 @@ try {
 
 interface WebSocketShardEvents {
   close(id: number, error: Error, recoverable: boolean): void;
+  ready(id: number, unavailable?: Set<string>): void;
   resume(id: number, replayed: number): void;
   debug(id: number, message: string): void;
   error(id: number, error: Error): void;
   disconnect(id: number): void;
   establish(id: number): void;
-  ready(id: number, unavailable: Set<string>): void;
-  ready(id: number): void;
 }
 
 export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
@@ -402,7 +401,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
           error = new Error('Authenication failed while logging in');
 
           this.sessionID = undefined;
-          this.emit('error', new Error(`Invalid token "${this.client.token}"`));
+          this.emit('error', this.id, new Error(`Invalid token "${this.client.token}"`));
         } break;
 
         case 4005: {
@@ -585,6 +584,27 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
 
         const replayed = this.seq === -1 ? 0 : (data.s - this.seq);
         this.emit('resume', this.id, replayed);
+      } break;
+
+      case 'USER_UPDATE': {
+        const event = new events.UserUpdateEvent(this, data.d);
+        event.process();
+
+        this.client.emit('userUpdate', event);
+      } break;
+
+      case 'WEBHOOKS_UPDATE': {
+        const event = new events.WebhooksUpdateEvent(this, data.d);
+        event.process();
+
+        this.client.emit('webhooksUpdate', event);
+      } break;
+
+      case 'TYPING_START': {
+        const event = new events.TypingStartEvent(this, data.d);
+        await event.process();
+
+        this.client.emit('typingStart', event);
       } break;
     }
   }

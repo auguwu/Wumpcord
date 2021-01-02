@@ -48,7 +48,7 @@ export default class EventBus<T extends object = DefaultEventBusMap> {
    * @param args Any additional arguments to add-onto the listener
    * @returns A boolean value if it was emitted or not
    */
-  emit<K extends keyof T>(event: K, ...args: any[]) {
+  emit<K extends keyof T>(event: K, ...args: T[K] extends Listener ? Parameters<T[K]> : any[]) {
     if (!(event in this.listeners)) return false;
 
     const listeners = this.listeners[event as string];
