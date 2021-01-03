@@ -2,43 +2,58 @@
   "name": "wumpcord",
   "description": "🚣 Flexible, type-safe, and lightweight Discord API library",
   "version": "1.0.0",
-  "main": "src/index.js",
+  "main": "build/index.js",
   "license": "MIT",
   "author": "Chris \"August\" Hernandez <august@augu.dev>",
   "repository": "https://github.com/auguwu/Wumpcord",
-  "types": "./types/index.d.ts",
+  "types": "./build/types/index.d.ts",
+  "funding": {
+    "url": "https://github.com/auguwu/Wumpcord?sponsor=1"
+  },
+  "files": [
+    "build/"
+  ],
   "maintainers": [
     "Chris \"August\" Hernandez <august@augu.dev>",
     "John \"Ice\" Burke <john@widgetbot.io>"
-  ],
-  "files": [
-    "src/",
-    "types/"
   ],
   "engines": {
     "node": ">=10"
   },
   "scripts": {
-    "lint:types": "eslint types --ext .d.ts --fix --config .eslintrc.types.json",
-    "prepare": "npm run lint:types && npm run lint",
-    "lint": "eslint src --ext .js --fix"
+    "prepare": "npm run lint",
+    "release": "rm -rf build && node scripts/release.js && npm run build && npm publish",
+    "docgen": "node scripts/docs.js",
+    "build": "rm -rf build && node scripts/build.js",
+    "lint": "node scripts/lint.js",
+    "test": "node scripts/test.js"
   },
   "dependencies": {
-    "@augu/immutable": "0.6.0",
+    "@augu/collections": "1.0.2",
     "@augu/orchid": "1.8.1",
-    "discord-api-types": "0.10.0",
-    "ws": "7.4.1"
+    "erlpack": "0.1.3",
+    "form-data": "3.0.0",
+    "node-opus": "0.3.3",
+    "tweetnacl": "1.0.3",
+    "ws": "7.4.2"
   },
   "devDependencies": {
     "@augu/eslint-config": "1.9.0",
-    "@types/node": "14.14.14",
+    "@types/jest": "26.0.19",
+    "@types/node": "14.14.19",
     "@types/ws": "7.4.0",
-    "@typescript-eslint/eslint-plugin": "4.10.0",
-    "@typescript-eslint/parser": "4.10.0",
-    "eslint": "7.15.0",
+    "@typescript-eslint/eslint-plugin": "4.11.1",
+    "@typescript-eslint/parser": "4.11.1",
+    "discord-api-types": "0.11.2",
+    "eslint": "7.16.0",
+    "jest": "26.6.3",
+    "ts-jest": "26.4.4",
+    "typedoc": "0.20.0",
     "typescript": "4.1.3"
   },
-  "peerDependencies": {
-    "erlpack": "0.1.3"
+  "optionalDependencies": {
+    "erlpack": "0.1.3",
+    "node-opus": "0.3.3",
+    "tweetnacl": "1.0.3"
   }
 }
