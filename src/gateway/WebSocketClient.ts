@@ -57,7 +57,11 @@ interface WebSocketClientEvents extends EntityEvents {
 }
 
 interface EntityEvents {
+  voiceServerUpdate(event: events.VoiceServerUpdateEvent): void;
+  voiceStateUpdate(event: events.VoiceStateUpdateEvent): void;
+
   webhooksUpdate(event: events.WebhooksUpdateEvent): void;
+  presenceUpdate(event: events.PresenceUpdateEvent): void;
   typingStart(event: events.TypingStartEvent): void;
   userUpdate(event: events.UserUpdateEvent): void;
 }

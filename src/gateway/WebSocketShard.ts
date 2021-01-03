@@ -606,10 +606,31 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
 
         this.client.emit('typingStart', event);
       } break;
+
+      case 'VOICE_SERVER_UPDATE': {
+        const event = new events.VoiceServerUpdateEvent(this, data.d);
+        event.process();
+
+        this.client.emit('voiceServerUpdate', event);
+      } break;
+
+      case 'VOICE_STATE_UPDATE': {
+        const event = new events.VoiceStateUpdateEvent(this, data.d);
+        event.process();
+
+        this.client.emit('voiceStateUpdate', event);
+      } break;
+
+      case 'PRESENCE_UPDATE': {
+        const event = new events.PresenceUpdateEvent(this, data.d);
+        event.process();
+
+        this.client.emit('presenceUpdate', event);
+      } break;
     }
   }
 
   toString() {
-    return `[wumpcord.WebSocketShard<${this.status}> #${this.id}/${this.client.shards.size}]`;
+    return `[wumpcord.WebSocketShard<${this.status}, #${this.id}/${this.client.shards.size}>]`;
   }
 }
