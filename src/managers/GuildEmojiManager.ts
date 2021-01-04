@@ -27,7 +27,7 @@ import BaseManager from './BaseManager';
 
 export default class GuildEmojiManager extends BaseManager<GuildEmoji> {
   constructor(client: WebSocketClient) {
-    super(client, 'guild:emoji', GuildEmoji);
+    super(client, GuildEmoji);
   }
 
   fetch(guildID: string, emojiID: string) {

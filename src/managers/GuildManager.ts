@@ -28,7 +28,7 @@ import { Guild } from '../models';
 
 export default class GuildManager extends BaseManager<Guild> {
   constructor(client: WebSocketClient) {
-    super(client, 'channel', Guild);
+    super(client, Guild);
   }
 
   fetch(id: string) {

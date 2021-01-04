@@ -20,4 +20,28 @@
  * SOFTWARE.
  */
 
-export default class InteractionOption {}
+import type * as interactions from './types';
+
+export default class InteractionOption {
+  public description: string;
+  public required?: boolean;
+  public default?: boolean;
+  public choices?: interactions.ApplicationCommandOptionChoiceArray;
+  public type: interactions.ApplicationCommandOption['type'];
+  public name: string;
+
+  constructor(data: interactions.ApplicationCommandOption) {
+    this.description = data.description;
+    this.type = data.type;
+    this.name = data.name;
+
+    if (data.required !== undefined)
+      this.required = data.required;
+
+    if (data.default !== undefined)
+      this.default = data.default;
+
+    if (data.choices !== undefined)
+      this.choices = data.choices;
+  }
+}

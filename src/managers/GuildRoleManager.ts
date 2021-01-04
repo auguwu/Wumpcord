@@ -28,7 +28,7 @@ import GuildRole from '../models/guild/GuildRole';
 
 export default class GuildRoleManager extends BaseManager<GuildRole> {
   constructor(client: WebSocketClient) {
-    super(client, 'member:role', GuildRole);
+    super(client, GuildRole);
   }
 
   fetch(guildID: string, roleID: string) {

@@ -23,6 +23,7 @@
 import { GuildMember, SelfUser, User } from '../models';
 import type { Collection } from '@augu/collections';
 import type * as discord from 'discord-api-types/v8';
+import InteractionHelper from '../interactions/Helper';
 import type * as types from '../types';
 import * as Constants from '../Constants';
 import ShardManager from './ShardingManager';
@@ -58,6 +59,8 @@ interface WebSocketClientEvents extends EntityEvents {
 interface EntityEvents {
   message(event: events.MessageCreateEvent): void;
 
+  interactionReceive(event: events.InteractionCreateEvent): void;
+
   voiceServerUpdate(event: events.VoiceServerUpdateEvent): void;
   voiceStateUpdate(event: events.VoiceStateUpdateEvent): void;
 
@@ -75,7 +78,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
   public voiceConnections: any;
 
   /** The interactions helper, this will return `null` if it's not enabled */
-  public interactions: any;
+  public interactions: InteractionHelper | null;
 
   /** The gateway URL to connect all shards to */
   public gatewayURL!: string;
@@ -131,7 +134,6 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
       getAllUsers: false,
       shardCount: 'auto',
       strategy: 'json',
-      cache: 'none',
       token: options.token,
       ws: {
         guildSubscriptions: true,
@@ -149,17 +151,15 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
     this.token = options.token;
     this.rest = new RestClient(this);
 
-    this.once('ready', () => {
+    this.once('ready', async () => {
       if (this.options.getAllUsers) {
         this.debug('Get All Users', 'Requesting all guild members...');
-        this.requestGuildMembers();
+        await this.requestGuildMembers();
       }
 
       if (this.options.interactions) {
         this.debug('Interactions', 'Created interactions helper.');
-
-        //this.interactions = new InteractionHelper(this.user.id);
-        //await this.interactions.getGlobalCommands();
+        this.interactions = new InteractionHelper(this);
       }
     });
   }
@@ -290,11 +290,9 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
         if (!collection) return;
 
         this.debug('Get Guild Members', `Populating ${collection.size} members if possible...`);
-        if (this.users.canCache) {
-          for (const member of collection.values()) {
-            const user = new User(this, member.user);
-            this.users.add(user);
-          }
+        for (const member of collection.values()) {
+          const user = new User(this, member.user);
+          this.users.add(user);
         }
       });
     });

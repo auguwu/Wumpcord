@@ -20,4 +20,41 @@
  * SOFTWARE.
  */
 
-export default class InteractionCommand {}
+import type * as interactions from './types';
+import Option from './Option';
+import Base from '../models/Base';
+
+interface ApplicationCommand extends interactions.ApplicationCommand {
+  is_guild?: boolean; // eslint-disable-line camelcase
+}
+
+export default class InteractionCommand extends Base<ApplicationCommand> {
+  public applicationID!: string;
+  public description!: string;
+  public isGuild!: boolean;
+  public options!: Option[];
+  public name!: string;
+
+  constructor(data: ApplicationCommand) {
+    super(data.id);
+
+    this.patch(data);
+  }
+
+  patch(data: ApplicationCommand) {
+    if (data.application_id !== undefined)
+      this.applicationID = data.application_id;
+
+    if (data.description !== undefined)
+      this.description = data.description;
+
+    if (data.options !== undefined)
+      this.options = data.options.map(option => new Option(option));
+
+    if (data.is_guild !== undefined)
+      this.isGuild = data.is_guild ?? false; // we pass this, not discord
+
+    if (data.name !== undefined)
+      this.name = data.name;
+  }
+}

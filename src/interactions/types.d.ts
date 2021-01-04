@@ -1,32 +1,36 @@
 // Credit: https://github.com/FurryBotCo/FurryBot/blob/master/src/util/DiscordCommands/types.d.ts
 /* eslint-disable camelcase */
 
-export interface ApplicationCommand {
+export interface ApplicationCommand extends IApplicationCommand {
   application_id: string;
-  description: string;
-  options: ApplicationCommandOption[];
-  name: string;
   id: string;
 }
 
+export interface IApplicationCommand {
+  description: string;
+  options?: ApplicationCommandOption[];
+  name: string;
+}
+
+export type ApplicationCommandOptionChoiceArray = [
+  ApplicationCommandOptionChoice?,
+  ApplicationCommandOptionChoice?,
+  ApplicationCommandOptionChoice?,
+  ApplicationCommandOptionChoice?,
+  ApplicationCommandOptionChoice?,
+  ApplicationCommandOptionChoice?,
+  ApplicationCommandOptionChoice?,
+  ApplicationCommandOptionChoice?,
+  ApplicationCommandOptionChoice?,
+  ApplicationCommandOptionChoice?
+];
+
 export interface ApplicationCommandOption {
+  description: string;
   required?: boolean;
   default?: boolean;
   options?: ApplicationCommandOption[];
-  choices?: [
-    ApplicationCommandOptionChoice?,
-    ApplicationCommandOptionChoice?,
-    ApplicationCommandOptionChoice?,
-    ApplicationCommandOptionChoice?,
-    ApplicationCommandOptionChoice?,
-    ApplicationCommandOptionChoice?,
-    ApplicationCommandOptionChoice?,
-    ApplicationCommandOptionChoice?,
-    ApplicationCommandOptionChoice?,
-    ApplicationCommandOptionChoice?
-  ];
-
-  description: string;
+  choices?: ApplicationCommandOptionChoiceArray;
   type: typeof ApplicationCommandOptionType[keyof typeof ApplicationCommandOptionType];
   name: string;
 }

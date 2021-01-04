@@ -22,9 +22,8 @@
   },
   "scripts": {
     "prepare": "npm run lint && npm run build && cp src/types.d.ts build/types.d.ts",
-    "release": "rm -rf build && node scripts/release.js && npm run build && npm publish",
     "docgen": "node scripts/docs.js",
-    "build": "rm -rf build && node scripts/build.js",
+    "build": "rm -rf build && node scripts/build.js && cp src/types.d.ts build/types.d.ts && cp src/interactions/types.d.ts build/interactions/types.d.ts",
     "lint": "node scripts/lint.js",
     "test": "node scripts/test.js"
   },

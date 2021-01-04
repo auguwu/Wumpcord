@@ -27,7 +27,7 @@ import BaseManager from './BaseManager';
 // @ts-ignore You can use it without a `Base` class, but yea...
 export default class GuildPresencesManager extends BaseManager<Presence> {
   constructor(client: WebSocketClient) {
-    super(client, 'presence', Presence);
+    super(client, Presence);
   }
 
   // Guild Presences can't be fetched, so let's not override it

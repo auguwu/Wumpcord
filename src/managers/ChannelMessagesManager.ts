@@ -27,7 +27,7 @@ import BaseManager from './BaseManager';
 
 export default class ChannelMessagesManager extends BaseManager<Message> {
   constructor(client: WebSocketClient) {
-    super(client, 'message', Message);
+    super(client, Message);
   }
 
   fetch(channelID: string, messageID: string) {

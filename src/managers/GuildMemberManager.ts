@@ -27,7 +27,7 @@ import BaseManager from './BaseManager';
 
 export default class GuildMemberManager extends BaseManager<GuildMember> {
   constructor(client: WebSocketClient) {
-    super(client, 'member', GuildMember);
+    super(client, GuildMember);
   }
 
   fetch(guildID: string, memberID: string) {

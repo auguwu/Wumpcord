@@ -27,7 +27,7 @@ import { User } from '../models';
 
 export default class UserManager extends BaseManager<User> {
   constructor(client: WebSocketClient) {
-    super(client, 'user', User);
+    super(client, User);
   }
 
   /**

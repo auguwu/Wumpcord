@@ -50,9 +50,9 @@ export default class MessageCreateEvent extends Event<GatewayMessageCreateDispat
       ? this.client.guilds.get(this.data.guild_id)!
       : undefined;
 
-    if (['news', 'text'].includes(channel.type)) {
-      if (channel.messages.canCache) channel.messages.cache.set(this.message.id, this.message);
-      if (this.client.channels.canCache) this.client.channels.cache.set(channel.id, channel);
+    if (channel !== null && ['news', 'text'].includes(channel.type)) {
+      channel.messages.cache.set(this.message.id, this.message);
+      this.client.channels.cache.set(channel.id, channel);
     }
 
     this.$refs = { channel: (channel as unknown as TextableChannel), guild };

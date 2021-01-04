@@ -30,7 +30,7 @@ export default class ChannelManager extends BaseManager<Channel> {
    * @param client The [WebSocketClient] attached to it
    */
   constructor(client: WebSocketClient) {
-    super(client, 'channel', Channel);
+    super(client, Channel);
   }
 
   /**

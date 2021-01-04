@@ -623,6 +623,15 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
 
         this.client.emit('message', event);
       } break;
+
+      case 'INTERACTION_CREATE': {
+        if (data.d.type === 1) return this.debug('Ping! Received interaction response.');
+
+        const event = new events.InteractionCreateEvent(this, data.d);
+        await event.process();
+
+        this.client.emit('interactionReceive', event);
+      } break;
     }
   }
 

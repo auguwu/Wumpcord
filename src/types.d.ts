@@ -21,9 +21,9 @@
  */
 /* eslint-disable camelcase */
 
-import type { TextChannel, VoiceChannel, StoreChannel, NewsChannel, GroupChannel, DMChannel, CategoryChannel, User } from './models';
+import type { TextChannel, VoiceChannel, StoreChannel, NewsChannel, GroupChannel, DMChannel, CategoryChannel } from './models';
 import type { ClientOptions as WebSocketClientOptions } from 'ws';
-import type { GatewayEvent, Cachable, GatewayIntent } from './Constants';
+import type { GatewayEvent, GatewayIntent } from './Constants';
 import type { RatelimitInfo } from './rest/RatelimitBucket';
 import type { HttpMethod } from '@augu/orchid';
 import type * as discord from 'discord-api-types/v8';
@@ -98,9 +98,6 @@ export interface ClientOptions {
 
   /** The serialization/deserialization strategy when encoding/decoding packets from Discord */
   strategy: 'etf' | 'json';
-
-  /** Types of cache we are allowed to cache or not */
-  cache: Cachable | Cachable[];
 
   /** The token to use */
   token: string;
