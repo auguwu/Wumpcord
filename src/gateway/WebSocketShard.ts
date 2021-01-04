@@ -515,13 +515,9 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
         this.debug('Received `HELLO` packet!');
 
         const packet = data as discord.GatewayHello;
-        if (packet.d.heartbeat_interval > 0) {
-          if (this._heartbeatInterval) clearInterval(this._heartbeatInterval);
-
-          this._heartbeatInterval = setTimeout(() => this._ackHeartbeat(), packet.d.heartbeat_interval).unref();
-        }
-
+        this._heartbeatInterval = setInterval(() => this._ackHeartbeat(), packet.d.heartbeat_interval).unref();
         this.status = Constants.ShardStatus.Nearly;
+
         if (this.sessionID) {
           this._ackHeartbeat();
           this._resume();
@@ -573,8 +569,9 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
       } break;
 
       case 'RESUMED': {
-        this.debug(`Session "${this.sessionID}" was replayed ${this.seq === -1 ? 'no' : (data.s - this.seq).toLocaleString()} events.`);
+        this.debug(`Session "${this.sessionID}" has replayed ${this.seq === -1 ? 'no' : (data.s - this.seq).toLocaleString()} events.`);
 
+        console.log(data.s - this.seq);
         const replayed = this.seq === -1 ? 0 : (data.s - this.seq);
         this.emit('resume', this.id, replayed);
       } break;
