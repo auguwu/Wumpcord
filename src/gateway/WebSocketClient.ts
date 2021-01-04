@@ -149,10 +149,10 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
     this.token = options.token;
     this.rest = new RestClient(this);
 
-    this.once('ready', async () => {
+    this.once('ready', () => {
       if (this.options.getAllUsers) {
         this.debug('Get All Users', 'Requesting all guild members...');
-        await this.requestGuildMembers();
+        this.requestGuildMembers();
       }
 
       if (this.options.interactions) {

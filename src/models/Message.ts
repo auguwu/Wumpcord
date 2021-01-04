@@ -147,6 +147,9 @@ export class Message extends Base<APIMessage> {
     if (data.application !== undefined)
       this.application = data.application;
 
+    if (data.content !== undefined)
+      this.content = data.content;
+
     if (data.referenced_message !== undefined)
       this.referencedMessage = data.referenced_message !== null ? new Message(this.client, data.referenced_message) : null;
 

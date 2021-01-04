@@ -56,7 +56,11 @@ export default class EventBus<T extends object = DefaultEventBusMap> {
 
     for (let i = 0; i < listeners.length; i++) {
       const listener = listeners[i];
-      listener(...args);
+      try {
+        listener(...args);
+      } catch(ex) {
+        console.error(ex);
+      }
     }
 
     return true;
@@ -83,13 +87,11 @@ export default class EventBus<T extends object = DefaultEventBusMap> {
    * @param listener The listener
    */
   once<K extends keyof T>(event: K, listener: T[K]) {
-    // @ts-ignore I know what I'm doing (no I don't)
-    const onceListener: any = (...args: any[]) => {
+    // @ts-ignore
+    return this.on(event, (...args: any[]) => {
       (listener as any)(...args);
-      this.remove(event, onceListener);
-    };
-
-    return this.on(event, onceListener);
+      this.remove(event, listener);
+    });
   }
 
   /**

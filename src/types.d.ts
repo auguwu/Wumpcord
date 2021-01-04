@@ -40,13 +40,8 @@ export type AnyGuildChannel = TextChannel | VoiceChannel | NewsChannel | StoreCh
 /** Represents all channel types */
 export type AnyChannel = TextChannel | VoiceChannel | CategoryChannel | DMChannel | GroupChannel | NewsChannel | StoreChannel;
 
-/** Represents a object that all properties are gonna be undefined */
-export type NullableObject<T extends object> = {
-  [P in keyof T]?: T[P];
-};
-
 /** Represents a nullable object of [ClientOptions] */
-export type NullableClientOptions = NullableObject<ClientOptions> & { token: string };
+export type NullableClientOptions = Partial<ClientOptions> & { token: string };
 
 /** Represents of how a Discord message is constructed */
 export type MessageContent = string | MessageContentOptions;
@@ -108,7 +103,7 @@ export interface ClientOptions {
   token: string;
 
   /** The WebSocket options for Discord */
-  ws: NullableObject<WebSocketOptions>;
+  ws: Partial<WebSocketOptions>;
 }
 
 /** The WebSocket options for Discord */

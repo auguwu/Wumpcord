@@ -92,16 +92,13 @@ export default class Util {
   static formatMessage(client: WebSocketClient, content: MessageContent, options?: MessageContentOptions) {
     const data: discord.RESTPostAPIChannelMessageJSONBody & { file?: MessageFile | MessageFile[] } = {};
 
-    if (!options && (typeof content !== 'string' || typeof content !== 'object'))
-      throw new TypeError('`content` must be a `string` or `MessageContent`');
-
-    if (typeof content === 'object' && (options !== undefined && typeof options === 'object'))
+    if (this.isObject(content) && (options !== undefined && Util.isObject(options)))
       throw new TypeError('Conflicting message contents, choose one or the other.');
 
     if (typeof content === 'string' && !options) {
       data.content = content;
       return data;
-    } else if (typeof content === 'object' && !options) {
+    } else if (this.isObject(content) && !options) {
       if (content.attachments !== undefined)
         data.file = content.attachments;
 
@@ -119,7 +116,7 @@ export default class Util {
 
       if (content.tts !== undefined)
         data.tts = Boolean(data.tts);
-    } else if (typeof content === 'string' && options) {
+    } else if (typeof content === 'string' && options && this.isObject(options)) {
       data.content = content;
 
       if (options.attachments !== undefined)
@@ -136,7 +133,7 @@ export default class Util {
 
       if (options.tts !== undefined)
         data.tts = Boolean(data.tts);
-    } else if (options !== undefined) {
+    } else if (options !== undefined && this.isObject(options)) {
       if (options.attachments !== undefined)
         data.file = options.attachments;
 
