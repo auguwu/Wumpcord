@@ -24,7 +24,7 @@ import type { APIAuditLogEntry, APIAuditLogChange } from 'discord-api-types/v8';
 import type { GuildTextableChannel } from '../../types';
 import type WebSocketClient from '../../gateway/WebSocketClient';
 import { AuditLogAction } from '../../Constants';
-import type Message from '../Message';
+import type { Message } from '../Message';
 import Base from '../Base';
 
 export default class AuditLogEntry extends Base<APIAuditLogEntry> {
@@ -107,7 +107,7 @@ export default class AuditLogEntry extends Base<APIAuditLogEntry> {
 
       if ([AuditLogAction.MessageUnpin, AuditLogAction.MessagePin].includes(this.actionType)) {
         this.messageID = data.options.message_id;
-        this.message = null;
+        this.message = undefined;
       }
 
       if ([

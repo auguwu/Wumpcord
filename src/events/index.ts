@@ -20,12 +20,12 @@
  * SOFTWARE.
  */
 
-export * from './interaction';
+//export * from './interaction';
 export * from './presence';
 export * from './message';
-export * from './invites';
-export * from './channel';
-export * from './guild';
+//export * from './invites';
+//export * from './channel';
+//export * from './guild';
 export * from './voice';
 
 export * from './WebhooksUpdateEvent';

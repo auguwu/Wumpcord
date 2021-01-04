@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-import { TextChannel, DMChannel, NewsChannel, GroupChannel, StoreChannel, VoiceChannel, CategoryChannel } from './channel/index';
 import type { APIPartialChannel } from 'discord-api-types/v8';
 import type WebSocketClient from '../gateway/WebSocketClient';
 import type { AnyChannel } from '../types';
@@ -42,6 +41,14 @@ export class Channel extends Base<APIPartialChannel> {
   }
 
   static from(client: WebSocketClient, data: any): AnyChannel {
+    const { NewsChannel } = require('./channel/NewsChannel');
+    const { DMChannel } = require('./channel/DMChannel');
+    const { TextChannel } = require('./channel/TextChannel');
+    const { CategoryChannel } = require('./channel/CategoryChannel');
+    const { VoiceChannel } = require('./channel/VoiceChannel');
+    const { StoreChannel } = require('./channel/StoreChannel');
+    const { GroupChannel } = require('./channel/GroupChannel');
+
     switch (data.type) {
       case 0: return new TextChannel(client, data);
       case 1: return new DMChannel(client, data);

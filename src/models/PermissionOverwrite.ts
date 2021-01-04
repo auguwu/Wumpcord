@@ -42,8 +42,6 @@ export class PermissionOverwrite extends Base<APIOverwrite> {
   }
 
   patch(data: APIOverwrite) {
-    super.patch(data);
-
     this.permissions = new Permission(data.allow, data.deny);
     this.type = data.type === OverwriteType.Role ? 'role' : 'member';
   }

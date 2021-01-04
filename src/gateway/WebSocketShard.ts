@@ -260,22 +260,20 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
 
   _checkReady() {
     if (this._readyTimeout) clearTimeout(this._readyTimeout);
-    if (!this.unavailableGuilds) {
+    if (!this.unavailableGuilds.size) {
       this.debug('Received all guilds from Discord, marking as ready');
 
       this.status = Constants.ShardStatus.Connected;
       this.emit('ready', this.id);
 
-      if (
-        this.client.shards.size !== this.client.options.shardCount ||
-        this.client.shards.some(s => s.status !== Constants.ShardStatus.Connected)
-      ) return;
+      if (this.client.shards.size === this.client.options.shardCount) {
+        this.resolver?.(null);
+        this.resolver = undefined;
 
-      this.resolver?.(null);
-      this.resolver = undefined;
+        this.client.ready = true;
+        this.client.emit('ready');
+      }
 
-      this.client.ready = true;
-      this.client.emit('ready');
       return;
     }
 
@@ -473,7 +471,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
       return;
     }
 
-    this.debug(`<- "${data.op} ${Util.getKey(Constants.OPCodes, data.op as number) || '<unknown>'}"`);
+    this.debug(`<- "${data.op} (${Util.getKey(Constants.OPCodes, data.op as number) || '<unknown>'})"`);
     if (data.s !== null && data.s > this.seq) {
       this.debug(`Received new sequence number: ${data.s}`);
       this.seq = data.s;
@@ -572,6 +570,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
       case 'READY': {
         if (!this.client.user) this.client.user = new SelfUser(this.client, data.d.user);
 
+        this.debug(`Received READY packet, hello ${this.client.user.tag} <3`);
         this.sessionID = data.d.session_id;
         this.client.users.add(this.client.user);
         this.unavailableGuilds = new Set(data.d.guilds.map(r => r.id));
@@ -626,6 +625,13 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
         event.process();
 
         this.client.emit('presenceUpdate', event);
+      } break;
+
+      case 'MESSAGE_CREATE': {
+        const event = new events.MessageCreateEvent(this, data.d);
+        await event.process();
+
+        this.client.emit('message', event);
       } break;
     }
   }

@@ -27,7 +27,7 @@ import type { APIChannel } from 'discord-api-types/v8';
 import { Collection } from '@augu/collections';
 import type { Guild } from '../Guild';
 
-export default class GuildChannel extends TextableChannel<APIChannel> {
+export default class GuildTextableChannel extends TextableChannel<APIChannel> {
   /** List of permission overwrites for this [GuildChannel] */
   public permissionOverwrites!: Collection<string, PermissionOverwrite>;
 

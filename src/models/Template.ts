@@ -44,7 +44,7 @@ export class Template {
 
   private patch(data: APITemplate) {
     if (data.serialized_source_guild !== undefined)
-      this.sourceGuild = this.client.guilds.add(new Guild(this.client, data.serialized_source_guild));
+      this.sourceGuild = this.client.guilds.add(new Guild(this.client, <any> data.serialized_source_guild));
 
     if (data.source_guild_id !== undefined)
       this.sourceGuildID = data.source_guild_id;

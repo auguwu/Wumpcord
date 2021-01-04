@@ -44,7 +44,7 @@ export default class Base<D extends object> {
    * @param data The data payload
    */
   patch(data: D) {
-    throw new SyntaxError('Overridable function [Base.patch] was not implemented.');
+    // noop
   }
 
   /**

@@ -92,7 +92,7 @@ export default class GuildMember extends Base<IGuildMember> {
       }
     }
 
-    this._populateGuild();
+    if (this.guildID) this._populateGuild();
   }
 
   get permission() {

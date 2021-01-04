@@ -33,7 +33,7 @@ export default class GuildManager extends BaseManager<Guild> {
 
   fetch(id: string) {
     return this.client.rest.dispatch<APIGuild>({
-      endpoint: `/channels/${id}`,
+      endpoint: `/guilds/${id}`,
       method: 'GET'
     }).then(data => {
       const shard = this.client.shards.filter(shard => shard.guilds.has(data.id));

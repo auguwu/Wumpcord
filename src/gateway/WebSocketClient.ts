@@ -42,7 +42,7 @@ interface WebSocketClientEvents extends EntityEvents {
   shardError(id: number, error: Error): void;
   shardDisconnect(id: number): void;
   shardSpawn(id: number): void;
-  shardReady(id: number): void;
+  shardReady(id: number, unavailable?: Set<string>): void;
 
   // REST
   restCall(props: types.RestCallProperties): void;
@@ -52,11 +52,12 @@ interface WebSocketClientEvents extends EntityEvents {
   // Normal
   debug(message: string): void;
   error(error: Error): void;
-  ready(unavailable: Set<string>): void;
-  ready(): void;
+  ready(unavailable?: Set<string>): void;
 }
 
 interface EntityEvents {
+  message(event: events.MessageCreateEvent): void;
+
   voiceServerUpdate(event: events.VoiceServerUpdateEvent): void;
   voiceStateUpdate(event: events.VoiceStateUpdateEvent): void;
 
@@ -95,7 +96,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
   public ready: boolean = false;
 
   /** The client's token, this is hidden by default. */
-  public token!: string;
+  public token: string;
 
   /** The user cache if available, this will be a empty Collection if not enabled. */
   public users: UserManager;
@@ -145,9 +146,9 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
     this.shards = new ShardManager(this);
     this.guilds = new GuildManager(this);
     this.users = new UserManager(this);
+    this.token = options.token;
     this.rest = new RestClient(this);
 
-    Object.defineProperty(this, 'token', { value: options.token });
     this.once('ready', async () => {
       if (this.options.getAllUsers) {
         this.debug('Get All Users', 'Requesting all guild members...');
@@ -157,8 +158,8 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
       if (this.options.interactions) {
         this.debug('Interactions', 'Created interactions helper.');
 
-        this.interactions = new InteractionHelper(this.user.id);
-        await this.interactions.getGlobalCommands();
+        //this.interactions = new InteractionHelper(this.user.id);
+        //await this.interactions.getGlobalCommands();
       }
     });
   }
@@ -214,7 +215,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
    */
   getBotGateway() {
     return this.rest.dispatch<discord.APIGatewayBotInfo>({
-      endpoint: '/bot/gateway',
+      endpoint: '/gateway/bot',
       method: 'get'
     });
   }

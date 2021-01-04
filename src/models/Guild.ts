@@ -457,7 +457,7 @@ export class Guild extends Base<IGuild> {
         // todo this :eyes:
       };
 
-      this.client.on('guildMemberChunk', handler);
+      //this.client.on('guildMemberChunk', handler);
     });
   }
 

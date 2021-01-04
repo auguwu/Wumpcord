@@ -42,7 +42,7 @@ export default class GuildChannel extends Channel {
 
   /** The guild that this [GuildChannel] is attached to */
   public guild!: Guild;
-  private client: WebSocketClient;
+  public client: WebSocketClient;
 
   /** The name of this [GuildChannel] instance */
   public name!: string;

@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import { APIMessage, APIPartialChannel, APIWebhook, RESTPostAPIChannelMessagesBulkDeleteJSONBody } from 'discord-api-types';
+import { APIMessage, APIPartialChannel, APIWebhook, RESTPostAPIChannelMessageJSONBody, RESTPostAPIChannelMessagesBulkDeleteJSONBody } from 'discord-api-types';
 import type { PermissionOverwrite } from '../PermissionOverwrite';
 import ChannelMessagesManager from '../../managers/ChannelMessagesManager';
 import type { GuildMember } from '..';
@@ -32,6 +32,7 @@ import Permission from '../../util/Permissions';
 import Util from '../../util';
 import { Guild } from '../Guild';
 import Webhook from '../Webhook';
+import { MessageContent, MessageContentOptions } from '../../types';
 
 interface GetMessagesOptions {
   around?: string;
@@ -138,5 +139,19 @@ export default class TextableChannel<T extends APIPartialChannel> extends Channe
       endpoint: `/channels/${this.id}/webhooks`,
       method: 'GET'
     }).then(webhooks => webhooks.map(d => new Webhook(this.client, d)));
+  }
+
+  send(content: MessageContent, options?: MessageContentOptions) {
+    const data = Util.formatMessage(this.client, content, options);
+    const file = data.file;
+
+    delete data.file;
+
+    return this.client.rest.dispatch<APIMessage, RESTPostAPIChannelMessageJSONBody>({
+      endpoint: `/channels/${this.id}/messages`,
+      method: 'POST',
+      file,
+      data
+    }).then(d => new Message(this.client, d));
   }
 }

@@ -20,4 +20,13 @@
  * SOFTWARE.
  */
 
-console.log('hello, world!');
+const { version: pkgVersion } = require('../package.json');
+
+export { default as DiscordRestError } from './errors/DiscordRestError';
+export { default as DiscordAPIError } from './errors/DiscordAPIError';
+export { default as Client } from './gateway/WebSocketClient';
+export * as voice from './voice';
+export * from './models';
+
+/** Returns the version of Wumpcord */
+export const version: string = pkgVersion;

@@ -20,12 +20,12 @@
  * SOFTWARE.
  */
 
-export { default as MessageReactionRemoveEmojiEvent } from './reaction/MessageReactionRemoveEmojiEvent';
-export { default as MessageReactionRemoveAllEvent } from './reaction/MessageReactionRemoveAllEvent';
-export { default as MessageReactionRemoveEvent } from './reaction/MessageReactionRemoveEvent';
-export { default as MessageReactionAddEvent } from './reaction/MessageReactionAddEvent';
+//export { default as MessageReactionRemoveEmojiEvent } from './reaction/MessageReactionRemoveEmojiEvent';
+//export { default as MessageReactionRemoveAllEvent } from './reaction/MessageReactionRemoveAllEvent';
+//export { default as MessageReactionRemoveEvent } from './reaction/MessageReactionRemoveEvent';
+//export { default as MessageReactionAddEvent } from './reaction/MessageReactionAddEvent';
 
-export { default as MessageDeleteBulkEvent } from './MessageDeleteBulkEvent';
-export { default as MessageDeleteEvent } from './MessageDeleteEvent';
-export { default as MessageUpdateEvent } from './MessageUpdateEvent';
+//export { default as MessageDeleteBulkEvent } from './MessageDeleteBulkEvent';
+//export { default as MessageDeleteEvent } from './MessageDeleteEvent';
+//export { default as MessageUpdateEvent } from './MessageUpdateEvent';
 export { default as MessageCreateEvent } from './MessageCreateEvent';

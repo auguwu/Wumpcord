@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-export * from './channel/index';
 export * from './presence';
 export * from './util';
 
@@ -28,6 +27,13 @@ export { default as GuildInvite } from './guild/GuildInvite';
 export { default as GuildMember } from './guild/GuildMember';
 export { default as GuildEmoji } from './guild/GuildEmoji';
 export { default as GuildRole } from './guild/GuildRole';
+export * from './channel/CategoryChannel';
+export * from './channel/GroupChannel';
+export * from './channel/StoreChannel';
+export * from './channel/VoiceChannel';
+export * from './channel/NewsChannel';
+export * from './channel/TextChannel';
+export * from './channel/DMChannel';
 export * from './PermissionOverwrite';
 export * from './VoiceState';
 export * from './SelfUser';
