@@ -569,10 +569,9 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
       } break;
 
       case 'RESUMED': {
-        this.debug(`Session "${this.sessionID}" has replayed ${this.seq === -1 ? 'no' : (data.s - this.seq).toLocaleString()} events.`);
+        this.debug(`Session "${this.sessionID}" has replayed ${(data.s - this.seq).toLocaleString()} events.`);
 
-        console.log(data.s - this.seq);
-        const replayed = this.seq === -1 ? 0 : (data.s - this.seq);
+        const replayed = (data.s - this.seq);
         this.emit('resume', this.id, replayed);
       } break;
 

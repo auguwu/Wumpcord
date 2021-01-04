@@ -37,6 +37,9 @@ export type TextableChannel = TextChannel | GroupChannel | DMChannel | NewsChann
 /** Represents all guild channels */
 export type AnyGuildChannel = TextChannel | VoiceChannel | NewsChannel | StoreChannel | CategoryChannel;
 
+/** Represents all guild textable channels */
+export type AnyGuildTextableChannel = TextChannel | NewsChannel;
+
 /** Represents all channel types */
 export type AnyChannel = TextChannel | VoiceChannel | CategoryChannel | DMChannel | GroupChannel | NewsChannel | StoreChannel;
 
