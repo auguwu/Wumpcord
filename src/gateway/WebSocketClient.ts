@@ -21,10 +21,10 @@
  */
 
 import { GuildMember, SelfUser, User } from '../models';
+import type { Collection } from '@augu/collections';
 import type * as discord from 'discord-api-types/v8';
 import type * as types from '../types';
 import * as Constants from '../Constants';
-import { Collection } from '@augu/collections';
 import ShardManager from './ShardingManager';
 import RestClient from '../rest/RestClient';
 import EventBus from '../util/EventBus';
@@ -85,9 +85,6 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
   /** The client options available to this WebSocket client. */
   public options: types.ClientOptions;
 
-  /** The user typing cache if available, this will be a empty Collection if not enabled. */
-  public typings: Collection<string, types.UserTyping>;
-
   /** The guild cache available, this will be a empty Collection if not enabled. */
   public guilds: GuildManager;
 
@@ -145,7 +142,6 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
         tries: undefined
       }
     });
-    this.typings = new Collection();
     this.shards = new ShardManager(this);
     this.guilds = new GuildManager(this);
     this.users = new UserManager(this);

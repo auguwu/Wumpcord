@@ -25,6 +25,7 @@ import type { MessageContentOptions, MessageFile } from '../types';
 import type WebSocketClient from '../gateway/WebSocketClient';
 import type { Readable } from 'stream';
 import { WebhookTypes } from '../Constants';
+import { Message } from './Message';
 import { User } from './User';
 import Util from '../util';
 import Base from './Base';

@@ -20,22 +20,17 @@
  * SOFTWARE.
  */
 
-import type { APIChannel, APIMessage, RESTPostAPIChannelMessageJSONBody } from 'discord-api-types/v8';
-import type { MessageContent, MessageContentOptions } from '../../types';
 import type WebSocketClient from '../../gateway/WebSocketClient';
-import { Channel } from '../Channel';
+import type { APIChannel } from 'discord-api-types/v8';
+import TextableChannel from '../inherit/TextableChannel';
 import { User } from '../User';
-import Util from '../../util';
 
-export class DMChannel extends Channel {
+export class DMChannel extends TextableChannel<APIChannel> {
   /** Represents the last message ID, useful for fetching messages in this channel */
   public lastMessageID!: string | null;
 
   /** List of recipients that are in this group DM */
   public recipient!: User;
-
-  /** The [WebSocket] client attached to this [GroupChannel] */
-  private client: WebSocketClient;
 
   /**
    * Creates a new [DMChannel] instance
@@ -43,9 +38,8 @@ export class DMChannel extends Channel {
    * @param data The data from Discord
    */
   constructor(client: WebSocketClient, data: APIChannel) {
-    super(data);
+    super(client, data);
 
-    this.client = client;
     this.patch(data);
   }
 
@@ -56,26 +50,6 @@ export class DMChannel extends Channel {
       this.lastMessageID = data.last_message_id;
 
     this.recipient = this.client.users.add(new User(this.client, data.recipients![0]));
-  }
-
-  /**
-   * Sends a message in this DM channel
-   * @param content The message content
-   * @param options Any additional options to send
-   */
-  send(content: MessageContent, options?: MessageContentOptions) {
-    const data = Util.formatMessage(this.client, content, options);
-    const file = data.file;
-
-    // delete it so it doesn't bleed when sending
-    delete data.file;
-
-    return this.client.rest.dispatch<APIMessage, RESTPostAPIChannelMessageJSONBody>({
-      endpoint: `/channels/${this.id}/messages`,
-      method: 'POST',
-      file,
-      data
-    }).then(data => new Message(this.client, data));
   }
 
   toString() {

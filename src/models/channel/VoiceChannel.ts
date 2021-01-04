@@ -22,8 +22,6 @@
 
 import type WebSocketClient from '../../gateway/WebSocketClient';
 import type { APIChannel } from 'discord-api-types/v8';
-import type GuildMember from '../guild/GuildMember';
-import { Collection } from '@augu/immutable';
 import GuildChannel from './GuildChannel';
 
 export class VoiceChannel extends GuildChannel {
@@ -33,9 +31,6 @@ export class VoiceChannel extends GuildChannel {
   /** The bitrate of the voice channel */
   public bitrate!: number;
 
-  /** List of members connected to this [VoiceChannel] */
-  public members: Collection<GuildMember>;
-
   /**
    * Creates a new [VoiceChannel] instance
    * @param client The [WebSocket] client attached to this [VoiceChannel]
@@ -44,7 +39,6 @@ export class VoiceChannel extends GuildChannel {
   constructor(client: WebSocketClient, data: APIChannel) {
     super(client, data);
 
-    this.members = new Collection();
     this.patch(data);
   }
 

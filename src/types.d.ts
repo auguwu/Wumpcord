@@ -206,12 +206,3 @@ export interface SendActivityOptions {
   url?: string;
   afk?: boolean;
 }
-
-export interface UserTyping {
-  lastTimestamp: Date;
-  elapsedTime: number;
-  timeout: NodeJS.Timeout;
-  channel: PartialEntity<TextableChannel>;
-  since: Date;
-  user: PartialEntity<User>;
-}

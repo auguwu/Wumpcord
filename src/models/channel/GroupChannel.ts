@@ -20,14 +20,12 @@
  * SOFTWARE.
  */
 
-import type { APIChannel, APIMessage, RESTPostAPIChannelMessageJSONBody } from 'discord-api-types/v8';
-import type { MessageContent, MessageContentOptions } from '../../types';
 import type WebSocketClient from '../../gateway/WebSocketClient';
-import { Channel } from '../Channel';
+import type { APIChannel } from 'discord-api-types/v8';
+import TextableChannel from '../inherit/TextableChannel';
 import { User } from '../User';
-import Util from '../../util';
 
-export class GroupChannel extends Channel {
+export class GroupChannel extends TextableChannel<APIChannel> {
   /** The last pinned message's timestamp */
   public lastPinTimestamp!: string | null;
 
@@ -39,9 +37,6 @@ export class GroupChannel extends Channel {
 
   /** The owner's ID, who-ever created the group DM */
   public ownerID!: string;
-
-  /** The [WebSocket] client attached to this [GroupChannel] */
-  private client: WebSocketClient;
 
   /** The name of the group DM */
   public name!: string;
@@ -55,9 +50,8 @@ export class GroupChannel extends Channel {
    * @param data The data from Discord
    */
   constructor(client: WebSocketClient, data: APIChannel) {
-    super(data);
+    super(client, data);
 
-    this.client = client;
     this.patch(data);
   }
 
@@ -80,26 +74,6 @@ export class GroupChannel extends Channel {
       this.icon = data.icon;
 
     this.recipients = data.recipients!.map(data => this.client.users.add(new User(this.client, data)));
-  }
-
-  /**
-   * Sends a message in this DM channel
-   * @param content The message content
-   * @param options Any additional options to send
-   */
-  send(content: MessageContent, options?: MessageContentOptions) {
-    const data = Util.formatMessage(this.client, content, options);
-    const file = data.file;
-
-    // delete it so it doesn't bleed when sending
-    delete data.file;
-
-    return this.client.rest.dispatch<APIMessage, RESTPostAPIChannelMessageJSONBody>({
-      endpoint: `/channels/${this.id}/messages`,
-      method: 'POST',
-      file,
-      data
-    }).then(data => new Message(this.client, data));
   }
 
   toString() {

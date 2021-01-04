@@ -20,14 +20,11 @@
  * SOFTWARE.
  */
 
-import type { APIChannel, APIMessage, RESTPostAPIChannelMessageJSONBody } from 'discord-api-types/v8';
-import type { MessageContent, MessageContentOptions } from '../../types';
 import type WebSocketClient from '../../gateway/WebSocketClient';
-import GuildChannel from './GuildChannel';
-import { Message } from '../Message';
-import Util from '../../util';
+import GuildTextableChannel from './GuildTextableChannel';
+import type { APIChannel } from 'discord-api-types/v8';
 
-export class TextChannel extends GuildChannel {
+export class TextChannel extends GuildTextableChannel {
   /** The ratelimit per user, how long they can send a message */
   public ratelimitPerUser!: number;
 
@@ -53,26 +50,6 @@ export class TextChannel extends GuildChannel {
 
     if (data.topic !== undefined)
       this.topic = data.topic;
-  }
-
-  /**
-   * Sends a message in this text channel
-   * @param content The message content
-   * @param options Any additional options to send
-   */
-  send(content: MessageContent, options?: MessageContentOptions) {
-    const data = Util.formatMessage(this.client, content, options);
-    const file = data.file;
-
-    // delete it so it doesn't bleed when sending
-    delete data.file;
-
-    return this.client.rest.dispatch<APIMessage, RESTPostAPIChannelMessageJSONBody>({
-      endpoint: `/channels/${this.id}/messages`,
-      method: 'POST',
-      file,
-      data
-    }).then(data => new Message(this.client, data));
   }
 
   toString() {

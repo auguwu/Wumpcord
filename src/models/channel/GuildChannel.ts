@@ -24,6 +24,7 @@ import type WebSocketClient from '../../gateway/WebSocketClient';
 import { PermissionOverwrite } from '../PermissionOverwrite';
 import type { APIChannel } from 'discord-api-types/v8';
 import { Collection } from '@augu/collections';
+import type { Guild } from '../Guild';
 import { Channel } from '../Channel';
 
 export default class GuildChannel extends Channel {
@@ -39,11 +40,9 @@ export default class GuildChannel extends Channel {
   /** The guild ID this [GuildChannel] is attached to */
   public guildID!: string;
 
-  /** The WebSocket client attached */
-  public client: WebSocketClient;
-
   /** The guild that this [GuildChannel] is attached to */
-  public guild!: any;
+  public guild!: Guild;
+  private client: WebSocketClient;
 
   /** The name of this [GuildChannel] instance */
   public name!: string;

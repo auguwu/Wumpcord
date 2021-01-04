@@ -32,7 +32,7 @@ import { User } from '../User';
 import Base from '../Base';
 
 interface IGuildMember extends APIGuildMember {
-  guild_id: string;
+  guild_id?: string;
 }
 
 export default class GuildMember extends Base<IGuildMember> {
@@ -116,6 +116,7 @@ export default class GuildMember extends Base<IGuildMember> {
   }
 
   private async _populateGuild() {
+    if (!this.guildID) throw new TypeError('Missing `guildID` property, was this created on accident?');
     if (!this._guild) {
       this._guild = await this.client.guilds.fetch(this.guildID);
     }
