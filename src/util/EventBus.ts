@@ -56,11 +56,7 @@ export default class EventBus<T extends object = DefaultEventBusMap> {
 
     for (let i = 0; i < listeners.length; i++) {
       const listener = listeners[i];
-      try {
-        listener(...args);
-      } catch(ex) {
-        console.error(ex);
-      }
+      listener(...args);
     }
 
     return true;
