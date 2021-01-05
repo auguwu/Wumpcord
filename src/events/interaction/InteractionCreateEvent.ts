@@ -31,8 +31,8 @@ import Event from '../Event';
 
 interface InteractionCreateRefs {
   command?: ApplicationCommand;
-  channel: AnyGuildTextableChannel;
   message?: Message;
+  channel: AnyGuildTextableChannel;
   guild: Guild;
 }
 

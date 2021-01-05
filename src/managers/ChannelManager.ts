@@ -37,10 +37,14 @@ export default class ChannelManager extends BaseManager<Channel> {
    * Fetches a channel from Discord and caches it if we can
    * @param id The channel's ID
    */
-  fetch(id: string) {
+  fetch<T extends Channel = Channel>(id: string) {
     return this.client.rest.dispatch({
       endpoint: `/channels/${id}`,
       method: 'GET'
-    }).then(data => this.add(Channel.from(this.client, data)));
+    }).then(data => this.add(Channel.from(this.client, data)) as T);
+  }
+
+  get<T extends Channel = Channel>(id: string) {
+    return super.get(id) as T | null;
   }
 }
