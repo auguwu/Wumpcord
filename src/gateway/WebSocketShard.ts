@@ -688,6 +688,34 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
 
         this.client.emit('inviteDelete', event);
       } break;
+
+      case 'CHANNEL_CREATE': {
+        const event = new events.ChannelCreateEvent(this, data.d);
+        event.process();
+
+        this.client.emit('channelCreate', event);
+      } break;
+
+      case 'CHANNEL_DELETE': {
+        const event = new events.ChannelDeleteEvent(this, data.d);
+        event.process();
+
+        this.client.emit('channelDelete', event);
+      } break;
+
+      case 'CHANNEL_UPDATE': {
+        const event = new events.ChannelUpdateEvent(this, data.d);
+        event.process();
+
+        this.client.emit('channelUpdate', event);
+      } break;
+
+      case 'CHANNEL_PINS_UPDATE': {
+        const event = new events.ChannelPinsUpdateEvent(this, data.d);
+        event.process();
+
+        this.client.emit('channelPinsUpdate', event);
+      } break;
     }
   }
 

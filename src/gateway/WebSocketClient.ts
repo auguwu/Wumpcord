@@ -57,6 +57,11 @@ interface WebSocketClientEvents extends EntityEvents {
 }
 
 interface EntityEvents {
+  channelPinsUpdate(event: events.ChannelPinsUpdateEvent): void;
+  channelUpdate(event: events.ChannelUpdateEvent): void;
+  channelDelete(event: events.ChannelDeleteEvent): void;
+  channelCreate(event: events.ChannelCreateEvent): void;
+
   inviteCreate(event: events.InviteCreateEvent): void;
   inviteDelete(event: events.InviteDeleteEvent): void;
 

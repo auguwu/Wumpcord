@@ -20,13 +20,17 @@
  * SOFTWARE.
  */
 
+export { default as ChannelPinsUpdateEvent } from './channel/ChannelPinsUpdateEvent';
+export { default as ChannelCreateEvent } from './channel/ChannelCreateEvent';
+export { default as ChannelUpdateEvent } from './channel/ChannelUpdateEvent';
+export { default as ChannelDeleteEvent } from './channel/ChannelDeleteEvent';
+
 export { default as InviteCreateEvent } from './invites/InviteCreateEvent';
 export { default as InviteDeleteEvent } from './invites/InviteDeleteEvent';
 
 export * from './interaction';
 export * from './presence';
 export * from './message';
-//export * from './channel';
 //export * from './guild';
 export * from './voice';
 

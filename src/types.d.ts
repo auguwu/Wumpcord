@@ -62,7 +62,7 @@ export type OnlineStatus = 'online' | 'offline' | 'idle' | 'dnd';
 export type MaybePromise<T> = Promise<T> | T;
 
 /** Represents a partial entity */
-export type PartialEntity<T> = Partial<T> & { id: string };
+export type PartialEntity<T> = T | { id: string };
 
 /** Represents a file to send to Discord */
 export interface MessageFile {
