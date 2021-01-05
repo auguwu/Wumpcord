@@ -22,7 +22,7 @@ If you need Voice Support, install `tweetnacl` (or `node-opus` if using OPUS enc
 ## Need Support?
 You can join the server below and join in #support under the **Wumpcord** category
 
-[![discord embed owo](https://discord.com/api/v8/guilds/382725233695522816/widget.png?style=banner3)](https://discord.gg/yDnbEDH)
+[![discord embed owo](https://discord.com/api/v8/guilds/382725233695522816/widget.png?style=banner3)](https://discord.gg/JjHGR6vhcG)
 
 ## Example Bot
 Coming Soon.
