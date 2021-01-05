@@ -21,6 +21,7 @@
  */
 
 import { HttpClient, HttpMethod, middleware } from '@augu/orchid';
+import DiscordRestValidationError from '../errors/DiscordRestValidationError';
 import DiscordRestError from '../errors/DiscordRestError';
 import DiscordAPIError from '../errors/DiscordAPIError';
 import RatelimitBucket from './RatelimitBucket';
@@ -238,10 +239,21 @@ export default class RestClient {
         ping: this.ping
       });
 
-      if (data.hasOwnProperty('message'))
-        return reject(new DiscordRestError(data.code, data.message));
-      else
+      if (data.hasOwnProperty('code')) {
+        if (data.hasOwnProperty('errors')) {
+          const errors: any[] = [];
+          for (const key of Object.keys(data.errors)) {
+            const error = (data.errors[key]?._errors ?? []).map(d => ({ ...d, key }));
+            if (error.length > 0) errors.push(...error);
+          }
+
+          return reject(new DiscordRestValidationError(request.endpoint, request.method, data.code, data.message, errors));
+        } else {
+          return reject(new DiscordRestError(data.code, data.message));
+        }
+      } else {
         return resolve(data);
+      }
     }).catch((ex) => reject(new DiscordAPIError(ex.statusCode || 500, ex.message))));
   }
 }

@@ -66,10 +66,16 @@ export default class InteractionCreateEvent extends Event<GatewayInteractionCrea
 
   // Credit: https://github.com/FurryBotCo/FurryBot/blob/master/src/events/rawWS.ts#L53
   _format() {
-    if (!this.command!.options?.length) return {
+    if (!this.command) return {
       roleMentions: [],
       userMentions: [],
-      content: `/${this.command!.name}`
+      content: ''
+    };
+
+    if (!this.command.options) return {
+      roleMentions: [],
+      userMentions: [],
+      content: `/${this.command.name}`
     };
 
     const roleMentions: string[] = [];
@@ -133,7 +139,7 @@ export default class InteractionCreateEvent extends Event<GatewayInteractionCrea
     const guild = this.client.guilds.get(guildID) ?? (await this.client.guilds.fetch(guildID));
     const channel = this.client.channels.get(guildID) as AnyGuildTextableChannel ?? (await this.client.channels.fetch(channelID)) as unknown as AnyGuildTextableChannel;
 
-    const refs: Partial<InteractionCreateRefs> = { guild, channel };
+    this.$refs = { guild, channel };
     if (!this.client.options.interactions) {
       this.shard.debug('Received interaction create event, it\'s not enabled.');
       return;
@@ -144,17 +150,16 @@ export default class InteractionCreateEvent extends Event<GatewayInteractionCrea
     await this.client.interactions!.createInteractionResponse(this.data.id, this.token, 5);
 
     const command = globalCommands.find(c => c.id === commandInfo.id) || guildCommands.find(c => c.id === commandInfo.id);
-    if (command !== undefined) {
+    if (command === undefined) {
       this.shard.debug(`Received /${commandInfo.name} but it wasn't found.`);
-      this.$refs = refs as InteractionCreateRefs;
       return;
     }
 
-    refs.command = command!;
+    this.$refs.command = command!;
     const { userMentions, roleMentions, content } = this._format();
     const allUsers = await Promise.all(userMentions.map(r => this.client.users.fetch(r)));
 
-    const message = new Message(this.client, {
+    this.$refs.message = new Message(this.client, {
       // @ts-ignore
       id: null,
       type: 0,
@@ -176,10 +181,5 @@ export default class InteractionCreateEvent extends Event<GatewayInteractionCrea
         id: this.member.user.id
       }
     });
-
-    this.$refs = {
-      ...(refs as InteractionCreateRefs),
-      message
-    };
   }
 }
