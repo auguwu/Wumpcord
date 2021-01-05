@@ -632,6 +632,62 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
 
         this.client.emit('interactionReceive', event);
       } break;
+
+      case 'MESSAGE_DELETE': {
+        const event = new events.MessageDeleteEvent(this, data.d);
+        event.process();
+
+        this.client.emit('messageDelete', event);
+      } break;
+
+      case 'MESSAGE_UPDATE': {
+        const event = new events.MessageUpdateEvent(this, data.d);
+        event.process();
+
+        this.client.emit('messageUpdate', event);
+      } break;
+
+      case 'MESSAGE_REACTION_ADD': {
+        const event = new events.MessageReactionAddEvent(this, data.d);
+        event.process();
+
+        this.client.emit('messageReactionAdd', event);
+      } break;
+
+      case 'MESSAGE_REACTION_REMOVE': {
+        const event = new events.MessageReactionRemoveEvent(this, data.d);
+        event.process();
+
+        this.client.emit('messageReactionRemove', event);
+      } break;
+
+      case 'MESSAGE_REACTION_REMOVE_ALL': {
+        const event = new events.MessageReactionRemoveAllEvent(this, data.d);
+        event.process();
+
+        this.client.emit('messageReactionRemoveAll', event);
+      } break;
+
+      case 'MESSAGE_REACTION_REMOVE_EMOJI': {
+        const event = new events.MessageReactionRemoveEmojiEvent(this, data.d);
+        event.process();
+
+        this.client.emit('messageReactionRemoveEmoji', event);
+      } break;
+
+      case 'INVITE_CREATE': {
+        const event = new events.InviteCreateEvent(this, data.d);
+        event.process();
+
+        this.client.emit('inviteCreate', event);
+      } break;
+
+      case 'INVITE_DELETE': {
+        const event = new events.InviteDeleteEvent(this, data.d);
+        event.process();
+
+        this.client.emit('inviteDelete', event);
+      } break;
     }
   }
 

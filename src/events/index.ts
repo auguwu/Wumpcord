@@ -20,10 +20,12 @@
  * SOFTWARE.
  */
 
+export { default as InviteCreateEvent } from './invites/InviteCreateEvent';
+export { default as InviteDeleteEvent } from './invites/InviteDeleteEvent';
+
 export * from './interaction';
 export * from './presence';
 export * from './message';
-//export * from './invites';
 //export * from './channel';
 //export * from './guild';
 export * from './voice';

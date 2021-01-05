@@ -57,6 +57,9 @@ interface WebSocketClientEvents extends EntityEvents {
 }
 
 interface EntityEvents {
+  inviteCreate(event: events.InviteCreateEvent): void;
+  inviteDelete(event: events.InviteDeleteEvent): void;
+
   messageReactionRemoveEmoji(event: events.MessageReactionRemoveEmojiEvent): void;
   messageReactionRemoveAll(event: events.MessageReactionRemoveAllEvent): void;
   messageReactionRemove(event: events.MessageReactionRemoveEvent): void;

@@ -1,7 +1,9 @@
 name: Release
-on: [release]
-jobs:
+on:
   release:
+    types: [created]
+jobs:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkouts the repository
@@ -24,5 +26,22 @@ jobs:
       - name: Runs Jest to check for any unit test errors
         run: npm run test
 
-      - name: Prepare for releases
-        run: rm -rf build && node scripts/release.js && node scripts/build.js
+  publish-npm:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
+      - name: Use Node.js v14.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14.x
+      
+      - name: Install all dependencies
+        run: npm ci
+
+      - name: Publish the library
+        run: npm public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.access_token }}
