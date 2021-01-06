@@ -49,10 +49,5 @@
     "typedoc": "0.20.12",
     "typescript": "4.1.3",
     "tweetnacl": "1.0.3"
-  },
-  "optionalDependencies": {
-    "erlpack": "0.1.3",
-    "node-opus": "0.3.3",
-    "tweetnacl": "1.0.3"
   }
 }
