@@ -21,6 +21,7 @@
  */
 
 import type { GatewayVoiceState } from 'discord-api-types';
+import Base from './Base';
 
 interface SelfVoiceState {
   stream: boolean;
@@ -34,7 +35,7 @@ interface ServerVoiceState {
   mute: boolean;
 }
 
-export class VoiceState {
+export class VoiceState extends Base<GatewayVoiceState> {
   public channelID!: string | null;
   public sessionID!: string;
   public suppress!: boolean;
@@ -45,6 +46,8 @@ export class VoiceState {
   public self: SelfVoiceState;
 
   constructor(data: GatewayVoiceState) {
+    super();
+
     this.server = {
       deaf: false,
       mute: false
@@ -60,7 +63,7 @@ export class VoiceState {
     this.patch(data);
   }
 
-  private patch(data: GatewayVoiceState) {
+  patch(data: GatewayVoiceState) {
     if (data.session_id !== undefined)
       this.sessionID = data.session_id;
 

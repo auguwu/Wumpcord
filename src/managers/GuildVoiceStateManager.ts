@@ -24,7 +24,6 @@ import type WebSocketClient from '../gateway/WebSocketClient';
 import { VoiceState } from '../models/VoiceState';
 import BaseManager from './BaseManager';
 
-// @ts-ignore You can use it without a `Base` class, but yea...
 export default class GuildVoiceStateManager extends BaseManager<VoiceState> {
   constructor(client: WebSocketClient) {
     super(client, VoiceState);

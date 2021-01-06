@@ -27,7 +27,7 @@ import type Base from '../models/Base';
 /**
  * Represents a manager for handling entity cache
  */
-export default class BaseManager<T extends Base<{}>> {
+export default class BaseManager<T extends Base<object>> {
   /** The holdable object to construct with [BaseManager.add] */
   private holdable: any;
 
