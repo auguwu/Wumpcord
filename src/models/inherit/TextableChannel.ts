@@ -31,7 +31,7 @@ import { Channel } from '../Channel';
 import Permission from '../../util/Permissions';
 import Util from '../../util';
 import { Guild } from '../Guild';
-import Webhook from '../Webhook';
+import { Webhook } from '../Webhook';
 import { MessageContent, MessageContentOptions } from '../../types';
 
 interface GetMessagesOptions {

@@ -336,4 +336,24 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
       });
     });
   }
+
+  disconnect(reconnect: boolean = false) {
+    if (reconnect) {
+      this.debug('End Of Life', 'Reconnecting all shards to Discord...');
+      for (const shard of this.shards.values()) shard.disconnect(true);
+
+      return;
+    }
+
+    this.debug('End Of Life', 'Disconnecting from Discord...');
+    this.channels.cache.clear();
+    this.guilds.cache.clear();
+    this.users.cache.clear();
+
+    for (const shard of this.shards.values()) shard.disconnect(false);
+  }
+
+  setStatus(status: types.OnlineStatus, options: types.SendActivityOptions) {
+    for (const shard of this.shards.values()) shard.setStatus(status, options);
+  }
 }
