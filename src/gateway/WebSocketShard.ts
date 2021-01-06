@@ -797,6 +797,34 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
         this.client.emit('guildMemberRemove', event);
       } break;
 
+      case 'GUILD_MEMBER_UPDATE': {
+        const event = new events.GuildMemberUpdateEvent(this, data.d);
+        event.process();
+
+        this.client.emit('guildMemberUpdate', event);
+      } break;
+
+      case 'GUILD_ROLE_CREATE': {
+        const event = new events.GuildRoleCreateEvent(this, data.d);
+        event.process();
+
+        this.client.emit('guildRoleCreate', event);
+      } break;
+
+      case 'GUILD_ROLE_DELETE': {
+        const event = new events.GuildRoleDeleteEvent(this, data.d);
+        event.process();
+
+        this.client.emit('guildRoleDelete', event);
+      } break;
+
+      case 'GUILD_ROLE_UPDATE': {
+        const event = new events.GuildRoleUpdateEvent(this, data.d);
+        event.process();
+
+        this.client.emit('guildRoleUpdate', event);
+      } break;
+
       default:
         this.client.emit('raw', data.t, data.d);
         break;

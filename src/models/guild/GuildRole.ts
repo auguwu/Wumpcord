@@ -80,7 +80,7 @@ export default class GuildRole extends Base<DiscordRole> {
     this.patch(data);
   }
 
-  patch(data: DiscordRole) {
+  patch(data: Partial<DiscordRole>) {
     if (data.permissions !== undefined)
       this.permissions = new Permission(data.permissions);
 

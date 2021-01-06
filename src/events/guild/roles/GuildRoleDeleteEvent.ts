@@ -20,4 +20,42 @@
  * SOFTWARE.
  */
 
-export default class GuildRoleDeleteEvent {}
+import type { GatewayGuildRoleDeleteDispatchData } from 'discord-api-types';
+import type { PartialEntity } from '../../../types';
+import { Guild, GuildRole } from '../../../models';
+import Event from '../../Event';
+
+interface GuildRoleDeleteRefs {
+  guild: PartialEntity<Guild>;
+  role: PartialEntity<GuildRole>;
+}
+
+export default class GuildRoleDeleteEvent extends Event<GatewayGuildRoleDeleteDispatchData, GuildRoleDeleteRefs> {
+  get guild() {
+    return this.$refs.guild;
+  }
+
+  get role() {
+    return this.$refs.role;
+  }
+
+  process() {
+    const guild = this.client.guilds.get(this.data.guild_id) ?? { id: this.data.guild_id };
+    if (guild instanceof Guild) {
+      const role = guild.roles.get(this.data.role_id);
+      if (role !== null) guild.roles.remove(role);
+
+      this.$refs = {
+        role: role ?? { id: this.data.role_id },
+        guild
+      };
+
+      return;
+    }
+
+    this.$refs = {
+      role: { id: this.data.role_id },
+      guild
+    };
+  }
+}

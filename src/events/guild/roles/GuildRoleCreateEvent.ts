@@ -20,4 +20,39 @@
  * SOFTWARE.
  */
 
-export default class GuildRoleCreateEvent {}
+import type { GatewayGuildRoleCreateDispatchData } from 'discord-api-types';
+import type { PartialEntity } from '../../../types';
+import { Guild, GuildRole } from '../../../models';
+import Event from '../../Event';
+
+interface GuildRoleCreateRefs {
+  guild: PartialEntity<Guild>;
+  role: GuildRole;
+}
+
+export default class GuildRoleCreateEvent extends Event<GatewayGuildRoleCreateDispatchData, GuildRoleCreateRefs> {
+  get guild() {
+    return this.$refs.guild;
+  }
+
+  get role() {
+    return this.$refs.role;
+  }
+
+  process() {
+    const guild = this.client.guilds.get(this.data.guild_id) ?? { id: this.data.guild_id };
+    if (guild instanceof Guild) {
+      const role = new GuildRole(this.client, { guild_id: guild.id, ...this.data.role }); // eslint-disable-line camelcase
+
+      guild.roles.add(role);
+      this.$refs = { role, guild };
+
+      return;
+    }
+
+    this.$refs = {
+      role: new GuildRole(this.client, this.data.role as any),
+      guild
+    };
+  }
+}

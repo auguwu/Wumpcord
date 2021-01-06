@@ -20,4 +20,41 @@
  * SOFTWARE.
  */
 
-export default class GuildRoleUpdateEvent {}
+import type { GatewayGuildRoleUpdateDispatchData } from 'discord-api-types';
+import type { PartialEntity } from '../../../types';
+import { Guild, GuildRole } from '../../../models';
+import Event from '../../Event';
+
+interface GuildRoleUpdateRefs {
+  updated: GuildRole;
+  old: PartialEntity<GuildRole>;
+}
+
+export default class GuildRoleDeleteEvent extends Event<GatewayGuildRoleUpdateDispatchData, GuildRoleUpdateRefs> {
+  get role() {
+    return this.$refs.updated;
+  }
+
+  get old() {
+    return this.$refs.old;
+  }
+
+  process() {
+    const guild = this.client.guilds.get(this.data.guild_id) ?? { id: this.data.guild_id };
+    if (guild instanceof Guild) {
+      const role = guild.roles.get(this.data.role.id);
+      if (role !== null) {
+        const old = role;
+        role.patch(this.data.role);
+
+        this.$refs = { old, updated: role };
+        return;
+      }
+    }
+
+    this.$refs = {
+      old: { id: this.data.role.id },
+      updated: new GuildRole(this.client, <any> this.data.role)
+    };
+  }
+}
