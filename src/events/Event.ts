@@ -55,7 +55,7 @@ export default class Event<D extends object, Refs extends object = {}> {
     this.data   = data;
   }
 
-  process(): types.MaybePromise<void> {
+  process(): types.MaybePromise<any> {
     throw new TypeError('Overridable function [Event.process] is not implemented.');
   }
 }

@@ -31,7 +31,7 @@ export { default as InviteDeleteEvent } from './invites/InviteDeleteEvent';
 export * from './interaction';
 export * from './presence';
 export * from './message';
-//export * from './guild';
+export * from './guild';
 export * from './voice';
 
 export * from './WebhooksUpdateEvent';

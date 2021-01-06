@@ -57,6 +57,12 @@ interface WebSocketClientEvents extends EntityEvents {
 }
 
 interface EntityEvents {
+  guildIntegrationsUpdate(event: events.GuildIntegrationsUpdateEvent): void;
+  guildEmojisUpdate(event: events.GuildEmojisUpdateEvent): void;
+  guildDelete(event: events.GuildDeleteEvent): void;
+  guildUpdate(event: events.GuildUpdateEvent): void;
+  guildCreate(event: events.GuildCreateEvent): void;
+
   channelPinsUpdate(event: events.ChannelPinsUpdateEvent): void;
   channelUpdate(event: events.ChannelUpdateEvent): void;
   channelDelete(event: events.ChannelDeleteEvent): void;
@@ -82,6 +88,11 @@ interface EntityEvents {
   presenceUpdate(event: events.PresenceUpdateEvent): void;
   typingStart(event: events.TypingStartEvent): void;
   userUpdate(event: events.UserUpdateEvent): void;
+
+  raw(
+    type: string,
+    data: object // TODO: add safety to this
+  ): void;
 }
 
 /**
