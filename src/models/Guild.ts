@@ -353,7 +353,8 @@ export class Guild extends Base<IGuild> {
     if (data.name !== undefined)
       this.name = data.name;
 
-    this.shardID = data.shard_id ?? 0;
+    if (data.shard_id !== undefined)
+      this.shardID = data.shard_id;
 
     if (data.voice_states !== undefined) {
       for (let i = 0; i < data.voice_states.length; i++) {

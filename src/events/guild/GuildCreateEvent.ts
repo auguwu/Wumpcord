@@ -34,9 +34,23 @@ export default class GuildCreateEvent extends Event<GatewayGuildCreateDispatchDa
   }
 
   process() {
+    if (this.client.guilds.has(this.data.id)) {
+      const guild = this.client.guilds.get(this.data.id);
+      if (guild !== null) {
+        if (!guild.unavailable && !this.data.unavailable) {
+          guild.patch({ shard_id: this.shard.id, ...this.data }); // eslint-disable-line camelcase
+          this.client.guilds.cache.set(this.data.id, guild);
+          this.$refs = { guild };
+
+          return true;
+        }
+      }
+    }
+
     const guild = new Guild(this.client, { shard_id: this.shard.id, ...this.data }); // eslint-disable-line camelcase
 
     this.client.guilds.add(guild);
     this.$refs = { guild };
+    return false;
   }
 }

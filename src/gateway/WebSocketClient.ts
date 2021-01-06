@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import { GuildMember, SelfUser, User } from '../models';
+import { Guild, GuildMember, SelfUser, User } from '../models';
 import type { Collection } from '@augu/collections';
 import type * as discord from 'discord-api-types/v8';
 import InteractionHelper from '../interactions/Helper';
@@ -62,6 +62,8 @@ interface EntityEvents {
 
   guildIntegrationsUpdate(event: events.GuildIntegrationsUpdateEvent): void;
   guildEmojisUpdate(event: events.GuildEmojisUpdateEvent): void;
+  guildUnavailable(guild: types.PartialEntity<Guild>): void;
+  guildAvailable(guild: Guild): void;
   guildDelete(event: events.GuildDeleteEvent): void;
   guildUpdate(event: events.GuildUpdateEvent): void;
   guildCreate(event: events.GuildCreateEvent): void;

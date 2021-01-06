@@ -22,19 +22,14 @@
 
 import type { GatewayGuildDeleteDispatchData } from 'discord-api-types';
 import type { PartialEntity } from '../../types';
-import type { Guild } from '../../models/Guild';
+import { Guild } from '../../models/Guild';
 import Event from '../Event';
 
 interface GuildDeleteRefs {
-  unavailable: boolean;
   guild: PartialEntity<Guild>;
 }
 
 export default class GuildDeleteEvent extends Event<GatewayGuildDeleteDispatchData, GuildDeleteRefs> {
-  get unavailable() {
-    return this.$refs.unavailable;
-  }
-
   get guild() {
     return this.$refs.guild;
   }
@@ -43,16 +38,17 @@ export default class GuildDeleteEvent extends Event<GatewayGuildDeleteDispatchDa
     const guild = this.client.guilds.get(this.data.id) ?? { id: this.data.id };
     if (this.data.unavailable) {
       this.$refs = {
-        unavailable: true,
         guild
       };
 
-      this.client.guilds.remove(this.data.id);
+      // @ts-ignore
+      (guild as Guild)?.patch({ unavailable: true });
+      if (guild instanceof Guild) this.client.guilds.add(guild);
+
       return true;
     }
 
     this.$refs = {
-      unavailable: false,
       guild
     };
 

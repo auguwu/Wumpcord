@@ -719,16 +719,26 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
 
       case 'GUILD_CREATE': {
         const event = new events.GuildCreateEvent(this, data.d);
-        event.process();
+        const available = event.process();
 
-        this.client.emit('guildCreate', event);
+        if (available) {
+          this.debug(`Guild ${event.guild.id} was previously unavailable, and now is available! Emitting \`guildAvailable\`...`);
+          this.client.emit('guildAvailable', event.guild);
+        } else {
+          this.client.emit('guildCreate', event);
+        }
       } break;
 
       case 'GUILD_DELETE': {
         const event = new events.GuildDeleteEvent(this, data.d);
-        event.process();
+        const unavailable = event.process();
 
-        this.client.emit('guildDelete', event);
+        if (unavailable) {
+          this.debug(`Guild "${event.guild.id}" is unavailable, emitting \`guildUnavailable\` event.`);
+          this.client.emit('guildUnavailable', event.guild);
+        } else {
+          this.client.emit('guildDelete', event);
+        }
       } break;
 
       case 'GUILD_UPDATE': {
