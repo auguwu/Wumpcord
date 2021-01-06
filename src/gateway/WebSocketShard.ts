@@ -752,6 +752,20 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
         this.client.emit('guildIntegrationsUpdate', event);
       } break;
 
+      case 'GUILD_BAN_ADD': {
+        const event = new events.GuildBanAddEvent(this, data.d);
+        event.process();
+
+        this.client.emit('guildBanAdd', event);
+      } break;
+
+      case 'GUILD_BAN_REMOVE': {
+        const event = new events.GuildBanRemoveEvent(this, data.d);
+        event.process();
+
+        this.client.emit('guildBanRemove', event);
+      } break;
+
       default:
         this.client.emit('raw', data.t, data.d);
         break;
