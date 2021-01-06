@@ -776,6 +776,13 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
         this.client.emit('guildBanRemove', event);
       } break;
 
+      case 'GUILD_MEMBERS_CHUNK': {
+        const event = new events.GuildMemberChunkEvent(this, data.d);
+        event.process();
+
+        this.client.emit('guildMembersChunk', event);
+      } break;
+
       default:
         this.client.emit('raw', data.t, data.d);
         break;

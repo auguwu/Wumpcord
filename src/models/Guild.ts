@@ -21,8 +21,9 @@
  */
 /* eslint-disable camelcase */
 
-import type { AnyChannel, AnyGuildChannel } from '../types';
 import { AuditLogAction, GuildFeature, OPCodes } from '../Constants';
+import type { AnyChannel, AnyGuildChannel } from '../types';
+import type { GuildMemberChunkEvent } from '../events';
 import GuildVoiceStateManager from '../managers/GuildVoiceStateManager';
 import type WebSocketClient from '../gateway/WebSocketClient';
 import GuildPresenceManager from '../managers/GuildPresencesManager';
@@ -35,15 +36,16 @@ import ChannelManager from '../managers/ChannelManager';
 import { VoiceState } from './VoiceState';
 import { Presence } from './presence';
 import GuildPreview from './guild/GuildPreview';
+import { Readable } from 'stream';
 import GuildMember from './guild/GuildMember';
 import GuildInvite from './guild/GuildInvite';
-import { Readable } from 'stream';
 import { Channel } from './Channel';
-import AuditLogs from './audits/AuditLogs';
+import { Webhook } from './Webhook';
 import GuildEmoji from './guild/GuildEmoji';
+import AuditLogs from './audits/AuditLogs';
 import GuildRole from './guild/GuildRole';
 import GuildBan from './guild/GuildBan';
-import Webhook from './Webhook';
+
 import Base from './Base';
 import Util from '../util';
 
@@ -73,8 +75,7 @@ import {
   RESTPostAPIGuildEmojiJSONBody,
   RESTPostAPIGuildPruneJSONBody,
   RESTPostAPIGuildRoleJSONBody,
-  RESTPutAPIGuildBanJSONBody,
-  RESTPutAPIGuildMemberJSONBody
+  RESTPutAPIGuildBanJSONBody
 } from 'discord-api-types';
 
 interface IGuild extends APIGuild {
@@ -243,7 +244,7 @@ export class Guild extends Base<IGuild> {
     this.patch(data);
   }
 
-  patch(data: IGuild) {
+  patch(data: Partial<IGuild>) {
     if (data.default_message_notifications !== undefined)
       this.defaultMessageNotifications = data.default_message_notifications;
 
@@ -448,17 +449,29 @@ export class Guild extends Base<IGuild> {
         guild_id: this.id
       });
 
-      const members = new Collection<string, GuildMember>();
       const timeout = setTimeout(() => {
         clearTimeout(timeout);
         return reject(new Error(`Unable to fetch guild members in ${time}ms`));
       }, time!);
 
-      const handler = () => {
-        // todo this :eyes:
+      const handler = (event: GuildMemberChunkEvent) => {
+        timeout.refresh();
+        if (event.nonce !== nonce) return;
+
+        this.members.cache = event.members;
+        if (limit && event.members.size >= limit) {
+          clearTimeout(timeout);
+          this.client.remove('guildMembersChunk', handler);
+
+          return resolve(event.members);
+        }
+
+        clearTimeout(timeout);
+        this.client.remove('guildMembersChunk', handler);
+        return resolve(event.members);
       };
 
-      //this.client.on('guildMemberChunk', handler);
+      this.client.on('guildMembersChunk', handler);
     });
   }
 
@@ -727,7 +740,7 @@ export class Guild extends Base<IGuild> {
         name: opts.name
       }
     }).then(data => {
-      this.patch({ shard_id: this.shardID, ...data });
+      this.patch({ ...data });
       return this;
     });
   }
@@ -773,13 +786,7 @@ export class Guild extends Base<IGuild> {
     opts: ModifyGuildMemberOptions,
     reason?: string
   ) {
-    let member: GuildMember | null;
-    if (!this.members.has(memberID)) {
-      member = await this.getGuildMember(memberID);
-    } else {
-      member = this.members.get(memberID);
-    }
-
+    const member = this.members.get(memberID);
     if (member === undefined || member === null)
       throw new TypeError(`Member "${memberID}" doesn't exist in guild ${this.name}`);
 
@@ -811,20 +818,8 @@ export class Guild extends Base<IGuild> {
   }
 
   async addRole(memberID: string, roleID: string, reason?: string) {
-    let member: GuildMember | null;
-    let role: GuildRole | null;
-
-    if (!this.members.has(memberID)) {
-      member = await this.getGuildMember(memberID);
-    } else {
-      member = this.members.get(memberID);
-    }
-
-    if (!this.roles.has(roleID)) {
-      role = await this.roles.fetch(this.id, roleID);
-    } else {
-      role = this.roles.get(roleID);
-    }
+    const member = this.members.get(memberID);
+    const role = this.roles.get(roleID);
 
     if (!member) throw new TypeError(`Member "${memberID}" was not found in this guild`);
     if (!role) throw new TypeError(`Role "${roleID}" doesn't exist in this guild`);
@@ -837,38 +832,21 @@ export class Guild extends Base<IGuild> {
   }
 
   async removeRole(memberID: string, roleID: string, reason?: string) {
-    let member: GuildMember | null;
-    let role: GuildRole | null;
-
-    if (!this.members.has(memberID)) {
-      member = await this.getGuildMember(memberID);
-    } else {
-      member = this.members.get(memberID);
-    }
-
-    if (!this.roles.has(roleID)) {
-      role = await this.roles.fetch(this.id, roleID);
-    } else {
-      role = this.roles.get(roleID);
-    }
+    const member = this.members.get(memberID);
+    const role = this.roles.get(roleID);
 
     if (!member) throw new TypeError(`Member "${memberID}" was not found in this guild`);
     if (!role) throw new TypeError(`Role "${roleID}" doesn't exist in this guild`);
 
     return this.client.rest.dispatch<void>({
+      auditLogReason: reason,
       endpoint: `/guilds/${this.id}/members/${member.id}/${role.id}`,
       method: 'DELETE'
     });
   }
 
   async kickMember(memberID: string, reason?: string) {
-    let member: GuildMember | null;
-    if (!this.members.has(memberID)) {
-      member = await this.getGuildMember(memberID);
-    } else {
-      member = this.members.get(memberID);
-    }
-
+    const member = this.members.get(memberID);
     if (member === undefined || member === null)
       throw new TypeError(`Member "${memberID}" doesn't exist in guild ${this.name}`);
 

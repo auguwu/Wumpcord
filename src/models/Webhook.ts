@@ -43,7 +43,7 @@ interface SendWebhookMessageOptions extends MessageContentOptions {
 
 type SendWebhookMessage = string | SendWebhookMessageOptions;
 
-export default class Webhook extends Base<APIWebhook> {
+export class Webhook extends Base<APIWebhook> {
   public applicationID!: string | null;
   public channelID!: string;
   public guildID!: string;

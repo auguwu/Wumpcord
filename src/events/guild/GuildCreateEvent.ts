@@ -38,7 +38,7 @@ export default class GuildCreateEvent extends Event<GatewayGuildCreateDispatchDa
       const guild = this.client.guilds.get(this.data.id);
       if (guild !== null) {
         if (!guild.unavailable && !this.data.unavailable) {
-          guild.patch({ shard_id: this.shard.id, ...this.data }); // eslint-disable-line camelcase
+          guild.patch({ ...this.data }); // eslint-disable-line camelcase
           this.client.guilds.cache.set(this.data.id, guild);
           this.$refs = { guild };
 

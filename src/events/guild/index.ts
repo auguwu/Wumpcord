@@ -31,7 +31,7 @@ export { default as GuildMemberChunkEvent } from './member/GuildMemberChunkEvent
 export { default as GuildMemberAddEvent } from './member/GuildMemberAddEvent';
 
 // Guild Roles
-export { default as GuildRoleRemoveEvent } from './roles/GuildRoleRemoveEvent';
+export { default as GuildRoleDeleteEvent } from './roles/GuildRoleDeleteEvent';
 export { default as GuildRoleUpdateEvent } from './roles/GuildRoleUpdateEvent';
 export { default as GuildRoleCreateEvent } from './roles/GuildRoleCreateEvent';
 
