@@ -20,4 +20,48 @@
  * SOFTWARE.
  */
 
-export default class GuildMemberUpdateEvent {}
+import type { GatewayGuildMemberUpdateDispatchData } from 'discord-api-types';
+import { Guild, GuildMember } from '../../../models';
+import { PartialEntity } from '../../../types';
+import Event from '../../Event';
+
+interface GuildMemberUpdateRefs {
+  updated: GuildMember;
+  old: PartialEntity<GuildMember> | null;
+}
+
+export default class GuildMemberUpdateEvent extends Event<GatewayGuildMemberUpdateDispatchData, GuildMemberUpdateRefs> {
+  get member() {
+    return this.$refs.updated;
+  }
+
+  get old() {
+    return this.$refs.old;
+  }
+
+  process() {
+    const guild = this.client.guilds.get(this.data.guild_id) ?? { id: this.data.guild_id };
+    if (guild instanceof Guild) {
+      if (this.data.user === undefined) {
+        this.$refs = { old: null, updated: new GuildMember(this.client, <any> this.data) };
+        return;
+      }
+
+      const member = guild.members.get(this.data.user.id) ?? { id: this.data.user.id };
+      let old = member;
+
+      if (member instanceof GuildMember) {
+        member.patch(this.data);
+        guild.members.cache.set(member.user.id, member);
+
+        this.$refs = { old, updated: member };
+        return;
+      }
+    }
+
+    this.$refs = {
+      updated: new GuildMember(this.client, <any> this.data),
+      old: this.data.user !== undefined ? { id: this.data.user.id } : null
+    };
+  }
+}

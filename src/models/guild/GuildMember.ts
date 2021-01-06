@@ -55,7 +55,7 @@ export default class GuildMember extends Base<IGuildMember> {
     this.patch(data);
   }
 
-  patch(data: IGuildMember) {
+  patch(data: Partial<IGuildMember>) {
     if (data.premium_since !== undefined)
       this.boostedAt = data.premium_since !== null ? new Date(data.premium_since) : null;
 

@@ -20,4 +20,48 @@
  * SOFTWARE.
  */
 
-export default class GuildMemberCreateEvent {}
+import type { GatewayGuildMemberAddDispatchData } from 'discord-api-types';
+import type { PartialEntity } from '../../../types';
+import { Guild, GuildMember } from '../../../models';
+import Event from '../../Event';
+
+interface GuildMemberAddRefs {
+  member: GuildMember;
+  guild: PartialEntity<Guild>;
+}
+
+export default class GuildMemberAddEvent extends Event<GatewayGuildMemberAddDispatchData, GuildMemberAddRefs> {
+  /**
+   * Getter if the member hasn't passed the **Member Screening** panel. Use
+   * a timeout (`setTimeout`) to check if `pending` is now the value you want.
+   *
+   * Useful for Autoroles and such.
+   */
+  get pending() {
+    return this.$refs.member.pending;
+  }
+
+  /**
+   * Returns the reference for the member that joined the guild.
+   */
+  get member() {
+    return this.$refs.member;
+  }
+
+  /**
+   * Returns a partial or a full guild, a partial guild only contains a object as
+   * `{ id: String }` while a full guild has all metadata, this is purely based
+   * on cache.
+   */
+  get guild() {
+    return this.$refs.guild;
+  }
+
+  process() {
+    const guild = this.client.guilds.get(this.data.guild_id) ?? { id: this.data.guild_id };
+    const member = new GuildMember(this.client, this.data);
+    if (guild instanceof Guild) guild.members.add(member);
+
+    this.$refs = { guild, member };
+  }
+}

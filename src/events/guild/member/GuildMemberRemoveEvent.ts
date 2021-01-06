@@ -20,4 +20,37 @@
  * SOFTWARE.
  */
 
-export default class GuildMemberRemoveEvent {}
+import type { GatewayGuildMemberRemoveDispatchData } from 'discord-api-types';
+import type { PartialEntity } from '../../../types';
+import { Guild, GuildMember } from '../../../models';
+import Event from '../../Event';
+
+interface GuildMemberRemoveRefs {
+  member: GuildMember | null;
+  guild: PartialEntity<Guild>;
+}
+
+export default class GuildMemberRemoveEvent extends Event<GatewayGuildMemberRemoveDispatchData, GuildMemberRemoveRefs> {
+  get member() {
+    return this.$refs.member;
+  }
+
+  get guild() {
+    return this.$refs.guild;
+  }
+
+  process() {
+    const guild = this.client.guilds.get(this.data.guild_id) ?? { id: this.data.guild_id };
+    let member!: GuildMember | null;
+
+    if (guild instanceof Guild) {
+      const mlem = guild.members.get(this.data.user.id);
+      if (mlem !== null) {
+        member = mlem;
+        guild.members.remove(member);
+      }
+    }
+
+    this.$refs = { guild, member };
+  }
+}

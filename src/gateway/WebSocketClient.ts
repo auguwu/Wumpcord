@@ -57,7 +57,14 @@ interface WebSocketClientEvents extends EntityEvents {
 }
 
 interface EntityEvents {
+  guildRoleCreate(event: events.GuildRoleCreateEvent): void;
+  guildRoleDelete(event: events.GuildRoleDeleteEvent): void;
+  guildRoleUpdate(event: events.GuildRoleUpdateEvent): void;
+
   guildMembersChunk(event: events.GuildMemberChunkEvent): void;
+  guildMemberUpdate(event: events.GuildMemberUpdateEvent): void;
+  guildMemberRemove(event: events.GuildMemberRemoveEvent): void;
+  guildMemberAdd(event: events.GuildMemberAddEvent): void;
 
   guildBanRemove(event: events.GuildBanRemoveEvent): void;
   guildBanAdd(event: events.GuildBanAddEvent): void;
