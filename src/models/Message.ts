@@ -274,7 +274,6 @@ export class Message<C extends AnyGuildTextableChannel = AnyGuildTextableChannel
         content: content
       });
 
-      console.log(data);
       return this.client.rest.dispatch<APIMessage, RESTPostAPIChannelMessageJSONBody>({
         endpoint: `/channels/${this.channelID}/messages`,
         method: 'POST',
