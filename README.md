@@ -16,10 +16,28 @@ $ npm i --no-optional wumpcord
 ### Features
 Specific features require extra dependencies, this is a list that requires them
 
-|Feature|Dependency|Install|Native?|
-|---|---|---|---|
-|Voice|`tweetnacl`, `node-opus`|`npm i tweetnacl node-opus`|Yes|
-|Clustering|`ioredis` (Optional)|`npm i ioredis`|No|
+#### Voice Dependencies
+> If `@discordjs/opus` or `opusscript` isn't installed, the library will error out and you will not have access to Voice
+
+- `tweetnacl`
+  - Required: Yes
+  - Native: No
+
+- `@discordjs/opus`
+  - Required: No
+  - Alternative: **opusscript**
+  - Native: Yes
+
+- `opusscript`
+  - Required: No
+  - Alternative: **@discordjs/opus**
+  - Native: Yes
+
+#### Cluster Dependencies
+- `ioredis`
+  - Required: No
+  - Native: No
+  - Alternative: IPC (no dependencies)
 
 ## Need Support?
 You can join the server below and join in #support under the **Wumpcord** category
@@ -45,7 +63,6 @@ client.on('ready', async () => {
     name: 'uwu'
   });
 });
-
 
 client.connect();
 ```
