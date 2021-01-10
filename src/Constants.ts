@@ -92,7 +92,7 @@ export enum OPCodes {
   Heartbeat,
   Identify,
   StatusUpdate,
-  VoiceServerUpdate,
+  VoiceStateUpdate,
   // 5 is a mystery
   Resume = 6,
   Reconnect,

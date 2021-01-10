@@ -57,10 +57,7 @@ export const EncryptionModes: [normal: string, suffix: string, lite: string] = [
 ];
 
 export const UnrecoverableCodes = [
-  4005, // we are already connected
+  4014,
   4006, // session invalid
-  4011, // server not found
-  4012, // unknown protocol
-  4014, // channel was deleted or we were kicked, do not reconnect
-  4016 // we didn't use the right mode (report an issue)
+  1000  // yes
 ];

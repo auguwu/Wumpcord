@@ -20,4 +20,4 @@
  * SOFTWARE.
  */
 
-
+import { Collection } from '@augu/collections';

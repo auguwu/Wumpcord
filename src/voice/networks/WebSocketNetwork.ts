@@ -32,6 +32,7 @@ export default class WebSocketNetwork {
   private _heartbeatInterval!: NodeJS.Timer;
   public lastHeartbeatAckAt!: number;
   public lastHeartbeatAt!: number;
+  private serverUpdate!: GatewayVoiceServerUpdateDispatchData;
   private connection: VoiceConnection;
   private sessionID: string | null;
   private socket!: WebSocket;
@@ -55,6 +56,7 @@ export default class WebSocketNetwork {
   }
 
   spawn(update: GatewayVoiceServerUpdateDispatchData) {
+    if (!this.serverUpdate) this.serverUpdate = update;
     this.token = update.token;
     this.socket = new WebSocket(`wss://${update.endpoint}?v=4`);
 
@@ -87,6 +89,15 @@ export default class WebSocketNetwork {
     this.sessionID = update.session_id;
   }
 
+  disconnect() {
+    this.ready = false;
+    this.connection.reset();
+  }
+
+  clean() {
+    this.socket.terminate();
+  }
+
   private debug(message: string) {
     this.connection.debug(message, `WebSocket/${this.connection.guildID}/${this.connection.channelID}`);
   }
@@ -97,7 +108,18 @@ export default class WebSocketNetwork {
   }
 
   private onClose(code: number, reason: string) {
-    this.debug(`Received close! (code=${code},reason=${reason})`);
+    this.debug(`Received close! (code=${code},reason=${reason || 'none'})`);
+    this.connection.emit('close', code, reason);
+
+    if (this.ready) {
+      if (constants.UnrecoverableCodes.includes(code)) {
+        this.debug('Close code was not recoverable, disconnecting');
+        return this.disconnect();
+      }
+
+      this.debug('Close code is recoverable!');
+      setTimeout(() => this.spawn(this.serverUpdate), 500);
+    }
   }
 
   private onMessage(data: any) {
@@ -124,7 +146,8 @@ export default class WebSocketNetwork {
         this.send(constants.VoiceOPCodes.Identify, {
           session_id: this.sessionID,
           server_id: this.connection.guildID,
-          user_id: this.connection.guild.client.user.id,
+          // @ts-ignore
+          user_id: this.connection.guild!.client.user.id,
           token: this.token
         });
 
@@ -152,6 +175,19 @@ export default class WebSocketNetwork {
         this.ready = true;
         this.connection.udp!.secretKey = new Uint8Array(payload.d.secret_key);
         this.connection._ready.resolve(null);
+      } break;
+
+      case constants.VoiceOPCodes.ClientDisconnect:
+        this.connection.emit('user.disconnect', payload.d.user_id);
+        break;
+
+      case constants.VoiceOPCodes.Speaking: {
+        // @ts-ignore
+        const self = this.connection.client.user.id === payload.d.user_id;
+        this.connection.userSpeaking.emplace(payload.d.user_id, true);
+
+        if (!payload.d.speaking) this.connection.userSpeaking.delete(payload.d.user_id);
+        this.connection.emit(payload.d.speaking ? 'speaking' : 'stopSpeaking', payload.d.user_id, self);
       } break;
     }
   }

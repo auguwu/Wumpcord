@@ -128,4 +128,9 @@ export default class UDPNetwork {
     this.debug('Disconnecting from UDP socket...');
     this.socket.disconnect();
   }
+
+  reset() {
+    this.timestamp = 0;
+    this.seq = 0;
+  }
 }

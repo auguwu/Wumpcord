@@ -20,12 +20,16 @@
  * SOFTWARE.
  */
 
+/* eslint-disable camelcase */
+
 import { GatewayVoiceServerUpdateDispatchData, GatewayVoiceStateUpdateDispatchData } from 'discord-api-types';
 import { getConverter, getOpus } from '.';
+import { User, VoiceChannel } from '../models';
 import type WebSocketClient from '../gateway/WebSocketClient';
 import { VoiceOPCodes } from './Constants';
 import WebSocketNetwork from './networks/WebSocketNetwork';
-import type { User } from '../models';
+import { Collection } from '@augu/collections';
+import { OPCodes } from '../Constants';
 import { Stream } from 'stream';
 import UDPNetwork from './networks/UDPNetwork';
 import Converter from './Converter';
@@ -38,7 +42,10 @@ interface VoiceConnectionEvents {
   establish(): void;
   speaking(user: User | string, self: boolean): void;
   debug(message: string): void;
+  close(code: number, reason: string): void;
   error(error: Error): void;
+  stop(): void;
+  end(): void;
 }
 
 interface ReadyPromise {
@@ -48,6 +55,7 @@ interface ReadyPromise {
 
 export default class VoiceConnection extends EventBus<VoiceConnectionEvents> {
   private playbackInterval!: NodeJS.Timer;
+  public userSpeaking: Collection<string, boolean>;
   public converter: Converter | null;
   public channelID: string;
   public speaking: boolean;
@@ -63,6 +71,7 @@ export default class VoiceConnection extends EventBus<VoiceConnectionEvents> {
     if (!Util.hasNaclInstalled()) throw new TypeError('Missing `tweetnacl` library, please install it');
     if (getOpus() === null) throw new TypeError('Missing `@discordjs/opus` or `opusscript` libraries, please install it');
 
+    this.userSpeaking = new Collection();
     this.channelID = channelID;
     this.speaking = false;
     this.converter = null;
@@ -127,7 +136,12 @@ export default class VoiceConnection extends EventBus<VoiceConnectionEvents> {
     this.playbackInterval = setInterval(() => {
       // Even though the converter ended, this doesn't mean the packet queue isn't empty
       // So we have to also make sure the packet queue is empty, before we stop
-      if (this.converter!.ended && !this.converter!.packets.length) return clearInterval(this.playbackInterval);
+      if (this.converter!.ended && !this.converter!.packets.length) {
+        clearInterval(this.playbackInterval);
+        this.emit('end');
+
+        return;
+      }
 
       const packet = this.converter!.provide();
       if (!packet) return;
@@ -136,5 +150,40 @@ export default class VoiceConnection extends EventBus<VoiceConnectionEvents> {
     }, 20);
 
     this.playbackInterval.unref();
+  }
+
+  reset() {
+    this.debug('Resetting connection');
+
+    this.udp!.reset();
+    this.ws.clean();
+
+    try {
+      this.udp!.disconnect();
+    } catch(ex) {
+      if (ex.message.indexOf('Not running') !== -1) return;
+
+      this.debug(ex);
+    }
+
+    this.guild!.shard!.send(OPCodes.VoiceStateUpdate, {
+      guild_id: this.guildID,
+      channel_id: null,
+      self_mute: false,
+      self_deaf: false
+    });
+  }
+
+  switch(channel: VoiceChannel | string) {
+    if (typeof channel !== 'string' && !(channel instanceof VoiceChannel)) throw new Error('`channel` is not a voice channel');
+
+    const id = typeof channel === 'string' ? channel : channel.id;
+    this.channelID = id;
+    this.guild!.shard!.send(OPCodes.VoiceStateUpdate, {
+      guild_id: this.guildID,
+      channel_id: id,
+      self_mute: false,
+      self_deaf: false
+    });
   }
 }
