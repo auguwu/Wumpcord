@@ -27,22 +27,22 @@ import { User } from '../User';
 
 export class GroupChannel extends TextableChannel<APIChannel> {
   /** The last pinned message's timestamp */
-  public lastPinTimestamp!: string | null;
+  public lastPinTimestamp?: string | null;
 
   /** Represents the last message ID, useful for fetching messages in this channel */
-  public lastMessageID!: string | null;
+  public lastMessageID?: string | null;
 
   /** List of recipients that are in this group DM */
   public recipients!: User[];
 
   /** The owner's ID, who-ever created the group DM */
-  public ownerID!: string;
+  public ownerID?: string;
 
   /** The name of the group DM */
-  public name!: string;
+  public name?: string;
 
   /** The group DM's icon */
-  public icon!: string | null;
+  public icon?: string | null;
 
   /**
    * Creates a new [GroupChannel] instance

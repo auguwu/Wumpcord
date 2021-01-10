@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import type { MessageContentOptions, TextableChannel } from '../types';
+import type { AnyGuildTextableChannel, MessageContentOptions } from '../types';
 import type WebSocketClient from '../gateway/WebSocketClient';
 import { GuildEmoji, GuildMember } from '.';
 import { Attachment } from './Attachment';
@@ -50,7 +50,7 @@ interface GetReactionsOptions {
   limit?: number;
 }
 
-export class Message extends Base<APIMessage> {
+export class Message<C extends AnyGuildTextableChannel = AnyGuildTextableChannel> extends Base<APIMessage> {
   public referencedMessage!: Message | null;
   public editedTimestamp!: Date | null;
   public mentionEveryone!: boolean;
@@ -165,7 +165,7 @@ export class Message extends Base<APIMessage> {
   }
 
   get channel() {
-    return this.client.channels.get(this.channelID) as unknown as TextableChannel;
+    return this.client.channels.get<C>(this.channelID);
   }
 
   delete() {
@@ -264,19 +264,38 @@ export class Message extends Base<APIMessage> {
   }
 
   reply(content: ReplyMessageContent, options?: Omit<MessageContentOptions, 'reply'>) {
-    const message: MessageContentOptions = Util.isObject(content) ? {
-      reply: this.id,
-      ...content
-    } : {
-      reply: this.id,
-      ...options
+    let message: MessageContentOptions = {
+      reply: this.id
     };
 
+    if (typeof content === 'string') {
+      const data = Util.formatMessage(this.client, {
+        reply: this.id,
+        content: content
+      });
+
+      console.log(data);
+      return this.client.rest.dispatch<APIMessage, RESTPostAPIChannelMessageJSONBody>({
+        endpoint: `/channels/${this.channelID}/messages`,
+        method: 'POST',
+        data
+      }).then(data => new Message(this.client, data));
+    }
+
+    if (Util.isObject(content) && Util.isObject(options)) throw new Error('Cannot have `content` and `options` as message options');
+    if (Util.isObject(content)) message = { reply: this.id, ...content };
+    if (Util.isObject(options)) message = { reply: this.id, ...options };
+
     const data = Util.formatMessage(this.client, message);
+    let file = data.file;
+    delete data.file;
+
+    console.log(data);
     return this.client.rest.dispatch<APIMessage, RESTPostAPIChannelMessageJSONBody>({
       endpoint: `/channels/${this.channelID}/messages`,
       method: 'POST',
-      data
+      data,
+      file
     }).then(data => new Message(this.client, data));
   }
 

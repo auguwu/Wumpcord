@@ -31,7 +31,7 @@ interface GuildBanProperties {
 
 export default class GuildBan {
   /** The reason of the ban */
-  public reason!: string;
+  public reason?: string;
 
   /** The user's ID who was banned */
   public userID!: string;

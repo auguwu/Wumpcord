@@ -31,7 +31,7 @@ interface GuildIntegrationAccount {
 }
 
 interface GuildIntegrationProperties extends APIGuildIntegration {
-  guildID: string;
+  guildID?: string;
 }
 
 export default class GuildIntegration extends Base<GuildIntegrationProperties> {
@@ -66,7 +66,7 @@ export default class GuildIntegration extends Base<GuildIntegrationProperties> {
   private client: WebSocketClient;
 
   /** The guild ID that this [GuildIntegration] is attached to */
-  public guildID: string;
+  public guildID?: string;
 
   /** The role ID for subscribers, if any */
   public roleID!: string;
@@ -81,7 +81,7 @@ export default class GuildIntegration extends Base<GuildIntegrationProperties> {
   public name!: string;
 
   /** The user who created this integration */
-  public user!: User;
+  public user?: User;
 
   /**
    * Creates a new [GuildIntegration] instance

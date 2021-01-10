@@ -29,7 +29,7 @@ import { Channel } from '../Channel';
 
 export default class GuildChannel extends Channel {
   /** List of permission overwrites for this [GuildChannel] */
-  public permissionOverwrites!: Collection<string, PermissionOverwrite>;
+  public permissionOverwrites: Collection<string, PermissionOverwrite>;
 
   /** The parent category's ID, this is `null` if [GuildChannel] is a [CategoryChannel] or doesn't have a parent */
   public parentID!: string | null;
@@ -38,10 +38,12 @@ export default class GuildChannel extends Channel {
   public position!: number;
 
   /** The guild ID this [GuildChannel] is attached to */
-  public guildID!: string;
+  public guildID?: string;
 
   /** The guild that this [GuildChannel] is attached to */
   public guild!: Guild;
+
+  /** The [WebSocketClient] attached */
   public client: WebSocketClient;
 
   /** The name of this [GuildChannel] instance */
@@ -58,7 +60,8 @@ export default class GuildChannel extends Channel {
   constructor(client: WebSocketClient, data: APIChannel) {
     super(data);
 
-    this.guildID = data.guild_id!;
+    this.permissionOverwrites = new Collection();
+    this.guildID = data.guild_id;
     this.client = client;
 
     this.patch(data);
@@ -66,8 +69,6 @@ export default class GuildChannel extends Channel {
 
   patch(data: APIChannel) {
     super.patch(data);
-
-    this.permissionOverwrites = new Collection();
 
     if (data.position !== undefined)
       this.position = data.position;
@@ -84,7 +85,7 @@ export default class GuildChannel extends Channel {
     if (data.permission_overwrites !== undefined) {
       for (let i = 0; i < data.permission_overwrites.length; i++) {
         const overwrite = data.permission_overwrites[i];
-        this.permissionOverwrites.set(overwrite.id, new PermissionOverwrite(overwrite));
+        this.permissionOverwrites?.set(overwrite.id, new PermissionOverwrite(overwrite));
       }
     }
   }

@@ -27,7 +27,7 @@ import { User } from '../User';
 
 export class DMChannel extends TextableChannel<APIChannel> {
   /** Represents the last message ID, useful for fetching messages in this channel */
-  public lastMessageID!: string | null;
+  public lastMessageID?: string | null;
 
   /** List of recipients that are in this group DM */
   public recipient!: User;

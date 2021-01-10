@@ -10,14 +10,16 @@
 You can install **Wumpcord** under NPM, as follows:
 
 ```sh
-# NPM
-$ npm i wumpcord
-
-# Yarn
-$ yarn add wumpcord
+$ npm i --no-optional wumpcord
 ```
 
-If you need Voice Support, install `tweetnacl` (or `node-opus` if using OPUS encoding) to make it work or it'll throw an error if you any voice methods (`Client.joinChannel`, `Guild.createVoiceConnection`, `VoiceChannel.join`, etc)
+### Features
+Specific features require extra dependencies, this is a list that requires them
+
+|Feature|Dependency|Install|Native?|
+|---|---|---|---|
+|Voice|`tweetnacl`, `node-opus`|`npm i tweetnacl node-opus`|Yes|
+|Clustering|`ioredis` (Optional)|`npm i ioredis`|No|
 
 ## Need Support?
 You can join the server below and join in #support under the **Wumpcord** category

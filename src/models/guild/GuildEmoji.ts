@@ -30,14 +30,14 @@ interface DiscordEmoji extends APIEmoji {
 }
 
 export default class GuildEmoji extends Base<DiscordEmoji> {
-  public requireColons!: boolean;
-  public available!: boolean;
-  public animated!: boolean;
-  public managed!: boolean;
-  public guildID!: string;
+  public requireColons?: boolean;
+  public available?: boolean;
+  public animated?: boolean;
+  public managed?: boolean;
+  public guildID?: string;
   private client: WebSocketClient;
   public name!: string | null;
-  public user!: User;
+  public user?: User;
 
   constructor(client: WebSocketClient, data: DiscordEmoji) {
     super(data.id!);
@@ -75,6 +75,8 @@ export default class GuildEmoji extends Base<DiscordEmoji> {
   }
 
   get guild() {
+    if (!this.guildID) return null;
+
     return this.client.guilds.get(this.guildID);
   }
 

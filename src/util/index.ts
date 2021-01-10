@@ -95,10 +95,10 @@ export default class Util {
     if (this.isObject(content) && (options !== undefined && Util.isObject(options)))
       throw new TypeError('Conflicting message contents, choose one or the other.');
 
-    if (typeof content === 'string' && !options) {
+    if (typeof content === 'string' && options === undefined) {
       data.content = content;
       return data;
-    } else if (this.isObject(content) && !options) {
+    } else if (this.isObject(content) && options === undefined) {
       if (content.attachments !== undefined)
         data.file = content.attachments;
 
@@ -106,7 +106,7 @@ export default class Util {
         data.allowed_mentions = this.formatAllowedMentions(content.mentions, client);
 
       if (content.content !== undefined)
-        data.content = data.content;
+        data.content = content.content;
 
       if (content.embed !== undefined)
         data.embed = content.embed;
@@ -116,7 +116,7 @@ export default class Util {
 
       if (content.tts !== undefined)
         data.tts = Boolean(data.tts);
-    } else if (typeof content === 'string' && options && this.isObject(options)) {
+    } else if (typeof content === 'string' && (options !== undefined && this.isObject(options))) {
       data.content = content;
 
       if (options.attachments !== undefined)

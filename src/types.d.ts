@@ -32,7 +32,7 @@ import type * as discord from 'discord-api-types/v8';
 export type GuildTextableChannel = TextChannel | NewsChannel | StoreChannel;
 
 /** Represents a textable channel that is or not attached to a guild */
-export type TextableChannel = TextChannel | GroupChannel | DMChannel | NewsChannel | StoreChannel;
+export type TextableChannel = TextChannel | GroupChannel | DMChannel | NewsChannel;
 
 /** Represents all guild channels */
 export type AnyGuildChannel = TextChannel | VoiceChannel | NewsChannel | StoreChannel | CategoryChannel;
@@ -62,7 +62,7 @@ export type OnlineStatus = 'online' | 'offline' | 'idle' | 'dnd';
 export type MaybePromise<T> = Promise<T> | T;
 
 /** Represents a partial entity */
-export type PartialEntity<T> = T | { id: string };
+export type PartialEntity<T> = Partial<T> & { id: string };
 
 /** Represents a file to send to Discord */
 export interface MessageFile {

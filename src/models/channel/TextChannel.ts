@@ -26,7 +26,7 @@ import type { APIChannel } from 'discord-api-types/v8';
 
 export class TextChannel extends GuildTextableChannel {
   /** The ratelimit per user, how long they can send a message */
-  public ratelimitPerUser!: number;
+  public ratelimitPerUser?: number;
 
   /** The channel's topic */
   public topic!: string | null;
