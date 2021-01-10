@@ -20,7 +20,17 @@
  * SOFTWARE.
  */
 
+import { createReadStream, existsSync, lstatSync } from 'fs';
+import { extname } from 'path';
+import { Stream } from 'stream';
 import Util from '../util';
+
+import FFMpegConverter from './converters/FFMpeg';
+import OpusConverter from './converters/Opus';
+import PCMConverter from './converters/PCM';
+import OGGConverter from './converters/Ogg';
+
+import Converter from './Converter';
 
 /** The opus libraries available */
 export type OpusLibrary = typeof import('opusscript') | typeof import('@discordjs/opus');
@@ -38,7 +48,51 @@ export function getOpus(): OpusLibrary | null {
   else return null;
 }
 
-/**
- * Voice package for Wumpcord
- */
-export default Object.create(null);
+export function getConverter(connection: any, source: string | Stream): Converter | null | Promise<Converter | null> {
+  if (typeof source === 'string' && existsSync(source)) {
+    const stats = lstatSync(source);
+    if (stats.isDirectory()) return null;
+
+    const ext = extname(source);
+    if (['.raw', '.pcm'].includes(ext)) return new PCMConverter(connection, createReadStream(source));
+    if (ext === '.dca') return new OpusConverter(connection, createReadStream(source));
+    if (ext === '.ogg') return new OGGConverter(connection, createReadStream(source));
+
+    return null;
+  }
+
+  if (source instanceof Stream) {
+    let converter = null;
+    return new Promise<Converter | null>((resolve, reject) => {
+      const onData = chunk => {
+        if (chunk === null) return;
+
+        try {
+          connection.udp?.encoder.decode(chunk, 960 * 2);
+          converter = new OpusConverter(connection, source);
+        } catch {
+          converter = new FFMpegConverter(connection, source);
+        }
+
+        resolve(converter);
+        source.removeListener('data', onData);
+      };
+
+      source.on('data', onData);
+    });
+  }
+
+  return new FFMpegConverter(connection, source);
+}
+
+export {
+  Converter,
+  FFMpegConverter,
+  OpusConverter,
+  OGGConverter,
+  PCMConverter
+};
+
+export { default as VoiceConnectionManager } from './VoiceConnectionManager';
+export { default as VoiceConnection } from './VoiceConnection';
+export * as Constants from './Constants';

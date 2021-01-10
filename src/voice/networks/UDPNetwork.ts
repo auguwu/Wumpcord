@@ -20,8 +20,9 @@
  * SOFTWARE.
  */
 
-import type { OpusEncoder } from '@discordjs/opus';
 import { createSocket, Socket } from 'dgram';
+import type { OpusEncoder } from '@discordjs/opus';
+import type VoiceConnection from './VoiceConnection';
 import { getOpus } from '..';
 import NaCL from 'tweetnacl';
 
@@ -36,7 +37,7 @@ type AbalOpus = typeof import('opusscript');
  * Represents a UDP4 connection with Discord
  */
 export default class UDPNetwork {
-  private connection: any;
+  private connection: VoiceConnection;
   private secretKey: Uint8Array | null;
   private rtpHeader: Buffer;
   public timestamp: number;
@@ -48,7 +49,7 @@ export default class UDPNetwork {
   public ip: string;
 
   constructor(
-    connection: any,
+    connection: VoiceConnection,
     ip: string,
     port: number
   ) {

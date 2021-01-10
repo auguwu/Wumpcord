@@ -22,6 +22,7 @@
 
 /* eslint-disable camelcase */
 import type { GatewayVoiceStateUpdateDispatchData, GatewayVoiceServerUpdateDispatchData } from 'discord-api-types';
+import type VoiceConnection from './VoiceConnection';
 import * as constants from '../Constants';
 import UDPNetwork from './UDPNetwork';
 import WebSocket from 'ws';
@@ -31,7 +32,7 @@ export default class WebSocketNetwork {
   private _heartbeatInterval!: NodeJS.Timer;
   public lastHeartbeatAckAt!: number;
   public lastHeartbeatAt!: number;
-  private connection: any;
+  private connection: VoiceConnection;
   private sessionID: string | null;
   private socket!: WebSocket;
   private token: string | null;
@@ -39,7 +40,7 @@ export default class WebSocketNetwork {
   public acked: boolean;
   public ssrc!: string;
 
-  constructor(connection: any) {
+  constructor(connection: VoiceConnection) {
     this.connection = connection;
     this.sessionID = null;
     this.ready = false;
