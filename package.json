@@ -31,9 +31,7 @@
     "@augu/collections": "1.0.2",
     "@augu/orchid": "1.8.1",
     "discord-api-types": "0.11.2",
-    "erlpack": "0.1.3",
     "form-data": "3.0.0",
-    "node-opus": "0.3.3",
     "tweetnacl": "1.0.3",
     "ws": "7.4.2"
   },
