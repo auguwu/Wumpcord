@@ -21,7 +21,7 @@
     "node": ">=14"
   },
   "scripts": {
-    "prepare": "npm run lint && cp node_modules/@augu/collections/build/index.js.* node_modules/@augu/collections/build/index.js && rm node_modules/@augu/collections/build/index.js.*",
+    "prepare": "npm run lint",
     "docgen": "node scripts/docs.js",
     "build": "rm -rf build && node scripts/build.js && cp src/types.d.ts build/types.d.ts && cp src/interactions/types.d.ts build/interactions/types.d.ts",
     "lint": "node scripts/lint.js",
