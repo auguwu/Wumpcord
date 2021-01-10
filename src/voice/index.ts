@@ -62,8 +62,8 @@ export function getConverter(connection: any, source: string | Stream): Converte
   }
 
   if (source instanceof Stream) {
-    let converter = null;
-    return new Promise<Converter | null>((resolve, reject) => {
+    let converter: Converter | null = null;
+    return new Promise<Converter | null>((resolve) => {
       const onData = chunk => {
         if (chunk === null) return;
 
@@ -82,7 +82,7 @@ export function getConverter(connection: any, source: string | Stream): Converte
     });
   }
 
-  return new FFMpegConverter(connection, source);
+  return null;
 }
 
 export {

@@ -22,13 +22,13 @@
 
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import type VoiceConnection from '../VoiceConnection';
-import type { Readable } from 'stream';
+import type { Stream } from 'stream';
 import Converter from '../Converter';
 
 export default class FFmpegConverter extends Converter {
   private process: ChildProcessWithoutNullStreams | null;
 
-  constructor(connection: VoiceConnection, source: Readable) {
+  constructor(connection: VoiceConnection, source: Stream) {
     super(connection, source);
 
     this.process = spawn('ffmpeg', [
@@ -47,7 +47,7 @@ export default class FFmpegConverter extends Converter {
 
     this.process!.stdout.on('close', this.shutdown.bind(this));
     this.process!.stdout.on('data', buffer =>
-      this.packets.push(connection.udp.encoder.encode(buffer, (960 * 2) * 2))
+      this.packets.push(connection.udp!.encoder.encode(buffer, (960 * 2) * 2))
     );
 
     this.process!.on('error', this.shutdown.bind(this));

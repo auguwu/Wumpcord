@@ -22,7 +22,7 @@
 
 import { createSocket, Socket } from 'dgram';
 import type { OpusEncoder } from '@discordjs/opus';
-import type VoiceConnection from './VoiceConnection';
+import type VoiceConnection from '../VoiceConnection';
 import { getOpus } from '..';
 import NaCL from 'tweetnacl';
 
@@ -37,7 +37,7 @@ type AbalOpus = typeof import('opusscript');
  */
 export default class UDPNetwork {
   private connection: VoiceConnection;
-  private secretKey: Uint8Array | null;
+  public secretKey: Uint8Array | null;
   private rtpHeader: Buffer;
   public timestamp: number;
   public encoder: OpusEncoder | import('opusscript');
@@ -67,7 +67,7 @@ export default class UDPNetwork {
 
     this.rtpHeader[0] = 0x80;
     this.rtpHeader[1] = 0x78;
-    this.rtpHeader.writeUIntBE(this.connection.ws.ssrc, 8, 4);
+    this.rtpHeader.writeUIntBE(<any> this.connection.ws.ssrc, 8, 4);
     this.findAddress();
 
     this.socket.on('message', this.onMessage.bind(this));
@@ -84,7 +84,7 @@ export default class UDPNetwork {
     packet[1] = 0x2;
 
     packet.writeUInt16BE(70, 2);
-    packet.writeUInt32BE(this.connection.ws.ssrc, 4);
+    packet.writeUInt32BE(<any> this.connection.ws.ssrc, 4);
     this.send(packet);
   }
 

@@ -22,7 +22,7 @@
 
 /* eslint-disable camelcase */
 import type { GatewayVoiceStateUpdateDispatchData, GatewayVoiceServerUpdateDispatchData } from 'discord-api-types';
-import type VoiceConnection from './VoiceConnection';
+import type VoiceConnection from '../VoiceConnection';
 import * as constants from '../Constants';
 import UDPNetwork from './UDPNetwork';
 import WebSocket from 'ws';
@@ -150,8 +150,8 @@ export default class WebSocketNetwork {
 
         this.debug('Received secret key, audio can now be sent');
         this.ready = true;
-        this.connection.udp.secretKey = new Uint8Array(payload.d.secret_key);
-        this.connection._ready.resolve();
+        this.connection.udp!.secretKey = new Uint8Array(payload.d.secret_key);
+        this.connection._ready.resolve(null);
       } break;
     }
   }

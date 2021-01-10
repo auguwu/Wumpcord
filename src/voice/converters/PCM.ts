@@ -21,11 +21,11 @@
  */
 
 import type VoiceConnection from '../VoiceConnection';
-import type { Readable } from 'stream';
+import type { Stream } from 'stream';
 import Converter from '../Converter';
 
 export default class PCMConverter extends Converter {
-  constructor(connection: VoiceConnection, source: Readable) {
+  constructor(connection: VoiceConnection, source: Stream) {
     super(connection, source);
 
     source.on('data', data => this.packets.push(data));

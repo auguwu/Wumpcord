@@ -21,15 +21,15 @@
  */
 
 import type VoiceConnection from './VoiceConnection';
-import type { Readable } from 'stream';
+import type { Stream } from 'stream';
 
 export default abstract class Converter {
   public connection: VoiceConnection;
   public packets: Buffer[];
-  public source: Readable;
+  public source: Stream;
   public ended: boolean;
 
-  constructor(connection: VoiceConnection, source: Readable) {
+  constructor(connection: VoiceConnection, source: Stream) {
     this.connection = connection;
     this.packets = [];
     this.source = source;
