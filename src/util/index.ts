@@ -208,7 +208,16 @@ export default class Util {
       require('tweetnacl');
 
       return true;
-    } catch(ex) {
+    } catch {
+      return false;
+    }
+  }
+
+  static tryRequire(mod: string) {
+    try {
+      require(mod);
+      return true;
+    } catch {
       return false;
     }
   }

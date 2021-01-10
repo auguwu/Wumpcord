@@ -20,6 +20,24 @@
  * SOFTWARE.
  */
 
+import Util from '../util';
+
+/** The opus libraries available */
+export type OpusLibrary = typeof import('opusscript') | typeof import('@discordjs/opus');
+
+/**
+ * Returns the opus library to use, returns `null` if no
+ * encoder is installed
+ */
+export function getOpus(): OpusLibrary | null {
+  const hasDjs = Util.tryRequire('@discordjs/opus');
+  const hasOpus = Util.tryRequire('opusscript');
+
+  if (hasOpus) return require('opusscript');
+  else if (hasDjs) return require('@discordjs/opus');
+  else return null;
+}
+
 /**
  * Voice package for Wumpcord
  */

@@ -50,6 +50,9 @@ client.on('ready', async () => {
 client.connect();
 ```
 
+## Special Thanks To
+- [Ice](https://github.com/IceeMC) for writing the voice library <3
+
 ## Maintainers
 - [August](https://floofy.dev)
 - [Ice](https://github.com/IceeMC)
