@@ -20,4 +20,23 @@
  * SOFTWARE.
  */
 
+import type VoiceConnection from '../VoiceConnection';
+import type { Readable } from 'stream';
+import Converter from '../Converter';
 
+export default class PCMConverter extends Converter {
+  constructor(connection: VoiceConnection, source: Readable) {
+    super(connection, source);
+
+    source.on('data', data => this.packets.push(data));
+    source.on('close', this.shutdown.bind(this));
+  }
+
+  provide() {
+    return this.packets.shift();
+  }
+
+  shutdown() {
+    this.ended = true;
+  }
+}

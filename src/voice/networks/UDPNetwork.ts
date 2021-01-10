@@ -26,7 +26,6 @@ import type VoiceConnection from './VoiceConnection';
 import { getOpus } from '..';
 import NaCL from 'tweetnacl';
 
-import OpusScript = require('opusscript');
 const MAX_TIMESTAMP = (2 ** 32) - 1;
 const MAX_SEQ = (2 ** 16) - 1;
 
@@ -41,7 +40,7 @@ export default class UDPNetwork {
   private secretKey: Uint8Array | null;
   private rtpHeader: Buffer;
   public timestamp: number;
-  public encoder: OpusEncoder | OpusScript;
+  public encoder: OpusEncoder | import('opusscript');
   public socket: Socket;
   private nonce: Buffer;
   private seq: number;

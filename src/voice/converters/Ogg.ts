@@ -20,4 +20,32 @@
  * SOFTWARE.
  */
 
+import type VoiceConnection from '../VoiceConnection';
+import type { Readable } from 'stream';
+import Converter from '../Converter';
+import Util from '../../util';
 
+export default class OGGConverter extends Converter {
+  constructor(connection: VoiceConnection, source: Readable) {
+    super(connection, source);
+
+    if (!Util.tryRequire('ogg')) throw new TypeError('Missing `ogg` package, please install it (`npm i ogg`)');
+
+    const ogg = require('ogg');
+    const decoder = new ogg.Decoder();
+    source.pipe(decoder);
+
+    decoder.on('stream', (stream: Readable) => {
+      stream.on('data', console.log);
+      source.on('close', this.shutdown.bind(this));
+    });
+  }
+
+  provide() {
+    return this.packets.shift();
+  }
+
+  shutdown() {
+    this.ended = true;
+  }
+}

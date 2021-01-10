@@ -50,6 +50,7 @@
   "optionalDependencies": {
     "@discordjs/opus": "0.3.3",
     "erlpack": "0.1.3",
+    "ogg": "1.2.6",
     "opusscript": "0.0.7",
     "tweetnacl": "1.0.3"
   }

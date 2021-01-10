@@ -20,4 +20,50 @@
  * SOFTWARE.
  */
 
+import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
+import type VoiceConnection from '../VoiceConnection';
+import type { Readable } from 'stream';
+import Converter from '../Converter';
 
+export default class FFmpegConverter extends Converter {
+  private process: ChildProcessWithoutNullStreams | null;
+
+  constructor(connection: VoiceConnection, source: Readable) {
+    super(connection, source);
+
+    this.process = spawn('ffmpeg', [
+      '-reconnect',  '1',
+      '-reconnect_streamed', '1',
+      '-reconnect_delay_max', '5',
+      // @ts-ignore
+      '-i', this.source,
+      '-analyzeduration', '0',
+      '-loglevel', '0',
+      '-f', 's16le',
+      '-ar', '48000',
+      '-ac', '2',
+      'pipe:1'
+    ]);
+
+    this.process!.stdout.on('close', this.shutdown.bind(this));
+    this.process!.stdout.on('data', buffer =>
+      this.packets.push(connection.udp.encoder.encode(buffer, (960 * 2) * 2))
+    );
+
+    this.process!.on('error', this.shutdown.bind(this));
+  }
+
+  provide() {
+    return this.packets.shift();
+  }
+
+  shutdown(error?: Error) {
+    this.debug(`Stream has ended ${error !== undefined ? `with error ${error.message}` : 'cleanly'}`);
+
+    if (error !== undefined) this.connection.emit('error', error);
+
+    this.process!.kill();
+    this.process = null;
+    this.ended = true;
+  }
+}

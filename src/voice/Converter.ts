@@ -36,8 +36,8 @@ export default abstract class Converter {
     this.ended = false;
   }
 
-  abstract shutdow(): void;
-  abstract provide(): Buffer;
+  abstract shutdown(error?: Error): void;
+  abstract provide(): Buffer | undefined;
 
   debug(message: string) {
     const name = (this.constructor as typeof Converter).name;
