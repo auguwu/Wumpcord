@@ -1,6 +1,25 @@
 name: ESLint
 on:
   push:
+    branches:
+      - 'indev'
+      - 'master'
+    paths-ignore:
+      - '.github/**'
+      - '.vscode/**'
+      - 'examples/'
+      - 'docs/'
+      - '.eslintignore'
+      - '.gitignore'
+      - '.npmignore'
+      - '**.md'
+      - 'jest.config.js'
+      - 'LICENSE'
+      - 'packaage.json'
+      - 'renovate.json'
+      - 'tsconfig.json'
+      - 'tsconfig.test.json'
+
   pull_request:
     branches:
       - 'indev'
@@ -20,6 +39,7 @@ on:
       - 'renovate.json'
       - 'tsconfig.json'
       - 'tsconfig.test.json'
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -43,6 +63,9 @@ jobs:
 
       - name: Lints the repository for any code-checking errors
         run: npm run lint
+
+      - name: Build the project for any errors
+        run: node scripts/build.js --ci
 
       - name: Runs unit tests
         run: npm run test --ci

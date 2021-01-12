@@ -25,14 +25,17 @@ const { join } = require('path');
 
 const log = (message) => process.stdout.write(`[build] ${message}\n`);
 
-async function main() {
+async function main(ci) {
   log('starting build...');
+  log(`ci: ${ci ? 'yes' : 'no'}`);
 
-  const child = exec('tsc', { cwd: join(__dirname, '..') });
+  const args = ci ? ['--noEmit'] : [];
+  const child = exec(`tsc ${args.join(' ')}`, { cwd: join(__dirname, '..') });
   log(`started child process as ${child.pid}`);
 
   let success = true;
   child.stdout.on('data', chunk => log(chunk));
+  child.stderr.on('data', chunk => log(chunk));
   child.on('error', error => {
     log('unable to build source');
     log(error.stack);
@@ -44,7 +47,11 @@ async function main() {
     success = code === 0;
 
     log(`\`tsc\` has closed with code ${code}${signal ? ` with signale "${signal}"` : ''}, success: ${success ? 'yes' : 'no'}`);
+    process.exit(success ? 0 : 1);
   });
 }
 
-main();
+const args = process.argv.slice(2);
+const isCi = args[0] === '--ci' || args[0] === '-c';
+
+main(isCi);

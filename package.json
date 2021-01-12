@@ -22,6 +22,7 @@
   },
   "scripts": {
     "prepare": "npm run lint",
+    "cleanup": "cp node_modules/@augu/collections/build/index.js.* node_modules/@augu/collections/build/index.js && rm node_modules/@augu/collections/build/index.js.*",
     "docgen": "node scripts/docs.js",
     "build": "rm -rf build && node scripts/build.js && cp src/types.d.ts build/types.d.ts && cp src/interactions/types.d.ts build/interactions/types.d.ts",
     "lint": "node scripts/lint.js",
@@ -30,7 +31,7 @@
   "dependencies": {
     "@augu/collections": "1.0.2",
     "@augu/orchid": "1.8.1",
-    "discord-api-types": "0.12.1",
+    "discord-api-types": "0.11.2",
     "form-data": "3.0.0",
     "ws": "7.4.2"
   },
