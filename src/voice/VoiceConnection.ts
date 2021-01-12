@@ -34,7 +34,7 @@ import { Stream } from 'stream';
 import UDPNetwork from './networks/UDPNetwork';
 import Converter from './Converter';
 import EventBus from '../util/EventBus';
-import Util from '../Util';
+import Util from '../util';
 
 interface VoiceConnectionEvents {
   'user.disconnect'(user: User | string): void;
