@@ -20,7 +20,10 @@
  * SOFTWARE.
  */
 
-import { Guild, GuildMember, SelfUser, User } from '../models';
+/* eslint-disable camelcase */
+
+import { Guild, GuildMember, SelfUser, User, VoiceChannel } from '../models';
+import { VoiceConnectionManager } from '../voice';
 import type { Collection } from '@augu/collections';
 import type * as discord from 'discord-api-types/v8';
 import InteractionHelper from '../interactions/Helper';
@@ -107,6 +110,11 @@ interface EntityEvents {
     type: string,
     data: object // TODO: add safety to this
   ): void;
+
+  rawShard(
+    id: number,
+    data: object
+  ): void;
 }
 
 /**
@@ -114,7 +122,7 @@ interface EntityEvents {
  */
 export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
   /** List of voice connections available to the client */
-  public voiceConnections: any;
+  public voiceConnections: VoiceConnectionManager;
 
   /** The interactions helper, this will return `null` if it's not enabled */
   public interactions: InteractionHelper | null;
@@ -156,7 +164,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
   constructor(options: types.NullableClientOptions) {
     super();
 
-    this.voiceConnections = null;
+    this.voiceConnections = new VoiceConnectionManager(this);
     this.interactions = null;
     this.channels = new ChannelManager(this);
     this.options = Util.merge<types.ClientOptions>(<any> options, {
@@ -351,9 +359,53 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
     this.users.cache.clear();
 
     for (const shard of this.shards.values()) shard.disconnect(false);
+    for (const guildID of this.voiceConnections.keys()) this.voiceConnections.destroy(guildID);
+
+    this.voiceConnections.clear();
+    this.shards.clear();
   }
 
   setStatus(status: types.OnlineStatus, options: types.SendActivityOptions) {
     for (const shard of this.shards.values()) shard.setStatus(status, options);
+  }
+
+  joinVoiceChannel(channelID: string, guildID: string) {
+    const channel = this.channels.get<VoiceChannel>(channelID);
+
+    if (!channel)
+      return Promise.reject(new TypeError(`Channel "${channelID}" was not cached`));
+
+    if (channel.type !== 'voice')
+      return Promise.reject(new TypeError(`Channel "${channelID}" was not a text channel`));
+
+    if (channel.guild && channel.permissionsOf(this.user.id).has('voiceConnect'))
+      return Promise.reject(new TypeError('Misisng `voiceConnect` permission'));
+
+    const guild = this.guilds.get(guildID);
+    if (!guild)
+      return Promise.reject(new TypeError(`Guild "${guildID}" isn't cached, run GuildStore.fetch to cache it!`));
+
+    guild.shard?.send(Constants.OPCodes.VoiceStateUpdate, {
+      channel_id: channelID,
+      guild_id: guildID,
+      self_mute: false,
+      self_deaf: false
+    });
+
+    return this.voiceConnections.connect(channelID, guildID);
+  }
+
+  leaveVoiceChannel(guildID: string) {
+    const guild = this.guilds.get(guildID);
+    if (guild !== null) {
+      guild.shard?.send(Constants.OPCodes.VoiceStateUpdate, {
+        channel_id: null,
+        guild_id: guildID,
+        self_mute: false,
+        self_deaf: false
+      });
+
+      this.voiceConnections.destroy(guildID);
+    }
   }
 }

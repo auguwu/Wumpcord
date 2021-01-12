@@ -46,6 +46,7 @@ interface WebSocketShardEvents {
   ready(id: number, unavailable?: Set<string>): void;
   resume(id: number, replayed: number): void;
   debug(id: number, message: string): void;
+  unknown(id: number, data: any): void;
   error(id: number, error: Error): void;
   disconnect(id: number): void;
   establish(id: number): void;
@@ -514,6 +515,11 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
       case Constants.OPCodes.Hello: {
         this.debug('Received `HELLO` packet!');
 
+        if (this._heartbeatInterval !== undefined) {
+          clearInterval(this._heartbeatInterval);
+          this._heartbeatInterval = undefined;
+        }
+
         const packet = data as discord.GatewayHello;
         this._heartbeatInterval = setInterval(() => this._ackHeartbeat(), packet.d.heartbeat_interval).unref();
         this.status = Constants.ShardStatus.Nearly;
@@ -530,6 +536,10 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
         this.acked = true;
         this.lastReceivedAt = Date.now();
         this.debug('Connection is now stable.');
+        break;
+
+      default:
+        this.emit('unknown', this.id, data);
         break;
     }
   }

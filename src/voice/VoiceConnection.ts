@@ -155,23 +155,16 @@ export default class VoiceConnection extends EventBus<VoiceConnectionEvents> {
   reset() {
     this.debug('Resetting connection');
 
-    this.udp!.reset();
+    this.udp?.reset();
     this.ws.clean();
 
     try {
-      this.udp!.disconnect();
+      this.udp?.disconnect();
     } catch(ex) {
       if (ex.message.indexOf('Not running') !== -1) return;
 
       this.debug(ex);
     }
-
-    this.guild!.shard!.send(OPCodes.VoiceStateUpdate, {
-      guild_id: this.guildID,
-      channel_id: null,
-      self_mute: false,
-      self_deaf: false
-    });
   }
 
   switch(channel: VoiceChannel | string) {

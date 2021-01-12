@@ -22,7 +22,9 @@
 
 import type WebSocketClient from '../../gateway/WebSocketClient';
 import type { APIChannel } from 'discord-api-types/v8';
+import { Permissions } from '../../Constants';
 import GuildChannel from './GuildChannel';
+import Permission from '../../util/Permissions';
 
 export class VoiceChannel extends GuildChannel {
   /** The limit that users can join this [VoiceChannel] */
@@ -52,7 +54,39 @@ export class VoiceChannel extends GuildChannel {
       this.userLimit = data.user_limit;
   }
 
-  toString() {
-    return `[wumpcord.VoiceChannel<${this.name}>]`;
+  permissionsOf(memberID: string) {
+    if (!this.guild) throw new TypeError('Guild isn\'t cached');
+
+    const member = this.guild.members.get(memberID);
+    if (member === null) return new Permission('0');
+
+    let permission = member.permission.allow;
+    if (permission & Permissions.administrator) return new Permission(String(Permissions.all));
+
+    let overwrite = this.permissionOverwrites.get(this.guild.id);
+    if (overwrite) permission = (permission & ~overwrite.permissions.denied) | overwrite.permissions.allow;
+
+    let deny = 0;
+    let allow = 0;
+    for (const role of member.roles) {
+      if ((overwrite = this.permissionOverwrites.get(role.id)) !== undefined) {
+        deny |= overwrite.permissions.denied;
+        allow |= overwrite.permissions.allow;
+      }
+    }
+
+    permission = (permission & ~deny) | allow;
+    overwrite = this.permissionOverwrites.get(memberID);
+
+    if (overwrite !== undefined) permission = (permission & ~overwrite.permissions.denied) | overwrite.permissions.allow;
+    return new Permission(String(permission));
+  }
+
+  join() {
+    return this.client.joinVoiceChannel(this.id, this.guildID!);
+  }
+
+  leave() {
+    return this.client.leaveVoiceChannel(this.guildID!);
   }
 }

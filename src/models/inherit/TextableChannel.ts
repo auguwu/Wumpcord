@@ -120,8 +120,8 @@ export default class TextableChannel<T extends APIPartialChannel> extends Channe
 
     let deny = 0;
     let allow = 0;
-    for (const roleID of member.roles.keys()) {
-      if ((overwrite = self.permissionOverwrites.get(roleID)) !== undefined) {
+    for (const role of member.roles) {
+      if ((overwrite = self.permissionOverwrites.get(role.id)) !== undefined) {
         deny |= overwrite.permissions.denied;
         allow |= overwrite.permissions.allow;
       }

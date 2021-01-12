@@ -45,6 +45,7 @@ export default class VoiceStateUpdateEvent extends Event<GatewayVoiceStateUpdate
   }
 
   process() {
+    console.trace('ea sports');
     const channel = this.data.channel_id !== null
       ? this.client.channels.get(this.data.channel_id) || { id: this.data.channel_id }
       : null;
@@ -60,9 +61,11 @@ export default class VoiceStateUpdateEvent extends Event<GatewayVoiceStateUpdate
       state: voiceState
     };
 
-    if (channel !== null && (channel as AnyChannel).type === 'voice') {
+    if (channel !== null && guild !== null && (channel as AnyChannel).type === 'voice') {
       this.shard.debug('Checking if there is an active voice connection...');
-      // TODO: voice stuff :eyes:
+
+      const connection = this.client.voiceConnections.get(guild.id);
+      if (connection !== undefined) connection.onVoiceStateUpdate(this.data);
     }
   }
 }

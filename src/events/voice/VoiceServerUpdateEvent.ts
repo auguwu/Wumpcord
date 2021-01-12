@@ -45,10 +45,13 @@ export default class VoiceServerUpdateEvent extends Event<GatewayVoiceServerUpda
   }
 
   process() {
+    console.trace('sex');
     this.$refs = {
       endpoint: this.data.endpoint,
       guild: this.client.guilds.get(this.data.guild_id) || { id: this.data.guild_id },
       token: this.data.token
     };
+
+    this.client.voiceConnections.onVoiceServerUpdate(this.data);
   }
 }
