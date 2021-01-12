@@ -1,0 +1,10 @@
+.github/
+docs/
+examples/
+node_modules/
+build/
+
+.npmignore
+*.md
+LICENSE
+*.json
