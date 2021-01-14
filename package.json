@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@augu/collections": "1.0.2",
-    "@augu/orchid": "1.8.1",
+    "@augu/orchid": "1.8.2",
     "discord-api-types": "0.11.2",
     "form-data": "3.0.0",
     "ws": "7.4.2"
