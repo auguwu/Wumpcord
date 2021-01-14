@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-export { default as CommandDecorator } from './Command';
-export { default as MonitorDecorator } from './Monitor';
-export { default as JobDecorator } from './Job';
-export { default as Subcommand } from './Subcommand';
+export default function Subcommand() {
+  return null;
+}
