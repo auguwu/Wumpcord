@@ -33,6 +33,11 @@ Specific features require extra dependencies, this is a list that requires them
   - Alternative: **@discordjs/opus**
   - Native: Yes
 
+- `ogg`
+  - Required: No
+  - Native: Yes
+  - For: OGG decoding
+
 #### Cluster Dependencies
 - `ioredis`
   - Required: No

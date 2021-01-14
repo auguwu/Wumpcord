@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import type { AnyGuildTextableChannel, MessageContentOptions } from '../types';
+import type { TextableChannel, MessageContentOptions } from '../types';
 import type WebSocketClient from '../gateway/WebSocketClient';
 import { GuildEmoji, GuildMember } from '.';
 import { Attachment } from './Attachment';
@@ -50,7 +50,7 @@ interface GetReactionsOptions {
   limit?: number;
 }
 
-export class Message<C extends AnyGuildTextableChannel = AnyGuildTextableChannel> extends Base<APIMessage> {
+export class Message<C extends TextableChannel = TextableChannel> extends Base<APIMessage> {
   public referencedMessage!: Message | null;
   public editedTimestamp!: Date | null;
   public mentionEveryone!: boolean;

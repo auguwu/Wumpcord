@@ -20,4 +20,16 @@
  * SOFTWARE.
  */
 
+/**
+ * Represents the information of a [Command]
+ */
+export interface CommandInfo {
+  description: string;
+  usage?: string;
+  name: string;
+}
+
+/**
+ * Represents a [Command] executor
+ */
 export default class Command {}
