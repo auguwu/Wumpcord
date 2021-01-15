@@ -29,7 +29,7 @@ import * as Constants from '../Constants';
 import type Client from '../gateway/WebSocketClient';
 import * as types from '../types';
 import { Queue } from '@augu/collections';
-import FormData from 'form-data';
+import FormData from '../util/FormData';
 import Util from '../util';
 
 /**
@@ -60,6 +60,9 @@ interface RequestDispatch<T = unknown> {
   /** Any data to send to Discord */
   data?: T;
 }
+
+// These don't require `content-type` headers
+const ContentMethods = ['get', 'head', 'GET', 'HEAD'];
 
 /**
  * Represents a class to handle requests to Discord
@@ -159,34 +162,44 @@ export default class RestClient {
     const bucket = new RatelimitBucket();
 
     let form: FormData | undefined = undefined;
-    if (!['get', 'GET', 'head', 'HEAD'].includes(request.method) && !request.headers!.hasOwnProperty('Content-Type'))
-      request.headers!['Content-Type'] = 'application/json';
+    if (
+      !ContentMethods.includes(request.method) &&
+      !request.headers!.hasOwnProperty('content-type')
+    ) {
+      request.headers!['content-type'] = 'application/json';
+    }
 
     if (request.auditLogReason !== undefined)
-      request.headers!['X-Audit-Log-Reason'] = encodeURIComponent(request.auditLogReason);
+      request.headers!['x-audit-log-reason'] = encodeURIComponent(request.auditLogReason);
 
-    if (request.file) {
+    if (request.file !== undefined) {
       form = new FormData();
+      request.headers!['content-type'] = `multipart/form-data; boundary=${form.boundary}`;
+
+      if (request.data !== undefined)
+        form.append('payload_json', request.data);
+
       if (Array.isArray(request.file)) {
         for (let i = 0; i < request.file.length; i++) {
           const file = request.file[i];
           if (!file.name) file.name = 'file.png';
 
-          form.append(file.name, file.file, { filename: file.name });
+          await form.append(file.name, file.file);
         }
       } else {
-        if (!request.file.name) request.file.name = 'file.png';
-        form.append(request.file.name, request.file.file, { filename: request.file.name });
-      }
+        if (!request.file.name)
+          request.file.name = 'file.png';
 
-      if (request.data) form.append('payload_json', JSON.stringify(request.data), { filename: 'payload_json' });
-      request.headers!['Content-Type'] = form.getHeaders();
+        await form.append(request.file.name, request.file.file);
+      }
     }
 
+    // form data overrides the data since it's already added it in the form
+    const data = form !== undefined ? Buffer.concat(form.finish()) : request.data;
     return new Promise((resolve, reject) => this.http.request({
       method: request.method,
       url: request.endpoint,
-      data: form ? form.getBuffer() : request.data, // form data overrides the data since it's already added it in the form
+      data,
       headers: request.headers
     }).then(async res => {
       if (res.statusCode !== 204 && res.isEmpty) {

@@ -20,5 +20,5 @@
  * SOFTWARE.
  */
 
-export { default as ArgumentUnionTypeReader } from './UnionArgumentTypeReader';
+export { default as ArgumentUnionTypeReader } from './ArgumentUnionTypeReader';
 export { default as ArgumentTypeReader } from './ArgumentTypeReader';

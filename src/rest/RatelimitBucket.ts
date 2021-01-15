@@ -50,39 +50,29 @@ export default class RatelimitBucket {
    * @param res The response from the http request
    * @returns Promise of ratelimit info (because we hit a 429) or `null` if we aren't being ratelimited.
    */
-  handle(endpoint: string, res: HttpResponse) {
-    return new Promise<RatelimitInfo>(async (resolve) => {
-      const resetTime = Number(res.headers['x-ratelimit-reset']);
-      const serverDate = res.headers.date;
-      const remaining = res.headers['x-ratelimit-remaining'];
+  async handle(endpoint: string, res: HttpResponse) {
+    const resetTime = Number(res.headers['x-ratelimit-reset']);
+    const serverDate = res.headers.date;
+    const remaining = res.headers['x-ratelimit-remaining'];
 
-      this.resetTime = resetTime ? calculate(resetTime, serverDate!) : Date.now();
-      this.remaining = remaining ? Number(remaining) : 0;
+    this.resetTime = resetTime ? calculate(resetTime, serverDate!) : Date.now();
+    this.remaining = remaining ? Number(remaining) : 0;
 
-      // view https://github.com/discordapp/discord-api-docs/issues/182
-      if (endpoint.includes('reactions'))
-        this.resetTime = new Date(serverDate!).getTime() - getAPIOffset(serverDate!) + 250;
+    // view https://github.com/discordapp/discord-api-docs/issues/182
+    if (endpoint.includes('reactions'))
+      this.resetTime = new Date(serverDate!).getTime() - getAPIOffset(serverDate!) + 250;
 
-      if (res.headers.hasOwnProperty('x-ratelimit-global')) {
-        this._globalTimer = Util.sleep(Number(res.headers['retry-after']));
-        await this._globalTimer;
+    if (res.headers.hasOwnProperty('x-ratelimit-global')) {
+      this._globalTimer = Util.sleep(Number(res.headers['retry-after']));
+      await this._globalTimer;
 
-        this._globalTimer = undefined;
-      }
+      this._globalTimer = undefined;
+    }
 
-      if (res.statusCode === 429) {
-        return resolve({
-          ratelimited: true,
-          remaining: this.remaining,
-          resetTime: this.resetTime
-        });
-      } else {
-        return resolve({
-          ratelimited: false,
-          remaining: this.remaining,
-          resetTime: this.resetTime
-        });
-      }
-    });
+    return {
+      ratelimited: res.statusCode === 429,
+      remaining: this.remaining,
+      resetTime: this.resetTime
+    };
   }
 }
