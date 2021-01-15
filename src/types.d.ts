@@ -25,8 +25,8 @@ import type { TextChannel, VoiceChannel, StoreChannel, NewsChannel, GroupChannel
 import type { ClientOptions as WebSocketClientOptions } from 'ws';
 import type { GatewayEvent, GatewayIntent } from './Constants';
 import type { RatelimitInfo } from './rest/RatelimitBucket';
-import type { HttpMethod } from '@augu/orchid';
-import type * as discord from 'discord-api-types/v8';
+import type { HttpMethod } from './rest/RestClient';
+import type * as discord from 'discord-api-types';
 
 /** Represents a guild textable channel */
 export type GuildTextableChannel = TextChannel | NewsChannel | StoreChannel;

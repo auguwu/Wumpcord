@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import type { HttpResponse } from '@augu/orchid';
+import type { IncomingMessage } from 'http';
 import Util from '../util';
 
 export interface RatelimitInfo {
@@ -50,10 +50,10 @@ export default class RatelimitBucket {
    * @param res The response from the http request
    * @returns Promise of ratelimit info (because we hit a 429) or `null` if we aren't being ratelimited.
    */
-  async handle(endpoint: string, res: HttpResponse) {
-    const resetTime = Number(res.headers['x-ratelimit-reset']);
-    const serverDate = res.headers.date;
-    const remaining = res.headers['x-ratelimit-remaining'];
+  async handle(endpoint: string, req: IncomingMessage) {
+    const resetTime = Number(req.headers['x-ratelimit-reset']);
+    const serverDate = req.headers.date;
+    const remaining = req.headers['x-ratelimit-remaining'];
 
     this.resetTime = resetTime ? calculate(resetTime, serverDate!) : Date.now();
     this.remaining = remaining ? Number(remaining) : 0;
@@ -62,15 +62,15 @@ export default class RatelimitBucket {
     if (endpoint.includes('reactions'))
       this.resetTime = new Date(serverDate!).getTime() - getAPIOffset(serverDate!) + 250;
 
-    if (res.headers.hasOwnProperty('x-ratelimit-global')) {
-      this._globalTimer = Util.sleep(Number(res.headers['retry-after']));
+    if (req.headers.hasOwnProperty('x-ratelimit-global')) {
+      this._globalTimer = Util.sleep(Number(req.headers['retry-after']));
       await this._globalTimer;
 
       this._globalTimer = undefined;
     }
 
     return {
-      ratelimited: res.statusCode === 429,
+      ratelimited: req.statusCode === 429,
       remaining: this.remaining,
       resetTime: this.resetTime
     };

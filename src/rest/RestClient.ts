@@ -20,8 +20,8 @@
  * SOFTWARE.
  */
 
-import { HttpClient, HttpMethod, middleware } from '@augu/orchid';
 import DiscordRestValidationError from '../errors/DiscordRestValidationError';
+import RequestAbortedError from '../errors/RequestAbortedError';
 import DiscordRestError from '../errors/DiscordRestError';
 import DiscordAPIError from '../errors/DiscordAPIError';
 import RatelimitBucket from './RatelimitBucket';
@@ -29,19 +29,33 @@ import * as Constants from '../Constants';
 import type Client from '../gateway/WebSocketClient';
 import * as types from '../types';
 import { Queue } from '@augu/collections';
-import FormData from '../util/FormData';
+import FormData from 'form-data';
+import https from 'https';
 import Util from '../util';
+import { strict } from 'assert';
+
+export type HttpMethod =
+  | 'GET'
+  | 'POST'
+  | 'PUT'
+  | 'PATCH'
+  | 'DELETE'
+  | 'CONNECT'
+  | 'OPTIONS'
+  | 'TRACE'
+  | 'get'
+  | 'post'
+  | 'put'
+  | 'patch'
+  | 'delete'
+  | 'connect'
+  | 'options'
+  | 'trace';
 
 /**
  * Represents a dispatched request
  */
 interface RequestDispatch<T = unknown> {
-  /** Resolves the request */
-  resolve(value: T | PromiseLike<T>): void;
-
-  /** The error that was thrown */
-  reject(error?: any): void;
-
   /** discord is bullshit so this is here because yes i mean- The audit log reason to show up */
   auditLogReason?: string;
 
@@ -80,14 +94,10 @@ export default class RestClient {
   /** List of requests to dispatch */
   private requests: Queue<RequestDispatch>;
 
-  /** The client to use */
-  private client: Client;
-
   /** If we are locked from making anymore requests */
   public locked: boolean;
 
-  /** The HTTP client to use */
-  private http: HttpClient;
+  #client: Client;
 
   /**
    * Represents a class to handle requests to Discord
@@ -98,44 +108,33 @@ export default class RestClient {
     this.ratelimited = false;
     this.lastCallAt = -1;
     this.requests = new Queue();
-    this.client = client;
     this.locked = false;
-    this.http = new HttpClient({
-      middleware: [middleware.forms()],
-      defaults: {
-        baseUrl: `${Constants.RestUrl}/v${Constants.RestVersion}`,
-        headers: {
-          Authorization: `Bot ${client.token}`,
-          'User-Agent': Constants.UserAgent
-        }
-      }
-    });
+    this.#client = client;
   }
 
   /**
    * Gets the current ping of the rest client
    */
   get ping() {
-    return this.lastDispatchedAt === -1 ? -1 : (this.lastCallAt - this.lastDispatchedAt);
+    return this.lastDispatchedAt === -1 ? 0 : (this.lastCallAt - this.lastDispatchedAt);
   }
 
   /**
    * If the rest client is busy or not
    */
   get busy() {
-    // @ts-ignore
-    return this.requests.items.length !== 0;
+    return this.requests.size() === 0;
   }
 
   /**
    * Dispatch a request to Discord
    * @param options The request options
+   * @typeparam TReturn The return value when dispatched
+   * @typeparam Data The request data to send to Discord
    */
-  dispatch<T, D = unknown>(options: Omit<RequestDispatch<D>, 'resolve' | 'reject'>) {
-    return new Promise<T>((resolve, reject) => {
+  dispatch<TReturn, Data = unknown>(options: RequestDispatch<Data>) {
+    return new Promise<TReturn>((resolve, reject) => {
       const request: RequestDispatch = {
-        resolve,
-        reject,
         headers: Util.get(options, 'headers', {}),
         endpoint: options.endpoint,
         method: options.method,
@@ -143,8 +142,8 @@ export default class RestClient {
         file: Util.get(options, 'file', undefined)
       };
 
-      this._executeRequest(request)
-        .then((data: any) => {
+      this._executeRequest<TReturn>(request)
+        .then((data) => {
           this.lastDispatchedAt = Date.now();
           return resolve(data);
         }).catch((error) => {
@@ -158,10 +157,9 @@ export default class RestClient {
    * Executes the request and handles ratelimiting
    * @param request The dispatched requeest
    */
-  async _executeRequest(request: RequestDispatch) {
+  private async _executeRequest<T>(request: RequestDispatch) {
     const bucket = new RatelimitBucket();
 
-    let form: FormData | undefined = undefined;
     if (
       !ContentMethods.includes(request.method) &&
       !request.headers!.hasOwnProperty('content-type')
@@ -172,101 +170,151 @@ export default class RestClient {
     if (request.auditLogReason !== undefined)
       request.headers!['x-audit-log-reason'] = encodeURIComponent(request.auditLogReason);
 
-    if (request.file !== undefined) {
-      form = new FormData();
-      request.headers!['content-type'] = `multipart/form-data; boundary=${form.boundary}`;
-
-      if (request.data !== undefined)
-        form.append('payload_json', request.data);
-
-      if (Array.isArray(request.file)) {
-        for (let i = 0; i < request.file.length; i++) {
-          const file = request.file[i];
-          if (!file.name) file.name = 'file.png';
-
-          await form.append(file.name, file.file);
-        }
-      } else {
-        if (!request.file.name)
-          request.file.name = 'file.png';
-
-        await form.append(request.file.name, request.file.file);
-      }
-    }
-
-    // form data overrides the data since it's already added it in the form
-    const data = form !== undefined ? Buffer.concat(form.finish()) : request.data;
-    return new Promise((resolve, reject) => this.http.request({
-      method: request.method,
-      url: request.endpoint,
-      data,
-      headers: request.headers
-    }).then(async res => {
-      if (res.statusCode !== 204 && res.isEmpty) {
-        this.client.debug('RestClient', 'Received a empty body from Discord, did we fuck up? (https://github.com/auguwu/Wumpcord/issues)');
-
-        /**
-         * Emitted when we receive a empty body payload
-         * @fires restEmpty
-         */
-        this.client.emit('restEmpty');
-
-        this.lastCallAt = Date.now();
-        return resolve(null);
-      }
-
-      this.lastCallAt = Date.now();
-      if (res.statusCode === 204) return resolve(null);
-
-      const ratelimitInfo = await bucket.handle(request.endpoint, res);
-      const data = res.json();
-
-      if (ratelimitInfo.ratelimited) {
-        this.ratelimited = true;
-        await Util.sleep(Number(res.headers['retry-after']));
-
-        return resolve(null);
-      }
-
-      // sometimes cloudflare can be mean >:(
-      if (res.statusCode === 502) {
-        /**
-         * Fired when Discord or Cloudflare stop working
-         * @fires restUnavailable
-         */
-        this.client.emit('restUnavailable');
-        return reject(new DiscordAPIError(502, 'Gateway is unavailable at this time (https://discordstatus.com)'));
-      }
-
-      /**
-       * Fired when the rest call has succeeded or errored out
-       * @fires restCall
-       * @param properties The properties available
-       */
-      this.client.emit('restCall', {
-        ratelimitInfo,
-        successful: res.successful,
-        endpoint: request.endpoint,
+    return new Promise<T>(async (resolve, reject) => {
+      const req = https.request({
+        protocol: 'https:',
+        headers: {
+          'User-Agent': Constants.UserAgent,
+          Authorization: `Bot ${this.#client.token}`,
+          ...(request.headers ?? {})
+        },
         method: request.method,
-        body: res.text(),
-        ping: this.ping
+        path: `/api/v${Constants.RestVersion}${request.endpoint}`,
+        port: 443,
+        host: 'discord.com'
       });
 
-      if (data.hasOwnProperty('code')) {
-        if (data.hasOwnProperty('errors')) {
-          const errors: any[] = [];
-          for (const key of Object.keys(data.errors)) {
-            const error = (data.errors[key]?._errors ?? []).map(d => ({ ...d, key }));
-            if (error.length > 0) errors.push(...error);
+      const buffers: Buffer[] = [];
+      let error!: Error;
+
+      req.once('abort', () => {
+        const err = error ?? new RequestAbortedError(request.endpoint, request.method);
+        return reject(err);
+      });
+
+      req.once('error', err => {
+        error = err;
+        req.abort();
+      });
+
+      req.once('response', res => {
+        this.lastCallAt = Date.now();
+        this.#client.debug('RestClient/Request', `Received "${res.statusCode} ${res.statusMessage}" on "${request.method.toUpperCase()} ${request.endpoint}"`);
+
+        res.on('data', chunk => buffers.push(chunk));
+        res.once('error', err => {
+          error = err;
+          req.abort();
+        });
+
+        res.on('end', async () => {
+          const body = Buffer.concat(buffers);
+          let resp;
+
+          try {
+            resp = JSON.parse(body.toString());
+          } catch(ex) {
+            this.#client.emit('error', new Error('Unable to parse JSON body from Discord'));
+            return reject(new Error('Unable to parse JSON body from Discord'));
           }
 
-          return reject(new DiscordRestValidationError(request.endpoint, request.method, data.code, data.message, errors));
+          if (res.statusCode! !== 204 && body.length === 0) {
+            this.#client.debug('RestClient/Response', 'Received empty body from Discord with the wrong status code.');
+            this.#client.emit('restEmpty');
+
+            return reject(new DiscordAPIError(500035, 'Received empty body from Discord with the wrong status code.'));
+          }
+
+          if (res.statusCode! === 204) return resolve(null as any);
+
+          const ratelimit = await bucket.handle(request.endpoint, res);
+          if (ratelimit.ratelimited) {
+            this.locked = true;
+            this.#client.debug('RestClient/Response', `Ratelimited on "${request.method.toUpperCase()} ${request.endpoint}", rest client is locked for ~${res.headers['retry-after']}ms`);
+            await Util.sleep(Number(res.headers['retry-after']));
+
+            return this._executeRequest(request);
+          }
+
+          if (res.statusCode! === 502) {
+            this.#client.emit('restUnavailable');
+            return reject(new DiscordAPIError(502, 'Rest is unavailable at this time (https://discordstatus.com)'));
+          }
+
+          this.#client.emit('restCall', {
+            ratelimitInfo: ratelimit,
+            successful: res.statusCode! <= 300 || res.statusCode! > 400,
+            endpoint: request.endpoint,
+            method: request.method,
+            body: body.toString(),
+            ping: this.ping
+          });
+
+          if (resp.hasOwnProperty('code')) {
+            if (resp.hasOwnProperty('errors')) {
+              let errors: any[] = [];
+              for (const key of Object.keys(resp.errors)) {
+                const error = (resp.errors[key]?._errors ?? []).map(data => ({ ...data, key }));
+                if (error.length > 0) errors = errors.concat(error);
+              }
+
+              return reject(new DiscordRestValidationError(
+                request.endpoint,
+                request.method,
+                resp.code,
+                resp.message,
+                errors
+              ));
+            } else {
+              return reject(new DiscordRestError(resp.code, resp.message));
+            }
+          } else {
+            return resolve(resp);
+          }
+        });
+      });
+
+      req.setTimeout(30000, () => {
+        this.#client.debug('RestClient', `Request was timed out (>30s) on "${request.method.toUpperCase()} ${request.endpoint}"`);
+        error = new Error(`Request was timed out (>30s) on "${request.method.toUpperCase()} ${request.endpoint}"`);
+        req.abort();
+      });
+
+      let form: FormData | undefined = undefined;
+      if (request.file !== undefined) {
+        form = new FormData();
+        request.headers!['content-type'] = form.getHeaders()['content-type'];
+
+        if (Array.isArray(request.file)) {
+          for (let i = 0; i < request.file.length; i++) {
+            const file = request.file[i];
+            if (!file.name) file.name = 'file.png';
+
+            if (Util.isReadableStream(file.file))
+              file.file = await Util.readableToBuffer(file.file);
+
+            form.append(file.name, file.file, { filename: file.name });
+          }
         } else {
-          return reject(new DiscordRestError(data.code, data.message));
+          if (!request.file.name)
+            request.file.name = 'file.png';
+
+          if (Util.isReadableStream(request.file.file))
+            request.file.file = await Util.readableToBuffer(request.file.file);
+
+          form.append(request.file.name, request.file.file, { filename: request.file.name });
         }
-      } else {
-        return resolve(data);
       }
-    }).catch((ex) => reject(new DiscordAPIError(ex.statusCode || 500, ex.message))));
+
+      if (form !== undefined) {
+        if (request.data !== undefined) form.append('payload_json', JSON.stringify(request.data));
+
+        req.end(form.getBuffer());
+      } else {
+        if (request.data !== undefined) req.write(JSON.stringify(request.data));
+
+        req.end();
+      }
+    });
   }
 }
