@@ -165,7 +165,7 @@ export class Message<C extends TextableChannel = TextableChannel> extends Base<A
   }
 
   get channel() {
-    return this.client.channels.get<C>(this.channelID);
+    return this.client.channels.get<C>(this.channelID) as C;
   }
 
   delete() {

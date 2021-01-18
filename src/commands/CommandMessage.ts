@@ -21,7 +21,7 @@
  */
 
 import type { MessageContent, MessageContentOptions, TextableChannel } from '../types';
-import type { Message } from '../models';
+import type { GuildMember, Message } from '../models';
 import type Command from './Command';
 
 /** Represents the metadata for creating a new [CommandMessage] instance */
@@ -108,6 +108,52 @@ export default class CommandMessage<C extends TextableChannel = TextableChannel>
    * if anything occured
    */
   send(content: MessageContent, options?: MessageContentOptions) {
-    return this.message.channel!.send(content, options);
+    return this.message.channel.send(content, options);
+  }
+
+  /**
+   * Sends a codeblock in the current channel.
+   * @param lang The language to prettify the codeblock
+   * @param content The content to send
+   */
+  code(lang: string, content: string) {
+    const ticks = '```';
+    return this.send(`${ticks}${lang}\n${content}\n${ticks}`);
+  }
+
+  /**
+   * Returns the author who executed this command. Simpler
+   * getter instead of repeating `<CommandMessage>.message.author`
+   */
+  get author() {
+    return this.message.author;
+  }
+
+  /**
+   * Returns the textable channel. Simpler
+   * getter instead of repeating `<CommandMessage>.message.channel`
+   */
+  get channel() {
+    return this.message.channel;
+  }
+
+  /**
+   * Returns the guild the message was created in or `undefined`
+   * if it's not a text or news channel. Simpler for checking
+   * if this context is in the guild or not.
+   */
+  get guild() {
+    return this.channel.type === 'news' || this.channel.type === 'text'
+      ? this.message.guild!
+      : undefined;
+  }
+
+  /**
+   * Returns the author of this created context but casted as
+   * a GuildMember. This will return `undefined` if [CommandMessage.guild]
+   * is undefined.
+   */
+  get member(): GuildMember | undefined {
+    return this.guild?.members.get(this.author.id) as any;
   }
 }
