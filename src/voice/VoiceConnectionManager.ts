@@ -47,86 +47,74 @@ export default class VoiceConnectionManager extends Collection<string, VoiceConn
     this.client = client;
   }
 
-  connect(channelID: string, guildID: string) {
+  private debug(message: string) {
+    this.client.debug('VoiceConnectionManager', message);
+  }
+
+  join(guildID: string, channelID: string) {
     const connection = this.get(guildID);
     if (connection && connection.ws.ready) {
       connection.switch(channelID);
-
-      if (connection.ws.ready)
-        return Promise.resolve(connection);
+      return Promise.resolve(connection);
     }
 
-    return new Promise((resolve, reject) => {
-      this.client.debug(`Voice Connection Manager => ${guildID}/${channelID}`, 'Established pending guild...');
+    return new Promise<VoiceConnection>((resolve, reject) => {
+      this.debug(`Creating a pending packet! (guild_id=${guildID},channel_id=${channelID})`);
       this.pending[guildID] = {
         resolve,
         reject,
 
         timeout: setTimeout(() => {
           delete this.pending[guildID];
-          reject(new Error('Voice connection has timed out'));
+          return reject(new Error('Establishing connection has timed out'));
         }, 15000).unref(),
 
-        guildID,
-        channelID
+        channelID,
+        guildID
       };
+
+      this.client.shards.find(r => r.guilds.has(guildID))?.send(4, {
+        channel_id: channelID,
+        guild_id: guildID,
+        self_mute: false,
+        self_deaf: false
+      });
     });
   }
 
-  create(guildID: string, channelID: string) {
-    if (this.has(guildID)) throw new TypeError(`Guild "${guildID}" and "${channelID}" have an active voice connection`);
-
-    const connection = new VoiceConnection(this.client, guildID, channelID);
-
-    this.set(guildID, connection);
-    return connection;
-  }
-
-  destroy(guildID: string) {
+  leave(guildID: string) {
     const connection = this.get(guildID);
-    if (connection !== undefined) connection.reset();
+    connection?.reset();
 
     this.delete(guildID);
+    this.client.shards.find(r => r.guilds.has(guildID))?.send(4, {
+      channel_id: null,
+      self_mute: false,
+      self_deaf: true,
+      guild_id: guildID
+    });
   }
 
   onVoiceServerUpdate(data: GatewayVoiceServerUpdateDispatchData) {
-    this.client.debug(`Voice Connection => ${data.guild_id}`, 'Received `VOICE_SERVER_UPDATE` event');
-    if (this.pending[data.guild_id] && this.pending[data.guild_id].timeout !== null) {
-      clearTimeout(this.pending[data.guild_id].timeout!);
-      this.pending[data.guild_id].timeout = null;
-    }
+    this.debug(`Received \`VOICE_SERVER_UPDATE\` for guild ${data.guild_id}`);
 
     const pending = this.pending[data.guild_id];
-    const connection = this.create(pending.guildID, pending.channelID);
+    if (!pending) {
+      this.debug('Missing pending data for guild, assuming it\'s not us.');
+      return;
+    }
+
+    const connection = this.emplace(data.guild_id, new VoiceConnection(this.client, data.guild_id, pending.channelID));
     connection.onVoiceServerUpdate(data);
 
     const establishHandler = () => {
-      this.client.debug(`Voice Connection => ${pending.guildID}`, 'Established a connection');
+      this.debug(`Established a voice connection (guild_id=${data.guild_id})`);
       pending.resolve(connection);
 
+      connection.remove('establish', establishHandler);
       delete this.pending[data.guild_id];
     };
 
-    const onUserDisconnectHandler = (user: string | User) => {
-      const id = typeof user === 'string' ? user : user.id;
-      if (id === this.client.user.id) {
-        this.client.debug(`Voice Connection => ${pending.guildID}`, 'Disconnected from voice');
-        pending.reject(new Error('Disconnected'));
-
-        try {
-          connection.reset();
-        } catch {
-          // ignore
-        }
-
-        delete this.pending[data.guild_id];
-        connection.remove('user.disconnect', onUserDisconnectHandler);
-        connection.remove('establish', establishHandler);
-      }
-    };
-
-    connection
-      .on('establish', establishHandler)
-      .on('user.disconnect', onUserDisconnectHandler);
+    connection.once('establish', establishHandler);
   }
 }

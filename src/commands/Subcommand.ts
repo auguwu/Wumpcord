@@ -20,4 +20,8 @@
  * SOFTWARE.
  */
 
+export interface SubcommandDefinition {
+
+}
+
 export default class Subcommand {}

@@ -359,7 +359,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
     this.users.cache.clear();
 
     for (const shard of this.shards.values()) shard.disconnect(false);
-    for (const guildID of this.voiceConnections.keys()) this.voiceConnections.destroy(guildID);
+    for (const guildID of this.voiceConnections.keys()) this.voiceConnections.leave(guildID);
 
     this.voiceConnections.clear();
     this.shards.clear();
@@ -376,7 +376,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
       return Promise.reject(new TypeError(`Channel "${channelID}" was not cached`));
 
     if (channel.type !== 'voice')
-      return Promise.reject(new TypeError(`Channel "${channelID}" was not a text channel`));
+      return Promise.reject(new TypeError(`Channel "${channelID}" was not a voice channel`));
 
     if (channel.guild && channel.permissionsOf(this.user.id).has('voiceConnect'))
       return Promise.reject(new TypeError('Misisng `voiceConnect` permission'));
@@ -385,27 +385,10 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
     if (!guild)
       return Promise.reject(new TypeError(`Guild "${guildID}" isn't cached, run GuildStore.fetch to cache it!`));
 
-    guild.shard?.send(Constants.OPCodes.VoiceStateUpdate, {
-      channel_id: channelID,
-      guild_id: guildID,
-      self_mute: false,
-      self_deaf: false
-    });
-
-    return this.voiceConnections.connect(channelID, guildID);
+    return this.voiceConnections.join(guildID, channelID);
   }
 
   leaveVoiceChannel(guildID: string) {
-    const guild = this.guilds.get(guildID);
-    if (guild !== null) {
-      guild.shard?.send(Constants.OPCodes.VoiceStateUpdate, {
-        channel_id: null,
-        guild_id: guildID,
-        self_mute: false,
-        self_deaf: false
-      });
-
-      this.voiceConnections.destroy(guildID);
-    }
+    this.voiceConnections.leave(guildID);
   }
 }

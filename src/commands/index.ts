@@ -25,7 +25,5 @@ export * from './arguments';
 export * from './commands';
 
 export { default as CommandMessage } from './CommandMessage';
-export { default as i18nModule } from './i18n';
 export { default as Command } from './Command';
 export { default as CronJob } from './CronJob';
-export { default as Monitor } from './Monitor';
