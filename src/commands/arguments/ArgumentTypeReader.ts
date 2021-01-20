@@ -20,4 +20,58 @@
  * SOFTWARE.
  */
 
-export default class ArgumentTypeReader<T> {}
+import type CommandMessage from '../CommandMessage';
+import type CommandClient from '../CommandClient';
+import type Argument from './Argument';
+
+/**
+ * Represents a type reader to read a argument's details
+ * from the end user to validate and parse the output.
+ */
+export default class ArgumentTypeReader<T> {
+  /** The bot instance */
+  public bot: CommandClient;
+
+  /** The reader's ID for providing the type */
+  public id: string;
+
+  /**
+   * Represents a type reader to read a argument's details
+   * from the end user to validate and parse the output.
+   *
+   * @param bot The bot instance
+   * @param id The reader's ID
+   */
+  constructor(bot: CommandClient, id: string) {
+    this.bot = bot;
+    this.id = id;
+  }
+
+  /**
+   * Validates the argument to return a boolean-represented value
+   * if it was validated or not.
+   *
+   * @param msg The command's message
+   * @param arg The found argument
+   * @param raw The raw value by the end user
+   * @throws {SyntaxError}: If the function wasn't overrided
+   * @returns A boolean value if it was validated or not; it can also
+   * return a Promise if the action should be asynchronous.
+   */
+  validate(msg: CommandMessage, arg: Argument, raw: string): boolean | Promise<boolean> {
+    throw new SyntaxError('Missing overridable function call for [ArgumentTypeReader.validate]');
+  }
+
+  /**
+   * Parses the argument to return the value.
+   * @param msg The command's message
+   * @param arg The found argument
+   * @param raw The raw value by the end user
+   * @throws {SyntaxError}: If the function wasn't overrided
+   * @returns A value if it was validated or not; it can also
+   * return a Promise if the action should be asynchronous.
+   */
+  parse(msg: CommandMessage, arg: Argument, raw: string): T | Promise<T> {
+    throw new SyntaxError('Missing overridable function call for [ArgumentTypeReader.parse]');
+  }
+}

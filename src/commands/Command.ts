@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 
+import Subcommand, { SubcommandDefinition } from './Subcommand';
+import Argument, { ArgumentInfo } from './arguments/Argument';
 import type { CommandMessage } from '.';
 import { Permissions } from '../Constants';
 import CommandClient from './CommandClient';
@@ -101,12 +103,6 @@ export interface CommandInfo {
   name: string;
 }
 
-/** Function caller for any subcommand */
-type SubcommandExecutor = <T extends object = object>(
-  msg: CommandMessage,
-  args: T
-) => Promise<void>;
-
 /** Interface for TypeScript users to use this for type-checking if they are using decorators */
 export interface CommandExecutor {
   /**
@@ -163,7 +159,7 @@ export default abstract class Command {
    * Note that the name of the subcommand must be the same as the function
    * name you're gonna call it or it'll not work.
    */
-  public subcommands: SubcommandDefinition[];
+  public subcommands: Subcommand[];
 
   /**
    * The command's description, this is defaulted to `No description was provided.`
@@ -193,7 +189,7 @@ export default abstract class Command {
   /**
    * List of arguments to provide for the user if needed.
    */
-  public args?: Argument[];
+  public args: Argument[];
 
   /**
    * The command's name
@@ -210,14 +206,15 @@ export default abstract class Command {
    * @param info The command's metadata
    */
   constructor(info: CommandInfo) {
-    this.userPermissions = this.constructor._resolvePermissionField(info.userPermissions);
-    this.botPermissions  = this.constructor._resolvePermissionField(info.botPermissions);
-    this.subcommands     = info.subcommands ?? [];
+    this.userPermissions = this.constructor.resolvePermissionField(info.userPermissions);
+    this.botPermissions  = this.constructor.resolvePermissionField(info.botPermissions);
+    this.subcommands     = info.subcommands?.map(subcommand => new Subcommand(this, subcommand)) ?? [];
     this.description     = info.description ?? 'No description was provided.';
     this.guildOnly       = info.guildOnly ?? false;
     this.ownerOnly       = info.ownerOnly ?? false;
+    this.aliases         = info.aliases ?? [];
     this.cooldown        = info.cooldown ?? 3; // todo: add default command options
-    this.args            = info.args ?? [];
+    this.args            = info.args?.map(arg => new Argument(arg)) ?? [];
     this.name            = info.name;
   }
 
@@ -232,7 +229,9 @@ export default abstract class Command {
    * Populates `bot` to the command
    */
   init(bot: CommandClient) {
+    this.subcommands = this.subcommands.map(s => s.init(bot));
     this.bot = bot;
+
     return this;
   }
 
@@ -242,7 +241,7 @@ export default abstract class Command {
    * @throws TypeError - If the permission doesn't exist or not a valid type
    * @returns The bitfield number for permission checking in the command handler
    */
-  static _resolvePermissionField(field?: number | Permissions | Permissions[] | KeyedPermissions | KeyedPermissions[]) {
+  static resolvePermissionField(field?: number | Permissions | Permissions[] | KeyedPermissions | KeyedPermissions[]) {
     // If it's not defined, we'll just set it as Read Messages and Send Messages
     if (typeof field === 'undefined') return (<number> Permissions.sendMessages | Permissions.readMessages);
 
@@ -273,7 +272,7 @@ export default abstract class Command {
   }
 
   /**
-   * Runs the parent command, any subcommand will be ran in defined using
+   * Runs this parent command, any subcommand will be ran in defined using
    * the `@Subcommand` decorator or listed in [CommandInfo].
    *
    * @param msg The command message that was created in the command handler
@@ -281,6 +280,6 @@ export default abstract class Command {
    * @returns A [Promise] of nothing.
    */
   run(msg: CommandMessage, args: any) {
-    throw new Error('Missing functionality on [Command.run]');
+    throw new Error('Missing functionality on function [Command.run]');
   }
 }
