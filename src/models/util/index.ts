@@ -20,6 +20,6 @@
  * SOFTWARE.
  */
 
-export { default as ReactionCollector } from './ReactionCollector';
-export { default as MessageCollector } from './MessageCollector';
+//export { default as ReactionCollector } from './ReactionCollector';
+export { default as MessageCollector, Filter } from './MessageCollector';
 export { default as EmbedBuilder } from './EmbedBuilder';

@@ -24,7 +24,7 @@
 
 import type { RESTPostAPIChannelMessageJSONBody, APIMessage } from 'discord-api-types/v8';
 import type { MessageContent, MessageContentOptions } from '../../types';
-import { TextChannel } from './TextChannel';
+import GuildTextableChannel from './GuildTextableChannel';
 import { Message } from '../Message';
 import Util from '../../util';
 
@@ -33,7 +33,7 @@ interface FollowedChannel {
   webhook_id: string;
 }
 
-export class NewsChannel extends TextChannel {
+export class NewsChannel extends GuildTextableChannel {
   /**
    * Follows this [NewsChannel] to a different channel
    * @param channelID The channel's ID

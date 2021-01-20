@@ -20,11 +20,23 @@
  * SOFTWARE.
  */
 
+import CommandMessage from '../CommandMessage';
+
 /** The argument's information for creating a new [Argument] instance */
 export interface ArgumentInfo {
+  validator?: ArgPredicate<boolean>;
+  infinite?: boolean;
+  default?: any;
+  parser?: ArgPredicate<any>;
+  prompt: string;
+  oneOf?: any[];
   type: string;
   name: string;
+  max?: number;
+  min?: number;
 }
+
+type ArgPredicate<T> = (msg: CommandMessage, arg: Argument, raw: string) => T | Promise<T>;
 
 export default class Argument {
   constructor(info: ArgumentInfo) {

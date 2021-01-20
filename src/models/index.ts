@@ -21,7 +21,7 @@
  */
 
 export * from './presence';
-//export * from './util';
+export * from './util';
 
 export { default as GuildInvite } from './guild/GuildInvite';
 export { default as GuildMember } from './guild/GuildMember';

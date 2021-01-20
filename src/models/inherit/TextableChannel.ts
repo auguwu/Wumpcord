@@ -21,6 +21,8 @@
  */
 
 import { APIMessage, APIPartialChannel, APIWebhook, RESTPostAPIChannelMessageJSONBody, RESTPostAPIChannelMessagesBulkDeleteJSONBody } from 'discord-api-types';
+import type { MessageContent, MessageContentOptions } from '../../types';
+import MessageCollector, { Filter } from '../util/MessageCollector';
 import type { PermissionOverwrite } from '../PermissionOverwrite';
 import ChannelMessagesManager from '../../managers/ChannelMessagesManager';
 import type { GuildMember } from '..';
@@ -32,7 +34,6 @@ import Permission from '../../util/Permissions';
 import Util from '../../util';
 import { Guild } from '../Guild';
 import { Webhook } from '../Webhook';
-import { MessageContent, MessageContentOptions } from '../../types';
 
 interface GetMessagesOptions {
   around?: string;
@@ -41,14 +42,20 @@ interface GetMessagesOptions {
 }
 
 export default class TextableChannel<T extends APIPartialChannel> extends Channel {
+  public collector: MessageCollector;
   public messages: ChannelMessagesManager;
   public client: WebSocketClient;
 
   constructor(client: WebSocketClient, data: T) {
     super(data);
 
+    this.collector = new MessageCollector(client, <any> this);
     this.messages = new ChannelMessagesManager(client);
     this.client = client;
+  }
+
+  await(userID: string, filter: Filter, time: number = 30000) {
+    return this.collector.await(filter, userID, time);
   }
 
   bulkDelete(messages: (string | Message)[]) {
