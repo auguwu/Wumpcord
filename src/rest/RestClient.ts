@@ -208,6 +208,8 @@ export default class RestClient {
         });
 
         res.on('end', async () => {
+          if (res.statusCode! === 204) return resolve(null as any);
+
           const body = Buffer.concat(buffers);
           let resp;
 
