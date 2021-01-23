@@ -73,8 +73,18 @@ export default class Subcommand {
   }
 
   init(bot: CommandClient) {
+    this.args = this.args.map(arg => arg.init(bot));
     this.bot = bot;
+
     return this;
+  }
+
+  get usage() {
+    let format = this.name;
+    if (this.args.length > 0)
+      format += ` ${this.args.map(o => o.format()).join(' ')}`;
+
+    return format;
   }
 
   /**

@@ -177,6 +177,12 @@ export default abstract class Command {
   public ownerOnly: boolean;
 
   /**
+   * The category the command is in, this is from the directory
+   * the command is placed in
+   */
+  public category!: string;
+
+  /**
    * Cooldown amount in seconds to pause the execution until exhausted.
    */
   public cooldown: number;
@@ -185,6 +191,12 @@ export default abstract class Command {
    * Any additional aliases to run this command
    */
   public aliases: string[];
+
+  /**
+   * The path the command was found in, this is used
+   * for reloading the command
+   */
+  public path!: string;
 
   /**
    * List of arguments to provide for the user if needed.
@@ -222,14 +234,24 @@ export default abstract class Command {
    * Returns the command's usage prompt
    */
   get usage() {
-    return '';
+    let format = `${this.bot.defaultPrefix}${this.name}`;
+    if (this.subcommands.length > 0)
+      format += ` ${this.subcommands.map(s => s.usage).join(' | ')}`;
+
+    if (this.args.length > 0)
+      format += ` ${this.args.map(s => s.format()).join(' ')}`;
+
+    return format;
   }
 
   /**
    * Populates `bot` to the command
    */
-  init(bot: CommandClient) {
+  init(bot: CommandClient, category: string, path: string) {
     this.subcommands = this.subcommands.map(s => s.init(bot));
+    this.category = category;
+    this.args = this.args.map(s => s.init(bot));
+    this.path = path;
     this.bot = bot;
 
     return this;

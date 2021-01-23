@@ -40,7 +40,7 @@ import UserManager from '../managers/UserManager';
 
 import type * as events from '../events';
 
-interface WebSocketClientEvents extends EntityEvents {
+export interface WebSocketClientEvents extends EntityEvents {
   // Gateway
   shardClose(id: number, error: Error, recoverable: boolean): void;
   shardError(id: number, error: Error): void;
