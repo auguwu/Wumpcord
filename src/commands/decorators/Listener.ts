@@ -22,18 +22,20 @@
 
 import type { WebSocketClientEvents } from '../../gateway/WebSocketClient';
 
-const SYMBOL = Symbol('wumpcord.listeners');
+const SYMBOL = Symbol('wumpcord.lol'); // wumpcord.list_of_listeners
+const EVENT_SYMBOL = Symbol('wumpcord.listener');
+const IS_LISTENER_SYMBOL = Symbol('wumpcord.$$listener$$');
 
-export interface ListenerDefinition {
-  run(...args: Parameters<WebSocketClientEvents[ListenerDefinition['event']]>): void;
+export interface EventDefinition {
   event: keyof WebSocketClientEvents;
+  run: EventCaller<keyof WebSocketClientEvents>;
 }
 
 /**
  * Returns a list of event listeners from the parent [target]'s constructor
  * @param target target class
  */
-export function getListenerDefinitions(target: any): ListenerDefinition[] {
+export function getEventDefinitions(target: any): EventDefinition[] {
   if (target.constructor === null) return [];
 
   const definitions = target.constructor[SYMBOL];
@@ -42,16 +44,50 @@ export function getListenerDefinitions(target: any): ListenerDefinition[] {
   return definitions;
 }
 
-type ListenerCaller<K extends keyof WebSocketClientEvents>
-  = Parameters<WebSocketClientEvents[K]>;
+/**
+ * Checks if the parent [target] is a [Listener] instance
+ * @param target target class
+ */
+export const isListener = (target: any) =>
+  target.constructor[EVENT_SYMBOL] !== undefined && target.constructor[EVENT_SYMBOL] === IS_LISTENER_SYMBOL;
+
+type EventCaller<K extends keyof WebSocketClientEvents>
+  = (...args: Parameters<WebSocketClientEvents[K]>) => void | Promise<void>;
 
 /**
  * Decorator to listen events from a function of a class
  * @param event The event to listen to
  * @returns A [MethodDecorator] to call for events
  */
-export default function Listener<K extends keyof WebSocketClientEvents>(event: K) {
-  return (target: any, prop: string | symbol, descriptor: TypedPropertyDescriptor<ListenerCaller<K>>) => {
-    // noop
+export function Event<K extends keyof WebSocketClientEvents>(event: K) {
+  return (
+    target: any,
+    prop: string | symbol,
+    descriptor: TypedPropertyDescriptor<EventCaller<K>>
+  ) => {
+    if (target.prototype !== undefined)
+      throw new TypeError(`Prototype of ${target.name ?? '<anonymous>'}#${String(prop)} is not defined`);
+
+    if (!target.constructor[EVENT_SYMBOL] || target.constructor[EVENT_SYMBOL] !== IS_LISTENER_SYMBOL)
+      throw new TypeError(`Class ${target.name ?? '<anoymous>'}#${String(prop)} was not marked as a Listener.`);
+
+    if (!target.constructor[SYMBOL]) target.constructor[SYMBOL] = [];
+
+    (target.constructor[SYMBOL] as EventDefinition[]).push({
+      event,
+      run: descriptor.value!
+    });
+  };
+}
+
+/**
+ * Mark a class as a [Listener], to receive events from
+ */
+export function Listener(): ClassDecorator {
+  return (target: any) => {
+    if (target.constructor[EVENT_SYMBOL] !== undefined)
+      throw new Error(`Class "${target.name}" is already marked as a [Listener].`);
+
+    target.constructor[EVENT_SYMBOL] = IS_LISTENER_SYMBOL;
   };
 }

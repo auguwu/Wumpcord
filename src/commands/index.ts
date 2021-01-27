@@ -25,5 +25,7 @@ export * from './arguments';
 export * from './commands';
 
 export { default as CommandMessage } from './CommandMessage';
+export { default as CommandClient } from './CommandClient';
+export { default as DiscordEvent } from './DiscordEvent';
 export { default as Command } from './Command';
 export { default as CronJob } from './CronJob';

@@ -20,18 +20,13 @@
  * SOFTWARE.
  */
 
-import type { AnyGuildTextableChannel, TextableChannel } from '../../types';
+import type { AnyGuildTextableChannel, PartialEntity, TextableChannel } from '../../types';
 import type { GatewayMessageUpdateDispatchData } from 'discord-api-types';
 import { Message } from '../../models';
 import Event from '../Event';
 
-type PartialMessage = Message | {
-  channel: TextableChannel;
-  id: string;
-};
-
 interface MessageUpdateRefs {
-  message: PartialMessage;
+  message: PartialEntity<Message> & { channel: TextableChannel };
   old: Message | null;
 }
 
@@ -45,7 +40,7 @@ export default class MessageUpdateEvent extends Event<GatewayMessageUpdateDispat
   }
 
   process() {
-    const message: PartialMessage = this.data.hasOwnProperty('content') ? new Message(this.client, <any> this.data) : {
+    const message = this.data.hasOwnProperty('content') ? new Message(this.client, <any> this.data) : {
       channel: this.client.channels.get<TextableChannel>(this.data.channel_id)!,
       id: this.data.id
     };

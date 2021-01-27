@@ -29,20 +29,7 @@ import EventBus from '../util/EventBus';
 import Command from './Command';
 import CronJob from './CronJob';
 import Util from '../util';
-
-interface ConstructableClass<T> extends Ctor<T> {
-  /**
-   * The default export if using ESM / TypeScript
-   */
-  default?: Ctor<T>;
-}
-
-interface Ctor<T> {
-  /**
-   * Create a new instance of [T]
-   */
-  new (...args: any[]): T;
-}
+import CommandHandler from './handlers/CommandHandler';
 
 interface CommandClientEvents extends WebSocketClientEvents {
   /**
@@ -127,16 +114,16 @@ interface CommandClientOptions {
 
 export default class CommandClient extends EventBus<CommandClientEvents> {
   public typeReaders: Collection<string, ArgumentTypeReader<any>>;
-  public commands: Collection<string, Command>;
   public options: CommandClientOptions;
+  public handler: CommandHandler;
   public client: WebSocketClient;
   public jobs: Collection<string, CronJob>;
 
-  constructor(token: string, options?: CommandClientOptions) {
+  constructor(token: string, options: CommandClientOptions) {
     super();
 
     this.typeReaders = new Collection();
-    this.commands = new Collection();
+    this.handler = new CommandHandler(this, options.commandsDir!);
     this.options = Util.merge(options, {
       unknownCommandResponses: false,
       clientOptions: {},
@@ -147,7 +134,7 @@ export default class CommandClient extends EventBus<CommandClientEvents> {
       eventsDir: '',
       jobsDir: '',
       owners: []
-    })!;
+    });
 
     this.client = new WebSocketClient({ token, ...this.options.clientOptions });
     this.jobs = new Collection();
@@ -169,7 +156,8 @@ export default class CommandClient extends EventBus<CommandClientEvents> {
   }
 
   disconnect(reconnect: boolean = false) {
-    this.commands.clear();
+    this.handler.commands.clear();
+    this.handler.modules.clear();
     this.jobs.clear();
 
     return this.client.disconnect(reconnect);
