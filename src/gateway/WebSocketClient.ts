@@ -31,7 +31,7 @@ import type * as types from '../types';
 import * as Constants from '../Constants';
 import ShardManager from './ShardingManager';
 import RestClient from '../rest/RestClient';
-import EventBus from '../util/EventBus';
+import EventBus, { DefaultEventBusMap } from '../util/EventBus';
 import Util from '../util';
 
 import ChannelManager from '../managers/ChannelManager';
@@ -40,7 +40,7 @@ import UserManager from '../managers/UserManager';
 
 import type * as events from '../events';
 
-export interface WebSocketClientEvents extends EntityEvents {
+export interface WebSocketClientEvents extends EntityEvents, DefaultEventBusMap {
   // Gateway
   shardClose(id: number, error: Error, recoverable: boolean): void;
   shardError(id: number, error: Error): void;
@@ -213,6 +213,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
 
   // Private Methods
   debug(title: string, message: string) {
+    // @ts-ignore "Argument of type '[string]' is not assignable to parameter of type 'E["debug"] extends Listener ? Parameters<E["debug"]> : any[]'."
     this.emit('debug', `[Debug => ${title}] ${message}`);
   }
 
@@ -292,6 +293,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
     if (session !== undefined && session.remaining <= 0) {
       const error = new Error('Exceeded the amount of tries to connect');
 
+      // @ts-ignore Argument of type '[Error]' is not assignable to parameter of type 'E["error"] extends Listener ? Parameters<E["error"]> : any[]'.
       this.emit('error', error);
       return Promise.reject(error);
     }

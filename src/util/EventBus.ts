@@ -28,7 +28,7 @@ export type Listener = (...args: any[]) => void;
 /**
  * Represents a default type for the event bus
  */
-interface DefaultEventBusMap {
+export interface DefaultEventBusMap {
   [x: string]: Listener;
 }
 
