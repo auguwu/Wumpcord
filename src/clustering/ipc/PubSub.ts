@@ -20,4 +20,6 @@
  * SOFTWARE.
  */
 
-export default class RedisPubSubIPCRouter {}
+import IPCRouter from '../IPCRouter';
+
+export default class RedisPubSubIPCRouter extends IPCRouter {}

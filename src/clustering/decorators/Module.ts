@@ -20,6 +20,9 @@
  * SOFTWARE.
  */
 
-export default function module() {
+/**
+ * Marks a class as a "Module"
+ */
+export function module() {
   // todo: this
 }

@@ -20,4 +20,6 @@
  * SOFTWARE.
  */
 
-export default class MessagingIPCRouter {}
+import IPCRouter from '../IPCRouter';
+
+export default class MessagingIPCRouter extends IPCRouter {}

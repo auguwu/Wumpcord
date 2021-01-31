@@ -289,7 +289,6 @@ export class Message<C extends TextableChannel = TextableChannel> extends Base<A
     let file = data.file;
     delete data.file;
 
-    console.log(data);
     return this.client.rest.dispatch<APIMessage, RESTPostAPIChannelMessageJSONBody>({
       endpoint: `/channels/${this.channelID}/messages`,
       method: 'POST',
