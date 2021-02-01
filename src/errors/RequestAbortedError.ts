@@ -20,6 +20,13 @@
  * SOFTWARE.
  */
 
-//export { default as ReactionCollector } from './ReactionCollector';
-export { default as MessageCollector, Filter } from './MessageCollector';
-export { default as EmbedBuilder } from './EmbedBuilder';
+/**
+ * Class to define a request aborted error
+ */
+export default class RequestAbortedError extends Error {
+  constructor(endpoint: string, method: string) {
+    super(`Request was aborted by server on "${method.toUpperCase()} ${endpoint}"`);
+
+    this.name = 'RequestAbortedError';
+  }
+}

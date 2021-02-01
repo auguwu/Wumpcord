@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import type { AnyGuildTextableChannel, MessageContentOptions } from '../types';
+import type { TextableChannel, MessageContentOptions } from '../types';
 import type WebSocketClient from '../gateway/WebSocketClient';
 import { GuildEmoji, GuildMember } from '.';
 import { Attachment } from './Attachment';
@@ -50,7 +50,7 @@ interface GetReactionsOptions {
   limit?: number;
 }
 
-export class Message<C extends AnyGuildTextableChannel = AnyGuildTextableChannel> extends Base<APIMessage> {
+export class Message<C extends TextableChannel = TextableChannel> extends Base<APIMessage> {
   public referencedMessage!: Message | null;
   public editedTimestamp!: Date | null;
   public mentionEveryone!: boolean;
@@ -165,7 +165,7 @@ export class Message<C extends AnyGuildTextableChannel = AnyGuildTextableChannel
   }
 
   get channel() {
-    return this.client.channels.get<C>(this.channelID);
+    return this.client.channels.get<C>(this.channelID) as C;
   }
 
   delete() {
@@ -289,7 +289,6 @@ export class Message<C extends AnyGuildTextableChannel = AnyGuildTextableChannel
     let file = data.file;
     delete data.file;
 
-    console.log(data);
     return this.client.rest.dispatch<APIMessage, RESTPostAPIChannelMessageJSONBody>({
       endpoint: `/channels/${this.channelID}/messages`,
       method: 'POST',

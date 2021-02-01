@@ -20,4 +20,46 @@
  * SOFTWARE.
  */
 
-export default class ReactionCollector {}
+import type { GuildEmoji } from '..';
+import { Collection } from '@augu/collections';
+import EventBus from '../../util/EventBus';
+import { Message } from '../Message';
+import Util from '../../util';
+
+type FilterFunction = (message: Message) => boolean;
+type DisposeReason = 'end' | 'max.tries' | 'min.tries' | 'none';
+
+interface ReactionCollectorEvents {
+  dispose(reactions: Collection<string, GuildEmoji>, reason: DisposeReason): void;
+  end(reactions: Collection<string, GuildEmoji>): void;
+}
+
+interface ReactionCollectorOptions {
+  time?: number;
+  max?: number;
+}
+
+export default class ReactionCollector extends EventBus<ReactionCollectorEvents> {
+  private reactions: Collection<string, GuildEmoji>;
+  private _timeout!: NodeJS.Timeout;
+  private message: Message;
+  private options: ReactionCollectorOptions;
+  private filter: FilterFunction;
+
+  constructor(
+    message: Message,
+    filter: FilterFunction,
+    options: ReactionCollectorOptions
+  ) {
+    super();
+
+    this.reactions = new Collection();
+    this.message = message;
+    this.options = Util.merge(options, {
+      time: 60000,
+      max: 10
+    });
+
+    this.filter = filter;
+  }
+}

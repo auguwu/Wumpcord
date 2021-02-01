@@ -31,7 +31,7 @@ import type * as types from '../types';
 import * as Constants from '../Constants';
 import ShardManager from './ShardingManager';
 import RestClient from '../rest/RestClient';
-import EventBus from '../util/EventBus';
+import EventBus, { DefaultEventBusMap } from '../util/EventBus';
 import Util from '../util';
 
 import ChannelManager from '../managers/ChannelManager';
@@ -40,7 +40,7 @@ import UserManager from '../managers/UserManager';
 
 import type * as events from '../events';
 
-interface WebSocketClientEvents extends EntityEvents {
+export interface WebSocketClientEvents extends EntityEvents, DefaultEventBusMap {
   // Gateway
   shardClose(id: number, error: Error, recoverable: boolean): void;
   shardError(id: number, error: Error): void;
@@ -213,6 +213,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
 
   // Private Methods
   debug(title: string, message: string) {
+    // @ts-ignore "Argument of type '[string]' is not assignable to parameter of type 'E["debug"] extends Listener ? Parameters<E["debug"]> : any[]'."
     this.emit('debug', `[Debug => ${title}] ${message}`);
   }
 
@@ -292,6 +293,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
     if (session !== undefined && session.remaining <= 0) {
       const error = new Error('Exceeded the amount of tries to connect');
 
+      // @ts-ignore Argument of type '[Error]' is not assignable to parameter of type 'E["error"] extends Listener ? Parameters<E["error"]> : any[]'.
       this.emit('error', error);
       return Promise.reject(error);
     }
@@ -359,7 +361,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
     this.users.cache.clear();
 
     for (const shard of this.shards.values()) shard.disconnect(false);
-    for (const guildID of this.voiceConnections.keys()) this.voiceConnections.destroy(guildID);
+    for (const guildID of this.voiceConnections.keys()) this.voiceConnections.leave(guildID);
 
     this.voiceConnections.clear();
     this.shards.clear();
@@ -376,7 +378,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
       return Promise.reject(new TypeError(`Channel "${channelID}" was not cached`));
 
     if (channel.type !== 'voice')
-      return Promise.reject(new TypeError(`Channel "${channelID}" was not a text channel`));
+      return Promise.reject(new TypeError(`Channel "${channelID}" was not a voice channel`));
 
     if (channel.guild && channel.permissionsOf(this.user.id).has('voiceConnect'))
       return Promise.reject(new TypeError('Misisng `voiceConnect` permission'));
@@ -385,27 +387,10 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
     if (!guild)
       return Promise.reject(new TypeError(`Guild "${guildID}" isn't cached, run GuildStore.fetch to cache it!`));
 
-    guild.shard?.send(Constants.OPCodes.VoiceStateUpdate, {
-      channel_id: channelID,
-      guild_id: guildID,
-      self_mute: false,
-      self_deaf: false
-    });
-
-    return this.voiceConnections.connect(channelID, guildID);
+    return this.voiceConnections.join(guildID, channelID);
   }
 
   leaveVoiceChannel(guildID: string) {
-    const guild = this.guilds.get(guildID);
-    if (guild !== null) {
-      guild.shard?.send(Constants.OPCodes.VoiceStateUpdate, {
-        channel_id: null,
-        guild_id: guildID,
-        self_mute: false,
-        self_deaf: false
-      });
-
-      this.voiceConnections.destroy(guildID);
-    }
+    this.voiceConnections.leave(guildID);
   }
 }

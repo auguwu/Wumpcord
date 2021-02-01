@@ -21,7 +21,7 @@
  */
 
 export * from './presence';
-//export * from './util';
+export * from './util';
 
 export { default as GuildInvite } from './guild/GuildInvite';
 export { default as GuildMember } from './guild/GuildMember';
@@ -33,8 +33,9 @@ export * from './channel/StoreChannel';
 export * from './channel/VoiceChannel';
 export * from './channel/NewsChannel';
 export * from './channel/TextChannel';
-export * from './channel/DMChannel';
 export * from './PermissionOverwrite';
+export * from './InteractionMessage';
+export * from './channel/DMChannel';
 export * from './VoiceState';
 export * from './SelfUser';
 export * from './Template';

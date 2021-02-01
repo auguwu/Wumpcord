@@ -244,4 +244,16 @@ export default class Util {
     const base64 = image.toString('base64');
     return `data:image/${type ?? 'png'};base64,${base64}`;
   }
+
+  static escapeUndefined<T>(obj: T): { [P in keyof T]: T extends undefined ? never : T[P] } {
+    const data = {};
+    for (const key of Object.keys(obj)) {
+      const value = obj[key];
+      if (value === undefined || value === null) continue;
+
+      data[key] = value;
+    }
+
+    return data as any;
+  }
 }

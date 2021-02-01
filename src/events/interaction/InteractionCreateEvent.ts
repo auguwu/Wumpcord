@@ -24,14 +24,14 @@
 
 import type { GatewayInteractionCreateDispatchData } from 'discord-api-types';
 import type { AnyGuildTextableChannel } from '../../types';
-import { Guild, GuildMember, Message } from '../../models';
+import { Guild, GuildMember, InteractionMessage, Message } from '../../models';
 import type ApplicationCommand from '../../interactions/Command';
 import type * as interactions from '../../interactions/types';
 import Event from '../Event';
 
 interface InteractionCreateRefs {
   command?: ApplicationCommand;
-  message?: Message;
+  message?: InteractionMessage;
   channel: AnyGuildTextableChannel;
   guild: Guild;
 }
@@ -159,19 +159,14 @@ export default class InteractionCreateEvent extends Event<GatewayInteractionCrea
     const { userMentions, roleMentions, content } = this._format();
     const allUsers = await Promise.all(userMentions.map(r => this.client.users.fetch(r)));
 
-    this.$refs.message = new Message(this.client, {
-      // @ts-ignore
-      id: null,
-      type: 0,
+    this.$refs.message = new InteractionMessage(this.client, {
       timestamp: new Date().toISOString(),
       channel_id: this.channel.id,
       guild_id: this.guild.id,
-      flags: 0,
       content,
-      mention_everyone: false,
       mention_roles: roleMentions,
       mentions: allUsers,
-      pinned: false,
+      token: this.data.token,
       author: {
         public_flags: this.member.user.flags,
         discriminator: this.member.user.discriminator,
