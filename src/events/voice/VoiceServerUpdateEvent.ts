@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020-2021 August, Ice
+ * Copyright (c) 2020-2021 August
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,7 +45,6 @@ export default class VoiceServerUpdateEvent extends Event<GatewayVoiceServerUpda
   }
 
   process() {
-    console.trace('sex');
     this.$refs = {
       endpoint: this.data.endpoint,
       guild: this.client.guilds.get(this.data.guild_id) || { id: this.data.guild_id },

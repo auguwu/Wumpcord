@@ -14,8 +14,7 @@
     "build/"
   ],
   "maintainers": [
-    "Chris \"August\" Hernandez <august@augu.dev>",
-    "John \"Ice\" Burke <john@widgetbot.io>"
+    "Chris \"August\" Hernandez <cutie@floofy.dev>"
   ],
   "engines": {
     "node": ">=14"

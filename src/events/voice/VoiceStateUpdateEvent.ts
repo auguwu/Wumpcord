@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020-2021 August, Ice
+ * Copyright (c) 2020-2021 August
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,7 +45,6 @@ export default class VoiceStateUpdateEvent extends Event<GatewayVoiceStateUpdate
   }
 
   process() {
-    console.trace('ea sports');
     const channel = this.data.channel_id !== null
       ? this.client.channels.get(this.data.channel_id) || { id: this.data.channel_id }
       : null;
