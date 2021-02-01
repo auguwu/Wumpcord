@@ -1,10 +1,6 @@
 # Wumpcord
 > :rowboat: **Flexible, type-safe, and lightweight Discord API library made in TypeScript**
 
-## Features
-- Clustering Support: Tired of build your own [clustering](https://nodejs.org/api/cluster.html) library to your bot? Wumpcord has clustering support built-in with a modular system to plug-in-play methods with IPC and Redis Pub/Sub support.
-- Extra Utilities: Wumpcord bundles in with extra utilities like a Reaction Handler and a Message Collector.
-
 ## Installation
 You can install **Wumpcord** under NPM, as follows:
 
@@ -15,7 +11,7 @@ $ npm i --no-optional wumpcord
 ### Features
 Specific features require extra dependencies, this is a list that requires them
 
-#### Voice Dependencies
+#### Optional Dependencies
 > If `@discordjs/opus` or `opusscript` isn't installed, the library will error out and you will not have access to Voice
 
 - `tweetnacl`
@@ -37,11 +33,10 @@ Specific features require extra dependencies, this is a list that requires them
   - Native: Yes
   - For: OGG decoding
 
-#### Cluster Dependencies
-- `ioredis`
+- `erlpack`
   - Required: No
-  - Native: No
-  - Alternative: IPC (no dependencies)
+  - Native: Yes
+  - Alternative: **JSON** (built-in)
 
 ## Need Support?
 You can join the server below and join in #support under the **Wumpcord** category
@@ -76,7 +71,6 @@ client.connect();
 
 ## Maintainers
 - [August](https://floofy.dev)
-- [Ice](https://github.com/IceeMC)
 
 ## Testers
 None at the moment.
