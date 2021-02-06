@@ -11,4 +11,4 @@ Before you wanna contribute, you will need Node.js v10 or higher.
 - Code your heart out! :heart:
 - Once you are finished, push to a different branch to the **indev** branch.
 - [Submit](https://github.com/auguwu/Wumpcord/compare) your contribution.
-  - If you are in the [Discord](https://discord.gg/yDnbEDH) server and have your PR merged, contact **August#5820** for the **Contributor** role.
+  - If you are in the [Discord](https://discord.gg/JjHGR6vhcG) server and have your PR merged, contact **August#5820** for the **Contributor** role.
