@@ -1,4 +1,5 @@
 {
+  "baseBranches": ["indev"],
   "automerge": true,
   "extends": ["config:base"]
 }
