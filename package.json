@@ -44,7 +44,7 @@
     "eslint": "7.19.0",
     "jest": "26.6.3",
     "ts-jest": "26.5.1",
-    "typescript": "4.1.3"
+    "typescript": "4.1.4"
   },
   "optionalDependencies": {
     "@discordjs/opus": "0.4.0",
