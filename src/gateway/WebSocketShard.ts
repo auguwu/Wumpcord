@@ -26,10 +26,10 @@ import { Guild, SelfUser } from '../models';
 import type * as discord from 'discord-api-types/v8';
 import type * as types from '../types';
 import * as Constants from '../Constants';
+import { EventBus } from '@augu/utils';
 import GuildManager from '../managers/GuildManager';
 import type Client from './WebSocketClient';
 import WebSocket from 'ws';
-import EventBus from '../util/EventBus';
 import Util from '../util';
 
 import * as events from '../events';

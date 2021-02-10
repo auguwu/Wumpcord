@@ -25,7 +25,7 @@ import type { TextableChannel } from '../../types';
 import type WebSocketClient from '../../gateway/WebSocketClient';
 import type { Message } from '../Message';
 import { Collection } from '@augu/collections';
-import EventBus from '../../util/EventBus';
+import { EventBus } from '@augu/utils';
 
 export type Filter = (msg: Message) => boolean;
 
@@ -102,7 +102,7 @@ export default class MessageCollector extends EventBus<MessageCollectorEvents> {
     const messages = this.#messages;
     this.emit('end', reason, messages);
 
-    this.#client.remove('message', this.#verify);
+    this.#client.removeListener('message', this.#verify);
     delete this.#awaiting[channelID];
   }
 
@@ -122,7 +122,7 @@ export default class MessageCollector extends EventBus<MessageCollectorEvents> {
       delete this.#awaiting[event.message.author.id];
 
       // Remove the event from the listener stack
-      this.#client.remove('message', this.#verify);
+      this.#client.removeListener('message', this.#verify);
 
       // Resolve the message
       return packet.resolve?.(event.message);

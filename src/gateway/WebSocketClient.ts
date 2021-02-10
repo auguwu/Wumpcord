@@ -30,8 +30,8 @@ import InteractionHelper from '../interactions/Helper';
 import type * as types from '../types';
 import * as Constants from '../Constants';
 import ShardManager from './ShardingManager';
+import { EventBus } from '@augu/utils';
 import RestClient from '../rest/RestClient';
-import EventBus, { DefaultEventBusMap } from '../util/EventBus';
 import Util from '../util';
 
 import ChannelManager from '../managers/ChannelManager';
@@ -40,7 +40,7 @@ import UserManager from '../managers/UserManager';
 
 import type * as events from '../events';
 
-export interface WebSocketClientEvents extends EntityEvents, DefaultEventBusMap {
+export interface WebSocketClientEvents extends EntityEvents {
   // Gateway
   shardClose(id: number, error: Error, recoverable: boolean): void;
   shardError(id: number, error: Error): void;
@@ -230,7 +230,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
 
     this.debug('Session Limit', shardInfo.session ? `${shardInfo.session.remaining}/${shardInfo.session.total}` : 'Not auto-sharding.');
 
-    for (let i = 0; i < (this.options.shardCount === 1 ? 1 : this.options.shardCount - 1); i++) {
+    for (let i = 0; i < (this.options.shardCount === 1 ? 1 : (this.options.shardCount as number) - 1); i++) {
       await this.shards.spawn(i, this.options.strategy);
       await Util.sleep(5000);
     }

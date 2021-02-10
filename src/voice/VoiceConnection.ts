@@ -29,11 +29,11 @@ import type WebSocketClient from '../gateway/WebSocketClient';
 import { VoiceOPCodes } from './Constants';
 import WebSocketNetwork from './networks/WebSocketNetwork';
 import { Collection } from '@augu/collections';
+import { EventBus } from '@augu/utils';
 import { OPCodes } from '../Constants';
 import { Stream } from 'stream';
 import UDPNetwork from './networks/UDPNetwork';
 import Converter from './Converter';
-import EventBus from '../util/EventBus';
 import Util from '../util';
 
 interface VoiceConnectionEvents {

@@ -29,12 +29,14 @@
   },
   "dependencies": {
     "@augu/collections": "1.0.3",
+    "@augu/utils": "1.0.0",
     "discord-api-types": "0.11.2",
     "form-data": "3.0.0",
     "ws": "7.4.3"
   },
   "devDependencies": {
     "@augu/eslint-config": "1.10.0",
+    "@augu/tsconfig": "1.0.1",
     "@types/jest": "26.0.20",
     "@types/node": "14.14.25",
     "@types/ws": "7.4.0",

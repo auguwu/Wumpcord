@@ -22,7 +22,7 @@
 
 import type { GuildEmoji } from '..';
 import { Collection } from '@augu/collections';
-import EventBus from '../../util/EventBus';
+import { EventBus } from '@augu/utils';
 import { Message } from '../Message';
 import Util from '../../util';
 
