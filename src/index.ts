@@ -29,7 +29,6 @@ export { default as Client } from './gateway/WebSocketClient';
 export * from './events';
 export * from './models';
 export * from './voice';
-export * from './types';
 
 /** Returns the version of Wumpcord */
 export const version: string = pkgVersion;
