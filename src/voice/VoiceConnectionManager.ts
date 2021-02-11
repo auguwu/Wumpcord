@@ -26,7 +26,6 @@ import type { GatewayVoiceServerUpdateDispatchData } from 'discord-api-types';
 import type WebSocketClient from '../gateway/WebSocketClient';
 import VoiceConnection from './VoiceConnection';
 import { Collection } from '@augu/collections';
-import type { User } from '../models';
 
 interface PendingGuild {
   resolve(connection: VoiceConnection): void;
@@ -111,7 +110,7 @@ export default class VoiceConnectionManager extends Collection<string, VoiceConn
       this.debug(`Established a voice connection (guild_id=${data.guild_id})`);
       pending.resolve(connection);
 
-      connection.remove('establish', establishHandler);
+      connection.removeListener('establish', establishHandler);
       delete this.pending[data.guild_id];
     };
 
