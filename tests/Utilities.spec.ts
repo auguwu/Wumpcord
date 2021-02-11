@@ -21,7 +21,6 @@
  */
 
 import Permissions from '../src/util/Permissions';
-import EventBus from '../src/util/EventBus';
 import Util from '../src/util';
 
 describe('Util', () => {
@@ -36,36 +35,6 @@ describe('Util', () => {
     const obj = { a: 'c' };
 
     expect(Util.get(obj, 'a', 'w')).toStrictEqual('c');
-  });
-});
-
-interface EventBusMap {
-  test(message: string): void;
-}
-
-describe('EventBus', () => {
-  let bus!: EventBus<EventBusMap>;
-
-  beforeAll(() => {
-    bus = new EventBus();
-  });
-
-  afterEach(() => bus.removeAllListeners());
-
-  it('should return `test` as the message content', () => {
-    bus.on('test', (msg) => {
-      expect(msg).toStrictEqual('test');
-    });
-
-    bus.emit('test', 'test');
-  });
-
-  it('should not return `test` as the message content', () => {
-    bus.on('test', msg => {
-      expect(msg).not.toStrictEqual('test');
-    });
-
-    bus.emit('test', 'ea sports');
   });
 });
 
