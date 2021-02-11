@@ -49,9 +49,12 @@
   },
   "optionalDependencies": {
     "@discordjs/opus": "0.4.0",
+    "@types/redis": "2.8.28",
     "erlpack": "0.1.3",
     "ogg": "1.2.6",
     "opusscript": "0.0.7",
+    "pg-native": "3.0.0",
+    "redis": "3.0.2",
     "tweetnacl": "1.0.3"
   }
 }

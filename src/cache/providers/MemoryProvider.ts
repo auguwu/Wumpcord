@@ -20,8 +20,27 @@
  * SOFTWARE.
  */
 
-describe('Test Spec', () => {
-  it('should be equal to 2', () =>
-    expect(1 + 1).toBe(2)
-  );
-});
+import { Collection } from '@augu/collections';
+import CacheProvider from '../Provider';
+
+export default class MemoryCacheProvider<T = unknown> extends CacheProvider {
+  #cache: Collection<string, T>;
+
+  constructor() {
+    super('memory');
+
+    this.#cache = new Collection();
+  }
+
+  get(id: string): T | null {
+    return this.#cache.get(id) ?? null;
+  }
+
+  remove(id: string) {
+    return this.#cache.delete(id);
+  }
+
+  add(key: string, value: T) {
+    return this.#cache.set(key, value);
+  }
+}

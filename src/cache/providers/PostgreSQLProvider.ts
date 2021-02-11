@@ -20,8 +20,7 @@
  * SOFTWARE.
  */
 
-describe('Test Spec', () => {
-  it('should be equal to 2', () =>
-    expect(1 + 1).toBe(2)
-  );
-});
+import CacheProvider from '../Provider';
+import pg from 'pg-native';
+
+export default class PostgreSQLProvider extends CacheProvider {}

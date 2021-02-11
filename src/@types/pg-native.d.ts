@@ -20,8 +20,15 @@
  * SOFTWARE.
  */
 
-describe('Test Spec', () => {
-  it('should be equal to 2', () =>
-    expect(1 + 1).toBe(2)
-  );
-});
+/**
+ * Main entrypoint for `pg-native`
+ *
+ * @author August <cutie@floofy.dev>
+ */
+declare module 'pg-native' {
+  namespace pg {
+
+  }
+
+  export = pg;
+}
