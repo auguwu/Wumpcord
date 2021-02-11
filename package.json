@@ -1,7 +1,7 @@
 {
   "name": "wumpcord",
   "description": "🚣 Flexible, type-safe, and lightweight Discord API library",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "main": "build/index.js",
   "license": "MIT",
   "author": "Chris \"August\" Hernandez <august@augu.dev>",
