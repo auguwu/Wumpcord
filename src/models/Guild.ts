@@ -461,13 +461,13 @@ export class Guild extends Base<IGuild> {
         this.members.cache = event.members;
         if (limit && event.members.size >= limit) {
           clearTimeout(timeout);
-          this.client.remove('guildMembersChunk', handler);
+          this.client.removeListener('guildMembersChunk', handler);
 
           return resolve(event.members);
         }
 
         clearTimeout(timeout);
-        this.client.remove('guildMembersChunk', handler);
+        this.client.removeListener('guildMembersChunk', handler);
         return resolve(event.members);
       };
 
