@@ -95,11 +95,9 @@ export default class VoiceConnection extends EventBus<VoiceConnectionEvents> {
 
   debug(message: string, title?: string) {
     if (!title)
-      title = `[VoiceConnection/${this.guildID}/${this.channelID}]`;
-    else
-      title = `[${title}]`;
+      title = `VoiceConnection/${this.guildID}/${this.channelID}`;
 
-    this.emit('debug', `${title} ${message}`);
+    this.client.emit('debug', `[Debug => ${title}] ${message}`);
   }
 
   speak() {
@@ -154,6 +152,8 @@ export default class VoiceConnection extends EventBus<VoiceConnectionEvents> {
 
   reset() {
     this.debug('Resetting connection');
+
+    if (this.playbackInterval) clearInterval(this.playbackInterval);
 
     this.udp?.reset();
     this.ws.clean();

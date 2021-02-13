@@ -74,7 +74,7 @@ export default class UDPNetwork {
   }
 
   private debug(message: string) {
-    this.connection.debug(message, `UDPNetwork/${this.connection.guildID}/${this.connection.channelID}`);
+    this.connection.debug(message, `voice:UDPNetwork/${this.connection.guildID}/${this.connection.channelID}`);
   }
 
   private findAddress() {
@@ -105,6 +105,7 @@ export default class UDPNetwork {
 
     port = Number(message.readUInt16BE(68));
     this.debug(`Discovery has been complete "${ip}:${port}", now selecting protocol`);
+    this.connection.ws.selectProtocol(ip, port);
   }
 
   sendPacket(packet: Buffer) {

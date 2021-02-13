@@ -21,6 +21,7 @@
  */
 
 import { createReadStream, existsSync, lstatSync } from 'fs';
+import VoiceConnection from './VoiceConnection';
 import { extname } from 'path';
 import { Stream } from 'stream';
 import Util from '../util';
@@ -43,22 +44,33 @@ export function getOpus(): OpusLibrary | null {
   const hasDjs = Util.tryRequire('@discordjs/opus');
   const hasOpus = Util.tryRequire('opusscript');
 
-  if (hasOpus) return require('opusscript');
-  else if (hasDjs) return require('@discordjs/opus');
+  if (hasDjs) return require('@discordjs/opus');
+  else if (hasOpus) return require('opusscript');
   else return null;
 }
 
-export function getConverter(connection: any, source: string | Stream): Converter | null | Promise<Converter | null> {
+export function getConverter(connection: VoiceConnection, source: string | Stream): Promise<Converter | null> {
   if (typeof source === 'string' && existsSync(source)) {
-    const stats = lstatSync(source);
-    if (stats.isDirectory()) return null;
+    return new Promise((resolve) => {
+      const stats = lstatSync(source);
+      if (stats.isDirectory()) return null;
 
-    const ext = extname(source);
-    if (['.raw', '.pcm'].includes(ext)) return new PCMConverter(connection, createReadStream(source));
-    if (ext === '.dca') return new OpusConverter(connection, createReadStream(source));
-    if (ext === '.ogg') return new OGGConverter(connection, createReadStream(source));
+      const ext = extname(source);
+      if (['.raw', '.pcm'].includes(ext)) {
+        connection.debug('Using PCM converter');
+        return resolve(new PCMConverter(connection, createReadStream(source)));
+      }
 
-    return null;
+      if (ext === '.dca') {
+        connection.debug('Using Opus converter');
+        return resolve(new OpusConverter(connection, createReadStream(source)));
+      }
+
+      if (ext === '.ogg') {
+        connection.debug('Using OGG converter');
+        return resolve(new OGGConverter(connection, createReadStream(source)));
+      }
+    });
   }
 
   if (source instanceof Stream) {
@@ -68,10 +80,13 @@ export function getConverter(connection: any, source: string | Stream): Converte
         if (chunk === null) return;
 
         try {
-          connection.udp?.encoder.decode(chunk, 960 * 2);
+          connection.udp?.encoder.decode(chunk);
           converter = new OpusConverter(connection, source);
+
+          connection.debug('Using Opus converter');
         } catch {
           converter = new FFMpegConverter(connection, source);
+          connection.debug('Using FFMpeg converter');
         }
 
         resolve(converter);
@@ -82,7 +97,7 @@ export function getConverter(connection: any, source: string | Stream): Converte
     });
   }
 
-  return null;
+  return Promise.resolve(null);
 }
 
 export {
@@ -90,9 +105,9 @@ export {
   FFMpegConverter,
   OpusConverter,
   OGGConverter,
-  PCMConverter
+  PCMConverter,
+  VoiceConnection
 };
 
 export { default as VoiceConnectionManager } from './VoiceConnectionManager';
-export { default as VoiceConnection } from './VoiceConnection';
 export * as Constants from './Constants';

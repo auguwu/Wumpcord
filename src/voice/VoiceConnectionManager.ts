@@ -31,7 +31,6 @@ interface PendingGuild {
   resolve(connection: VoiceConnection): void;
   reject(error?: any): void;
   channelID: string;
-  timeout: NodeJS.Timeout | null;
   guildID: string;
 }
 
@@ -62,15 +61,12 @@ export default class VoiceConnectionManager extends Collection<string, VoiceConn
       this.pending[guildID] = {
         resolve,
         reject,
-
-        timeout: setTimeout(() => {
-          delete this.pending[guildID];
-          return reject(new Error('Establishing connection has timed out'));
-        }, 15000).unref(),
-
         channelID,
         guildID
       };
+
+      const connection = new VoiceConnection(this.client, guildID, channelID);
+      this.set(guildID, connection);
 
       this.client.shards.find(r => r.guilds.has(guildID))?.send(4, {
         channel_id: channelID,
@@ -103,7 +99,7 @@ export default class VoiceConnectionManager extends Collection<string, VoiceConn
       return;
     }
 
-    const connection = this.emplace(data.guild_id, new VoiceConnection(this.client, data.guild_id, pending.channelID));
+    const connection = this.get(data.guild_id)!;
     connection.onVoiceServerUpdate(data);
 
     const establishHandler = () => {

@@ -50,6 +50,20 @@ export enum VoiceOPCodes {
   ClientDisconnect = 13
 }
 
+export const OPVoiceCodes: { [key: number]: string } = {
+  0: 'Identify',
+  1: 'Select Protocol',
+  2: 'Ready',
+  3: 'Heartbeat',
+  4: 'Session Description',
+  5: 'Speaking',
+  6: 'Heartbeat Acked',
+  7: 'Resume',
+  8: 'Hello',
+  9: 'Resumed',
+  13: 'Client Disconnected'
+};
+
 export const EncryptionModes: [normal: string, suffix: string, lite: string] = [
   'xsalsa20_poly1305', // Normal
   'xsalsa20_poly1305_suffix', // Suffix
