@@ -360,8 +360,8 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
     this.guilds.cache.clear();
     this.users.cache.clear();
 
-    for (const shard of this.shards.values()) shard.disconnect(false);
     for (const guildID of this.voiceConnections.keys()) this.voiceConnections.leave(guildID);
+    for (const shard of this.shards.values()) shard.disconnect(false);
 
     this.voiceConnections.clear();
     this.shards.clear();
