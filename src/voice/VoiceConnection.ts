@@ -22,10 +22,10 @@
 
 /* eslint-disable camelcase */
 
-import { GatewayVoiceServerUpdateDispatchData, GatewayVoiceStateUpdateDispatchData } from 'discord-api-types';
-import { getConverter, getOpus } from '.';
+import type { GatewayVoiceServerUpdateDispatchData, GatewayVoiceStateUpdateDispatchData } from 'discord-api-types';
 import { User, VoiceChannel } from '../models';
 import type WebSocketClient from '../gateway/WebSocketClient';
+import { getConverter } from '.';
 import { VoiceOPCodes } from './Constants';
 import WebSocketNetwork from './networks/WebSocketNetwork';
 import { Collection } from '@augu/collections';
@@ -69,7 +69,6 @@ export default class VoiceConnection extends EventBus<VoiceConnectionEvents> {
     super();
 
     if (!Util.hasNaclInstalled()) throw new TypeError('Missing `tweetnacl` library, please install it');
-    if (getOpus() === null) throw new TypeError('Missing `@discordjs/opus` or `opusscript` libraries, please install it');
 
     this.userSpeaking = new Collection();
     this.channelID = channelID;

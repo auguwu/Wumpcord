@@ -21,16 +21,12 @@
  */
 
 import { createSocket, Socket } from 'dgram';
-import type { OpusEncoder } from '@discordjs/opus';
 import type VoiceConnection from '../VoiceConnection';
-import { getOpus } from '..';
+import { OpusEncoder } from 'node-opus';
 import NaCL from 'tweetnacl';
 
 const MAX_TIMESTAMP = (2 ** 32) - 1;
 const MAX_SEQ = (2 ** 16) - 1;
-
-type DJSOpus = typeof import('@discordjs/opus');
-type AbalOpus = typeof import('opusscript');
 
 /**
  * Represents a UDP4 connection with Discord
@@ -40,7 +36,7 @@ export default class UDPNetwork {
   public secretKey: Uint8Array | null;
   private rtpHeader: Buffer;
   public timestamp: number;
-  public encoder: OpusEncoder | import('opusscript');
+  public encoder: OpusEncoder;
   public socket: Socket;
   private nonce: Buffer;
   private seq: number;
@@ -52,13 +48,11 @@ export default class UDPNetwork {
     ip: string,
     port: number
   ) {
-    const opus = getOpus()!;
-
     this.connection = connection;
     this.secretKey = null;
     this.rtpHeader = Buffer.alloc(12);
     this.timestamp = 0;
-    this.encoder = (opus as DJSOpus).OpusEncoder ? new (opus as DJSOpus).OpusEncoder(48000, 2) : new (opus as AbalOpus)(48000);
+    this.encoder = new OpusEncoder(48000);
     this.socket = createSocket('udp4');
     this.nonce = Buffer.alloc(24);
     this.seq = 0;

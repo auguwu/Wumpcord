@@ -33,22 +33,6 @@ import OGGConverter from './converters/Ogg';
 
 import Converter from './Converter';
 
-/** The opus libraries available */
-export type OpusLibrary = typeof import('opusscript') | typeof import('@discordjs/opus');
-
-/**
- * Returns the opus library to use, returns `null` if no
- * encoder is installed
- */
-export function getOpus(): OpusLibrary | null {
-  const hasDjs = Util.tryRequire('@discordjs/opus');
-  const hasOpus = Util.tryRequire('opusscript');
-
-  if (hasDjs) return require('@discordjs/opus');
-  else if (hasOpus) return require('opusscript');
-  else return null;
-}
-
 export function getConverter(connection: VoiceConnection, source: string | Stream): Promise<Converter | null> {
   if (typeof source === 'string' && existsSync(source)) {
     return new Promise((resolve) => {

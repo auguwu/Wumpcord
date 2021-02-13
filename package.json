@@ -48,10 +48,9 @@
     "typescript": "4.1.5"
   },
   "optionalDependencies": {
-    "@discordjs/opus": "0.4.0",
     "erlpack": "0.1.3",
+    "node-opus": "0.3.3",
     "ogg": "1.2.6",
-    "opusscript": "0.0.7",
     "tweetnacl": "1.0.3"
   }
 }

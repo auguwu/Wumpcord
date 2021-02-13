@@ -33,7 +33,10 @@ export default class OpusConverter extends Converter {
   }
 
   provide() {
-    return this.packets.shift();
+    const packet = this.packets.shift();
+    if (packet === undefined) return undefined;
+
+    return this.connection.udp?.encoder.decode(packet);
   }
 
   shutdown() {
