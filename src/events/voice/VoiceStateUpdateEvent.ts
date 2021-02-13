@@ -64,7 +64,8 @@ export default class VoiceStateUpdateEvent extends Event<GatewayVoiceStateUpdate
       this.shard.debug('Checking if there is an active voice connection...');
 
       const connection = this.client.voiceConnections.get(guild.id);
-      if (connection !== undefined) connection.onVoiceStateUpdate(this.data);
+      if (connection !== undefined)
+        connection.onVoiceStateUpdate(this.data);
     }
   }
 }

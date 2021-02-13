@@ -2,6 +2,7 @@
   "extends": "@augu/tsconfig",
   "compilerOptions": {
     "declaration": true, // i cant be bothered to do this
+    "moduleResolution": "node",
     "types": ["node"],
     "outDir": "./build",
     "rootDir": "./src"

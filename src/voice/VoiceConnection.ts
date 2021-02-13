@@ -22,10 +22,10 @@
 
 /* eslint-disable camelcase */
 
-import { GatewayVoiceServerUpdateDispatchData, GatewayVoiceStateUpdateDispatchData } from 'discord-api-types';
-import { getConverter, getOpus } from '.';
+import type { GatewayVoiceServerUpdateDispatchData, GatewayVoiceStateUpdateDispatchData } from 'discord-api-types';
 import { User, VoiceChannel } from '../models';
 import type WebSocketClient from '../gateway/WebSocketClient';
+import { getConverter } from '.';
 import { VoiceOPCodes } from './Constants';
 import WebSocketNetwork from './networks/WebSocketNetwork';
 import { Collection } from '@augu/collections';
@@ -69,7 +69,6 @@ export default class VoiceConnection extends EventBus<VoiceConnectionEvents> {
     super();
 
     if (!Util.hasNaclInstalled()) throw new TypeError('Missing `tweetnacl` library, please install it');
-    if (getOpus() === null) throw new TypeError('Missing `@discordjs/opus` or `opusscript` libraries, please install it');
 
     this.userSpeaking = new Collection();
     this.channelID = channelID;
@@ -95,11 +94,9 @@ export default class VoiceConnection extends EventBus<VoiceConnectionEvents> {
 
   debug(message: string, title?: string) {
     if (!title)
-      title = `[VoiceConnection/${this.guildID}/${this.channelID}]`;
-    else
-      title = `[${title}]`;
+      title = `VoiceConnection/${this.guildID}/${this.channelID}`;
 
-    this.emit('debug', `${title} ${message}`);
+    this.client.emit('debug', `[Debug => ${title}] ${message}`);
   }
 
   speak() {
@@ -154,6 +151,8 @@ export default class VoiceConnection extends EventBus<VoiceConnectionEvents> {
 
   reset() {
     this.debug('Resetting connection');
+
+    if (this.playbackInterval) clearInterval(this.playbackInterval);
 
     this.udp?.reset();
     this.ws.clean();

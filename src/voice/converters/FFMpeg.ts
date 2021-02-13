@@ -62,7 +62,7 @@ export default class FFmpegConverter extends Converter {
 
     if (error !== undefined) this.connection.emit('error', error);
 
-    this.process!.kill();
+    this.process?.kill();
     this.process = null;
     this.ended = true;
   }

@@ -62,6 +62,7 @@ export default class WebSocketNetwork {
 
     this.socket.on('message', this.onMessage.bind(this));
     this.socket.on('close', this.onClose.bind(this));
+    this.socket.on('error', console.error);
     this.socket.on('open', this.onOpen.bind(this));
   }
 
@@ -99,11 +100,10 @@ export default class WebSocketNetwork {
   }
 
   private debug(message: string) {
-    this.connection.debug(message, `WebSocket/${this.connection.guildID}/${this.connection.channelID}`);
+    this.connection.debug(message, `voice:WebSocketNetwork/${this.connection.guildID}/${this.connection.channelID}`);
   }
 
   private onOpen() {
-    this.connection.emit('establish');
     this.debug('Established a WebSocket connection with Discord');
   }
 
@@ -133,7 +133,7 @@ export default class WebSocketNetwork {
       return;
     }
 
-    this.debug(`Received "${Util.getKey(constants.VoiceOPCodes, data.op) ?? 'Unknown'}"`);
+    this.debug(`Received "${constants.OPVoiceCodes[payload.op]}" event!`);
     switch (payload.op) {
       case constants.VoiceOPCodes.Hello: {
         if (!this._heartbeatInterval) {
@@ -174,7 +174,7 @@ export default class WebSocketNetwork {
         this.debug('Received secret key, audio can now be sent');
         this.ready = true;
         this.connection.udp!.secretKey = new Uint8Array(payload.d.secret_key);
-        this.connection._ready.resolve(null);
+        this.connection.emit('establish');
       } break;
 
       case constants.VoiceOPCodes.ClientDisconnect:
@@ -193,7 +193,13 @@ export default class WebSocketNetwork {
   }
 
   private heartbeat() {
+    if (!this.acked) {
+      this.debug('Didn\'t receive packet back');
+      return;
+    }
+
     this.lastHeartbeatAt = Date.now();
+    this.acked = false;
     this.send(constants.VoiceOPCodes.Heartbeat, this.lastHeartbeatAt);
   }
 }
