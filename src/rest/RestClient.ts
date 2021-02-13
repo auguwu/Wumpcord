@@ -159,6 +159,7 @@ export default class RestClient {
    */
   private async _executeRequest<T>(request: RequestDispatch) {
     const bucket = new RatelimitBucket();
+    const form = request.file !== undefined ? new FormData() : null;
 
     if (
       !ContentMethods.includes(request.method) &&
@@ -169,6 +170,9 @@ export default class RestClient {
 
     if (request.auditLogReason !== undefined)
       request.headers!['x-audit-log-reason'] = encodeURIComponent(request.auditLogReason);
+
+    if (form !== null)
+      request.headers!['content-type'] = form.getHeaders()['content-type'];
 
     return new Promise<T>(async (resolve, reject) => {
       const req = https.request({
@@ -282,10 +286,8 @@ export default class RestClient {
         req.abort();
       });
 
-      let form: FormData | undefined = undefined;
       if (request.file !== undefined) {
-        form = new FormData();
-        request.headers!['content-type'] = form.getHeaders()['content-type'];
+        request.headers!['content-type'] = form!.getHeaders()['content-type'];
 
         if (Array.isArray(request.file)) {
           for (let i = 0; i < request.file.length; i++) {
@@ -295,7 +297,7 @@ export default class RestClient {
             if (Util.isReadableStream(file.file))
               file.file = await Util.readableToBuffer(file.file);
 
-            form.append(file.name, file.file, { filename: file.name });
+            form!.append(file.name, file.file, { filename: file.name });
           }
         } else {
           if (!request.file.name)
@@ -304,14 +306,13 @@ export default class RestClient {
           if (Util.isReadableStream(request.file.file))
             request.file.file = await Util.readableToBuffer(request.file.file);
 
-          form.append(request.file.name, request.file.file, { filename: request.file.name });
+          form!.append(request.file.name, request.file.file, { filename: request.file.name });
         }
       }
 
-      if (form !== undefined) {
+      if (form !== null) {
         if (request.data !== undefined) form.append('payload_json', JSON.stringify(request.data));
-
-        req.end(form.getBuffer());
+        form.pipe(req);
       } else {
         if (request.data !== undefined) req.write(JSON.stringify(request.data));
 
