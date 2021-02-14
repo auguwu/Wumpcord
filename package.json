@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@augu/collections": "1.0.3",
-    "@augu/utils": "1.0.2",
+    "@augu/utils": "1.0.3",
     "discord-api-types": "0.11.2",
     "form-data": "3.0.0",
     "ws": "7.4.3"
