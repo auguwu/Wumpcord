@@ -11,8 +11,7 @@
     "url": "https://github.com/auguwu/Wumpcord?sponsor=1"
   },
   "files": [
-    "build/",
-    "index.d.ts"
+    "build/"
   ],
   "maintainers": [
     "Chris \"August\" Hernandez <cutie@floofy.dev>"
