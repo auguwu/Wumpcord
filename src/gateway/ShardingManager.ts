@@ -24,6 +24,7 @@ import type WebSocketClient from './WebSocketClient';
 import type * as types from '../types';
 import { Collection } from '@augu/collections';
 import WebSocketShard from './WebSocketShard';
+import { ShardStatus } from '../Constants';
 
 export default class ShardManager extends Collection<number, WebSocketShard> {
   /** Reference for creating a [WebSocketShard] */
@@ -67,8 +68,11 @@ export default class ShardManager extends Collection<number, WebSocketShard> {
       .on('close', (id, error, recoverable) => this.client.emit('shardClose', id, error, recoverable))
       .on('ready', (id, unavailable) => this.client.emit('shardReady', id, unavailable));
 
-    this.set(id, shard);
-    return shard.connect();
+    return shard.connect()
+      .then(() => {
+        this.set(shard.id, shard);
+        this.checkReady();
+      });
   }
 
   /**
@@ -95,5 +99,17 @@ export default class ShardManager extends Collection<number, WebSocketShard> {
     if (shard.status === 'dead') return;
 
     return shard.disconnect(false);
+  }
+
+  private checkReady() {
+    if (this.client.ready) return;
+
+    for (const shard of this.values()) {
+      if (!shard.ready)
+        return;
+    }
+
+    this.client.ready = true;
+    this.client.emit('ready');
   }
 }

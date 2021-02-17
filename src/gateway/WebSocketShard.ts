@@ -92,6 +92,8 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
   /** The [WebSocketClient] attached to this shard */
   private client: Client;
 
+  public ready: boolean = false;
+
   /** The status of the shard */
   public status: 'connected' | 'handshaking' | 'nearly' | 'dead' | 'waiting_for_guilds';
 
@@ -260,21 +262,17 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
   }
 
   _checkReady() {
-    if (this._readyTimeout) clearTimeout(this._readyTimeout);
+    if (this._readyTimeout !== undefined) clearTimeout(this._readyTimeout);
     if (!this.unavailableGuilds.size) {
       this.debug('Recieved all guilds from Discord, marking shard as ready.');
 
       this.status = Constants.ShardStatus.Connected;
-      this.emit('ready', this.id);
+      this.ready = true;
 
-      if (this.client.shards.size !== this.client.options.shardCount || this.client.shards.some(s => s.status !== Constants.ShardStatus.Connected)) {
-        return;
-      } else {
-        this.resolver?.(null);
-        this.client.ready = true;
-        this.client.emit('ready');
-        return;
-      }
+      this.emit('ready', this.id);
+      this.resolver!(null);
+
+      return;
     }
 
     this._readyTimeout = setTimeout(() => {
@@ -283,12 +281,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
 
       this.status = Constants.ShardStatus.Connected;
       this.emit('ready', this.id, this.unavailableGuilds);
-
-      this.resolver?.(null);
-      this.resolver = undefined;
-
-      this.client.ready = true;
-      this.client.emit('ready');
+      this.resolver!(null);
     }, 15000);
   }
 

@@ -24,12 +24,10 @@ import { createReadStream, existsSync, lstatSync } from 'fs';
 import VoiceConnection from './VoiceConnection';
 import { extname } from 'path';
 import { Stream } from 'stream';
-import Util from '../util';
 
 import FFMpegConverter from './converters/FFMpeg';
 import OpusConverter from './converters/Opus';
 import PCMConverter from './converters/PCM';
-import OGGConverter from './converters/Ogg';
 
 import Converter from './Converter';
 
@@ -48,11 +46,6 @@ export function getConverter(connection: VoiceConnection, source: string | Strea
       if (ext === '.dca') {
         connection.debug('Using Opus converter');
         return resolve(new OpusConverter(connection, createReadStream(source)));
-      }
-
-      if (ext === '.ogg') {
-        connection.debug('Using OGG converter');
-        return resolve(new OGGConverter(connection, createReadStream(source)));
       }
     });
   }
@@ -88,7 +81,6 @@ export {
   Converter,
   FFMpegConverter,
   OpusConverter,
-  OGGConverter,
   PCMConverter,
   VoiceConnection
 };

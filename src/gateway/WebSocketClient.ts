@@ -56,7 +56,7 @@ export interface WebSocketClientEvents extends EntityEvents {
   // Normal
   debug(message: string): void;
   error(error: Error): void;
-  ready(unavailable?: Set<string>): void;
+  ready(): void;
 }
 
 interface EntityEvents {
@@ -199,13 +199,15 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
     this.token = options.token;
     this.rest = new RestClient(this);
 
-    this.once('ready', async () => {
+    this.on('ready', async () => {
       if (this.options.getAllUsers) {
         this.debug('Get All Users', 'Requesting all guild members...');
         await this.requestGuildMembers();
       }
 
       if (this.options.interactions) {
+        if (this.interactions !== null) return;
+
         this.debug('Interactions', 'Created interactions helper.');
         this.interactions = new InteractionHelper(this);
       }
@@ -215,7 +217,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
   // Private Methods
   debug(title: string, message: string) {
     // @ts-ignore "Argument of type '[string]' is not assignable to parameter of type 'E["debug"] extends Listener ? Parameters<E["debug"]> : any[]'."
-    this.emit('debug', `[Debug => ${title}] ${message}`);
+    this.emit('debug', `[Debug => ${title}] ${message}\n${error.join('\n')}`);
   }
 
   /**
