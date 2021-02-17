@@ -92,6 +92,7 @@ interface EntityEvents {
   messageReactionRemoveAll(event: events.MessageReactionRemoveAllEvent): void;
   messageReactionRemove(event: events.MessageReactionRemoveEvent): void;
   messageReactionAdd(event: events.MessageReactionAddEvent): void;
+  messageDeleteBulk(event: events.MessageDeleteBulkEvent): void;
   messageUpdate(event: events.MessageUpdateEvent): void;
   messageDelete(event: events.MessageDeleteEvent): void;
   message(event: events.MessageCreateEvent): void;
