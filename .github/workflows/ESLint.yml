@@ -66,6 +66,3 @@ jobs:
 
       - name: Build the project for any errors
         run: tsc --noEmit
-
-      - name: Runs unit tests
-        run: npm run test --ci

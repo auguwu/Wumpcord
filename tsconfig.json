@@ -1,12 +1,12 @@
 {
   "extends": "@augu/tsconfig",
   "compilerOptions": {
-    "declaration": true, // i cant be bothered to do this
+    "declaration": true,
     "moduleResolution": "node",
     "types": ["node"],
     "outDir": "./build",
     "rootDir": "./src"
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "tests/**/*"]
+  "exclude": ["node_modules"]
 }

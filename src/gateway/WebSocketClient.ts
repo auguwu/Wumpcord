@@ -56,7 +56,7 @@ export interface WebSocketClientEvents extends EntityEvents {
   // Normal
   debug(message: string): void;
   error(error: Error): void;
-  ready(unavailable?: Set<string>): void;
+  ready(): void;
 }
 
 interface EntityEvents {
@@ -92,6 +92,7 @@ interface EntityEvents {
   messageReactionRemoveAll(event: events.MessageReactionRemoveAllEvent): void;
   messageReactionRemove(event: events.MessageReactionRemoveEvent): void;
   messageReactionAdd(event: events.MessageReactionAddEvent): void;
+  messageDeleteBulk(event: events.MessageDeleteBulkEvent): void;
   messageUpdate(event: events.MessageUpdateEvent): void;
   messageDelete(event: events.MessageDeleteEvent): void;
   message(event: events.MessageCreateEvent): void;
@@ -198,13 +199,15 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
     this.token = options.token;
     this.rest = new RestClient(this);
 
-    this.once('ready', async () => {
+    this.on('ready', async () => {
       if (this.options.getAllUsers) {
         this.debug('Get All Users', 'Requesting all guild members...');
         await this.requestGuildMembers();
       }
 
       if (this.options.interactions) {
+        if (this.interactions !== null) return;
+
         this.debug('Interactions', 'Created interactions helper.');
         this.interactions = new InteractionHelper(this);
       }

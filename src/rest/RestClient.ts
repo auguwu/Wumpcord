@@ -32,7 +32,6 @@ import { Queue } from '@augu/collections';
 import FormData from 'form-data';
 import https from 'https';
 import Util from '../util';
-import { strict } from 'assert';
 
 export type HttpMethod =
   | 'GET'
@@ -76,7 +75,7 @@ interface RequestDispatch<T = unknown> {
 }
 
 // These don't require `content-type` headers
-const ContentMethods = ['get', 'head', 'GET', 'HEAD'];
+const ContentMethods = ['get', 'head', 'GET', 'HEAD'] as const;
 
 /**
  * Represents a class to handle requests to Discord
@@ -162,7 +161,7 @@ export default class RestClient {
     const form = request.file !== undefined ? new FormData() : null;
 
     if (
-      !ContentMethods.includes(request.method) &&
+      !ContentMethods.includes(request.method as any) &&
       !request.headers!.hasOwnProperty('content-type')
     ) {
       request.headers!['content-type'] = 'application/json';
