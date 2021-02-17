@@ -6,7 +6,7 @@
   "license": "MIT",
   "author": "Chris \"August\" Hernandez <august@augu.dev>",
   "repository": "https://github.com/auguwu/Wumpcord",
-  "types": "index.d.ts",
+  "types": "./build/index.d.ts",
   "funding": {
     "url": "https://github.com/auguwu/Wumpcord?sponsor=1"
   },

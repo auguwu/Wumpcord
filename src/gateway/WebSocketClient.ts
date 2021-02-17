@@ -217,7 +217,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
   // Private Methods
   debug(title: string, message: string) {
     // @ts-ignore "Argument of type '[string]' is not assignable to parameter of type 'E["debug"] extends Listener ? Parameters<E["debug"]> : any[]'."
-    this.emit('debug', `[Debug => ${title}] ${message}\n${error.join('\n')}`);
+    this.emit('debug', `[Debug => ${title}] ${message}`);
   }
 
   /**
