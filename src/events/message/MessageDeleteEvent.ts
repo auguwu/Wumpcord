@@ -20,18 +20,18 @@
  * SOFTWARE.
  */
 
-import type { AnyGuildTextableChannel, PartialEntity } from '../../types';
+import type { AnyChannel, AnyGuildTextableChannel, PartialEntity } from '../../types';
 import type { GatewayMessageDeleteDispatchData } from 'discord-api-types';
 import type { Guild, Message } from '../../models';
 import Event from '../Event';
 
-interface MessageDeleteRefs {
+interface MessageDeleteRefs<C extends AnyChannel = AnyChannel> {
   message: PartialEntity<Message>;
-  channel: PartialEntity<AnyGuildTextableChannel>;
+  channel: PartialEntity<C>;
   guild?: PartialEntity<Guild>;
 }
 
-export default class MessageDeleteEvent extends Event<GatewayMessageDeleteDispatchData, MessageDeleteRefs> {
+export default class MessageDeleteEvent<C extends AnyChannel = AnyChannel> extends Event<GatewayMessageDeleteDispatchData, MessageDeleteRefs<C>> {
   get message() {
     return this.$refs.message;
   }
@@ -45,7 +45,7 @@ export default class MessageDeleteEvent extends Event<GatewayMessageDeleteDispat
   }
 
   process() {
-    const channel = this.client.channels.get<AnyGuildTextableChannel>(this.data.channel_id) ?? { id: this.data.channel_id };
+    const channel = this.client.channels.get<C>(this.data.channel_id) ?? { id: this.data.channel_id };
     const guild = this.data.guild_id !== undefined
       ? this.client.guilds.get(this.data.guild_id) ?? { id: this.data.guild_id }
       : undefined;
@@ -53,7 +53,7 @@ export default class MessageDeleteEvent extends Event<GatewayMessageDeleteDispat
     if (!(<any> channel).messages) {
       this.shard.debug('Channel was not a text or news channel, skipping');
       this.$refs = {
-        channel,
+        channel: (channel as unknown as C),
         guild,
         message: {
           id: this.data.id
@@ -65,7 +65,7 @@ export default class MessageDeleteEvent extends Event<GatewayMessageDeleteDispat
 
     const message = (channel as AnyGuildTextableChannel).messages.get(this.data.id) ?? { id: this.data.id };
     this.$refs = {
-      channel,
+      channel: (channel as unknown as C),
       guild,
       message
     };

@@ -20,17 +20,17 @@
  * SOFTWARE.
  */
 
-import type { AnyGuildTextableChannel, PartialEntity, TextableChannel } from '../../types';
+import type { AnyChannel, PartialEntity } from '../../types';
 import type { GatewayMessageUpdateDispatchData } from 'discord-api-types';
 import { Message } from '../../models';
 import Event from '../Event';
 
-interface MessageUpdateRefs {
-  message: PartialEntity<Message> & { channel: TextableChannel };
+interface MessageUpdateRefs<C extends AnyChannel = AnyChannel> {
+  message: PartialEntity<Message, { channel: C }>;
   old: Message | null;
 }
 
-export default class MessageUpdateEvent extends Event<GatewayMessageUpdateDispatchData, MessageUpdateRefs> {
+export default class MessageUpdateEvent<C extends AnyChannel = AnyChannel> extends Event<GatewayMessageUpdateDispatchData, MessageUpdateRefs<C>> {
   get message() {
     return this.$refs.message;
   }
@@ -41,12 +41,12 @@ export default class MessageUpdateEvent extends Event<GatewayMessageUpdateDispat
 
   process() {
     const message = this.data.hasOwnProperty('content') ? new Message(this.client, <any> this.data) : {
-      channel: this.client.channels.get<TextableChannel>(this.data.channel_id)!,
+      channel: this.client.channels.get<C>(this.data.channel_id)!,
       id: this.data.id
-    };
+    } as PartialEntity<Message, { channel: C }>;
 
-    const old = this.client.channels.get<AnyGuildTextableChannel>(this.data.channel_id)?.messages?.get(this.data.id) ?? null;
+    const old = this.client.channels.get<any>(this.data.channel_id)?.messages?.get(this.data.id) ?? null;
 
-    this.$refs = { message, old };
+    this.$refs = { message: (message as any), old };
   }
 }

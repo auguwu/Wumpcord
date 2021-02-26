@@ -92,10 +92,10 @@ interface EntityEvents {
   messageReactionRemoveAll(event: events.MessageReactionRemoveAllEvent): void;
   messageReactionRemove(event: events.MessageReactionRemoveEvent): void;
   messageReactionAdd(event: events.MessageReactionAddEvent): void;
-  messageDeleteBulk(event: events.MessageDeleteBulkEvent): void;
-  messageUpdate(event: events.MessageUpdateEvent): void;
-  messageDelete(event: events.MessageDeleteEvent): void;
-  message(event: events.MessageCreateEvent): void;
+  messageDeleteBulk(event: events.MessageDeleteBulkEvent<types.AnyChannel>): void;
+  messageUpdate(event: events.MessageUpdateEvent<types.AnyChannel>): void;
+  messageDelete(event: events.MessageDeleteEvent<types.AnyChannel>): void;
+  message(event: events.MessageCreateEvent<types.AnyChannel>): void;
 
   interactionReceive(event: events.InteractionCreateEvent): void;
 
@@ -218,6 +218,33 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
   debug(title: string, message: string) {
     // @ts-ignore "Argument of type '[string]' is not assignable to parameter of type 'E["debug"] extends Listener ? Parameters<E["debug"]> : any[]'."
     this.emit('debug', `[Debug => ${title}] ${message}`);
+  }
+
+  addListener<C extends types.AnyChannel = types.AnyChannel>(event: 'messageDeleteBulk', listener: (event: events.MessageDeleteBulkEvent<C>) => void): this;
+  addListener<C extends types.AnyChannel = types.AnyChannel>(event: 'messageDelete', listener: (event: events.MessageDeleteEvent<C>) => void): this;
+  addListener<C extends types.AnyChannel = types.AnyChannel>(event: 'messageUpdate', listener: (event: events.MessageUpdateEvent<C>) => void): this;
+  addListener<C extends types.AnyChannel = types.AnyChannel>(event: 'message', listener: (event: events.MessageCreateEvent<C>) => void): this;
+  addListener<K extends keyof WebSocketClientEvents>(event: K, listener: WebSocketClientEvents[K]): this;
+  addListener(event: string, listener: (...args: any[]) => void) {
+    return super.addListener(event as keyof WebSocketClientEvents, listener);
+  }
+
+  on<C extends types.AnyChannel = types.AnyChannel>(event: 'messageDeleteBulk', listener: (event: events.MessageDeleteBulkEvent<C>) => void): this;
+  on<C extends types.AnyChannel = types.AnyChannel>(event: 'messageDelete', listener: (event: events.MessageDeleteEvent<C>) => void): this;
+  on<C extends types.AnyChannel = types.AnyChannel>(event: 'messageUpdate', listener: (event: events.MessageUpdateEvent<C>) => void): this;
+  on<C extends types.AnyChannel = types.AnyChannel>(event: 'message', listener: (event: events.MessageCreateEvent<C>) => void): this;
+  on<K extends keyof WebSocketClientEvents>(event: K, listener: WebSocketClientEvents[K]): this;
+  on(event: string, listener: (...args: any[]) => void) {
+    return super.on(event as keyof WebSocketClientEvents, listener);
+  }
+
+  once<C extends types.AnyChannel = types.AnyChannel>(event: 'messageDeleteBulk', listener: (event: events.MessageDeleteBulkEvent<C>) => void): this;
+  once<C extends types.AnyChannel = types.AnyChannel>(event: 'messageDelete', listener: (event: events.MessageDeleteEvent<C>) => void): this;
+  once<C extends types.AnyChannel = types.AnyChannel>(event: 'messageUpdate', listener: (event: events.MessageUpdateEvent<C>) => void): this;
+  once<C extends types.AnyChannel = types.AnyChannel>(event: 'message', listener: (event: events.MessageCreateEvent<C>) => void): this;
+  once<K extends keyof WebSocketClientEvents>(event: K, listener: WebSocketClientEvents[K]): this;
+  once(event: string, listener: (...args: any[]) => void) {
+    return super.once(event as keyof WebSocketClientEvents, listener);
   }
 
   /**

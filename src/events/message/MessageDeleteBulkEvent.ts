@@ -20,18 +20,18 @@
  * SOFTWARE.
  */
 
-import type { AnyGuildTextableChannel, PartialEntity } from '../../types';
+import type { AnyChannel, PartialEntity } from '../../types';
 import type { GatewayMessageDeleteBulkDispatchData } from 'discord-api-types';
 import { Guild, Message } from '../../models';
 import Event from '../Event';
 
-interface MessageDeleteBulkRefs {
+interface MessageDeleteBulkRefs<C extends AnyChannel = AnyChannel> {
   messages: PartialEntity<Message>[];
-  channel: PartialEntity<AnyGuildTextableChannel>;
+  channel: PartialEntity<C>;
   guild?: PartialEntity<Guild>;
 }
 
-export default class MessageDeleteBulkEvent extends Event<GatewayMessageDeleteBulkDispatchData, MessageDeleteBulkRefs> {
+export default class MessageDeleteBulkEvent<C extends AnyChannel = AnyChannel> extends Event<GatewayMessageDeleteBulkDispatchData, MessageDeleteBulkRefs<C>> {
   get messages() {
     return this.$refs.messages;
   }
@@ -45,7 +45,7 @@ export default class MessageDeleteBulkEvent extends Event<GatewayMessageDeleteBu
   }
 
   process() {
-    const channel = this.client.channels.get<AnyGuildTextableChannel>(this.data.channel_id) ?? { id: this.data.channel_id };
+    const channel = this.client.channels.get<C>(this.data.channel_id) ?? { id: this.data.channel_id };
     const guild = this.data.guild_id !== undefined
       ? this.client.guilds.get(this.data.guild_id) ?? { id: this.data.guild_id }
       : undefined;
@@ -53,14 +53,14 @@ export default class MessageDeleteBulkEvent extends Event<GatewayMessageDeleteBu
     const messages: PartialEntity<Message>[] = [];
     if (!channel.hasOwnProperty('messages')) {
       messages.push(...this.data.ids.map(s => ({ id: s })));
-      this.$refs = { channel, guild, messages };
+      this.$refs = { channel: (channel as unknown as C), guild, messages };
 
       return;
     }
 
     for (let i = 0; i < this.data.ids.length; i++) {
       const id = this.data.ids[i];
-      const chan = channel as AnyGuildTextableChannel;
+      const chan: any = channel;
 
       const message = chan.messages.get(id);
       if (message !== null) {
@@ -71,7 +71,7 @@ export default class MessageDeleteBulkEvent extends Event<GatewayMessageDeleteBu
       }
     }
 
-    this.$refs = { channel, guild, messages };
+    this.$refs = { channel: (channel as unknown as C), guild, messages };
   }
 }
 

@@ -209,27 +209,76 @@ declare namespace Wumpcord {
   }
 
   export interface MessageContentOptions {
+    /**
+     * List of attachments to send to Discord
+     */
     attachments?: Wumpcord.MessageFile | Wumpcord.MessageFile[];
+
+    /**
+     * Object of allowed mentions available, defaults in [ClientOptions]
+     * will be overrided if none are provided
+     */
     mentions?: Wumpcord.AllowedMentions;
+
+    /**
+     * The content to send to Discord
+     */
     content?: string;
+
+    /**
+     * A rich embed to send
+     */
     embed?: discord.APIEmbed | Wumpcord.EmbedBuilder;
+
+    /**
+     * If we should reply to the user as a referenced message
+     */
     reply?: string;
+
+    /**
+     * If we should enable Text to Speech
+     */
     tts?: boolean;
   }
 
   export interface RestCallProperties {
+    /** Ratelimit information */
     ratelimitInfo: Wumpcord.RatelimitInfo;
+
+    /** If the request was successful or not */
     successful: boolean;
+
+    /** The endpoint requested */
     endpoint: string;
+
+    /** The HTTP method verb */
     method: Wumpcord.HTTPMethod;
+
+    /** The response from Discord */
     body: string;
+
+    /** The ping from dispatched -> requested */
     ping: number;
   }
 
   export interface SendActivityOptions {
+    /** The text to display */
     name: string;
-    type: string;
+
+    /**
+     * The type to set as
+     *
+     * - 0: **Playing**
+     * - 1: **Streaming**
+     * - 2: **Listening to**
+     * - 5: **Competing In**
+      */
+    type: 0 | 1 | 2 | 5;
+
+    /** The url to display in the **Streaming** status */
     url?: string;
+
+    /** If we are AFK from Discord (why would you even use this?!) */
     afk?: boolean;
   }
 }
