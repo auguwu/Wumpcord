@@ -1,4 +1,6 @@
 node_modules
 examples
+typings
+docs
 test
 src

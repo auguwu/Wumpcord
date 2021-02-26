@@ -1,7 +1,7 @@
 {
   "name": "wumpcord",
   "description": "🚣 Flexible, type-safe, and lightweight Discord API library",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "main": "build/index.js",
   "license": "MIT",
   "author": "Chris \"August\" Hernandez <august@augu.dev>",
@@ -11,8 +11,7 @@
     "url": "https://github.com/auguwu/Wumpcord?sponsor=1"
   },
   "files": [
-    "build/",
-    "index.d.ts"
+    "build/"
   ],
   "maintainers": [
     "Chris \"August\" Hernandez <cutie@floofy.dev>"
@@ -28,7 +27,7 @@
     "lint": "node scripts/lint.js"
   },
   "dependencies": {
-    "@augu/collections": "1.0.3",
+    "@augu/collections": "1.0.4",
     "@augu/utils": "1.0.3",
     "discord-api-types": "0.11.2",
     "form-data": "4.0.0",
@@ -37,12 +36,12 @@
   "devDependencies": {
     "@augu/eslint-config": "1.10.0",
     "@augu/tsconfig": "1.0.1",
-    "@types/node": "14.14.28",
+    "@types/node": "14.14.31",
     "@types/ws": "7.4.0",
-    "@typescript-eslint/eslint-plugin": "4.15.1",
-    "@typescript-eslint/parser": "4.15.1",
+    "@typescript-eslint/eslint-plugin": "4.15.2",
+    "@typescript-eslint/parser": "4.15.2",
     "eslint": "7.20.0",
-    "typescript": "4.1.5"
+    "typescript": "4.2.2"
   },
   "optionalDependencies": {
     "erlpack": "0.1.3",

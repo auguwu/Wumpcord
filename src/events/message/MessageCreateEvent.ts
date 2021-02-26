@@ -20,18 +20,18 @@
  * SOFTWARE.
  */
 
-import type { AnyGuildTextableChannel, TextableChannel } from '../../types';
 import type { GatewayMessageCreateDispatchData } from 'discord-api-types';
+import type { AnyChannel } from '../../types';
 import type { Guild } from '../../models';
 import { Message } from '../../models/Message';
 import Event from '../Event';
 
-interface MessageCreateRefs {
-  channel: TextableChannel;
+interface MessageCreateRefs<C extends AnyChannel = AnyChannel> {
+  channel: C;
   guild?: Guild;
 }
 
-export default class MessageCreateEvent extends Event<GatewayMessageCreateDispatchData, MessageCreateRefs> {
+export default class MessageCreateEvent<C extends AnyChannel = AnyChannel> extends Event<GatewayMessageCreateDispatchData, MessageCreateRefs<C>> {
   get channel() {
     return this.$refs.channel;
   }
@@ -45,16 +45,16 @@ export default class MessageCreateEvent extends Event<GatewayMessageCreateDispat
   }
 
   async process() {
-    const channel = this.client.channels.get(this.data.channel_id)! as AnyGuildTextableChannel;
+    const channel = this.client.channels.get(this.data.channel_id)! as C;
     const guild = this.data.guild_id !== undefined
       ? this.client.guilds.get(this.data.guild_id)!
       : undefined;
 
     if (channel !== null && ['news', 'text'].includes(channel.type)) {
-      channel.messages.cache.set(this.message.id, this.message);
+      (channel as any).messages.cache.set(this.message.id, this.message);
       this.client.channels.cache.set(channel.id, channel);
     }
 
-    this.$refs = { channel: (channel as unknown as TextableChannel), guild };
+    this.$refs = { channel: (channel as unknown as C), guild };
   }
 }
