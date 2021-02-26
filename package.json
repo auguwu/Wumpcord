@@ -6,11 +6,12 @@
   "license": "MIT",
   "author": "Chris \"August\" Hernandez <august@augu.dev>",
   "repository": "https://github.com/auguwu/Wumpcord",
-  "types": "./build/index.d.ts",
+  "types": "./typings/index.d.ts",
   "funding": {
     "url": "https://github.com/auguwu/Wumpcord?sponsor=1"
   },
   "files": [
+    "typings/",
     "build/"
   ],
   "maintainers": [
@@ -27,7 +28,7 @@
     "lint": "node scripts/lint.js"
   },
   "dependencies": {
-    "@augu/collections": "1.0.3",
+    "@augu/collections": "1.0.4",
     "@augu/utils": "1.0.3",
     "discord-api-types": "0.11.2",
     "form-data": "4.0.0",
