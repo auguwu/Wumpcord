@@ -160,17 +160,17 @@ export default class Util {
 
   static formatAllowedMentions(mentions: AllowedMentions, client: WebSocketClient): discord.APIAllowedMentionsSend {
     const data: discord.APIAllowedMentionsSend = {
-      replied_user: mentions?.replied ?? client.options.allowedMentions.replied,
+      replied_user: mentions?.replied ?? client.options.allowedMentions?.replied ?? false,
       parse: []
     };
 
     if (!mentions) {
-      if (client.options.allowedMentions.everyone === true) data.parse!.push(discord.AllowedMentionsTypes.Everyone);
-      if (client.options.allowedMentions.roles === true) data.parse!.push(discord.AllowedMentionsTypes.Role);
-      if (client.options.allowedMentions.users === true) data.parse!.push(discord.AllowedMentionsTypes.User);
+      if (client.options.allowedMentions?.everyone === true) data.parse!.push(discord.AllowedMentionsTypes.Everyone);
+      if (client.options.allowedMentions?.roles === true) data.parse!.push(discord.AllowedMentionsTypes.Role);
+      if (client.options.allowedMentions?.users === true) data.parse!.push(discord.AllowedMentionsTypes.User);
 
-      if (Array.isArray(client.options.allowedMentions.roles)) data.roles = client.options.allowedMentions.roles;
-      if (Array.isArray(client.options.allowedMentions.users)) data.users = client.options.allowedMentions.users;
+      if (Array.isArray(client.options.allowedMentions?.roles)) data.roles = client.options.allowedMentions?.roles;
+      if (Array.isArray(client.options.allowedMentions?.users)) data.users = client.options.allowedMentions?.users;
 
       return data;
     }

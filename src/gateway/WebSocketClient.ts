@@ -39,6 +39,7 @@ import GuildManager from '../managers/GuildManager';
 import UserManager from '../managers/UserManager';
 
 import type * as events from '../events';
+import type TextableChannel from '../models/inherit/TextableChannel';
 
 export interface WebSocketClientEvents extends EntityEvents {
   // Gateway
@@ -121,7 +122,12 @@ interface EntityEvents {
 /**
  * Handles everything related to Discord and is the entrypoint to your Discord bot.
  */
-export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
+export default class WebSocketClient<
+  Options extends types.ClientOptions = types.ClientOptions,
+  Events extends WebSocketClientEvents = WebSocketClientEvents
+> extends EventBus<Events> {
+  #sweepInterval!: NodeJS.Timer;
+
   /** List of voice connections available to the client */
   public voiceConnections: VoiceConnectionManager;
 
@@ -135,7 +141,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
   public channels: ChannelManager;
 
   /** The client options available to this WebSocket client. */
-  public options: types.ClientOptions;
+  public options: Options;
 
   /** The guild cache available, this will be a empty Collection if not enabled. */
   public guilds: GuildManager;
@@ -162,13 +168,11 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
    * Handles everything related to Discord and is the entrypoint to your Discord bot.
    * @param options The options available to this context
    */
-  constructor(options: types.NullableClientOptions) {
+  constructor(options: Options) {
     super();
 
-    this.voiceConnections = new VoiceConnectionManager(this);
-    this.interactions = null;
-    this.channels = new ChannelManager(this);
-    this.options = Util.merge<types.ClientOptions>(<any> options, {
+    this.options = Util.merge<any>(<any> options, {
+      sweepUnneededCacheIn: 360000, // 1 hour
       populatePresences: false,
       allowedMentions: {
         everyone: false,
@@ -190,9 +194,13 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
         clientOptions: undefined,
         compress: false,
         intents: [],
-        tries: undefined
+        tries: 10
       }
     });
+
+    this.voiceConnections = new VoiceConnectionManager(this);
+    this.interactions = null;
+    this.channels = new ChannelManager(this);
     this.shards = new ShardManager(this);
     this.guilds = new GuildManager(this);
     this.users = new UserManager(this);
@@ -211,10 +219,24 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
         this.debug('Interactions', 'Created interactions helper.');
         this.interactions = new InteractionHelper(this);
       }
+
+      if (this.options.sweepUnneededCacheIn! > 1000 || this.options.sweepUnneededCacheIn! < 8640000) {
+        this.debug('Entity Cache Sweep', 'Enabling un-needed cache sweep (use `<1000 or >86400000` to disable it!)');
+        this.#sweepInterval = setInterval(this._unsweep.bind(this)).unref();
+      }
     });
   }
 
-  // Private Methods
+  private _unsweep() {
+    for (const channel of this.channels.cache.values()) {
+      const isTextable = ['news', 'text', 'dm', 'group'].includes(channel.type);
+      if (isTextable) {
+        const messages = (channel as TextableChannel<discord.APIChannel>).messages;
+        messages.cache.forEach(msg => messages.cache.delete(msg.id));
+      }
+    }
+  }
+
   debug(title: string, message: string) {
     // @ts-ignore "Argument of type '[string]' is not assignable to parameter of type 'E["debug"] extends Listener ? Parameters<E["debug"]> : any[]'."
     this.emit('debug', `[Debug => ${title}] ${message}`);
@@ -224,7 +246,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
   addListener<C extends types.AnyChannel = types.AnyChannel>(event: 'messageDelete', listener: (event: events.MessageDeleteEvent<C>) => void): this;
   addListener<C extends types.AnyChannel = types.AnyChannel>(event: 'messageUpdate', listener: (event: events.MessageUpdateEvent<C>) => void): this;
   addListener<C extends types.AnyChannel = types.AnyChannel>(event: 'message', listener: (event: events.MessageCreateEvent<C>) => void): this;
-  addListener<K extends keyof WebSocketClientEvents>(event: K, listener: WebSocketClientEvents[K]): this;
+  addListener<K extends keyof Events>(event: K, listener: Events[K]): this;
   addListener(event: string, listener: (...args: any[]) => void) {
     return super.addListener(event as keyof WebSocketClientEvents, listener);
   }
@@ -233,7 +255,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
   on<C extends types.AnyChannel = types.AnyChannel>(event: 'messageDelete', listener: (event: events.MessageDeleteEvent<C>) => void): this;
   on<C extends types.AnyChannel = types.AnyChannel>(event: 'messageUpdate', listener: (event: events.MessageUpdateEvent<C>) => void): this;
   on<C extends types.AnyChannel = types.AnyChannel>(event: 'message', listener: (event: events.MessageCreateEvent<C>) => void): this;
-  on<K extends keyof WebSocketClientEvents>(event: K, listener: WebSocketClientEvents[K]): this;
+  on<K extends keyof Events>(event: K, listener: Events[K]): this;
   on(event: string, listener: (...args: any[]) => void) {
     return super.on(event as keyof WebSocketClientEvents, listener);
   }
@@ -242,7 +264,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
   once<C extends types.AnyChannel = types.AnyChannel>(event: 'messageDelete', listener: (event: events.MessageDeleteEvent<C>) => void): this;
   once<C extends types.AnyChannel = types.AnyChannel>(event: 'messageUpdate', listener: (event: events.MessageUpdateEvent<C>) => void): this;
   once<C extends types.AnyChannel = types.AnyChannel>(event: 'message', listener: (event: events.MessageCreateEvent<C>) => void): this;
-  once<K extends keyof WebSocketClientEvents>(event: K, listener: WebSocketClientEvents[K]): this;
+  once<K extends keyof Events>(event: K, listener: Events[K]): this;
   once(event: string, listener: (...args: any[]) => void) {
     return super.once(event as keyof WebSocketClientEvents, listener);
   }
@@ -261,7 +283,7 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
     this.debug('Session Limit', shardInfo.session ? `${shardInfo.session.remaining}/${shardInfo.session.total}` : 'Not auto-sharding.');
 
     for (let i = 0; i < (this.options.shardCount === 1 ? 1 : (this.options.shardCount as number) - 1); i++) {
-      await this.shards.spawn(i, this.options.strategy);
+      await this.shards.spawn(i, this.options.strategy!);
       await Util.sleep(5000);
     }
   }
@@ -270,17 +292,17 @@ export default class WebSocketClient extends EventBus<WebSocketClientEvents> {
    * Returns the intents by it's numeric value
    */
   get intents() {
-    if (typeof this.options.ws.intents === 'undefined') return Constants.GatewayIntents.guilds | Constants.GatewayIntents.guildMessages;
-    else if (typeof this.options.ws.intents === 'number') return this.options.ws.intents;
+    if (typeof this.options.ws!.intents === 'undefined') return 0;
+    else if (typeof this.options.ws!.intents === 'number') return this.options.ws!.intents;
     else {
       let intents = 0;
-      for (let i = 0; i < this.options.ws.intents.length; i++) {
-        const intent = this.options.ws.intents[i];
+      for (let i = 0; i < this.options.ws!.intents.length; i++) {
+        const intent = this.options.ws!.intents[i];
         if (typeof intent === 'number') {
           intents |= intent;
         } else {
           if (!Constants.GatewayIntents.hasOwnProperty(intent)) continue;
-          intents |= Constants.GatewayIntents[intent];
+          intents |= Constants.GatewayIntents[intent] as any;
         }
       }
 

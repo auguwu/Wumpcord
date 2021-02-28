@@ -43,9 +43,6 @@ export type AnyGuildTextableChannel = TextChannel | NewsChannel;
 /** Represents all channel types */
 export type AnyChannel = TextChannel | VoiceChannel | CategoryChannel | DMChannel | GroupChannel | NewsChannel | StoreChannel;
 
-/** Represents a nullable object of [ClientOptions] */
-export type NullableClientOptions = Partial<ClientOptions> & { token: string };
-
 /** Represents of how a Discord message is constructed */
 export type MessageContent = string | MessageContentOptions;
 
@@ -75,35 +72,38 @@ export interface MessageFile {
 
 /** Represents all the client options available */
 export interface ClientOptions {
+  /** Number in milliseconds to clean un-needed cache in */
+  sweepUnneededCacheIn?: number;
+
   /** If we should populate presences when requesting for all guild members */
-  populatePresences: boolean;
+  populatePresences?: boolean;
 
   /** The reconnection timeout */
-  reconnectTimeout: number;
+  reconnectTimeout?: number;
 
   /** Object of allowed mentions, this will be overrided if [MessageContent.mentions] is `null` or `undefined`. */
-  allowedMentions: AllowedMentions;
+  allowedMentions?: AllowedMentions;
 
   /** List of disabled gateway events to not emit */
-  disabledEvents: GatewayEvent[];
+  disabledEvents?: GatewayEvent[];
 
   /** If we should enable the Interactions helper, to help with creating interactions */
-  interactions: boolean;
+  interactions?: boolean;
 
   /** If we should call `WebSocketClient#requestGuildMembers` on all guilds once we are ready */
-  getAllUsers: boolean;
+  getAllUsers?: boolean;
 
   /** The shard count to start off with */
-  shardCount: number | 'auto';
+  shardCount?: number | 'auto';
 
   /** The serialization/deserialization strategy when encoding/decoding packets from Discord */
-  strategy: 'etf' | 'json';
+  strategy?: 'etf' | 'json';
 
   /** The token to use */
   token: string;
 
   /** The WebSocket options for Discord */
-  ws: Partial<WebSocketOptions>;
+  ws?: Partial<WebSocketOptions>;
 }
 
 /** The WebSocket options for Discord */

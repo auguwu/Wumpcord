@@ -294,8 +294,8 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
     this.debug('Identifying....');
 
     const packet: discord.GatewayIdentifyData = {
-      guild_subscriptions: Boolean(this.client.options.ws.guildSubscriptions),
-      large_threshold: this.client.options.ws.largeThreshold ?? 250,
+      guild_subscriptions: Boolean(this.client.options.ws?.guildSubscriptions ?? false),
+      large_threshold: this.client.options.ws?.largeThreshold ?? 250,
       compress: false,
       intents: this.client.intents,
       token: this.client.token,
@@ -306,7 +306,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
       }
     };
 
-    if (this.client.options.shardCount > 0) packet.shard = [this.id, this.client.options.shardCount as number];
+    if (this.client.options.shardCount! > 0) packet.shard = [this.id, this.client.options.shardCount as number];
     return this.send(Constants.OPCodes.Identify, packet);
   }
 
@@ -314,7 +314,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
     this.debug('Creating a new WebSocket connection...');
 
     return new Promise<void>((resolve, reject) => {
-      this.ws = new WebSocket(this.client.gatewayURL, this.client.options.ws.clientOptions);
+      this.ws = new WebSocket(this.client.gatewayURL, this.client.options.ws?.clientOptions);
 
       this.ws.on('message', this._onMessage.bind(this));
       this.ws.on('error', this._onError.bind(this));
