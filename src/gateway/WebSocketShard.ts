@@ -268,9 +268,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
 
       this.status = Constants.ShardStatus.Connected;
       this.ready = true;
-
       this.emit('ready', this.id);
-      this.resolver!(null);
 
       return;
     }
@@ -281,7 +279,6 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
 
       this.status = Constants.ShardStatus.Connected;
       this.emit('ready', this.id, this.unavailableGuilds);
-      this.resolver!(null);
     }, 15000);
   }
 
@@ -484,6 +481,10 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
 
           this._checkReady();
         } else {
+          // respect disabled events
+          if (this.client.options.disabledEvents?.includes(t as any))
+            break;
+
           await this._wsEvent(data as any);
         }
       } break;
@@ -568,6 +569,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
         this.client.users.add(this.client.user);
         this.unavailableGuilds = new Set(data.d.guilds.map(r => r.id));
         this.status = Constants.ShardStatus.WaitingForGuilds;
+        this.resolver?.(null);
         this._checkReady();
       } break;
 
