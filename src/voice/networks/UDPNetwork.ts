@@ -22,8 +22,16 @@
 
 import { createSocket, Socket } from 'dgram';
 import type VoiceConnection from '../VoiceConnection';
-import { OpusEncoder } from 'node-opus';
+import * as utils from '@augu/utils';
 import NaCL from 'tweetnacl';
+
+let OpusEncoder;
+
+try {
+  OpusEncoder = utils.lazilyRequire<any>('node-opus')?.OpusEncoder;
+} catch {
+  OpusEncoder = null;
+}
 
 const MAX_TIMESTAMP = (2 ** 32) - 1;
 const MAX_SEQ = (2 ** 16) - 1;
@@ -36,7 +44,7 @@ export default class UDPNetwork {
   public secretKey: Uint8Array | null;
   private rtpHeader: Buffer;
   public timestamp: number;
-  public encoder: OpusEncoder;
+  public encoder: any;
   public socket: Socket;
   private nonce: Buffer;
   private seq: number;
@@ -48,6 +56,9 @@ export default class UDPNetwork {
     ip: string,
     port: number
   ) {
+    if (OpusEncoder === null)
+      throw new TypeError('Missing `node-opus` library, please install it');
+
     this.connection = connection;
     this.secretKey = null;
     this.rtpHeader = Buffer.alloc(12);
