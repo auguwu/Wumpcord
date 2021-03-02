@@ -23,14 +23,20 @@
 import { createSocket, Socket } from 'dgram';
 import type VoiceConnection from '../VoiceConnection';
 import * as utils from '@augu/utils';
-import NaCL from 'tweetnacl';
 
-let OpusEncoder;
+let OpusEncoder = null;
+let NaCL: typeof import('tweetnacl') | undefined = undefined;
 
 try {
   OpusEncoder = utils.lazilyRequire<any>('node-opus')?.OpusEncoder;
 } catch {
-  OpusEncoder = null;
+  // noop
+}
+
+try {
+  NaCL = utils.lazilyRequire<typeof import('tweetnacl')>('tweetnacl');
+} catch(ex) {
+  // noop
 }
 
 const MAX_TIMESTAMP = (2 ** 32) - 1;
@@ -63,7 +69,7 @@ export default class UDPNetwork {
     this.secretKey = null;
     this.rtpHeader = Buffer.alloc(12);
     this.timestamp = 0;
-    this.encoder = new OpusEncoder(48000);
+    this.encoder = new (OpusEncoder as any)(48000);
     this.socket = createSocket('udp4');
     this.nonce = Buffer.alloc(24);
     this.seq = 0;
@@ -120,7 +126,7 @@ export default class UDPNetwork {
     this.rtpHeader.copy(this.nonce, 0, 0, 12);
     this.send(Buffer.concat([
       this.rtpHeader,
-      NaCL.secretbox(packet, this.nonce, this.secretKey!)
+      NaCL!.secretbox(packet, this.nonce, this.secretKey!)
     ]));
   }
 
