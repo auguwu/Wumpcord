@@ -11,7 +11,7 @@ $ npm i --no-optional wumpcord
 If you wish to install indev builds (that are most likely buggy), you can install them using:
 
 ```sh
-$ npm i --no-optional auguwu/Wumpcord:indev
+$ npm i --no-optional wumpcord@indev
 ```
 
 ### Features
