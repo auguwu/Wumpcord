@@ -8,6 +8,12 @@ You can install **Wumpcord** under NPM, as follows:
 $ npm i --no-optional wumpcord
 ```
 
+If you wish to install indev builds (that are most likely buggy), you can install them using:
+
+```sh
+$ npm i --no-optional wumpcord@indev
+```
+
 ### Features
 Specific features require extra dependencies, this is a list that requires them
 

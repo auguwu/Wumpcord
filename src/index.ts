@@ -26,9 +26,15 @@ export { default as DiscordRestError } from './errors/DiscordRestError';
 export { default as DiscordAPIError } from './errors/DiscordAPIError';
 export { default as Client } from './gateway/WebSocketClient';
 
+export * as Constants from './Constants';
+
 export * from './events';
 export * from './models';
 export * from './voice';
+export * from './types';
+
+// export misc types
+export { WebSocketClientEvents } from './gateway/WebSocketClient';
 
 /** Returns the version of Wumpcord */
 export const version: string = pkgVersion;

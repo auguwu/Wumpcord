@@ -37,7 +37,7 @@ export default class GuildManager extends BaseManager<Guild> {
       method: 'GET'
     }).then(data => {
       const shard = this.client.shards.filter(shard => shard.guilds.has(data.id));
-      let shardID: number = 0;
+      let shardID = 0;
 
       if (shard.length > 0) shardID = shard[0].id;
       if (data.unavailable !== undefined && data.unavailable === true) return this.add(new UnavailableGuild({
