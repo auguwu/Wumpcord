@@ -41,7 +41,7 @@ export default class GuildMember extends Base<IGuildMember> {
   public pending!: boolean;
   public guildID!: string;
   public isMuted!: boolean;
-  private _guild!: Guild;
+  private _guild?: Guild | null;
   public isDeaf!: boolean;
   private client: WebSocketClient;
   public roles: GuildRole[] = [];
@@ -92,7 +92,8 @@ export default class GuildMember extends Base<IGuildMember> {
       }
     }
 
-    if (this.guildID) this._populateGuild();
+    // don't populate it yet, maybe when a method is called?
+    this._guild = this.client.guilds.get(this.guildID);
   }
 
   get permission() {
@@ -124,21 +125,21 @@ export default class GuildMember extends Base<IGuildMember> {
 
   async modify(opts: ModifyGuildMemberOptions, reason?: string) {
     await this._populateGuild();
-    return this._guild.modifyMember(this.id, opts, reason);
+    return this._guild!.modifyMember(this.id, opts, reason);
   }
 
   async addRole(role: string | GuildRole, reason?: string) {
     await this._populateGuild();
 
     const id = typeof role === 'string' ? role : role.id;
-    return this._guild.addRole(this.id, id, reason);
+    return this._guild!.addRole(this.id, id, reason);
   }
 
   async removeRole(role: string | GuildRole, reason?: string) {
     await this._populateGuild();
 
     const id = typeof role === 'string' ? role : role.id;
-    return this._guild.removeRole(this.id, id, reason);
+    return this._guild!.removeRole(this.id, id, reason);
   }
 
   setNick(nick: string, reason?: string) {

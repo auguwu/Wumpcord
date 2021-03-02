@@ -98,7 +98,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
   public status: 'connected' | 'handshaking' | 'nearly' | 'dead' | 'waiting_for_guilds';
 
   /** Guild cache for this shard, this is disabled if not provided. */
-  public guilds: GuildManager;
+  public guilds: Set<string>;
 
   /** If we acked a heartbeat response for not */
   private acked: boolean;
@@ -132,7 +132,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
     this.strategy = strategy;
     this.status = Constants.ShardStatus.Dead;
     this.client = client;
-    this.guilds = new GuildManager(client);
+    this.guilds = new Set();
     this.acked = true;
     this.seq = -1;
     this.id = id;
@@ -476,7 +476,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
           this.unavailableGuilds.delete(guild.id);
 
           const g = new Guild(this.client, { shard_id: this.id, ...guild });
-          this.guilds.add(g);
+          this.guilds.add(guild.id);
           this.client.guilds.add(g);
 
           this._checkReady();

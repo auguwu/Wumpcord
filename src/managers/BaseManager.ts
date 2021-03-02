@@ -73,13 +73,13 @@ export default class BaseManager<T extends Base<object>> {
    */
   add(data: any): T {
     const existing = this.get(data.id);
-    if (existing && existing.patch) {
-      existing.patch(data);
+    if (existing !== null) {
+      existing.patch?.(data);
       this.cache.set(data.id, existing);
+      return existing;
     }
 
-    if (existing) return existing;
-
+    console.trace('it does not :(');
     if (data instanceof this.holdable) {
       this.cache.set(data.id, data);
       return data;
