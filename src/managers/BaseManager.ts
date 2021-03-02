@@ -79,7 +79,6 @@ export default class BaseManager<T extends Base<object>> {
       return existing;
     }
 
-    console.trace('it does not :(');
     if (data instanceof this.holdable) {
       this.cache.set(data.id, data);
       return data;
