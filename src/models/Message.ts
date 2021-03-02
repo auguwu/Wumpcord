@@ -153,10 +153,6 @@ export class Message<C extends TextableChannel = TextableChannel> extends Base<A
     if (data.referenced_message !== undefined)
       this.referencedMessage = data.referenced_message !== null ? new Message(this.client, data.referenced_message) : null;
 
-    // cache it just in case
-    if (this.guild !== null)
-      this.guild.members.add(this.member);
-
     this.edits.unshift(this);
   }
 
