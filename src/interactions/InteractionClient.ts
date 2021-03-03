@@ -11,7 +11,6 @@ export default class InteractionClient<
   Options extends ClientOptions = ClientOptions,
   Events extends InteractionClientEvents = InteractionClientEvents
 > extends WebSocketClient<Options, Events> {
-
   /** The interactions helper */
   public readonly interactions = new InteractionHelper(this);
 }
