@@ -28,6 +28,7 @@ import { Guild, GuildMember, InteractionMessage, Message } from '../../models';
 import type ApplicationCommand from '../../interactions/Command';
 import type * as interactions from '../../interactions/types';
 import Event from '../Event';
+import type InteractionClient from '../../interactions/InteractionClient';
 
 interface InteractionCreateRefs {
   command?: ApplicationCommand;
@@ -37,6 +38,8 @@ interface InteractionCreateRefs {
 }
 
 export default class InteractionCreateEvent extends Event<GatewayInteractionCreateDispatchData, InteractionCreateRefs> {
+  public client!: InteractionClient;
+
   get member() {
     return new GuildMember(this.client, {
       guild_id: this.data.guild_id, // eslint-disable-line camelcase
@@ -140,14 +143,10 @@ export default class InteractionCreateEvent extends Event<GatewayInteractionCrea
     const channel = this.client.channels.get(guildID) as AnyGuildTextableChannel ?? (await this.client.channels.fetch(channelID)) as unknown as AnyGuildTextableChannel;
 
     this.$refs = { guild, channel };
-    if (!this.client.options.interactions) {
-      this.shard.debug('Received interaction create event, it\'s not enabled.');
-      return;
-    }
 
-    const globalCommands = await this.client.interactions!.getGlobalCommands();
-    const guildCommands = await this.client.interactions!.getGuildCommands(guild.id);
-    await this.client.interactions!.createInteractionResponse(this.data.id, this.token, 5);
+    const globalCommands = await this.client.interactions.getGlobalCommands();
+    const guildCommands = await this.client.interactions.getGuildCommands(guild.id);
+    await this.client.interactions.createInteractionResponse(this.data.id, this.token, 5);
 
     const command = globalCommands.find(c => c.id === commandInfo.id) || guildCommands.find(c => c.id === commandInfo.id);
     if (command === undefined) {

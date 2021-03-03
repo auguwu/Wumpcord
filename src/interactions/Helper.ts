@@ -22,12 +22,12 @@
 /* eslint-disable camelcase */
 
 import type * as interactions from './types';
-import type WebSocketClient from '../gateway/WebSocketClient';
+import type InteractionClient from './InteractionClient';
 import ApplicationCommand from './Command';
 
 export default class InteractionHelper {
-  private client: WebSocketClient;
-  constructor(client: WebSocketClient) {
+  private client: InteractionClient;
+  constructor(client: InteractionClient) {
     this.client = client;
   }
 

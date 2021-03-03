@@ -24,7 +24,7 @@
 import type { AnyChannel, MessageContentOptions, TextableChannel, AllowedMentions } from '../types';
 import type { APIEmbed, APIUser } from 'discord-api-types';
 import { User } from './User';
-import WebSocketClient from '../gateway/WebSocketClient';
+import InteractionClient from '../interactions/InteractionClient';
 import Util from '../util';
 
 /** Represents the metadata of a [InteractionMessage] */
@@ -72,15 +72,15 @@ export class InteractionMessage<C extends AnyChannel = TextableChannel> {
   public content!: string;
   public author!: User;
 
-  #client: WebSocketClient;
+  #client: InteractionClient;
   #token!: string;
 
   /**
    * Creates a new [InteractionMessage] instance
-   * @param client The [WebSocketClient] attached
+   * @param client The [InteractionClient] attached
    * @param data The data supplied from Discord
    */
-  constructor(client: WebSocketClient, data: Partial<APIInteractionMessage> & { token: string }) {
+  constructor(client: InteractionClient, data: Partial<APIInteractionMessage> & { token: string }) {
     this.#client = client;
     this.patch(data);
   }
@@ -184,13 +184,13 @@ export class InteractionMessage<C extends AnyChannel = TextableChannel> {
    */
   edit(content: OriginalInteractionMessageContent, options?: OriginalInteractionMessageContentOptions) {
     const data = this._formatMessage(content, options) as Omit<RESTPostAPIApplicationResponse, 'tts'>;
-    return this.#client.interactions!.editOriginalInteraction(this.#token, 4, data);
+    return this.#client.interactions.editOriginalInteraction(this.#token, 4, data);
   }
 
   /**
    * Deletes the original interaction, if any
    */
   delete() {
-    return this.#client.interactions!.deleteOriginalInteraction(this.#token, 4);
+    return this.#client.interactions.deleteOriginalInteraction(this.#token, 4);
   }
 }
