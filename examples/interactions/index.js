@@ -1,8 +1,7 @@
 // Example on how to use the Interaction Helper
-const { Client } = require('wumpcord');
+const { InteractionClient } = require('wumpcord');
 
-const client = new Client({
-  interactions: true,
+const client = new InteractionClient({
   token: 'set your token here',
   ws: { intents: ['guildMessages', 'guilds'] }
 });

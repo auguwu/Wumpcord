@@ -26,7 +26,6 @@ import { Guild, GuildMember, SelfUser, User, VoiceChannel } from '../models';
 import { VoiceConnectionManager } from '../voice';
 import type { Collection } from '@augu/collections';
 import type * as discord from 'discord-api-types/v8';
-import InteractionHelper from '../interactions/Helper';
 import type * as types from '../types';
 import * as Constants from '../Constants';
 import ShardManager from './ShardingManager';
@@ -131,9 +130,6 @@ export default class WebSocketClient<
   /** List of voice connections available to the client */
   public voiceConnections: VoiceConnectionManager;
 
-  /** The interactions helper, this will return `null` if it's not enabled */
-  public interactions: InteractionHelper | null;
-
   /** The gateway URL to connect all shards to */
   public gatewayURL!: string;
 
@@ -181,7 +177,6 @@ export default class WebSocketClient<
         users: false
       },
       reconnectTimeout: 7000,
-      interactions: false,
       disabledEvents: [],
       getAllUsers: false,
       shardCount: 'auto',
@@ -199,7 +194,6 @@ export default class WebSocketClient<
     });
 
     this.voiceConnections = new VoiceConnectionManager(this);
-    this.interactions = null;
     this.channels = new ChannelManager(this);
     this.shards = new ShardManager(this);
     this.guilds = new GuildManager(this);
@@ -211,13 +205,6 @@ export default class WebSocketClient<
       if (this.options.getAllUsers) {
         this.debug('Get All Users', 'Requesting all guild members...');
         await this.requestGuildMembers();
-      }
-
-      if (this.options.interactions) {
-        if (this.interactions !== null) return;
-
-        this.debug('Interactions', 'Created interactions helper.');
-        this.interactions = new InteractionHelper(this);
       }
 
       if (this.options.sweepUnneededCacheIn! > 1000 || this.options.sweepUnneededCacheIn! < 8640000) {

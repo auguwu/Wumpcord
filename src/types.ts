@@ -87,9 +87,6 @@ export interface ClientOptions {
   /** List of disabled gateway events to not emit */
   disabledEvents?: GatewayEvent[];
 
-  /** If we should enable the Interactions helper, to help with creating interactions */
-  interactions?: boolean;
-
   /** If we should call `WebSocketClient#requestGuildMembers` on all guilds once we are ready */
   getAllUsers?: boolean;
 

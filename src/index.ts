@@ -25,6 +25,7 @@ const { version: pkgVersion } = require('../package.json');
 export { default as DiscordRestError } from './errors/DiscordRestError';
 export { default as DiscordAPIError } from './errors/DiscordAPIError';
 export { default as Client } from './gateway/WebSocketClient';
+export { default as InteractionClient } from './interactions/InteractionClient';
 
 export * as Constants from './Constants';
 
