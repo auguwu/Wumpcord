@@ -97,8 +97,6 @@ interface EntityEvents {
   messageDelete(event: events.MessageDeleteEvent<types.AnyChannel>): void;
   message(event: events.MessageCreateEvent<types.AnyChannel>): void;
 
-  interactionReceive(event: events.InteractionCreateEvent): void;
-
   voiceServerUpdate(event: events.VoiceServerUpdateEvent): void;
   voiceStateUpdate(event: events.VoiceStateUpdateEvent): void;
 
@@ -125,7 +123,7 @@ export default class WebSocketClient<
   Options extends types.ClientOptions = types.ClientOptions,
   Events extends WebSocketClientEvents = WebSocketClientEvents
 > extends EventBus<Events> {
-  #sweepInterval!: NodeJS.Timer;
+  protected _sweepInterval!: NodeJS.Timer;
 
   /** List of voice connections available to the client */
   public voiceConnections: VoiceConnectionManager;
@@ -209,7 +207,7 @@ export default class WebSocketClient<
 
       if (this.options.sweepUnneededCacheIn! > 1000 || this.options.sweepUnneededCacheIn! < 8640000) {
         this.debug('Entity Cache Sweep', 'Enabling un-needed cache sweep (use `<1000 or >86400000` to disable it!)');
-        this.#sweepInterval = setInterval(this._unsweep.bind(this)).unref();
+        this._sweepInterval = setInterval(this._unsweep.bind(this)).unref();
       }
     });
   }

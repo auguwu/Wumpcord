@@ -36,6 +36,7 @@ export * from './types';
 
 // export misc types
 export { WebSocketClientEvents } from './gateway/WebSocketClient';
+export { InteractionClientEvents } from './interactions/InteractionClient';
 
 /** Returns the version of Wumpcord */
 export const version: string = pkgVersion;
