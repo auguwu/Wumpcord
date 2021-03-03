@@ -27,12 +27,13 @@ import type * as discord from 'discord-api-types/v8';
 import type * as types from '../types';
 import * as Constants from '../Constants';
 import { EventBus } from '@augu/utils';
-import GuildManager from '../managers/GuildManager';
 import type Client from './WebSocketClient';
+import type InteractionClient from '../interactions/InteractionClient';
 import WebSocket from 'ws';
 import Util from '../util';
 
 import * as events from '../events';
+
 
 let Erlpack: typeof import('erlpack');
 try {
@@ -89,7 +90,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
   /** The serialization strategy to use when encoding/decoding packets */
   public strategy: types.ClientOptions['strategy'];
 
-  /** The [WebSocketClient] attached to this shard */
+  /** The [WebSocketClient | InteractionClient] attached to this shard */
   private client: Client;
 
   public ready: boolean = false;
@@ -632,10 +633,15 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
       case 'INTERACTION_CREATE': {
         if (data.d.type === 1) return this.debug('Ping! Received interaction response.');
 
-        const event = new events.InteractionCreateEvent(this, data.d);
-        await event.process();
+        if (Object.prototype.hasOwnProperty.call(this.client, 'interactions')) {
+          const event = new events.InteractionCreateEvent(this, data.d);
+          await event.process();
 
-        this.client.emit('interactionReceive', event);
+          (this.client as InteractionClient).emit('interactionReceive', event);
+        } else {
+          this.debug('Received INTERACTION_CREATE packet but client is not InteractionClient.');
+        }
+
       } break;
 
       case 'MESSAGE_DELETE': {
