@@ -25,6 +25,9 @@ import { Collection, Queue } from '@augu/collections';
 import { Readable } from 'stream';
 import * as discord from 'discord-api-types';
 
+import * as events from './events';
+import * as models from './models';
+
 declare namespace Wumpcord {
   // ~ Constants ~
   /**
@@ -281,4 +284,8 @@ declare namespace Wumpcord {
     /** If we are AFK from Discord (why would you even use this?!) */
     afk?: boolean;
   }
+
+  export * from './events';
 }
+
+export as namespace Wumpcord;
