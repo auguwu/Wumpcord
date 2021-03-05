@@ -30,21 +30,21 @@ interface ChannelPinsUpdateRefs {
 }
 
 export default class ChannelPinsUpdateEvent extends Event<GatewayChannelPinsUpdateDispatchData, ChannelPinsUpdateRefs> {
-  get lastPinnedAt() {
-    return this.$refs.lastPinnedAt;
+  get lastPinnedAt(): Date | null {
+    return this.$ref('lastPinnedAt')!;
   }
 
   get channel() {
-    return this.$refs.channel;
+    return this.$ref('channel')!;
   }
 
-  process() {
-    this.$refs = {
-      lastPinnedAt: this.data.last_pin_timestamp !== undefined && this.data.last_pin_timestamp !== null
-        ? new Date(this.data.last_pin_timestamp)
+  process(data: GatewayChannelPinsUpdateDispatchData) {
+    this['addReferences']({
+      lastPinnedAt: data.last_pin_timestamp !== undefined && data.last_pin_timestamp !== null
+        ? new Date(data.last_pin_timestamp)
         : null,
 
-      channel: this.client.channels.get<AnyChannel>(this.data.channel_id) ?? { id: this.data.channel_id }
-    };
+      channel: this.client.channels.get<AnyChannel>(data.channel_id) ?? { id: data.channel_id }
+    });
   }
 }

@@ -37,25 +37,40 @@ export default class Event<D extends object, Refs extends object = {}> {
   public shard: WebSocketShard;
 
   /** The references attached to this [Event] */
-  public $refs: Refs;
-
-  /** The data payload from Discord */
-  public data: D;
+  #refs: Refs;
 
   /**
    * Represents a event from Discord and handles everything
    * @param shard The shard that is handling this event
-   * @param data The data payload from Discord
    */
-  constructor(shard: WebSocketShard, data: D) {
-    // @ts-ignore Yes it is private, but I want to access it.
-    this.client = shard.client;
+  constructor(shard: WebSocketShard) {
+    this.client = shard['client'];
     this.shard  = shard;
-    this.$refs  = {} as Refs;
-    this.data   = data;
+    this.#refs  = {} as Refs;
   }
 
-  process(): types.MaybePromise<any> {
+  /**
+   * Retrieve a reference from this [Event]
+   * @param name The name of the reference
+   * @returns The reference found or `undefined` if not found
+   */
+  $ref<K extends keyof Refs>(name: K): Refs[K] | undefined {
+    return this.#refs[name];
+  }
+
+  /**
+   * Adds a reference to this [Event]
+   * @internal
+   * @param name The name of the reference
+   * @param value The value of the reference
+   * @returns This instance to chain methods
+   */
+  private addReferences(refs: Refs) {
+    this.#refs = refs;
+    return this;
+  }
+
+  process(data: D): types.MaybePromise<any> {
     throw new TypeError('Overridable function [Event.process] is not implemented.');
   }
 }

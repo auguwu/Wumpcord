@@ -32,19 +32,21 @@ interface TypingStartReferences {
 
 export class TypingStartEvent extends Event<GatewayTypingStartDispatchData, TypingStartReferences> {
   get user() {
-    return this.client.users.get(this.$refs.user.id);
+    const user = this.$ref('user')!;
+    return this.client.users.get(user!.id);
   }
 
   get channel() {
-    return this.client.channels.get(this.$refs.channel.id);
+    return this.client.channels.get(this.$ref('channel')!.id);
   }
 
-  async process() {
-    const { data, client } = this;
+  async process(data: GatewayTypingStartDispatchData) {
+    const channel = this.client.channels.get(data.channel_id) || { id: data.channel_id };
+    const user = this.client.users.get(data.user_id) || { id: data.user_id };
 
-    const channel = client.channels.get(data.channel_id) || { id: data.channel_id };
-    const user = client.users.get(data.user_id) || { id: data.user_id };
-
-    this.$refs = { user, channel };
+    this['addReferences']({
+      channel,
+      user
+    });
   }
 }

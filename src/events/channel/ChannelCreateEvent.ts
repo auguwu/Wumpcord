@@ -32,16 +32,16 @@ interface ChannelCreateRefs {
 
 export default class ChannelCreateEvent extends Event<GatewayChannelCreateDispatchData, ChannelCreateRefs> {
   get channel() {
-    return this.$refs.channel;
+    return this.$ref('channel')!;
   }
 
   get guild() {
-    return this.$refs.guild;
+    return this.$ref('guild')!;
   }
 
-  process() {
-    const channel = Channel.from(this.client, this.data);
-    const guild = this.data.guild_id !== undefined ? this.client.guilds.get(this.data.guild_id) ?? { id: this.data.guild_id } : undefined;
+  process(data: GatewayChannelCreateDispatchData) {
+    const channel = Channel.from(this.client, data);
+    const guild = data.guild_id !== undefined ? this.client.guilds.get(data.guild_id) ?? { id: data.guild_id } : undefined;
 
     this.client.channels.add(channel);
     (guild as Guild | undefined)?.channels?.add(channel);

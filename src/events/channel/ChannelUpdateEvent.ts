@@ -26,46 +26,46 @@ import { Channel, Guild } from '../../models';
 import Event from '../Event';
 
 interface ChannelUpdateRefs {
-  old: PartialEntity<AnyChannel> | null;
+  old: PartialEntity<AnyChannel>;
   new: AnyChannel;
 }
 
 export default class ChannelUpdateEvent extends Event<GatewayChannelUpdateDispatchData, ChannelUpdateRefs> {
   get old() {
-    return this.$refs.old;
+    return this.$ref('old')!;
   }
 
   get channel() {
-    return this.$refs.new;
+    return this.$ref('new')!;
   }
 
-  process() {
-    const guild = this.data.guild_id !== undefined ? this.client.guilds.get(this.data.guild_id) ?? { id: this.data.guild_id } : undefined;
+  process(data: GatewayChannelUpdateDispatchData) {
+    const guild = data.guild_id !== undefined ? this.client.guilds.get(data.guild_id) ?? { id: data.guild_id } : undefined;
     if (!guild || !guild.hasOwnProperty('channels')) {
-      this.$refs = {
-        old: null,
-        new: Channel.from(this.client, this.data)
-      };
+      this['addReferences']({
+        old: { id: data.id },
+        new: Channel.from(this.client, data)
+      });
 
       return;
     }
 
-    const updated = Channel.from(this.client, this.data);
-    const old = (guild as Guild).channels.get<AnyChannel>(this.data.id);
+    const updated = Channel.from(this.client, data);
+    const old = (guild as Guild).channels.get<AnyChannel>(data.id);
     if (old === null) {
-      this.$refs = {
-        old: null,
+      this['addReferences']({
+        old: { id: data.id },
         new: updated
-      };
+      });
 
       return;
     }
 
-    (guild as Guild).channels.remove(old);
-    (guild as Guild).channels.add(updated);
-    this.$refs = {
+    (guild as Guild).channels?.remove(old);
+    (guild as Guild).channels?.add(updated);
+    this['addReferences']({
       old,
       new: updated
-    };
+    });
   }
 }

@@ -31,18 +31,18 @@ interface ChannelDeleteRefs {
 
 export default class ChannelDeleteEvent extends Event<GatewayChannelDeleteDispatchData, ChannelDeleteRefs> {
   get channel() {
-    return this.$refs.channel;
+    return this.$ref('channel')!;
   }
 
-  process() {
-    if (this.data.guild_id !== undefined) {
-      const guild = this.client.guilds.get(this.data.guild_id);
-      if (guild !== null) guild.channels.remove(this.data.id);
+  process(data: GatewayChannelDeleteDispatchData) {
+    if (data.guild_id !== undefined) {
+      const guild = this.client.guilds.get(data.guild_id);
+      if (guild !== null) guild.channels.remove(data.id);
     }
 
-    this.client.channels.remove(this.data.id);
-    this.$refs = {
-      channel: this.client.channels.get<AnyChannel>(this.data.id) ?? Channel.from(this.client, this.data)
-    };
+    this.client.channels.remove(data.id);
+    this['addReferences']({
+      channel: Channel.from(this.client, data)
+    });
   }
 }
