@@ -20,4 +20,4 @@
  * SOFTWARE.
  */
 
-console.log('reworking voice!');
+export { default as VoiceClient } from './VoiceClient';

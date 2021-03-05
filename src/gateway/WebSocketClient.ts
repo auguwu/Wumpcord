@@ -23,10 +23,10 @@
 /* eslint-disable camelcase */
 
 import { Guild, GuildMember, SelfUser, User, VoiceChannel } from '../models';
-import { VoiceConnectionManager } from '../voice';
 import type { Collection } from '@augu/collections';
 import type * as discord from 'discord-api-types/v8';
 import type * as types from '../types';
+import { VoiceClient } from '../voice';
 import * as Constants from '../Constants';
 import ShardManager from './ShardingManager';
 import { EventBus } from '@augu/utils';
@@ -125,9 +125,6 @@ export default class WebSocketClient<
 > extends EventBus<Events> {
   protected _sweepInterval!: NodeJS.Timer;
 
-  /** List of voice connections available to the client */
-  public voiceConnections: VoiceConnectionManager;
-
   /** The gateway URL to connect all shards to */
   public gatewayURL!: string;
 
@@ -142,6 +139,9 @@ export default class WebSocketClient<
 
   /** The shard manager available to this context. */
   public shards: ShardManager;
+
+  /** List of voice connections available to the client */
+  public voice: VoiceClient;
 
   /** If we are ready to be used or not. */
   public ready: boolean = false;
@@ -191,18 +191,18 @@ export default class WebSocketClient<
       }
     });
 
-    this.voiceConnections = new VoiceConnectionManager(this);
     this.channels = new ChannelManager(this);
     this.shards = new ShardManager(this);
     this.guilds = new GuildManager(this);
+    this.voice = new VoiceClient(this);
     this.users = new UserManager(this);
     this.token = options.token;
     this.rest = new RestClient(this);
 
-    this.on('ready', async () => {
+    this.on('ready', () => {
       if (this.options.getAllUsers) {
         this.debug('Get All Users', 'Requesting all guild members...');
-        await this.requestGuildMembers();
+        this.requestGuildMembers();
       }
 
       if (this.options.sweepUnneededCacheIn! > 1000 || this.options.sweepUnneededCacheIn! < 8640000) {
@@ -397,10 +397,7 @@ export default class WebSocketClient<
     this.guilds.cache.clear();
     this.users.cache.clear();
 
-    for (const guildID of this.voiceConnections.keys()) this.voiceConnections.leave(guildID);
     for (const shard of this.shards.values()) shard.disconnect(false);
-
-    this.voiceConnections.clear();
     this.shards.clear();
   }
 
@@ -424,10 +421,10 @@ export default class WebSocketClient<
     if (!guild)
       return Promise.reject(new TypeError(`Guild "${guildID}" isn't cached, run GuildStore.fetch to cache it!`));
 
-    return this.voiceConnections.join(guildID, channelID);
+    return this.voice.joinChannel(channel);
   }
 
-  leaveVoiceChannel(guildID: string) {
-    this.voiceConnections.leave(guildID);
+  leaveVoiceChannel() {
+    // noop
   }
 }
