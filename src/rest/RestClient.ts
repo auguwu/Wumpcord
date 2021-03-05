@@ -262,10 +262,7 @@ export default class RestClient {
               this._lockTimeout = undefined;
               return this
                 ._executeRequest<any>(request)
-                .then((data) => {
-                  this._lockTimeout = undefined;
-                  clearTimeout(data);
-                })
+                .then(resolve)
                 .catch(reject);
             }, parseInt(res.headers['retry-after']!) * 1000);
 
