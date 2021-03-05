@@ -83,10 +83,10 @@ export class VoiceChannel extends GuildChannel {
   }
 
   join() {
-    return this.client.joinVoiceChannel(this.id, this.guildID!);
+    return this.client.voice.joinChannel(this);
   }
 
   leave() {
-    return this.client.leaveVoiceChannel(this.guildID!);
+    return this.client.voice.leaveChannel(this);
   }
 }

@@ -50,7 +50,7 @@ export default class RatelimitBucket {
    * @param res The response from the http request
    * @returns Promise of ratelimit info (because we hit a 429) or `null` if we aren't being ratelimited.
    */
-  async handle(endpoint: string, req: IncomingMessage) {
+  handle(endpoint: string, req: IncomingMessage) {
     const resetTime = Number(req.headers['x-ratelimit-reset']);
     const serverDate = req.headers.date;
     const remaining = req.headers['x-ratelimit-remaining'];
@@ -61,13 +61,6 @@ export default class RatelimitBucket {
     // view https://github.com/discordapp/discord-api-docs/issues/182
     if (endpoint.includes('reactions'))
       this.resetTime = new Date(serverDate!).getTime() - getAPIOffset(serverDate!) + 250;
-
-    if (req.headers.hasOwnProperty('x-ratelimit-global')) {
-      this._globalTimer = Util.sleep(Number(req.headers['retry-after']));
-      await this._globalTimer;
-
-      this._globalTimer = undefined;
-    }
 
     return {
       ratelimited: req.statusCode === 429,
