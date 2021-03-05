@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020-2021 August, Ice
+ * Copyright (c) 2020-2021 August
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,26 +20,4 @@
  * SOFTWARE.
  */
 
-import type VoiceConnection from '../VoiceConnection';
-import type { Stream } from 'stream';
-import Converter from '../Converter';
-
-export default class OpusConverter extends Converter {
-  constructor(connection: VoiceConnection, source: Stream) {
-    super(connection, source);
-
-    source.on('data', data => this.packets.push(data));
-    source.on('close', this.shutdown.bind(this));
-  }
-
-  provide() {
-    const packet = this.packets.shift();
-    if (packet === undefined) return undefined;
-
-    return this.connection.udp?.encoder.decode(packet);
-  }
-
-  shutdown() {
-    this.ended = true;
-  }
-}
+export default class VoiceClient {}

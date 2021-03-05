@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020-2021 August, Ice
+ * Copyright (c) 2020-2021 August
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,70 +20,4 @@
  * SOFTWARE.
  */
 
-import { createReadStream, existsSync, lstatSync } from 'fs';
-import VoiceConnection from './VoiceConnection';
-import { extname } from 'path';
-import { Stream } from 'stream';
-
-import FFMpegConverter from './converters/FFMpeg';
-import OpusConverter from './converters/Opus';
-import PCMConverter from './converters/PCM';
-
-import Converter from './Converter';
-
-export function getConverter(connection: VoiceConnection, source: string | Stream): Promise<Converter | null> {
-  if (typeof source === 'string' && existsSync(source)) {
-    return new Promise((resolve) => {
-      const stats = lstatSync(source);
-      if (stats.isDirectory()) return null;
-
-      const ext = extname(source);
-      if (['.raw', '.pcm'].includes(ext)) {
-        connection.debug('Using PCM converter');
-        return resolve(new PCMConverter(connection, createReadStream(source)));
-      }
-
-      if (ext === '.dca') {
-        connection.debug('Using Opus converter');
-        return resolve(new OpusConverter(connection, createReadStream(source)));
-      }
-    });
-  }
-
-  if (source instanceof Stream) {
-    let converter: Converter | null = null;
-    return new Promise<Converter | null>((resolve) => {
-      const onData = chunk => {
-        if (chunk === null) return;
-
-        try {
-          connection.udp?.encoder.decode(chunk);
-          converter = new OpusConverter(connection, source);
-
-          connection.debug('Using Opus converter');
-        } catch {
-          converter = new FFMpegConverter(connection, source);
-          connection.debug('Using FFMpeg converter');
-        }
-
-        resolve(converter);
-        source.removeListener('data', onData);
-      };
-
-      source.on('data', onData);
-    });
-  }
-
-  return Promise.resolve(null);
-}
-
-export {
-  Converter,
-  FFMpegConverter,
-  OpusConverter,
-  PCMConverter,
-  VoiceConnection
-};
-
-export { default as VoiceConnectionManager } from './VoiceConnectionManager';
-export * as Constants from './Constants';
+console.log('reworking voice!');

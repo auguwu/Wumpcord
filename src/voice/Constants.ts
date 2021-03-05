@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020-2021 August, Ice
+ * Copyright (c) 2020-2021 August
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,59 +19,3 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-/** List of all closed codes */
-export enum VoiceCloseCodes {
-  UnknownOPCode = 4001,
-  FailedPayload,
-  NotAuthencated,
-  AuthFailed,
-  AlreadyAuth,
-  SessionInvalid,
-  SessionTimeout = 4009,
-  ServerNotFound = 4011,
-  UnknownProtocol,
-  Disconnected = 4014,
-  VoiceServerCrash,
-  UnknownEncryption
-}
-
-export enum VoiceOPCodes {
-  Identify,
-  SelectProtocol,
-  Ready,
-  Heartbeat,
-  SessionDescription,
-  Speaking,
-  HeartbeatAck,
-  Resume,
-  Hello,
-  Resumed,
-  ClientDisconnect = 13
-}
-
-export const OPVoiceCodes: { [key: number]: string } = {
-  0: 'Identify',
-  1: 'Select Protocol',
-  2: 'Ready',
-  3: 'Heartbeat',
-  4: 'Session Description',
-  5: 'Speaking',
-  6: 'Heartbeat Acked',
-  7: 'Resume',
-  8: 'Hello',
-  9: 'Resumed',
-  13: 'Client Disconnected'
-};
-
-export const EncryptionModes: [normal: string, suffix: string, lite: string] = [
-  'xsalsa20_poly1305', // Normal
-  'xsalsa20_poly1305_suffix', // Suffix
-  'xsalsa20_poly1305_lite' // Lite
-];
-
-export const UnrecoverableCodes = [
-  4014,
-  4006, // session invalid
-  1000  // yes
-];
