@@ -27,7 +27,7 @@
     "lint": "node scripts/lint.js"
   },
   "dependencies": {
-    "@augu/collections": "1.0.4",
+    "@augu/collections": "1.0.5",
     "@augu/utils": "1.2.0",
     "discord-api-types": "0.11.2",
     "erlpack": "0.1.3",
