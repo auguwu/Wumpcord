@@ -437,12 +437,27 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
       this.debug(`Unknown close code "${code}"`);
     }
 
+    if (code === 4000) {
+      this.debug('Received unknown error, reconnecting!');
+      const [code, reason] = this.ws!.readyState === WebSocket.OPEN ? [4906, 'Reconnect: Wumpcord'] : [];
+      if (!code || !reason)
+        this.ws?.terminate();
+      else
+        this.ws?.close(code, reason);
+
+      this.status = Constants.ShardStatus.Dead;
+      setTimeout(() => {
+        this.debug('Attempting to re-connect...');
+        this.client.shards.connect(this.id);
+      }, 5000);
+    }
+
     const message = Constants.UnrecoverableCodes.includes(code) ?
       `Close code "${code}" can't be re-initialized, shard dead.` :
       `Close code "${code}" can be re-initialized, unzombifying...`;
 
     this.debug(message);
-    this.disconnect(Constants.UnrecoverableCodes.includes(code));
+    this.disconnect(!Constants.UnrecoverableCodes.includes(code));
   }
 
   private _onError(error: Error) {
