@@ -581,50 +581,50 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
       } break;
 
       case 'USER_UPDATE': {
-        const event = new events.UserUpdateEvent(this);
-        event.process(data.d);
+        const event = new events.UserUpdateEvent(this, data.d);
+        event.process();
 
         this.client.emit('userUpdate', event);
       } break;
 
       case 'WEBHOOKS_UPDATE': {
-        const event = new events.WebhooksUpdateEvent(this);
-        event.process(data.d);
+        const event = new events.WebhooksUpdateEvent(this, data.d);
+        event.process();
 
         this.client.emit('webhooksUpdate', event);
       } break;
 
       case 'TYPING_START': {
-        const event = new events.TypingStartEvent(this);
-        await event.process(data.d);
+        const event = new events.TypingStartEvent(this, data.d);
+        await event.process();
 
         this.client.emit('typingStart', event);
       } break;
 
       case 'VOICE_SERVER_UPDATE': {
-        const event = new events.VoiceServerUpdateEvent(this);
-        event.process(data.d);
+        const event = new events.VoiceServerUpdateEvent(this, data.d);
+        event.process();
 
         this.client.emit('voiceServerUpdate', event);
       } break;
 
       case 'VOICE_STATE_UPDATE': {
-        const event = new events.VoiceStateUpdateEvent(this);
-        event.process(data.d);
+        const event = new events.VoiceStateUpdateEvent(this, data.d);
+        event.process();
 
         this.client.emit('voiceStateUpdate', event);
       } break;
 
       case 'PRESENCE_UPDATE': {
-        const event = new events.PresenceUpdateEvent(this);
-        event.process(data.d);
+        const event = new events.PresenceUpdateEvent(this, data.d);
+        event.process();
 
         this.client.emit('presenceUpdate', event);
       } break;
 
       case 'MESSAGE_CREATE': {
-        const event = new events.MessageCreateEvent(this);
-        await event.process(data.d);
+        const event = new events.MessageCreateEvent(this, data.d);
+        await event.process();
 
         this.client.emit('message', event);
       } break;
@@ -633,8 +633,8 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
         if (data.d.type === 1) return this.debug('Ping! Received interaction response.');
 
         if (Object.prototype.hasOwnProperty.call(this.client, 'interactions')) {
-          const event = new events.InteractionCreateEvent(this);
-          await event.process(data.d);
+          const event = new events.InteractionCreateEvent(this, data.d);
+          await event.process();
 
           (this.client as InteractionClient).emit('interactionReceive', event);
         } else {
@@ -643,92 +643,92 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
       } break;
 
       case 'MESSAGE_DELETE': {
-        const event = new events.MessageDeleteEvent(this);
-        event.process(data.d);
+        const event = new events.MessageDeleteEvent(this, data.d);
+        event.process();
 
         this.client.emit('messageDelete', event);
       } break;
 
       case 'MESSAGE_UPDATE': {
-        const event = new events.MessageUpdateEvent(this);
-        event.process(data.d);
+        const event = new events.MessageUpdateEvent(this, data.d);
+        event.process();
 
         this.client.emit('messageUpdate', event);
       } break;
 
       case 'MESSAGE_REACTION_ADD': {
-        const event = new events.MessageReactionAddEvent(this);
-        event.process(data.d);
+        const event = new events.MessageReactionAddEvent(this, data.d);
+        event.process();
 
         this.client.emit('messageReactionAdd', event);
       } break;
 
       case 'MESSAGE_REACTION_REMOVE': {
-        const event = new events.MessageReactionRemoveEvent(this);
-        event.process(data.d);
+        const event = new events.MessageReactionRemoveEvent(this, data.d);
+        event.process();
 
         this.client.emit('messageReactionRemove', event);
       } break;
 
       case 'MESSAGE_REACTION_REMOVE_ALL': {
-        const event = new events.MessageReactionRemoveAllEvent(this);
-        event.process(data.d);
+        const event = new events.MessageReactionRemoveAllEvent(this, data.d);
+        event.process();
 
         this.client.emit('messageReactionRemoveAll', event);
       } break;
 
       case 'MESSAGE_REACTION_REMOVE_EMOJI': {
-        const event = new events.MessageReactionRemoveEmojiEvent(this);
-        event.process(data.d);
+        const event = new events.MessageReactionRemoveEmojiEvent(this, data.d);
+        event.process();
 
         this.client.emit('messageReactionRemoveEmoji', event);
       } break;
 
       case 'INVITE_CREATE': {
-        const event = new events.InviteCreateEvent(this);
-        event.process(data.d);
+        const event = new events.InviteCreateEvent(this, data.d);
+        event.process();
 
         this.client.emit('inviteCreate', event);
       } break;
 
       case 'INVITE_DELETE': {
-        const event = new events.InviteDeleteEvent(this);
-        event.process(data.d);
+        const event = new events.InviteDeleteEvent(this, data.d);
+        event.process();
 
         this.client.emit('inviteDelete', event);
       } break;
 
       case 'CHANNEL_CREATE': {
-        const event = new events.ChannelCreateEvent(this);
-        event.process(data.d);
+        const event = new events.ChannelCreateEvent(this, data.d);
+        event.process();
 
         this.client.emit('channelCreate', event);
       } break;
 
       case 'CHANNEL_DELETE': {
-        const event = new events.ChannelDeleteEvent(this);
-        event.process(data.d);
+        const event = new events.ChannelDeleteEvent(this, data.d);
+        event.process();
 
         this.client.emit('channelDelete', event);
       } break;
 
       case 'CHANNEL_UPDATE': {
-        const event = new events.ChannelUpdateEvent(this);
-        event.process(data.d);
+        const event = new events.ChannelUpdateEvent(this, data.d);
+        event.process();
 
         this.client.emit('channelUpdate', event);
       } break;
 
       case 'CHANNEL_PINS_UPDATE': {
-        const event = new events.ChannelPinsUpdateEvent(this);
-        event.process(data.d);
+        const event = new events.ChannelPinsUpdateEvent(this, data.d);
+        event.process();
 
         this.client.emit('channelPinsUpdate', event);
       } break;
 
       case 'GUILD_CREATE': {
-        const event = new events.GuildCreateEvent(this);
-        const available = event.process(data.d);
+        const event = new events.GuildCreateEvent(this, data.d);
+        const available = event.process();
 
         if (available) {
           this.debug(`Guild ${event.guild.id} was previously unavailable, and now is available! Emitting \`guildAvailable\`...`);
@@ -739,8 +739,8 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
       } break;
 
       case 'GUILD_DELETE': {
-        const event = new events.GuildDeleteEvent(this);
-        const unavailable = event.process(data.d);
+        const event = new events.GuildDeleteEvent(this, data.d);
+        const unavailable = event.process();
 
         if (unavailable) {
           this.debug(`Guild "${event.guild.id}" is unavailable, emitting \`guildUnavailable\` event.`);
@@ -751,85 +751,85 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
       } break;
 
       case 'GUILD_UPDATE': {
-        const event = new events.GuildUpdateEvent(this);
-        event.process(data.d);
+        const event = new events.GuildUpdateEvent(this, data.d);
+        event.process();
 
         this.client.emit('guildUpdate', event);
       } break;
 
       case 'GUILD_EMOJIS_UPDATE': {
-        const event = new events.GuildEmojisUpdateEvent(this);
-        event.process(data.d);
+        const event = new events.GuildEmojisUpdateEvent(this, data.d);
+        event.process();
 
         this.client.emit('guildEmojisUpdate', event);
       } break;
 
       case 'GUILD_INTEGRATIONS_UPDATE': {
-        const event = new events.GuildIntegrationsUpdateEvent(this);
-        event.process(data.d);
+        const event = new events.GuildIntegrationsUpdateEvent(this, data.d);
+        event.process();
 
         this.client.emit('guildIntegrationsUpdate', event);
       } break;
 
       case 'GUILD_BAN_ADD': {
-        const event = new events.GuildBanAddEvent(this);
-        event.process(data.d);
+        const event = new events.GuildBanAddEvent(this, data.d);
+        event.process();
 
         this.client.emit('guildBanAdd', event);
       } break;
 
       case 'GUILD_BAN_REMOVE': {
-        const event = new events.GuildBanRemoveEvent(this);
-        event.process(data.d);
+        const event = new events.GuildBanRemoveEvent(this, data.d);
+        event.process();
 
         this.client.emit('guildBanRemove', event);
       } break;
 
       case 'GUILD_MEMBERS_CHUNK': {
-        const event = new events.GuildMemberChunkEvent(this);
-        event.process(data.d);
+        const event = new events.GuildMemberChunkEvent(this, data.d);
+        event.process();
 
         this.client.emit('guildMembersChunk', event);
       } break;
 
       case 'GUILD_MEMBER_ADD': {
-        const event = new events.GuildMemberAddEvent(this);
-        event.process(data.d);
+        const event = new events.GuildMemberAddEvent(this, data.d);
+        event.process();
 
         this.client.emit('guildMemberAdd', event);
       } break;
 
       case 'GUILD_MEMBER_REMOVE': {
-        const event = new events.GuildMemberRemoveEvent(this);
-        event.process(data.d);
+        const event = new events.GuildMemberRemoveEvent(this, data.d);
+        event.process();
 
         this.client.emit('guildMemberRemove', event);
       } break;
 
       case 'GUILD_MEMBER_UPDATE': {
-        const event = new events.GuildMemberUpdateEvent(this);
-        event.process(data.d);
+        const event = new events.GuildMemberUpdateEvent(this, data.d);
+        event.process();
 
         this.client.emit('guildMemberUpdate', event);
       } break;
 
       case 'GUILD_ROLE_CREATE': {
-        const event = new events.GuildRoleCreateEvent(this);
-        event.process(data.d);
+        const event = new events.GuildRoleCreateEvent(this, data.d);
+        event.process();
 
         this.client.emit('guildRoleCreate', event);
       } break;
 
       case 'GUILD_ROLE_DELETE': {
-        const event = new events.GuildRoleDeleteEvent(this);
-        event.process(data.d);
+        const event = new events.GuildRoleDeleteEvent(this, data.d);
+        event.process();
 
         this.client.emit('guildRoleDelete', event);
       } break;
 
       case 'GUILD_ROLE_UPDATE': {
-        const event = new events.GuildRoleUpdateEvent(this);
-        event.process(data.d);
+        const event = new events.GuildRoleUpdateEvent(this, data.d);
+        event.process();
 
         this.client.emit('guildRoleUpdate', event);
       } break;

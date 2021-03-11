@@ -32,17 +32,17 @@ interface WebhooksUpdateReferences {
 
 export class WebhooksUpdateEvent extends Event<GatewayWebhooksUpdateDispatchData, WebhooksUpdateReferences> {
   get guild() {
-    return this.$ref('guild')!;
+    return this.$refs.guild;
   }
 
   get channel() {
-    return this.$ref('channel')!;
+    return this.$refs.channel;
   }
 
-  process(data: GatewayWebhooksUpdateDispatchData) {
-    this['addReferences']({
-      channel: this.client.channels.get(data.channel_id) ?? { id: data.channel_id },
-      guild: this.client.guilds.get(data.guild_id) ?? { id: data.guild_id }
-    });
+  process() {
+    this.$refs = {
+      channel: this.client.channels.get(this.data.channel_id) || { id: this.data.channel_id },
+      guild: this.client.guilds.get(this.data.guild_id) || { id: this.data.guild_id }
+    };
   }
 }

@@ -32,28 +32,26 @@ interface UserUpdateReferences {
 
 export class UserUpdateEvent extends Event<GatewayUserUpdateDispatchData, UserUpdateReferences> {
   get old() {
-    return this.$ref('old');
+    return this.$refs.old;
   }
 
   get user() {
-    return this.$ref('user')!;
+    return this.$refs.user;
   }
 
-  process(data: GatewayUserUpdateDispatchData) {
-    const user = this.client.users.get(data.id);
+  process() {
+    const user = this.client.users.get(this.data.id);
     if (!user) {
       this.shard.debug('Unable to emit \'userUpdate\': Missing cached user, emitting anyway');
-      this['addReferences']({
-        user: this.client.users.add(new User(this.client, data))
-      });
+      this.$refs = { old: undefined, user: new User(this.client, this.data) };
 
       return;
     }
 
-    const updated = this.client.users.add(new User(this.client, data));
-    this['addReferences']({
-      user: updated,
-      old: user
-    });
+    const updated = this.client.users.add(new User(this.client, this.data));
+    this.$refs = {
+      old: user,
+      user: updated
+    };
   }
 }
