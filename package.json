@@ -38,7 +38,7 @@
     "@augu/eslint-config": "1.10.0",
     "@augu/tsconfig": "1.0.1",
     "@discordjs/opus": "0.4.0",
-    "@types/node": "14.14.33",
+    "@types/node": "14.14.34",
     "@types/ws": "7.4.0",
     "@typescript-eslint/eslint-plugin": "4.17.0",
     "@typescript-eslint/parser": "4.17.0",
