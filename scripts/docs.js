@@ -92,7 +92,6 @@ async function main() {
           const constraint = param.getConstraint();
 
           definition.generics.push([name, constraint !== undefined ? constraint.getText() : null]);
-          definition.name = `${clazz.getName()}<${definition.generics.map(([name, constraint]) => `${name}${constraint !== null ? ` extends ${constraint}` : ''}`).join(', ')}>`;
         }
       }
 
@@ -151,7 +150,7 @@ async function main() {
     const children = klazz.children.filter(child => child.type === 'property' ? !child.private : true);
 
     block.push(
-      `# class ${klazz.name}`,
+      `# class [${klazz.name.trim()}](${klazz.commitUrl})`,
       klazz.text.trim(),
       ''
     );
