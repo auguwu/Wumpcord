@@ -20,8 +20,9 @@
     "node": ">=14"
   },
   "scripts": {
+    "clean:node_modules": "rm -rf node_modules/@types/**/node_modules && rm -rf node_modules/@augu/**/node_modules",
+    "clean:win:tar": "cp node_modules/@augu/collections/build/index.js.* node_modules/@augu/collections/build/index.js && rm node_modules/@augu/collections/build/index.js.*",
     "prepare": "npm run build",
-    "cleanup": "cp node_modules/@augu/collections/build/index.js.* node_modules/@augu/collections/build/index.js && rm node_modules/@augu/collections/build/index.js.*",
     "docgen": "node scripts/docs.js",
     "build": "npm run lint && rm -rf build && tsc",
     "lint": "node scripts/lint.js"
@@ -44,10 +45,11 @@
     "@typescript-eslint/parser": "4.17.0",
     "eslint": "7.22.0",
     "opusscript": "0.0.8",
+    "ts-morph": "^10.0.1",
     "tweetnacl": "1.0.3",
     "typescript": "4.2.3"
   },
-  "optionalDependencies": {
+  "peerDependencies": {
     "erlpack": "0.1.3"
   }
 }
