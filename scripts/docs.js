@@ -50,6 +50,11 @@ const isPrivate = (node) => {
   return hasPrivateFlag.length > 0;
 };
 
+const ImportRegex = /import\("[\w/:]+"\)\./gmi;
+const getTypeName = (str) => {
+  return str.replaceAll(ImportRegex, '');
+};
+
 async function main() {
   const project = new ts.Project({
     tsConfigFilePath: join(__dirname, '..', 'tsconfig.json')
@@ -91,25 +96,49 @@ async function main() {
           const name = param.getName();
           const constraint = param.getConstraint();
 
-          definition.generics.push([name, constraint !== undefined ? constraint.getText() : null]);
+          definition.generics.push([name, constraint !== undefined ? getTypeName(constraint.getText()) : null]);
         }
       }
 
+      const signatures = clazz.getConstructors();
       const properties = clazz.getProperties();
       const staticMethods = clazz.getStaticMethods();
       const methods = clazz.getMethods();
       const getters = clazz.getGetAccessors();
 
+      for (const signature of signatures) {
+        const jsdoc = signature.getJsDocs()[0]?.getInnerText().trim().split('\n').shift() ?? 'No documentation has been written for this constructor signature.';
+        const params = signature.getParameters();
+
+        const name = `${clazz.getName()}${definition.generics.map(([name, constraint]) => `${name}${constraint !== null ? ` extends ${constraint}` : ''}`).map((val, index) => `${index === 0 ? '<' : ''}${val}${index + 1 === definition.generics.length ? '>' : ''}`).join(', ')}`;
+        const listParams = [];
+
+        for (const param of params) {
+          const name = param.getName();
+          const type = param.getType();
+
+          const typeName = type.getText(param, _ts.TypeFormatFlags.NoTruncation | _ts.TypeFormatFlags.WriteArrayAsGenericType);
+          listParams.push(`${name}: ${getTypeName(typeName) ?? 'unknown'}`);
+        }
+
+        definition.children.push({
+          type: 'constructor',
+          docs: jsdoc,
+          name: `new ${name}(${listParams.join(', ')});`
+        });
+      }
+
       for (const property of properties) {
         const line = property.getJsDocs()[0];
         const name = property.getName();
-        const rawType = property.getType();
+        const type = property.getType();
+        const typeName = type.getText(property, _ts.TypeFormatFlags.NoTruncation | _ts.TypeFormatFlags.WriteArrayAsGenericType);
 
         if (!line) {
           definition.children.push({
             references: [],
             private: isPrivate(property),
-            //value: rawType.getStringIndexType().getText(),
+            value: typeName,
             type: 'property',
             docs: 'No documentation has been written.',
             name
@@ -124,6 +153,7 @@ async function main() {
         definition.children.push({
           references: matches?.map(s => s.slice(1, s.length - 1).trim()) ?? [],
           private: isPrivate(property),
+          value: typeName,
           type: 'property',
           docs: line.getInnerText().trim(),
           name
@@ -132,7 +162,20 @@ async function main() {
 
       classes.push(definition);
     }
+
+    for (const typeAlias of sourcedTypes) {
+      const jsdoc = typeAlias.getJsDocs()[0]?.getInnerText().trim() ?? 'No documentation has been written for this type alias.';
+      const name = typeAlias.getName();
+      const type = typeAlias.getType();
+
+      typeAliases.push({
+        docs: jsdoc,
+        name
+      });
+    }
   }
+
+  //console.log(typeAliases);
 
   const block = [
     '<!--',
@@ -142,6 +185,8 @@ async function main() {
     '',
     '# Wumpcord',
     '> Documentation for Wumpcord. A prettier UI for this a work in progress and coming soon!',
+    '',
+    '> Note: If anything starts with **API**, **Gateway**, or **REST**, it\'ll be in reference to [discord-api-types](https://github.com/discordjs/discord-api-types).',
     ''
   ];
 
@@ -155,14 +200,31 @@ async function main() {
       ''
     );
 
-    for (let i = 0; i < children.length; i++) {
-      if (i === 0)
+    const properties = children.filter(child => child.type === 'property');
+    const constructors = children.filter(child => child.type === 'constructor');
+
+    for (const [index, construct] of withIndex(constructors)) {
+      if (index === 0)
+        block.push('## Constructors');
+
+      block.push(
+        `> ${construct.docs.trim()}`,
+        '',
+        '```js',
+        construct.name,
+        '```',
+        ''
+      );
+    }
+
+    for (const [index, property] of withIndex(properties)) {
+      const className = klazz.name.trim();
+      const name = property.name.trim();
+
+      if (index === 0)
         block.push('## Properties');
 
-      const child = children[i];
-      block.push(
-        `- **${klazz.name.trim()}.${child.name.trim()}** -> ??? ~ ${child.docs.trim()}`
-      );
+      block.push(`- **${className}.${name}** -> ${property.value.trim()} ~ ${property.docs.trim()}`);
     }
 
     block.push('');
@@ -173,6 +235,11 @@ async function main() {
 
   await fs.writeFile(join(__dirname, '..', 'docs', 'main.md'), block.join('\n'));
   log(`Wrote documentation in ${join(__dirname, '..', 'docs', 'main.md')}.`);
+}
+
+function * withIndex(array) {
+  for (let i = 0; i < array.length; i++)
+    yield [i, array[i]];
 }
 
 main();
