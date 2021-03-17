@@ -172,6 +172,7 @@ export default class RestClient {
           this.execute();
       })
       .catch((error) => {
+        this.handling = false;
         request.reject(error);
 
         if (this.requests.size() > 0)
