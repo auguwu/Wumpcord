@@ -160,6 +160,78 @@ async function main() {
         });
       }
 
+      for (const method of staticMethods) {
+        const name = method.getName();
+        const docs = method.getJsDocs()[0];
+        const returnVal = method.getReturnType().getText(method, _ts.TypeFormatFlags.NoTruncation | _ts.TypeFormatFlags.WriteArrayAsGenericType);
+        const def = {
+          references: [],
+          parameters: [],
+          generics: [],
+          private: isPrivate(method),
+          static: true,
+          value: returnVal,
+          type: 'method',
+          text: docs?.getDescription().trim() ?? 'No documentation has been written for this method.',
+          name
+        };
+
+        if (def.text === 'No documentation has been written for this method.') {
+          const params = method.getParameters();
+          const generics = method.getTypeParameters();
+          for (const generic of generics) {
+            const name = generic.getName();
+            const constraint = generic.getConstraint();
+
+            def.generics.push([name, constraint !== undefined ? constraint.getText() : null]);
+          }
+
+          def.parameters = params.map(param => ({
+            name: param.getName(),
+            docs: 'No documentation has been written for this parameter.',
+            type: param.getType().getText(param, _ts.TypeFormatFlags.NoTruncation | _ts.TypeFormatFlags.WriteArrayAsGenericType)
+          }));
+
+          continue;
+        }
+
+        const params = method.getParameters();
+        const generics = method.getTypeParameters();
+        for (const generic of generics) {
+          const name = generic.getName();
+          const constraint = generic.getConstraint();
+
+          def.generics.push([name, constraint !== undefined ? constraint.getText() : null]);
+        }
+
+        const jsdocParams = method.getJsDocs();
+        for (const param of params) {
+          const name = param.getName();
+          const type = param.getType().getText(param, _ts.TypeFormatFlags.NoTruncation | _ts.TypeFormatFlags.WriteArrayAsGenericType);
+          const paramDocs = jsdocParams[0]
+            .getTags()
+            .filter(tag => tag.getKindName() === 'JSDocParameterTag')
+            .filter(tag => tag.getText(false).replace('*', '').split(' ')[1] === name);
+
+          const description = paramDocs[0]
+            .getText()
+            .replace('*', '')
+            .split(' ')
+            .slice(2)
+            .filter(r => r.trim() !== '')
+            .map(s => s.trim())
+            .join(' ');
+
+          def.parameters.push({
+            name,
+            type,
+            docs: description
+          });
+        }
+
+        definition.children.push(def);
+      }
+
       classes.push(definition);
     }
 
@@ -176,8 +248,6 @@ async function main() {
       });
     }
   }
-
-  //console.log(typeAliases);
 
   const block = [
     '<!--',
@@ -205,6 +275,7 @@ async function main() {
 
     const properties = children.filter(child => child.type === 'property');
     const constructors = children.filter(child => child.type === 'constructor');
+    const staticMethods = children.filter(child => child.type === 'method' && child.static);
 
     for (const [index, construct] of withIndex(constructors)) {
       if (index === 0)
@@ -228,6 +299,35 @@ async function main() {
         block.push('### Properties');
 
       block.push(`- **${className}.${name}** -> \`${getTypeName(property.value.trim())}\` ~ ${property.docs.trim()}`);
+    }
+
+    for (const [index, method] of withIndex(staticMethods)) {
+      const name = method.name.trim();
+      const genericString = method
+        .generics
+        .map(([name, constraint]) => `${name}${constraint !== null ? ` extends ${getTypeName(constraint)}` : ''}`)
+        .map((type, idx) => `${(idx + 1) === 1 ? '<' : ''}${type}${(idx + 1) === method.generics.length ? '>' : ''}`)
+        .join(', ');
+
+      const params = method
+        .parameters
+        .map(p => `${p.name}: ${getTypeName(p.type)}`)
+        .join(', ');
+
+      block.push(
+        `### (static) ${klazz.name.trim()}#${name}${genericString}(${params}): ${getTypeName(method.value)}`,
+        method.text,
+        ''
+      );
+
+      for (const [index, param] of withIndex(method.parameters)) {
+        if (index === 0)
+          block.push('### Parameters');
+
+        block.push(`- **${param.name}: \`${getTypeName(param.type)}\`** ~ **${param.docs}**`);
+      }
+
+      block.push('');
     }
 
     block.push('');
