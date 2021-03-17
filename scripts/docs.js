@@ -138,7 +138,7 @@ async function main() {
           definition.children.push({
             references: [],
             private: isPrivate(property),
-            value: typeName,
+            value: getTypeName(typeName),
             type: 'property',
             docs: 'No documentation has been written.',
             name
@@ -165,11 +165,13 @@ async function main() {
 
     for (const typeAlias of sourcedTypes) {
       const jsdoc = typeAlias.getJsDocs()[0]?.getInnerText().trim() ?? 'No documentation has been written for this type alias.';
+      const path = sourceFile.getFilePath().split('/').filter(r => !cwd.includes(r));
       const name = typeAlias.getName();
-      const type = typeAlias.getType();
 
       typeAliases.push({
+        commitUrl: `https://github.com/auguwu/Wumpcord/blob/${commitHash}/${path.join('/')}`,
         docs: jsdoc,
+        raw: typeAlias.getText(false).replace('export ', ''),
         name
       });
     }
@@ -190,12 +192,13 @@ async function main() {
     ''
   ];
 
+  block.push('# Classes', '');
   for (let i = 0; i < classes.length; i++) {
     const klazz = classes[i];
     const children = klazz.children.filter(child => child.type === 'property' ? !child.private : true);
 
     block.push(
-      `# class [${klazz.name.trim()}](${klazz.commitUrl})`,
+      `## class [${klazz.name.trim()}](${klazz.commitUrl})`,
       klazz.text.trim(),
       ''
     );
@@ -205,7 +208,7 @@ async function main() {
 
     for (const [index, construct] of withIndex(constructors)) {
       if (index === 0)
-        block.push('## Constructors');
+        block.push('### Constructors');
 
       block.push(
         `> ${construct.docs.trim()}`,
@@ -222,12 +225,26 @@ async function main() {
       const name = property.name.trim();
 
       if (index === 0)
-        block.push('## Properties');
+        block.push('### Properties');
 
       block.push(`- **${className}.${name}** -> ${property.value.trim()} ~ ${property.docs.trim()}`);
     }
 
     block.push('');
+  }
+
+  block.push('# Type Aliases', '');
+  for (let i = 0; i < typeAliases.length; i++) {
+    const alias = typeAliases[i];
+    block.push(
+      `## type [${alias.name.trim()}](${alias.commitUrl})`,
+      alias.docs.trim(),
+      '',
+      '```ts',
+      alias.raw,
+      '```',
+      ''
+    );
   }
 
   if (!existsSync(join(__dirname, '..', 'docs', 'main.md')))
