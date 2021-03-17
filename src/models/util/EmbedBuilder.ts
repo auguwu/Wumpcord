@@ -23,7 +23,7 @@
 /* eslint-disable camelcase */
 
 import type { APIEmbed, APIEmbedAuthor, APIEmbedField, APIEmbedFooter, APIEmbedImage, APIEmbedThumbnail } from 'discord-api-types';
-import Util from '../../util';
+import { omitUndefinedOrNull } from '@augu/utils';
 import Role from '../guild/GuildRole';
 
 export default class EmbedBuilder {
@@ -168,8 +168,18 @@ export default class EmbedBuilder {
     return this;
   }
 
+  setImage(url: string) {
+    this.image = { url };
+    return this;
+  }
+
+  setFooter(text: string, iconUrl?: string) {
+    this.footer = { text, icon_url: iconUrl };
+    return this;
+  }
+
   build() {
-    return Util.escapeUndefined<APIEmbed>({
+    return omitUndefinedOrNull<APIEmbed>({
       description: this.description,
       thumbnail: this.thumbnail,
       timestamp: this.timestamp,
