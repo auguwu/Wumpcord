@@ -192,6 +192,8 @@ async function main() {
             type: param.getType().getText(param, _ts.TypeFormatFlags.NoTruncation | _ts.TypeFormatFlags.WriteArrayAsGenericType)
           }));
 
+          definition.children.push(def);
+
           continue;
         }
 
@@ -315,7 +317,7 @@ async function main() {
         .join(', ');
 
       block.push(
-        `### (static) ${klazz.name.trim()}#${name}${genericString}(${params}): ${getTypeName(method.value)}`,
+        `### (static) ${klazz.name.trim()}#${name}${genericString}(${params}): \`${getTypeName(method.value)}\``,
         method.text,
         ''
       );
