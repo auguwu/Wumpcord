@@ -10,7 +10,7 @@ Updated At: 17/03/2021
 
 # Classes
 
-## class [DiscordAPIError](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/errors/DiscordAPIError.ts)
+## class [DiscordAPIError](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/errors/DiscordAPIError.ts)
 Represents a error related to Discord's API
 
 ### Constructors
@@ -21,7 +21,7 @@ new DiscordAPIError(code: number, message: string);
 ```
 
 
-## class [DiscordRestError](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/errors/DiscordRestError.ts)
+## class [DiscordRestError](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/errors/DiscordRestError.ts)
 Represents a error related to the rest client
 
 ### Constructors
@@ -32,7 +32,7 @@ new DiscordRestError(code: number, message: string);
 ```
 
 
-## class [DiscordRestValidationError](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/errors/DiscordRestValidationError.ts)
+## class [DiscordRestValidationError](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/errors/DiscordRestValidationError.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -43,7 +43,7 @@ new DiscordRestValidationError(endpoint: string, method: string, code: number, m
 ```
 
 
-## class [RequestAbortedError](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/errors/RequestAbortedError.ts)
+## class [RequestAbortedError](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/errors/RequestAbortedError.ts)
 Class to define a request aborted error
 
 ### Constructors
@@ -54,7 +54,7 @@ new RequestAbortedError(endpoint: string, method: string);
 ```
 
 
-## class [Event](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/Event.ts)
+## class [Event](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/Event.ts)
 Represents a event from Discord and handles everything
 
 ### Constructors
@@ -65,154 +65,154 @@ new Event<D extends object, Refs extends object>(shard: WebSocketShard, data: D)
 ```
 
 ### Properties
-- **Event.client** -> WebSocketClient<types.ClientOptions, import("D:/Projects/Misc/TypeScript/Wumpcord/src/gateway/WebSocketClient").WebSocketClientEvents> ~ The WebSocket client attached
-- **Event.shard** -> WebSocketShard ~ The WebSocket shard that is handling this event
-- **Event.$refs** -> Refs ~ The references attached to this [Event]
-- **Event.data** -> D ~ The data payload from Discord
+- **Event.client** -> `WebSocketClient<types.ClientOptions, WebSocketClientEvents>` ~ The WebSocket client attached
+- **Event.shard** -> `WebSocketShard` ~ The WebSocket shard that is handling this event
+- **Event.$refs** -> `Refs` ~ The references attached to this [Event]
+- **Event.data** -> `D` ~ The data payload from Discord
 
-## class [TypingStartEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/TypingStartEvent.ts)
+## class [TypingStartEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/TypingStartEvent.ts)
 No documentation has been written at this time
 
 
-## class [UserUpdateEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/UserUpdateEvent.ts)
+## class [UserUpdateEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/UserUpdateEvent.ts)
 No documentation has been written at this time
 
 
-## class [WebhooksUpdateEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/WebhooksUpdateEvent.ts)
+## class [WebhooksUpdateEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/WebhooksUpdateEvent.ts)
 No documentation has been written at this time
 
 
-## class [ChannelCreateEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/channel/ChannelCreateEvent.ts)
+## class [ChannelCreateEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/channel/ChannelCreateEvent.ts)
 No documentation has been written at this time
 
 
-## class [ChannelDeleteEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/channel/ChannelDeleteEvent.ts)
+## class [ChannelDeleteEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/channel/ChannelDeleteEvent.ts)
 No documentation has been written at this time
 
 
-## class [ChannelPinsUpdateEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/channel/ChannelPinsUpdateEvent.ts)
+## class [ChannelPinsUpdateEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/channel/ChannelPinsUpdateEvent.ts)
 No documentation has been written at this time
 
 
-## class [ChannelUpdateEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/channel/ChannelUpdateEvent.ts)
+## class [ChannelUpdateEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/channel/ChannelUpdateEvent.ts)
 No documentation has been written at this time
 
 
-## class [GuildCreateEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/guild/GuildCreateEvent.ts)
+## class [GuildCreateEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/guild/GuildCreateEvent.ts)
 No documentation has been written at this time
 
 
-## class [GuildDeleteEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/guild/GuildDeleteEvent.ts)
+## class [GuildDeleteEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/guild/GuildDeleteEvent.ts)
 No documentation has been written at this time
 
 
-## class [GuildEmojisUpdateEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/guild/GuildEmojisUpdateEvent.ts)
+## class [GuildEmojisUpdateEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/guild/GuildEmojisUpdateEvent.ts)
 No documentation has been written at this time
 
 
-## class [GuildIntegrationsUpdateEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/guild/GuildIntegrationsUpdateEvent.ts)
+## class [GuildIntegrationsUpdateEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/guild/GuildIntegrationsUpdateEvent.ts)
 No documentation has been written at this time
 
 
-## class [GuildUpdateEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/guild/GuildUpdateEvent.ts)
+## class [GuildUpdateEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/guild/GuildUpdateEvent.ts)
 No documentation has been written at this time
 
 
-## class [GuildBanAddEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/guild/bans/GuildBanAddEvent.ts)
+## class [GuildBanAddEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/guild/bans/GuildBanAddEvent.ts)
 No documentation has been written at this time
 
 
-## class [GuildBanAddEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/guild/bans/GuildBanRemoveEvent.ts)
+## class [GuildBanAddEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/guild/bans/GuildBanRemoveEvent.ts)
 No documentation has been written at this time
 
 
-## class [GuildMemberAddEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/guild/member/GuildMemberAddEvent.ts)
+## class [GuildMemberAddEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/guild/member/GuildMemberAddEvent.ts)
 No documentation has been written at this time
 
 
-## class [GuildMemberChunkEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/guild/member/GuildMemberChunkEvent.ts)
+## class [GuildMemberChunkEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/guild/member/GuildMemberChunkEvent.ts)
 No documentation has been written at this time
 
 
-## class [GuildMemberRemoveEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/guild/member/GuildMemberRemoveEvent.ts)
+## class [GuildMemberRemoveEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/guild/member/GuildMemberRemoveEvent.ts)
 No documentation has been written at this time
 
 
-## class [GuildMemberUpdateEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/guild/member/GuildMemberUpdateEvent.ts)
+## class [GuildMemberUpdateEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/guild/member/GuildMemberUpdateEvent.ts)
 No documentation has been written at this time
 
 
-## class [GuildRoleCreateEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/guild/roles/GuildRoleCreateEvent.ts)
+## class [GuildRoleCreateEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/guild/roles/GuildRoleCreateEvent.ts)
 No documentation has been written at this time
 
 
-## class [GuildRoleDeleteEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/guild/roles/GuildRoleDeleteEvent.ts)
+## class [GuildRoleDeleteEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/guild/roles/GuildRoleDeleteEvent.ts)
 No documentation has been written at this time
 
 
-## class [GuildRoleDeleteEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/guild/roles/GuildRoleUpdateEvent.ts)
+## class [GuildRoleDeleteEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/guild/roles/GuildRoleUpdateEvent.ts)
 No documentation has been written at this time
 
 
-## class [InteractionCreateEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/interaction/InteractionCreateEvent.ts)
+## class [InteractionCreateEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/interaction/InteractionCreateEvent.ts)
 No documentation has been written at this time
 
 ### Properties
-- **InteractionCreateEvent.client** -> InteractionClient<ClientOptions, InteractionClientEvents> ~ No documentation has been written.
+- **InteractionCreateEvent.client** -> `InteractionClient<ClientOptions, InteractionClientEvents>` ~ No documentation has been written.
 
-## class [InviteCreateEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/invites/InviteCreateEvent.ts)
+## class [InviteCreateEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/invites/InviteCreateEvent.ts)
 No documentation has been written at this time
 
 
-## class [InviteDeleteEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/invites/InviteDeleteEvent.ts)
+## class [InviteDeleteEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/invites/InviteDeleteEvent.ts)
 No documentation has been written at this time
 
 
-## class [MessageCreateEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/message/MessageCreateEvent.ts)
+## class [MessageCreateEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/message/MessageCreateEvent.ts)
 No documentation has been written at this time
 
 
-## class [MessageDeleteBulkEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/message/MessageDeleteBulkEvent.ts)
+## class [MessageDeleteBulkEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/message/MessageDeleteBulkEvent.ts)
 No documentation has been written at this time
 
 
-## class [MessageDeleteEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/message/MessageDeleteEvent.ts)
+## class [MessageDeleteEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/message/MessageDeleteEvent.ts)
 No documentation has been written at this time
 
 
-## class [MessageUpdateEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/message/MessageUpdateEvent.ts)
+## class [MessageUpdateEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/message/MessageUpdateEvent.ts)
 No documentation has been written at this time
 
 
-## class [MessageReactionAddEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/message/reaction/MessageReactionAddEvent.ts)
+## class [MessageReactionAddEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/message/reaction/MessageReactionAddEvent.ts)
 No documentation has been written at this time
 
 
-## class [MessageReactionRemoveAllEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/message/reaction/MessageReactionRemoveAllEvent.ts)
+## class [MessageReactionRemoveAllEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/message/reaction/MessageReactionRemoveAllEvent.ts)
 No documentation has been written at this time
 
 
-## class [MessageReactionRemoveEmojiEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/message/reaction/MessageReactionRemoveEmojiEvent.ts)
+## class [MessageReactionRemoveEmojiEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/message/reaction/MessageReactionRemoveEmojiEvent.ts)
 No documentation has been written at this time
 
 
-## class [MessageReactionRemoveEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/message/reaction/MessageReactionRemoveEvent.ts)
+## class [MessageReactionRemoveEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/message/reaction/MessageReactionRemoveEvent.ts)
 No documentation has been written at this time
 
 
-## class [PresenceUpdateEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/presence/PresenceUpdateEvent.ts)
+## class [PresenceUpdateEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/presence/PresenceUpdateEvent.ts)
 No documentation has been written at this time
 
 
-## class [VoiceServerUpdateEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/voice/VoiceServerUpdateEvent.ts)
+## class [VoiceServerUpdateEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/voice/VoiceServerUpdateEvent.ts)
 No documentation has been written at this time
 
 
-## class [VoiceStateUpdateEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/events/voice/VoiceStateUpdateEvent.ts)
+## class [VoiceStateUpdateEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/events/voice/VoiceStateUpdateEvent.ts)
 No documentation has been written at this time
 
 
-## class [ShardManager](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/gateway/ShardingManager.ts)
+## class [ShardManager](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/gateway/ShardingManager.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -223,7 +223,7 @@ new ShardManager(client: WebSocketClient<types.ClientOptions, WebSocketClientEve
 ```
 
 
-## class [WebSocketClient](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/gateway/WebSocketClient.ts)
+## class [WebSocketClient](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/gateway/WebSocketClient.ts)
 Handles everything related to Discord and is the entrypoint to your Discord bot.
 
 ### Constructors
@@ -234,19 +234,19 @@ new WebSocketClient<Options extends types.ClientOptions, Events extends WebSocke
 ```
 
 ### Properties
-- **WebSocketClient.gatewayURL** -> string ~ The gateway URL to connect all shards to
-- **WebSocketClient.channels** -> ChannelManager ~ The channel cache available, this will be a empty Collection if not enabled.
-- **WebSocketClient.options** -> Options ~ The client options available to this WebSocket client.
-- **WebSocketClient.guilds** -> GuildManager ~ The guild cache available, this will be a empty Collection if not enabled.
-- **WebSocketClient.shards** -> ShardManager ~ The shard manager available to this context.
-- **WebSocketClient.voice** -> VoiceClient ~ List of voice connections available to the client
-- **WebSocketClient.ready** -> boolean ~ If we are ready to be used or not.
-- **WebSocketClient.token** -> string ~ The client's token, this is hidden by default.
-- **WebSocketClient.users** -> UserManager ~ The user cache if available, this will be a empty Collection if not enabled.
-- **WebSocketClient.rest** -> RestClient ~ The rest client for creating requests to Discord's REST API.
-- **WebSocketClient.user** -> SelfUser ~ The self user instance
+- **WebSocketClient.gatewayURL** -> `string` ~ The gateway URL to connect all shards to
+- **WebSocketClient.channels** -> `ChannelManager` ~ The channel cache available, this will be a empty Collection if not enabled.
+- **WebSocketClient.options** -> `Options` ~ The client options available to this WebSocket client.
+- **WebSocketClient.guilds** -> `GuildManager` ~ The guild cache available, this will be a empty Collection if not enabled.
+- **WebSocketClient.shards** -> `ShardManager` ~ The shard manager available to this context.
+- **WebSocketClient.voice** -> `VoiceClient` ~ List of voice connections available to the client
+- **WebSocketClient.ready** -> `boolean` ~ If we are ready to be used or not.
+- **WebSocketClient.token** -> `string` ~ The client's token, this is hidden by default.
+- **WebSocketClient.users** -> `UserManager` ~ The user cache if available, this will be a empty Collection if not enabled.
+- **WebSocketClient.rest** -> `RestClient` ~ The rest client for creating requests to Discord's REST API.
+- **WebSocketClient.user** -> `SelfUser` ~ The self user instance
 
-## class [WebSocketShard](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/gateway/WebSocketShard.ts)
+## class [WebSocketShard](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/gateway/WebSocketShard.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -257,17 +257,17 @@ new WebSocketShard(client: Client<types.ClientOptions, WebSocketClientEvents>, i
 ```
 
 ### Properties
-- **WebSocketShard.unavailableGuilds** -> Set<string> ~ List of unavailable guilds known to this shard
-- **WebSocketShard.lastReceivedAt** -> number ~ The last time we received an acked response
-- **WebSocketShard.lastAckedAt** -> number ~ The last time we acked a response
-- **WebSocketShard.closeSeq** -> number | undefined ~ The closing sequence number
-- **WebSocketShard.strategy** -> "etf" | "json" | undefined ~ The serialization strategy to use when encoding/decoding packets
-- **WebSocketShard.ready** -> boolean ~ No documentation has been written.
-- **WebSocketShard.status** -> "connected" | "handshaking" | "nearly" | "dead" | "waiting_for_guilds" ~ The status of the shard
-- **WebSocketShard.guilds** -> Set<string> ~ Guild cache for this shard, this is disabled if not provided.
-- **WebSocketShard.id** -> number ~ The shard's ID
+- **WebSocketShard.unavailableGuilds** -> `Set<string>` ~ List of unavailable guilds known to this shard
+- **WebSocketShard.lastReceivedAt** -> `number` ~ The last time we received an acked response
+- **WebSocketShard.lastAckedAt** -> `number` ~ The last time we acked a response
+- **WebSocketShard.closeSeq** -> `number | undefined` ~ The closing sequence number
+- **WebSocketShard.strategy** -> `"etf" | "json" | undefined` ~ The serialization strategy to use when encoding/decoding packets
+- **WebSocketShard.ready** -> `boolean` ~ No documentation has been written.
+- **WebSocketShard.status** -> `"connected" | "handshaking" | "nearly" | "dead" | "waiting_for_guilds"` ~ The status of the shard
+- **WebSocketShard.guilds** -> `Set<string>` ~ Guild cache for this shard, this is disabled if not provided.
+- **WebSocketShard.id** -> `number` ~ The shard's ID
 
-## class [InteractionCommand](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/interactions/Command.ts)
+## class [InteractionCommand](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/interactions/Command.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -278,13 +278,13 @@ new InteractionCommand(data: ApplicationCommand);
 ```
 
 ### Properties
-- **InteractionCommand.applicationID** -> string ~ No documentation has been written.
-- **InteractionCommand.description** -> string ~ No documentation has been written.
-- **InteractionCommand.isGuild** -> boolean ~ No documentation has been written.
-- **InteractionCommand.options** -> Array<Option> ~ No documentation has been written.
-- **InteractionCommand.name** -> string ~ No documentation has been written.
+- **InteractionCommand.applicationID** -> `string` ~ No documentation has been written.
+- **InteractionCommand.description** -> `string` ~ No documentation has been written.
+- **InteractionCommand.isGuild** -> `boolean` ~ No documentation has been written.
+- **InteractionCommand.options** -> `Array<Option>` ~ No documentation has been written.
+- **InteractionCommand.name** -> `string` ~ No documentation has been written.
 
-## class [InteractionHelper](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/interactions/Helper.ts)
+## class [InteractionHelper](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/interactions/Helper.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -295,13 +295,13 @@ new InteractionHelper(client: InteractionClient<ClientOptions, InteractionClient
 ```
 
 
-## class [InteractionClient](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/interactions/InteractionClient.ts)
+## class [InteractionClient](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/interactions/InteractionClient.ts)
 No documentation has been written at this time
 
 ### Properties
-- **InteractionClient.interactions** -> any ~ The interactions helper
+- **InteractionClient.interactions** -> `any` ~ The interactions helper
 
-## class [InteractionOption](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/interactions/Option.ts)
+## class [InteractionOption](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/interactions/Option.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -312,14 +312,14 @@ new InteractionOption(data: interactions.ApplicationCommandOption);
 ```
 
 ### Properties
-- **InteractionOption.description** -> string ~ No documentation has been written.
-- **InteractionOption.required** -> boolean | undefined ~ No documentation has been written.
-- **InteractionOption.default** -> boolean | undefined ~ No documentation has been written.
-- **InteractionOption.choices** -> interactions.ApplicationCommandOptionChoiceArray | undefined ~ No documentation has been written.
-- **InteractionOption.type** -> interactions.ApplicationCommandOptionType ~ No documentation has been written.
-- **InteractionOption.name** -> string ~ No documentation has been written.
+- **InteractionOption.description** -> `string` ~ No documentation has been written.
+- **InteractionOption.required** -> `boolean | undefined` ~ No documentation has been written.
+- **InteractionOption.default** -> `boolean | undefined` ~ No documentation has been written.
+- **InteractionOption.choices** -> `interactions.ApplicationCommandOptionChoiceArray | undefined` ~ No documentation has been written.
+- **InteractionOption.type** -> `interactions.ApplicationCommandOptionType` ~ No documentation has been written.
+- **InteractionOption.name** -> `string` ~ No documentation has been written.
 
-## class [BaseManager](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/managers/BaseManager.ts)
+## class [BaseManager](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/managers/BaseManager.ts)
 Represents a manager for handling entity cache
 
 ### Constructors
@@ -330,10 +330,10 @@ new BaseManager<T extends Base<object>>(client: Client<ClientOptions, WebSocketC
 ```
 
 ### Properties
-- **BaseManager.client** -> Client<import("D:/Projects/Misc/TypeScript/Wumpcord/src/types").ClientOptions, import("D:/Projects/Misc/TypeScript/Wumpcord/src/gateway/WebSocketClient").WebSocketClientEvents> ~ The client to use
-- **BaseManager.cache** -> Collection<string, T> ~ The cache
+- **BaseManager.client** -> `Client<ClientOptions, WebSocketClientEvents>` ~ The client to use
+- **BaseManager.cache** -> `Collection<string, T>` ~ The cache
 
-## class [ChannelManager](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/managers/ChannelManager.ts)
+## class [ChannelManager](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/managers/ChannelManager.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -344,7 +344,7 @@ new ChannelManager(client: WebSocketClient<ClientOptions, WebSocketClientEvents>
 ```
 
 
-## class [ChannelMessagesManager](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/managers/ChannelMessagesManager.ts)
+## class [ChannelMessagesManager](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/managers/ChannelMessagesManager.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -355,7 +355,7 @@ new ChannelMessagesManager(client: WebSocketClient<ClientOptions, WebSocketClien
 ```
 
 
-## class [GuildEmojiManager](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/managers/GuildEmojiManager.ts)
+## class [GuildEmojiManager](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/managers/GuildEmojiManager.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -366,7 +366,7 @@ new GuildEmojiManager(client: WebSocketClient<ClientOptions, WebSocketClientEven
 ```
 
 
-## class [GuildManager](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/managers/GuildManager.ts)
+## class [GuildManager](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/managers/GuildManager.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -377,7 +377,7 @@ new GuildManager(client: WebSocketClient<ClientOptions, WebSocketClientEvents>);
 ```
 
 
-## class [GuildMemberManager](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/managers/GuildMemberManager.ts)
+## class [GuildMemberManager](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/managers/GuildMemberManager.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -388,7 +388,7 @@ new GuildMemberManager(client: WebSocketClient<ClientOptions, WebSocketClientEve
 ```
 
 
-## class [GuildPresencesManager](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/managers/GuildPresencesManager.ts)
+## class [GuildPresencesManager](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/managers/GuildPresencesManager.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -399,7 +399,7 @@ new GuildPresencesManager(client: WebSocketClient<ClientOptions, WebSocketClient
 ```
 
 
-## class [GuildRoleManager](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/managers/GuildRoleManager.ts)
+## class [GuildRoleManager](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/managers/GuildRoleManager.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -410,7 +410,7 @@ new GuildRoleManager(client: WebSocketClient<ClientOptions, WebSocketClientEvent
 ```
 
 
-## class [GuildVoiceStateManager](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/managers/GuildVoiceStateManager.ts)
+## class [GuildVoiceStateManager](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/managers/GuildVoiceStateManager.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -421,7 +421,7 @@ new GuildVoiceStateManager(client: WebSocketClient<ClientOptions, WebSocketClien
 ```
 
 
-## class [UserManager](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/managers/UserManager.ts)
+## class [UserManager](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/managers/UserManager.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -432,7 +432,7 @@ new UserManager(client: WebSocketClient<ClientOptions, WebSocketClientEvents>);
 ```
 
 
-## class [Application](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/Application.ts)
+## class [Application](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/Application.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -443,22 +443,22 @@ new Application(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, d
 ```
 
 ### Properties
-- **Application.requiresCodeGrant** -> boolean ~ No documentation has been written.
-- **Application.primarySkuID** -> string ~ No documentation has been written.
-- **Application.description** -> string | null ~ No documentation has been written.
-- **Application.rpcOrigins** -> Array<string> ~ No documentation has been written.
-- **Application.coverImage** -> string | null ~ No documentation has been written.
-- **Application.isPublic** -> boolean ~ No documentation has been written.
-- **Application.guildID** -> string ~ No documentation has been written.
-- **Application.summary** -> string | null ~ No documentation has been written.
-- **Application.owner** -> User | null ~ No documentation has been written.
-- **Application.flags** -> number ~ No documentation has been written.
-- **Application.team** -> Team | null ~ No documentation has been written.
-- **Application.icon** -> string | null ~ No documentation has been written.
-- **Application.name** -> string ~ No documentation has been written.
-- **Application.slug** -> string ~ No documentation has been written.
+- **Application.requiresCodeGrant** -> `boolean` ~ No documentation has been written.
+- **Application.primarySkuID** -> `string` ~ No documentation has been written.
+- **Application.description** -> `string | null` ~ No documentation has been written.
+- **Application.rpcOrigins** -> `Array<string>` ~ No documentation has been written.
+- **Application.coverImage** -> `string | null` ~ No documentation has been written.
+- **Application.isPublic** -> `boolean` ~ No documentation has been written.
+- **Application.guildID** -> `string` ~ No documentation has been written.
+- **Application.summary** -> `string | null` ~ No documentation has been written.
+- **Application.owner** -> `User | null` ~ No documentation has been written.
+- **Application.flags** -> `number` ~ No documentation has been written.
+- **Application.team** -> `Team | null` ~ No documentation has been written.
+- **Application.icon** -> `string | null` ~ No documentation has been written.
+- **Application.name** -> `string` ~ No documentation has been written.
+- **Application.slug** -> `string` ~ No documentation has been written.
 
-## class [Attachment](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/Attachment.ts)
+## class [Attachment](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/Attachment.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -469,13 +469,13 @@ new Attachment(data: APIAttachment);
 ```
 
 ### Properties
-- **Attachment.proxyUrl** -> string ~ No documentation has been written.
-- **Attachment.height** -> number | null ~ No documentation has been written.
-- **Attachment.width** -> number | null ~ No documentation has been written.
-- **Attachment.size** -> number ~ No documentation has been written.
-- **Attachment.url** -> string ~ No documentation has been written.
+- **Attachment.proxyUrl** -> `string` ~ No documentation has been written.
+- **Attachment.height** -> `number | null` ~ No documentation has been written.
+- **Attachment.width** -> `number | null` ~ No documentation has been written.
+- **Attachment.size** -> `number` ~ No documentation has been written.
+- **Attachment.url** -> `string` ~ No documentation has been written.
 
-## class [Base](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/Base.ts)
+## class [Base](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/Base.ts)
 Represents a base entity
 
 ### Constructors
@@ -486,9 +486,9 @@ new Base<D extends object>(id: string | undefined);
 ```
 
 ### Properties
-- **Base.id** -> string ~ The entity's ID
+- **Base.id** -> `string` ~ The entity's ID
 
-## class [Channel](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/Channel.ts)
+## class [Channel](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/Channel.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -499,9 +499,9 @@ new Channel(data: APIPartialChannel);
 ```
 
 ### Properties
-- **Channel.type** -> "text" | "dm" | "voice" | "group" | "category" | "news" | "store" ~ The type of channel
+- **Channel.type** -> `"text" | "dm" | "voice" | "group" | "category" | "news" | "store"` ~ The type of channel
 
-## class [Guild](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/Guild.ts)
+## class [Guild](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/Guild.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -512,52 +512,52 @@ new Guild(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, data: I
 ```
 
 ### Properties
-- **Guild.voiceStates** -> GuildVoiceStateManager ~ No documentation has been written.
-- **Guild.unavailable** -> false ~ No documentation has been written.
-- **Guild.presences** -> GuildPresenceManager ~ No documentation has been written.
-- **Guild.channels** -> ChannelManager ~ No documentation has been written.
-- **Guild.members** -> GuildMemberManager ~ No documentation has been written.
-- **Guild.emojis** -> GuildEmojiManager ~ No documentation has been written.
-- **Guild.roles** -> GuildRoleManager ~ No documentation has been written.
-- **Guild.defaultMessageNotifications** -> number ~ No documentation has been written.
-- **Guild.approximatePresenceCount** -> number ~ No documentation has been written.
-- **Guild.approximateMemberCount** -> number ~ No documentation has been written.
-- **Guild.publicUpdatesChannelID** -> string | null ~ No documentation has been written.
-- **Guild.explicitContentFilter** -> number ~ No documentation has been written.
-- **Guild.maxVideoChannelUsers** -> number ~ No documentation has been written.
-- **Guild.systemChannelFlags** -> number ~ No documentation has been written.
-- **Guild.verificationLevel** -> number ~ No documentation has been written.
-- **Guild.systemChannelID** -> string | null ~ No documentation has been written.
-- **Guild.widgetChannelID** -> string | null ~ No documentation has been written.
-- **Guild.discoverySplash** -> string | null ~ No documentation has been written.
-- **Guild.preferredLocale** -> string ~ No documentation has been written.
-- **Guild.rulesChannelID** -> string | null ~ No documentation has been written.
-- **Guild.welcomeScreen** -> APIGuildWelcomeScreen ~ No documentation has been written.
-- **Guild.applicationID** -> string | null ~ No documentation has been written.
-- **Guild.widgetEnabled** -> boolean ~ No documentation has been written.
-- **Guild.vanityURLCode** -> string | null ~ No documentation has been written.
-- **Guild.afkChannelID** -> string | null ~ No documentation has been written.
-- **Guild.maxPresences** -> number | null ~ No documentation has been written.
-- **Guild.memberCount** -> number ~ No documentation has been written.
-- **Guild.premiumTier** -> number ~ No documentation has been written.
-- **Guild.description** -> string | null ~ No documentation has been written.
-- **Guild.afkTimeout** -> number ~ No documentation has been written.
-- **Guild.maxMembers** -> number ~ No documentation has been written.
-- **Guild.boosters** -> number ~ No documentation has been written.
-- **Guild.features** -> Array<GuildFeature> ~ No documentation has been written.
-- **Guild.iconHash** -> string | null ~ No documentation has been written.
-- **Guild.mfaLevel** -> number ~ No documentation has been written.
-- **Guild.joinedAt** -> Date ~ No documentation has been written.
-- **Guild.shardID** -> number ~ No documentation has been written.
-- **Guild.ownerID** -> string ~ No documentation has been written.
-- **Guild.isOwner** -> boolean ~ No documentation has been written.
-- **Guild.banner** -> string | null ~ No documentation has been written.
-- **Guild.region** -> string ~ No documentation has been written.
-- **Guild.large** -> boolean ~ No documentation has been written.
-- **Guild.icon** -> string | null ~ No documentation has been written.
-- **Guild.name** -> string ~ No documentation has been written.
+- **Guild.voiceStates** -> `GuildVoiceStateManager` ~ No documentation has been written.
+- **Guild.unavailable** -> `false` ~ No documentation has been written.
+- **Guild.presences** -> `GuildPresenceManager` ~ No documentation has been written.
+- **Guild.channels** -> `ChannelManager` ~ No documentation has been written.
+- **Guild.members** -> `GuildMemberManager` ~ No documentation has been written.
+- **Guild.emojis** -> `GuildEmojiManager` ~ No documentation has been written.
+- **Guild.roles** -> `GuildRoleManager` ~ No documentation has been written.
+- **Guild.defaultMessageNotifications** -> `number` ~ No documentation has been written.
+- **Guild.approximatePresenceCount** -> `number` ~ No documentation has been written.
+- **Guild.approximateMemberCount** -> `number` ~ No documentation has been written.
+- **Guild.publicUpdatesChannelID** -> `string | null` ~ No documentation has been written.
+- **Guild.explicitContentFilter** -> `number` ~ No documentation has been written.
+- **Guild.maxVideoChannelUsers** -> `number` ~ No documentation has been written.
+- **Guild.systemChannelFlags** -> `number` ~ No documentation has been written.
+- **Guild.verificationLevel** -> `number` ~ No documentation has been written.
+- **Guild.systemChannelID** -> `string | null` ~ No documentation has been written.
+- **Guild.widgetChannelID** -> `string | null` ~ No documentation has been written.
+- **Guild.discoverySplash** -> `string | null` ~ No documentation has been written.
+- **Guild.preferredLocale** -> `string` ~ No documentation has been written.
+- **Guild.rulesChannelID** -> `string | null` ~ No documentation has been written.
+- **Guild.welcomeScreen** -> `APIGuildWelcomeScreen` ~ No documentation has been written.
+- **Guild.applicationID** -> `string | null` ~ No documentation has been written.
+- **Guild.widgetEnabled** -> `boolean` ~ No documentation has been written.
+- **Guild.vanityURLCode** -> `string | null` ~ No documentation has been written.
+- **Guild.afkChannelID** -> `string | null` ~ No documentation has been written.
+- **Guild.maxPresences** -> `number | null` ~ No documentation has been written.
+- **Guild.memberCount** -> `number` ~ No documentation has been written.
+- **Guild.premiumTier** -> `number` ~ No documentation has been written.
+- **Guild.description** -> `string | null` ~ No documentation has been written.
+- **Guild.afkTimeout** -> `number` ~ No documentation has been written.
+- **Guild.maxMembers** -> `number` ~ No documentation has been written.
+- **Guild.boosters** -> `number` ~ No documentation has been written.
+- **Guild.features** -> `Array<GuildFeature>` ~ No documentation has been written.
+- **Guild.iconHash** -> `string | null` ~ No documentation has been written.
+- **Guild.mfaLevel** -> `number` ~ No documentation has been written.
+- **Guild.joinedAt** -> `Date` ~ No documentation has been written.
+- **Guild.shardID** -> `number` ~ No documentation has been written.
+- **Guild.ownerID** -> `string` ~ No documentation has been written.
+- **Guild.isOwner** -> `boolean` ~ No documentation has been written.
+- **Guild.banner** -> `string | null` ~ No documentation has been written.
+- **Guild.region** -> `string` ~ No documentation has been written.
+- **Guild.large** -> `boolean` ~ No documentation has been written.
+- **Guild.icon** -> `string | null` ~ No documentation has been written.
+- **Guild.name** -> `string` ~ No documentation has been written.
 
-## class [InteractionMessage](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/InteractionMessage.ts)
+## class [InteractionMessage](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/InteractionMessage.ts)
 Represents a partial [Message] instance for interactions
 
 ### Constructors
@@ -568,16 +568,16 @@ new InteractionMessage<C extends AnyChannel>(client: InteractionClient<ClientOpt
 ```
 
 ### Properties
-- **InteractionMessage.mentionRoles** -> Array<string> ~ No documentation has been written.
-- **InteractionMessage.commandID** -> string ~ No documentation has been written.
-- **InteractionMessage.channelID** -> string ~ No documentation has been written.
-- **InteractionMessage.timestamp** -> string ~ No documentation has been written.
-- **InteractionMessage.mentions** -> Array<User> ~ No documentation has been written.
-- **InteractionMessage.guildID** -> string ~ No documentation has been written.
-- **InteractionMessage.content** -> string ~ No documentation has been written.
-- **InteractionMessage.author** -> User ~ No documentation has been written.
+- **InteractionMessage.mentionRoles** -> `Array<string>` ~ No documentation has been written.
+- **InteractionMessage.commandID** -> `string` ~ No documentation has been written.
+- **InteractionMessage.channelID** -> `string` ~ No documentation has been written.
+- **InteractionMessage.timestamp** -> `string` ~ No documentation has been written.
+- **InteractionMessage.mentions** -> `Array<User>` ~ No documentation has been written.
+- **InteractionMessage.guildID** -> `string` ~ No documentation has been written.
+- **InteractionMessage.content** -> `string` ~ No documentation has been written.
+- **InteractionMessage.author** -> `User` ~ No documentation has been written.
 
-## class [Message](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/Message.ts)
+## class [Message](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/Message.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -588,32 +588,32 @@ new Message(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, data:
 ```
 
 ### Properties
-- **Message.referencedMessage** -> Message<TextableChannel> | null ~ No documentation has been written.
-- **Message.editedTimestamp** -> Date | null ~ No documentation has been written.
-- **Message.mentionEveryone** -> boolean ~ No documentation has been written.
-- **Message.mentionChannels** -> Array<string> ~ No documentation has been written.
-- **Message.mentionRoles** -> Array<string> ~ No documentation has been written.
-- **Message.application** -> APIMessageApplication ~ No documentation has been written.
-- **Message.attachments** -> Array<Attachment> ~ No documentation has been written.
-- **Message.reactions** -> Array<APIReaction> ~ No documentation has been written.
-- **Message.reference** -> APIMessageReference ~ No documentation has been written.
-- **Message.channelID** -> string ~ No documentation has been written.
-- **Message.timestamp** -> Date ~ No documentation has been written.
-- **Message.webhookID** -> string ~ No documentation has been written.
-- **Message.mentions** -> Array<string> ~ No documentation has been written.
-- **Message.activity** -> APIMessageActivity ~ No documentation has been written.
-- **Message.content** -> string ~ No documentation has been written.
-- **Message.guildID** -> string ~ No documentation has been written.
-- **Message.member** -> GuildMember ~ No documentation has been written.
-- **Message.embeds** -> Array<APIEmbed> ~ No documentation has been written.
-- **Message.pinned** -> boolean ~ No documentation has been written.
-- **Message.author** -> User ~ No documentation has been written.
-- **Message.flags** -> number ~ No documentation has been written.
-- **Message.edits** -> Array<Message<TextableChannel>> ~ No documentation has been written.
-- **Message.type** -> number ~ No documentation has been written.
-- **Message.tts** -> boolean ~ No documentation has been written.
+- **Message.referencedMessage** -> `Message<TextableChannel> | null` ~ No documentation has been written.
+- **Message.editedTimestamp** -> `Date | null` ~ No documentation has been written.
+- **Message.mentionEveryone** -> `boolean` ~ No documentation has been written.
+- **Message.mentionChannels** -> `Array<string>` ~ No documentation has been written.
+- **Message.mentionRoles** -> `Array<string>` ~ No documentation has been written.
+- **Message.application** -> `APIMessageApplication` ~ No documentation has been written.
+- **Message.attachments** -> `Array<Attachment>` ~ No documentation has been written.
+- **Message.reactions** -> `Array<APIReaction>` ~ No documentation has been written.
+- **Message.reference** -> `APIMessageReference` ~ No documentation has been written.
+- **Message.channelID** -> `string` ~ No documentation has been written.
+- **Message.timestamp** -> `Date` ~ No documentation has been written.
+- **Message.webhookID** -> `string` ~ No documentation has been written.
+- **Message.mentions** -> `Array<string>` ~ No documentation has been written.
+- **Message.activity** -> `APIMessageActivity` ~ No documentation has been written.
+- **Message.content** -> `string` ~ No documentation has been written.
+- **Message.guildID** -> `string` ~ No documentation has been written.
+- **Message.member** -> `GuildMember` ~ No documentation has been written.
+- **Message.embeds** -> `Array<APIEmbed>` ~ No documentation has been written.
+- **Message.pinned** -> `boolean` ~ No documentation has been written.
+- **Message.author** -> `User` ~ No documentation has been written.
+- **Message.flags** -> `number` ~ No documentation has been written.
+- **Message.edits** -> `Array<Message<TextableChannel>>` ~ No documentation has been written.
+- **Message.type** -> `number` ~ No documentation has been written.
+- **Message.tts** -> `boolean` ~ No documentation has been written.
 
-## class [PermissionOverwrite](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/PermissionOverwrite.ts)
+## class [PermissionOverwrite](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/PermissionOverwrite.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -624,10 +624,10 @@ new PermissionOverwrite(data: APIOverwrite);
 ```
 
 ### Properties
-- **PermissionOverwrite.permissions** -> Permission ~ List of permissions available for this [PermissionOverwrite]
-- **PermissionOverwrite.type** -> "role" | "member" ~ The overwrite type
+- **PermissionOverwrite.permissions** -> `Permission` ~ List of permissions available for this [PermissionOverwrite]
+- **PermissionOverwrite.type** -> `"role" | "member"` ~ The overwrite type
 
-## class [SelfUser](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/SelfUser.ts)
+## class [SelfUser](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/SelfUser.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -638,10 +638,10 @@ new SelfUser(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, data
 ```
 
 ### Properties
-- **SelfUser.mfaEnabled** -> boolean ~ If the user has MFA enabled (why do bots have this)
-- **SelfUser.verified** -> boolean ~ If the bot is verified or not
+- **SelfUser.mfaEnabled** -> `boolean` ~ If the user has MFA enabled (why do bots have this)
+- **SelfUser.verified** -> `boolean` ~ If the bot is verified or not
 
-## class [Template](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/Template.ts)
+## class [Template](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/Template.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -652,18 +652,18 @@ new Template(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, data
 ```
 
 ### Properties
-- **Template.sourceGuildID** -> string ~ No documentation has been written.
-- **Template.description** -> string | null ~ No documentation has been written.
-- **Template.sourceGuild** -> Guild ~ No documentation has been written.
-- **Template.usageCount** -> number ~ No documentation has been written.
-- **Template.createdAt** -> Date ~ No documentation has been written.
-- **Template.updatedAt** -> Date ~ No documentation has been written.
-- **Template.creatorID** -> string ~ No documentation has been written.
-- **Template.unsynced** -> boolean ~ No documentation has been written.
-- **Template.code** -> string ~ No documentation has been written.
-- **Template.name** -> string ~ No documentation has been written.
+- **Template.sourceGuildID** -> `string` ~ No documentation has been written.
+- **Template.description** -> `string | null` ~ No documentation has been written.
+- **Template.sourceGuild** -> `Guild` ~ No documentation has been written.
+- **Template.usageCount** -> `number` ~ No documentation has been written.
+- **Template.createdAt** -> `Date` ~ No documentation has been written.
+- **Template.updatedAt** -> `Date` ~ No documentation has been written.
+- **Template.creatorID** -> `string` ~ No documentation has been written.
+- **Template.unsynced** -> `boolean` ~ No documentation has been written.
+- **Template.code** -> `string` ~ No documentation has been written.
+- **Template.name** -> `string` ~ No documentation has been written.
 
-## class [User](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/User.ts)
+## class [User](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/User.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -674,14 +674,14 @@ new User(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, data: AP
 ```
 
 ### Properties
-- **User.discriminator** -> string ~ The user's discriminator
-- **User.username** -> string ~ The user's username
-- **User.avatar** -> string | null ~ The user's avatar UUID
-- **User.system** -> boolean ~ The user account is a system account or not
-- **User.flags** -> number ~ The user's public flags
-- **User.bot** -> boolean ~ If the user is a bot account or not
+- **User.discriminator** -> `string` ~ The user's discriminator
+- **User.username** -> `string` ~ The user's username
+- **User.avatar** -> `string | null` ~ The user's avatar UUID
+- **User.system** -> `boolean` ~ The user account is a system account or not
+- **User.flags** -> `number` ~ The user's public flags
+- **User.bot** -> `boolean` ~ If the user is a bot account or not
 
-## class [VoiceState](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/VoiceState.ts)
+## class [VoiceState](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/VoiceState.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -692,16 +692,16 @@ new VoiceState(data: GatewayVoiceState);
 ```
 
 ### Properties
-- **VoiceState.channelID** -> string | null ~ No documentation has been written.
-- **VoiceState.sessionID** -> string ~ No documentation has been written.
-- **VoiceState.suppress** -> boolean ~ No documentation has been written.
-- **VoiceState.memberID** -> string ~ No documentation has been written.
-- **VoiceState.guildID** -> string ~ No documentation has been written.
-- **VoiceState.userID** -> string ~ No documentation has been written.
-- **VoiceState.server** -> ServerVoiceState ~ No documentation has been written.
-- **VoiceState.self** -> SelfVoiceState ~ No documentation has been written.
+- **VoiceState.channelID** -> `string | null` ~ No documentation has been written.
+- **VoiceState.sessionID** -> `string` ~ No documentation has been written.
+- **VoiceState.suppress** -> `boolean` ~ No documentation has been written.
+- **VoiceState.memberID** -> `string` ~ No documentation has been written.
+- **VoiceState.guildID** -> `string` ~ No documentation has been written.
+- **VoiceState.userID** -> `string` ~ No documentation has been written.
+- **VoiceState.server** -> `ServerVoiceState` ~ No documentation has been written.
+- **VoiceState.self** -> `SelfVoiceState` ~ No documentation has been written.
 
-## class [Webhook](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/Webhook.ts)
+## class [Webhook](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/Webhook.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -712,16 +712,16 @@ new Webhook(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, data:
 ```
 
 ### Properties
-- **Webhook.applicationID** -> string | null ~ No documentation has been written.
-- **Webhook.channelID** -> string ~ No documentation has been written.
-- **Webhook.guildID** -> string ~ No documentation has been written.
-- **Webhook.avatar** -> string | null ~ No documentation has been written.
-- **Webhook.token** -> string ~ No documentation has been written.
-- **Webhook.type** -> string ~ No documentation has been written.
-- **Webhook.name** -> string | null ~ No documentation has been written.
-- **Webhook.user** -> User ~ No documentation has been written.
+- **Webhook.applicationID** -> `string | null` ~ No documentation has been written.
+- **Webhook.channelID** -> `string` ~ No documentation has been written.
+- **Webhook.guildID** -> `string` ~ No documentation has been written.
+- **Webhook.avatar** -> `string | null` ~ No documentation has been written.
+- **Webhook.token** -> `string` ~ No documentation has been written.
+- **Webhook.type** -> `string` ~ No documentation has been written.
+- **Webhook.name** -> `string | null` ~ No documentation has been written.
+- **Webhook.user** -> `User` ~ No documentation has been written.
 
-## class [AuditLogEntry](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/audits/AuditLogEntry.ts)
+## class [AuditLogEntry](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/audits/AuditLogEntry.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -732,21 +732,21 @@ new AuditLogEntry(client: WebSocketClient<ClientOptions, WebSocketClientEvents>,
 ```
 
 ### Properties
-- **AuditLogEntry.inactiveMembers** -> number | undefined ~ Number of days after inactive members were kicked (action = Member Prune)
-- **AuditLogEntry.membersRemoved** -> number | undefined ~ The amount of members removed from the guild (action = Member Prune)
-- **AuditLogEntry.actionType** -> number ~ The action type that was executed
-- **AuditLogEntry.targetCount** -> number | undefined ~ Number of entities that were targeted (actions = Message Delete, Message Delete Bulk, Member Disconnect, Member Move)
-- **AuditLogEntry.channelID** -> string | undefined ~ The channel ID for fallback purposes (actions = Message Delete, Message [Un]pin, Member Moved)
-- **AuditLogEntry.messageID** -> string | undefined ~ The message ID for fallback purposes (actions = Message Unpin/Pin)
-- **AuditLogEntry.channel** -> GuildTextableChannel | undefined ~ The channel that it occured in, if cached (actions = Message Delete, Message [Un]pin, Member Moved)
-- **AuditLogEntry.message** -> Message<import("D:/Projects/Misc/TypeScript/Wumpcord/src/types").TextableChannel> | undefined ~ The message that was targeted, if cached (actions = Message Unpin and Message Pin)
-- **AuditLogEntry.changes** -> Array<APIAuditLogChange> ~ List of changes, if any
-- **AuditLogEntry.reason** -> string | undefined ~ The reason on why it was updated
-- **AuditLogEntry.type** -> "role" | "member" | undefined ~ The type that the audit log was executed (actions = Channel Overwrite Create/Delete/Update)
-- **AuditLogEntry.role** -> string | undefined ~ The role name that was updated from the channel overwrite update (actions = Channel Overwrite Create/Delete/Update)
-- **AuditLogEntry.user** -> any ~ The user who performed the audit log action
+- **AuditLogEntry.inactiveMembers** -> `number | undefined` ~ Number of days after inactive members were kicked (action = Member Prune)
+- **AuditLogEntry.membersRemoved** -> `number | undefined` ~ The amount of members removed from the guild (action = Member Prune)
+- **AuditLogEntry.actionType** -> `number` ~ The action type that was executed
+- **AuditLogEntry.targetCount** -> `number | undefined` ~ Number of entities that were targeted (actions = Message Delete, Message Delete Bulk, Member Disconnect, Member Move)
+- **AuditLogEntry.channelID** -> `string | undefined` ~ The channel ID for fallback purposes (actions = Message Delete, Message [Un]pin, Member Moved)
+- **AuditLogEntry.messageID** -> `string | undefined` ~ The message ID for fallback purposes (actions = Message Unpin/Pin)
+- **AuditLogEntry.channel** -> `GuildTextableChannel | undefined` ~ The channel that it occured in, if cached (actions = Message Delete, Message [Un]pin, Member Moved)
+- **AuditLogEntry.message** -> `Message<TextableChannel> | undefined` ~ The message that was targeted, if cached (actions = Message Unpin and Message Pin)
+- **AuditLogEntry.changes** -> `Array<APIAuditLogChange>` ~ List of changes, if any
+- **AuditLogEntry.reason** -> `string | undefined` ~ The reason on why it was updated
+- **AuditLogEntry.type** -> `"role" | "member" | undefined` ~ The type that the audit log was executed (actions = Channel Overwrite Create/Delete/Update)
+- **AuditLogEntry.role** -> `string | undefined` ~ The role name that was updated from the channel overwrite update (actions = Channel Overwrite Create/Delete/Update)
+- **AuditLogEntry.user** -> `any` ~ The user who performed the audit log action
 
-## class [AuditLogs](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/audits/AuditLogs.ts)
+## class [AuditLogs](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/audits/AuditLogs.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -757,16 +757,16 @@ new AuditLogs(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, dat
 ```
 
 ### Properties
-- **AuditLogs.integrations** -> Array<GuildIntegration> ~ List of intergrations affected in the audit logs
-- **AuditLogs.webhooks** -> Array<Webhook> ~ List of webhooks affected in the audit logs
-- **AuditLogs.entries** -> Array<AuditLogEntry> ~ List of available entries
-- **AuditLogs.users** -> Array<User> ~ Any users affected in the audit logs
+- **AuditLogs.integrations** -> `Array<GuildIntegration>` ~ List of intergrations affected in the audit logs
+- **AuditLogs.webhooks** -> `Array<Webhook>` ~ List of webhooks affected in the audit logs
+- **AuditLogs.entries** -> `Array<AuditLogEntry>` ~ List of available entries
+- **AuditLogs.users** -> `Array<User>` ~ Any users affected in the audit logs
 
-## class [CategoryChannel](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/channel/CategoryChannel.ts)
+## class [CategoryChannel](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/channel/CategoryChannel.ts)
 No documentation has been written at this time
 
 
-## class [DMChannel](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/channel/DMChannel.ts)
+## class [DMChannel](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/channel/DMChannel.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -777,10 +777,10 @@ new DMChannel(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, dat
 ```
 
 ### Properties
-- **DMChannel.lastMessageID** -> string | null | undefined ~ Represents the last message ID, useful for fetching messages in this channel
-- **DMChannel.recipient** -> User ~ List of recipients that are in this group DM
+- **DMChannel.lastMessageID** -> `string | null | undefined` ~ Represents the last message ID, useful for fetching messages in this channel
+- **DMChannel.recipient** -> `User` ~ List of recipients that are in this group DM
 
-## class [GroupChannel](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/channel/GroupChannel.ts)
+## class [GroupChannel](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/channel/GroupChannel.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -791,14 +791,14 @@ new GroupChannel(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, 
 ```
 
 ### Properties
-- **GroupChannel.lastPinTimestamp** -> string | null | undefined ~ The last pinned message's timestamp
-- **GroupChannel.lastMessageID** -> string | null | undefined ~ Represents the last message ID, useful for fetching messages in this channel
-- **GroupChannel.recipients** -> Array<User> ~ List of recipients that are in this group DM
-- **GroupChannel.ownerID** -> string | undefined ~ The owner's ID, who-ever created the group DM
-- **GroupChannel.name** -> string | undefined ~ The name of the group DM
-- **GroupChannel.icon** -> string | null | undefined ~ The group DM's icon
+- **GroupChannel.lastPinTimestamp** -> `string | null | undefined` ~ The last pinned message's timestamp
+- **GroupChannel.lastMessageID** -> `string | null | undefined` ~ Represents the last message ID, useful for fetching messages in this channel
+- **GroupChannel.recipients** -> `Array<User>` ~ List of recipients that are in this group DM
+- **GroupChannel.ownerID** -> `string | undefined` ~ The owner's ID, who-ever created the group DM
+- **GroupChannel.name** -> `string | undefined` ~ The name of the group DM
+- **GroupChannel.icon** -> `string | null | undefined` ~ The group DM's icon
 
-## class [GuildChannel](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/channel/GuildChannel.ts)
+## class [GuildChannel](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/channel/GuildChannel.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -809,16 +809,16 @@ new GuildChannel(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, 
 ```
 
 ### Properties
-- **GuildChannel.permissionOverwrites** -> Collection<string, PermissionOverwrite> ~ List of permission overwrites for this [GuildChannel]
-- **GuildChannel.parentID** -> string | null ~ The parent category's ID, this is `null` if [GuildChannel] is a [CategoryChannel] or doesn't have a parent
-- **GuildChannel.position** -> number ~ The sorting position the channel is in
-- **GuildChannel.guildID** -> string | undefined ~ The guild ID this [GuildChannel] is attached to
-- **GuildChannel.guild** -> Guild ~ The guild that this [GuildChannel] is attached to
-- **GuildChannel.client** -> WebSocketClient<import("D:/Projects/Misc/TypeScript/Wumpcord/src/types").ClientOptions, import("D:/Projects/Misc/TypeScript/Wumpcord/src/gateway/WebSocketClient").WebSocketClientEvents> ~ The [WebSocketClient] attached
-- **GuildChannel.name** -> string ~ The name of this [GuildChannel] instance
-- **GuildChannel.nsfw** -> boolean ~ If the channel is marked NSFW or not
+- **GuildChannel.permissionOverwrites** -> `Collection<string, PermissionOverwrite>` ~ List of permission overwrites for this [GuildChannel]
+- **GuildChannel.parentID** -> `string | null` ~ The parent category's ID, this is `null` if [GuildChannel] is a [CategoryChannel] or doesn't have a parent
+- **GuildChannel.position** -> `number` ~ The sorting position the channel is in
+- **GuildChannel.guildID** -> `string | undefined` ~ The guild ID this [GuildChannel] is attached to
+- **GuildChannel.guild** -> `Guild` ~ The guild that this [GuildChannel] is attached to
+- **GuildChannel.client** -> `WebSocketClient<ClientOptions, WebSocketClientEvents>` ~ The [WebSocketClient] attached
+- **GuildChannel.name** -> `string` ~ The name of this [GuildChannel] instance
+- **GuildChannel.nsfw** -> `boolean` ~ If the channel is marked NSFW or not
 
-## class [GuildTextableChannel](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/channel/GuildTextableChannel.ts)
+## class [GuildTextableChannel](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/channel/GuildTextableChannel.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -829,23 +829,23 @@ new GuildTextableChannel(client: WebSocketClient<ClientOptions, WebSocketClientE
 ```
 
 ### Properties
-- **GuildTextableChannel.permissionOverwrites** -> Collection<string, PermissionOverwrite> ~ List of permission overwrites for this [GuildChannel]
-- **GuildTextableChannel.parentID** -> string | null ~ The parent category's ID, this is `null` if [GuildChannel] is a [CategoryChannel] or doesn't have a parent
-- **GuildTextableChannel.position** -> number ~ The sorting position the channel is in
-- **GuildTextableChannel.guildID** -> string | undefined ~ The guild ID this [GuildChannel] is attached to
-- **GuildTextableChannel.guild** -> Guild ~ The guild that this [GuildChannel] is attached to
-- **GuildTextableChannel.name** -> string ~ The name of this [GuildChannel] instance
-- **GuildTextableChannel.nsfw** -> boolean ~ If the channel is marked NSFW or not
+- **GuildTextableChannel.permissionOverwrites** -> `Collection<string, PermissionOverwrite>` ~ List of permission overwrites for this [GuildChannel]
+- **GuildTextableChannel.parentID** -> `string | null` ~ The parent category's ID, this is `null` if [GuildChannel] is a [CategoryChannel] or doesn't have a parent
+- **GuildTextableChannel.position** -> `number` ~ The sorting position the channel is in
+- **GuildTextableChannel.guildID** -> `string | undefined` ~ The guild ID this [GuildChannel] is attached to
+- **GuildTextableChannel.guild** -> `Guild` ~ The guild that this [GuildChannel] is attached to
+- **GuildTextableChannel.name** -> `string` ~ The name of this [GuildChannel] instance
+- **GuildTextableChannel.nsfw** -> `boolean` ~ If the channel is marked NSFW or not
 
-## class [NewsChannel](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/channel/NewsChannel.ts)
+## class [NewsChannel](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/channel/NewsChannel.ts)
 No documentation has been written at this time
 
 
-## class [StoreChannel](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/channel/StoreChannel.ts)
+## class [StoreChannel](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/channel/StoreChannel.ts)
 No documentation has been written at this time
 
 
-## class [TextChannel](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/channel/TextChannel.ts)
+## class [TextChannel](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/channel/TextChannel.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -856,10 +856,10 @@ new TextChannel(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, d
 ```
 
 ### Properties
-- **TextChannel.ratelimitPerUser** -> number | undefined ~ The ratelimit per user, how long they can send a message
-- **TextChannel.topic** -> string | null ~ The channel's topic
+- **TextChannel.ratelimitPerUser** -> `number | undefined` ~ The ratelimit per user, how long they can send a message
+- **TextChannel.topic** -> `string | null` ~ The channel's topic
 
-## class [VoiceChannel](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/channel/VoiceChannel.ts)
+## class [VoiceChannel](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/channel/VoiceChannel.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -870,10 +870,10 @@ new VoiceChannel(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, 
 ```
 
 ### Properties
-- **VoiceChannel.userLimit** -> number ~ The limit that users can join this [VoiceChannel]
-- **VoiceChannel.bitrate** -> number ~ The bitrate of the voice channel
+- **VoiceChannel.userLimit** -> `number` ~ The limit that users can join this [VoiceChannel]
+- **VoiceChannel.bitrate** -> `number` ~ The bitrate of the voice channel
 
-## class [GuildBan](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/guild/GuildBan.ts)
+## class [GuildBan](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/guild/GuildBan.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -884,11 +884,11 @@ new GuildBan(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, data
 ```
 
 ### Properties
-- **GuildBan.reason** -> string | undefined ~ The reason of the ban
-- **GuildBan.userID** -> string ~ The user's ID who was banned
-- **GuildBan.user** -> User ~ The user who was banned, if cached
+- **GuildBan.reason** -> `string | undefined` ~ The reason of the ban
+- **GuildBan.userID** -> `string` ~ The user's ID who was banned
+- **GuildBan.user** -> `User` ~ The user who was banned, if cached
 
-## class [GuildEmoji](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/guild/GuildEmoji.ts)
+## class [GuildEmoji](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/guild/GuildEmoji.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -899,15 +899,15 @@ new GuildEmoji(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, da
 ```
 
 ### Properties
-- **GuildEmoji.requireColons** -> boolean | undefined ~ No documentation has been written.
-- **GuildEmoji.available** -> boolean | undefined ~ No documentation has been written.
-- **GuildEmoji.animated** -> boolean | undefined ~ No documentation has been written.
-- **GuildEmoji.managed** -> boolean | undefined ~ No documentation has been written.
-- **GuildEmoji.guildID** -> string | undefined ~ No documentation has been written.
-- **GuildEmoji.name** -> string | null ~ No documentation has been written.
-- **GuildEmoji.user** -> User | undefined ~ No documentation has been written.
+- **GuildEmoji.requireColons** -> `boolean | undefined` ~ No documentation has been written.
+- **GuildEmoji.available** -> `boolean | undefined` ~ No documentation has been written.
+- **GuildEmoji.animated** -> `boolean | undefined` ~ No documentation has been written.
+- **GuildEmoji.managed** -> `boolean | undefined` ~ No documentation has been written.
+- **GuildEmoji.guildID** -> `string | undefined` ~ No documentation has been written.
+- **GuildEmoji.name** -> `string | null` ~ No documentation has been written.
+- **GuildEmoji.user** -> `User | undefined` ~ No documentation has been written.
 
-## class [GuildIntegration](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/guild/GuildIntegration.ts)
+## class [GuildIntegration](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/guild/GuildIntegration.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -918,23 +918,23 @@ new GuildIntegration(client: WebSocketClient<ClientOptions, WebSocketClientEvent
 ```
 
 ### Properties
-- **GuildIntegration.expireGracePeriod** -> number ~ The expiration grace period (in days)
-- **GuildIntegration.enableEmoticons** -> boolean ~ Boolean value if emotions from this integration will be synced with Discord
-- **GuildIntegration.subscribers** -> number ~ How many subscribers the integration has
-- **GuildIntegration.lastSyncAt** -> Date ~ [Date] on when the last sync occured
-- **GuildIntegration.behaviour** -> "role" | "kick" ~ The expiration behaviour ('role' => Remove Role, 'kick' => Member gets kicked from the guild)
-- **GuildIntegration.revoked** -> boolean ~ If the integration was revoked or not
-- **GuildIntegration.enabled** -> boolean ~ If the integration is enabled or not
-- **GuildIntegration.account** -> GuildIntegrationAccount ~ Account details of the integration
-- **GuildIntegration.syncing** -> boolean ~ If Discord is currently syncing this guild with the latest information
-- **GuildIntegration.guildID** -> string | undefined ~ The guild ID that this [GuildIntegration] is attached to
-- **GuildIntegration.roleID** -> string ~ The role ID for subscribers, if any
-- **GuildIntegration.userID** -> string ~ The user ID who created this [GuildIntegration] instance
-- **GuildIntegration.type** -> "twitch" | "youtube" | "discord" ~ The integration type ('twitch', 'youtube', or 'discord')
-- **GuildIntegration.name** -> string ~ The name of the integration
-- **GuildIntegration.user** -> User | undefined ~ The user who created this integration
+- **GuildIntegration.expireGracePeriod** -> `number` ~ The expiration grace period (in days)
+- **GuildIntegration.enableEmoticons** -> `boolean` ~ Boolean value if emotions from this integration will be synced with Discord
+- **GuildIntegration.subscribers** -> `number` ~ How many subscribers the integration has
+- **GuildIntegration.lastSyncAt** -> `Date` ~ [Date] on when the last sync occured
+- **GuildIntegration.behaviour** -> `"role" | "kick"` ~ The expiration behaviour ('role' => Remove Role, 'kick' => Member gets kicked from the guild)
+- **GuildIntegration.revoked** -> `boolean` ~ If the integration was revoked or not
+- **GuildIntegration.enabled** -> `boolean` ~ If the integration is enabled or not
+- **GuildIntegration.account** -> `GuildIntegrationAccount` ~ Account details of the integration
+- **GuildIntegration.syncing** -> `boolean` ~ If Discord is currently syncing this guild with the latest information
+- **GuildIntegration.guildID** -> `string | undefined` ~ The guild ID that this [GuildIntegration] is attached to
+- **GuildIntegration.roleID** -> `string` ~ The role ID for subscribers, if any
+- **GuildIntegration.userID** -> `string` ~ The user ID who created this [GuildIntegration] instance
+- **GuildIntegration.type** -> `"twitch" | "youtube" | "discord"` ~ The integration type ('twitch', 'youtube', or 'discord')
+- **GuildIntegration.name** -> `string` ~ The name of the integration
+- **GuildIntegration.user** -> `User | undefined` ~ The user who created this integration
 
-## class [GuildInvite](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/guild/GuildInvite.ts)
+## class [GuildInvite](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/guild/GuildInvite.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -945,21 +945,21 @@ new GuildInvite(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, d
 ```
 
 ### Properties
-- **GuildInvite.approximatePresenceCount** -> number ~ The approximate presence count available
-- **GuildInvite.approximateMemberCount** -> number | null ~ The approximate member count available
-- **GuildInvite.targetUserType** -> "stream" | "unknown" ~ The target user type
-- **GuildInvite.temporary** -> boolean ~ If the invite is temporary or not
-- **GuildInvite.targetUser** -> User ~ The target user who this invite was meant to be for
-- **GuildInvite.createdAt** -> Date ~ [Date] value on when this [GuildInvite] was created at
-- **GuildInvite.channelID** -> string ~ The channel's ID that the invite was created in
-- **GuildInvite.maxUses** -> number | null ~ Maxmium amount of use cases, returns `null` if there is no limit
-- **GuildInvite.maxAge** -> number | null ~ Millisecond count on when the invite is expired, returns `null` if there is no max age
-- **GuildInvite.inviter** -> User ~ The user who created the invite
-- **GuildInvite.guildID** -> string ~ The guild's ID that the invite was created for
-- **GuildInvite.code** -> string ~ The code of the invite
-- **GuildInvite.uses** -> number ~ Number of uses this invite has been used on
+- **GuildInvite.approximatePresenceCount** -> `number` ~ The approximate presence count available
+- **GuildInvite.approximateMemberCount** -> `number | null` ~ The approximate member count available
+- **GuildInvite.targetUserType** -> `"stream" | "unknown"` ~ The target user type
+- **GuildInvite.temporary** -> `boolean` ~ If the invite is temporary or not
+- **GuildInvite.targetUser** -> `User` ~ The target user who this invite was meant to be for
+- **GuildInvite.createdAt** -> `Date` ~ [Date] value on when this [GuildInvite] was created at
+- **GuildInvite.channelID** -> `string` ~ The channel's ID that the invite was created in
+- **GuildInvite.maxUses** -> `number | null` ~ Maxmium amount of use cases, returns `null` if there is no limit
+- **GuildInvite.maxAge** -> `number | null` ~ Millisecond count on when the invite is expired, returns `null` if there is no max age
+- **GuildInvite.inviter** -> `User` ~ The user who created the invite
+- **GuildInvite.guildID** -> `string` ~ The guild's ID that the invite was created for
+- **GuildInvite.code** -> `string` ~ The code of the invite
+- **GuildInvite.uses** -> `number` ~ Number of uses this invite has been used on
 
-## class [GuildMember](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/guild/GuildMember.ts)
+## class [GuildMember](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/guild/GuildMember.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -970,17 +970,17 @@ new GuildMember(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, d
 ```
 
 ### Properties
-- **GuildMember.boostedAt** -> Date | null ~ No documentation has been written.
-- **GuildMember.joinedAt** -> Date ~ No documentation has been written.
-- **GuildMember.pending** -> boolean ~ No documentation has been written.
-- **GuildMember.guildID** -> string ~ No documentation has been written.
-- **GuildMember.isMuted** -> boolean ~ No documentation has been written.
-- **GuildMember.isDeaf** -> boolean ~ No documentation has been written.
-- **GuildMember.roles** -> Array<GuildRole> ~ No documentation has been written.
-- **GuildMember.nick** -> string | null ~ No documentation has been written.
-- **GuildMember.user** -> User ~ No documentation has been written.
+- **GuildMember.boostedAt** -> `Date | null` ~ No documentation has been written.
+- **GuildMember.joinedAt** -> `Date` ~ No documentation has been written.
+- **GuildMember.pending** -> `boolean` ~ No documentation has been written.
+- **GuildMember.guildID** -> `string` ~ No documentation has been written.
+- **GuildMember.isMuted** -> `boolean` ~ No documentation has been written.
+- **GuildMember.isDeaf** -> `boolean` ~ No documentation has been written.
+- **GuildMember.roles** -> `Array<GuildRole>` ~ No documentation has been written.
+- **GuildMember.nick** -> `string | null` ~ No documentation has been written.
+- **GuildMember.user** -> `User` ~ No documentation has been written.
 
-## class [GuildPreview](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/guild/GuildPreview.ts)
+## class [GuildPreview](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/guild/GuildPreview.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -991,17 +991,17 @@ new GuildPreview(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, 
 ```
 
 ### Properties
-- **GuildPreview.approximatePresenceCount** -> number ~ Number of online members
-- **GuildPreview.approximateMemberCount** -> number ~ Number of all members in the guild
-- **GuildPreview.discoverySplash** -> string | null ~ The discovery splash UUID, is `null` if not populated
-- **GuildPreview.description** -> string ~ The description of the guild preview
-- **GuildPreview.features** -> Array<GuildFeature> ~ List of features that is enabled in the guild
-- **GuildPreview.splash** -> string | null ~ The splash UUID, it's `null` if not populated
-- **GuildPreview.emojis** -> Array<GuildEmoji> ~ List of guild emojis available when displayed
-- **GuildPreview.icon** -> string | null ~ The icon UUID, returns `null` if not populated
-- **GuildPreview.name** -> string ~ The name of the guild that this preview belongs to
+- **GuildPreview.approximatePresenceCount** -> `number` ~ Number of online members
+- **GuildPreview.approximateMemberCount** -> `number` ~ Number of all members in the guild
+- **GuildPreview.discoverySplash** -> `string | null` ~ The discovery splash UUID, is `null` if not populated
+- **GuildPreview.description** -> `string` ~ The description of the guild preview
+- **GuildPreview.features** -> `Array<GuildFeature>` ~ List of features that is enabled in the guild
+- **GuildPreview.splash** -> `string | null` ~ The splash UUID, it's `null` if not populated
+- **GuildPreview.emojis** -> `Array<GuildEmoji>` ~ List of guild emojis available when displayed
+- **GuildPreview.icon** -> `string | null` ~ The icon UUID, returns `null` if not populated
+- **GuildPreview.name** -> `string` ~ The name of the guild that this preview belongs to
 
-## class [GuildRole](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/guild/GuildRole.ts)
+## class [GuildRole](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/guild/GuildRole.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -1012,19 +1012,19 @@ new GuildRole(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, dat
 ```
 
 ### Properties
-- **GuildRole.isPremiumRole** -> boolean ~ If the role is a Nitro Booster role.
-- **GuildRole.integrationID** -> string | null ~ If the role belongs to a integration, it'll return a Snowflake or `null` if not found
-- **GuildRole.permissions** -> Permission ~ Permissions available for this [GuildRole]
-- **GuildRole.mentionable** -> boolean ~ If the role is mentionable or not
-- **GuildRole.position** -> number ~ The sorting position the role is in
-- **GuildRole.hoisted** -> boolean ~ If the role is hoisted or not
-- **GuildRole.managed** -> boolean ~ If the role is managed by a integration or not
-- **GuildRole.guildID** -> string ~ The guild's ID that this role belongs to
-- **GuildRole.botID** -> string | null ~ A bot ID if this [GuildRole] is a bot integration role, it'll return `null` if not.
-- **GuildRole.color** -> number ~ The color of the role, returns `0` if it's the default
-- **GuildRole.name** -> string ~ The name of the role
+- **GuildRole.isPremiumRole** -> `boolean` ~ If the role is a Nitro Booster role.
+- **GuildRole.integrationID** -> `string | null` ~ If the role belongs to a integration, it'll return a Snowflake or `null` if not found
+- **GuildRole.permissions** -> `Permission` ~ Permissions available for this [GuildRole]
+- **GuildRole.mentionable** -> `boolean` ~ If the role is mentionable or not
+- **GuildRole.position** -> `number` ~ The sorting position the role is in
+- **GuildRole.hoisted** -> `boolean` ~ If the role is hoisted or not
+- **GuildRole.managed** -> `boolean` ~ If the role is managed by a integration or not
+- **GuildRole.guildID** -> `string` ~ The guild's ID that this role belongs to
+- **GuildRole.botID** -> `string | null` ~ A bot ID if this [GuildRole] is a bot integration role, it'll return `null` if not.
+- **GuildRole.color** -> `number` ~ The color of the role, returns `0` if it's the default
+- **GuildRole.name** -> `string` ~ The name of the role
 
-## class [UnavailableGuild](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/guild/UnavailableGuild.ts)
+## class [UnavailableGuild](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/guild/UnavailableGuild.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -1035,10 +1035,10 @@ new UnavailableGuild(data: IUnavailableGuild);
 ```
 
 ### Properties
-- **UnavailableGuild.unavailable** -> boolean ~ No documentation has been written.
-- **UnavailableGuild.shardID** -> number ~ No documentation has been written.
+- **UnavailableGuild.unavailable** -> `boolean` ~ No documentation has been written.
+- **UnavailableGuild.shardID** -> `number` ~ No documentation has been written.
 
-## class [TextableChannel](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/inherit/TextableChannel.ts)
+## class [TextableChannel](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/inherit/TextableChannel.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -1049,11 +1049,11 @@ new TextableChannel(client: WebSocketClient<ClientOptions, WebSocketClientEvents
 ```
 
 ### Properties
-- **TextableChannel.collector** -> MessageCollector ~ No documentation has been written.
-- **TextableChannel.messages** -> ChannelMessagesManager ~ No documentation has been written.
-- **TextableChannel.client** -> WebSocketClient<ClientOptions, WebSocketClientEvents> ~ No documentation has been written.
+- **TextableChannel.collector** -> `MessageCollector` ~ No documentation has been written.
+- **TextableChannel.messages** -> `ChannelMessagesManager` ~ No documentation has been written.
+- **TextableChannel.client** -> `WebSocketClient<ClientOptions, WebSocketClientEvents>` ~ No documentation has been written.
 
-## class [Activity](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/presence/Activity.ts)
+## class [Activity](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/presence/Activity.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -1064,18 +1064,18 @@ new Activity(data: GatewayActivity);
 ```
 
 ### Properties
-- **Activity.timestamps** -> GatewayActivityTimestamps ~ The timestamps available for this [Activity]
-- **Activity.createdAt** -> Date ~ Details on when the activity started displaying
-- **Activity.details** -> string | null ~ The details of the [Activity], indicating this is a Rich Presence
-- **Activity.assets** -> Partial<Record<"large_image" | "large_text" | "small_image" | "small_text", string>> | undefined ~ Assets available for this [Activity], if any
-- **Activity.emoji** -> GatewayActivityEmoji ~ The partial emoji instance
-- **Activity.state** -> string | null ~ The state of the [Activity], indicating this is a Rich Presence
-- **Activity.party** -> GatewayActivityParty ~ The party details for this [Activity], if any
-- **Activity.type** -> ActivityType ~ The type of the activity
-- **Activity.name** -> string ~ The name of the activity
-- **Activity.rpc** -> boolean ~ If this activity is a Rich Presence activity or not
+- **Activity.timestamps** -> `GatewayActivityTimestamps` ~ The timestamps available for this [Activity]
+- **Activity.createdAt** -> `Date` ~ Details on when the activity started displaying
+- **Activity.details** -> `string | null` ~ The details of the [Activity], indicating this is a Rich Presence
+- **Activity.assets** -> `Partial<Record<"large_image" | "large_text" | "small_image" | "small_text", string>> | undefined` ~ Assets available for this [Activity], if any
+- **Activity.emoji** -> `GatewayActivityEmoji` ~ The partial emoji instance
+- **Activity.state** -> `string | null` ~ The state of the [Activity], indicating this is a Rich Presence
+- **Activity.party** -> `GatewayActivityParty` ~ The party details for this [Activity], if any
+- **Activity.type** -> `ActivityType` ~ The type of the activity
+- **Activity.name** -> `string` ~ The name of the activity
+- **Activity.rpc** -> `boolean` ~ If this activity is a Rich Presence activity or not
 
-## class [Presence](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/presence/Presence.ts)
+## class [Presence](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/presence/Presence.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -1086,13 +1086,13 @@ new Presence(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, data
 ```
 
 ### Properties
-- **Presence.clientStatus** -> ClientStatus ~ The client status available for this [Presence]
-- **Presence.activities** -> Array<Activity> ~ List of activities this user beholds
-- **Presence.status** -> "online" | "offline" | "idle" | "dnd" ~ The current status (online, idle, dnd, offline)
-- **Presence.guildID** -> string ~ The guild that the presence was emitted in
-- **Presence.user** -> User ~ The user that holds this [Presence]
+- **Presence.clientStatus** -> `ClientStatus` ~ The client status available for this [Presence]
+- **Presence.activities** -> `Array<Activity>` ~ List of activities this user beholds
+- **Presence.status** -> `"online" | "offline" | "idle" | "dnd"` ~ The current status (online, idle, dnd, offline)
+- **Presence.guildID** -> `string` ~ The guild that the presence was emitted in
+- **Presence.user** -> `User` ~ The user that holds this [Presence]
 
-## class [Team](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/teams/Team.ts)
+## class [Team](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/teams/Team.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -1103,11 +1103,11 @@ new Team(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, data: AP
 ```
 
 ### Properties
-- **Team.members** -> Array<Member> ~ No documentation has been written.
-- **Team.ownerID** -> string ~ No documentation has been written.
-- **Team.icon** -> string | null ~ No documentation has been written.
+- **Team.members** -> `Array<Member>` ~ No documentation has been written.
+- **Team.ownerID** -> `string` ~ No documentation has been written.
+- **Team.icon** -> `string | null` ~ No documentation has been written.
 
-## class [TeamMember](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/teams/TeamMember.ts)
+## class [TeamMember](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/teams/TeamMember.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -1118,12 +1118,12 @@ new TeamMember(client: WebSocketClient<ClientOptions, WebSocketClientEvents>, da
 ```
 
 ### Properties
-- **TeamMember.permissions** -> Array<string> ~ No documentation has been written.
-- **TeamMember.membership** -> number ~ No documentation has been written.
-- **TeamMember.teamID** -> string ~ No documentation has been written.
-- **TeamMember.user** -> User ~ No documentation has been written.
+- **TeamMember.permissions** -> `Array<string>` ~ No documentation has been written.
+- **TeamMember.membership** -> `number` ~ No documentation has been written.
+- **TeamMember.teamID** -> `string` ~ No documentation has been written.
+- **TeamMember.user** -> `User` ~ No documentation has been written.
 
-## class [EmbedBuilder](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/util/EmbedBuilder.ts)
+## class [EmbedBuilder](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/util/EmbedBuilder.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -1134,18 +1134,18 @@ new EmbedBuilder(data: APIEmbed);
 ```
 
 ### Properties
-- **EmbedBuilder.description** -> string | undefined ~ No documentation has been written.
-- **EmbedBuilder.timestamp** -> string | undefined ~ No documentation has been written.
-- **EmbedBuilder.thumbnail** -> APIEmbedThumbnail | undefined ~ No documentation has been written.
-- **EmbedBuilder.author** -> APIEmbedAuthor | undefined ~ No documentation has been written.
-- **EmbedBuilder.footer** -> APIEmbedFooter | undefined ~ No documentation has been written.
-- **EmbedBuilder.fields** -> Array<APIEmbedField> | undefined ~ No documentation has been written.
-- **EmbedBuilder.image** -> APIEmbedImage | undefined ~ No documentation has been written.
-- **EmbedBuilder.color** -> number | undefined ~ No documentation has been written.
-- **EmbedBuilder.title** -> string | undefined ~ No documentation has been written.
-- **EmbedBuilder.url** -> string | undefined ~ No documentation has been written.
+- **EmbedBuilder.description** -> `string | undefined` ~ No documentation has been written.
+- **EmbedBuilder.timestamp** -> `string | undefined` ~ No documentation has been written.
+- **EmbedBuilder.thumbnail** -> `APIEmbedThumbnail | undefined` ~ No documentation has been written.
+- **EmbedBuilder.author** -> `APIEmbedAuthor | undefined` ~ No documentation has been written.
+- **EmbedBuilder.footer** -> `APIEmbedFooter | undefined` ~ No documentation has been written.
+- **EmbedBuilder.fields** -> `Array<APIEmbedField> | undefined` ~ No documentation has been written.
+- **EmbedBuilder.image** -> `APIEmbedImage | undefined` ~ No documentation has been written.
+- **EmbedBuilder.color** -> `number | undefined` ~ No documentation has been written.
+- **EmbedBuilder.title** -> `string | undefined` ~ No documentation has been written.
+- **EmbedBuilder.url** -> `string | undefined` ~ No documentation has been written.
 
-## class [MessageCollector](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/util/MessageCollector.ts)
+## class [MessageCollector](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/util/MessageCollector.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -1156,9 +1156,9 @@ new MessageCollector(client: WebSocketClient<ClientOptions, WebSocketClientEvent
 ```
 
 ### Properties
-- **MessageCollector.options** -> MessageCollectorOptions ~ No documentation has been written.
+- **MessageCollector.options** -> `MessageCollectorOptions` ~ No documentation has been written.
 
-## class [ReactionCollector](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/util/ReactionCollector.ts)
+## class [ReactionCollector](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/util/ReactionCollector.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -1169,7 +1169,7 @@ new ReactionCollector(message: Message<TextableChannel>, filter: FilterFunction,
 ```
 
 
-## class [Converter](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/old_voice/Converter.ts)
+## class [Converter](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/old_voice/Converter.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -1180,12 +1180,12 @@ new Converter(connection: VoiceConnection, source: Stream);
 ```
 
 ### Properties
-- **Converter.connection** -> VoiceConnection ~ No documentation has been written.
-- **Converter.packets** -> Array<Buffer> ~ No documentation has been written.
-- **Converter.source** -> Stream ~ No documentation has been written.
-- **Converter.ended** -> boolean ~ No documentation has been written.
+- **Converter.connection** -> `VoiceConnection` ~ No documentation has been written.
+- **Converter.packets** -> `Array<Buffer>` ~ No documentation has been written.
+- **Converter.source** -> `Stream` ~ No documentation has been written.
+- **Converter.ended** -> `boolean` ~ No documentation has been written.
 
-## class [VoiceConnection](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/old_voice/VoiceConnection.ts)
+## class [VoiceConnection](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/old_voice/VoiceConnection.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -1196,15 +1196,15 @@ new VoiceConnection(client: WebSocketClient<ClientOptions, WebSocketClientEvents
 ```
 
 ### Properties
-- **VoiceConnection.userSpeaking** -> Collection<string, boolean> ~ No documentation has been written.
-- **VoiceConnection.converter** -> Converter | null ~ No documentation has been written.
-- **VoiceConnection.channelID** -> string ~ No documentation has been written.
-- **VoiceConnection.speaking** -> boolean ~ No documentation has been written.
-- **VoiceConnection.guildID** -> string ~ No documentation has been written.
-- **VoiceConnection.udp** -> UDPNetwork | null ~ No documentation has been written.
-- **VoiceConnection.ws** -> WebSocketNetwork ~ No documentation has been written.
+- **VoiceConnection.userSpeaking** -> `Collection<string, boolean>` ~ No documentation has been written.
+- **VoiceConnection.converter** -> `Converter | null` ~ No documentation has been written.
+- **VoiceConnection.channelID** -> `string` ~ No documentation has been written.
+- **VoiceConnection.speaking** -> `boolean` ~ No documentation has been written.
+- **VoiceConnection.guildID** -> `string` ~ No documentation has been written.
+- **VoiceConnection.udp** -> `UDPNetwork | null` ~ No documentation has been written.
+- **VoiceConnection.ws** -> `WebSocketNetwork` ~ No documentation has been written.
 
-## class [VoiceConnectionManager](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/old_voice/VoiceConnectionManager.ts)
+## class [VoiceConnectionManager](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/old_voice/VoiceConnectionManager.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -1215,7 +1215,7 @@ new VoiceConnectionManager(client: WebSocketClient<ClientOptions, WebSocketClien
 ```
 
 
-## class [FFmpegConverter](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/old_voice/converters/FFMpeg.ts)
+## class [FFmpegConverter](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/old_voice/converters/FFMpeg.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -1226,7 +1226,7 @@ new FFmpegConverter(connection: VoiceConnection, source: Stream);
 ```
 
 
-## class [OpusConverter](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/old_voice/converters/Opus.ts)
+## class [OpusConverter](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/old_voice/converters/Opus.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -1237,7 +1237,7 @@ new OpusConverter(connection: VoiceConnection, source: Stream);
 ```
 
 
-## class [PCMConverter](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/old_voice/converters/PCM.ts)
+## class [PCMConverter](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/old_voice/converters/PCM.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -1248,7 +1248,7 @@ new PCMConverter(connection: VoiceConnection, source: Stream);
 ```
 
 
-## class [UDPNetwork](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/old_voice/networks/UDPNetwork.ts)
+## class [UDPNetwork](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/old_voice/networks/UDPNetwork.ts)
 Represents a UDP4 connection with Discord
 
 ### Constructors
@@ -1259,14 +1259,14 @@ new UDPNetwork(connection: VoiceConnection, ip: string, port: number);
 ```
 
 ### Properties
-- **UDPNetwork.secretKey** -> Uint8Array | null ~ No documentation has been written.
-- **UDPNetwork.timestamp** -> number ~ No documentation has been written.
-- **UDPNetwork.encoder** -> any ~ No documentation has been written.
-- **UDPNetwork.socket** -> Socket ~ No documentation has been written.
-- **UDPNetwork.port** -> number ~ No documentation has been written.
-- **UDPNetwork.ip** -> string ~ No documentation has been written.
+- **UDPNetwork.secretKey** -> `Uint8Array | null` ~ No documentation has been written.
+- **UDPNetwork.timestamp** -> `number` ~ No documentation has been written.
+- **UDPNetwork.encoder** -> `any` ~ No documentation has been written.
+- **UDPNetwork.socket** -> `Socket` ~ No documentation has been written.
+- **UDPNetwork.port** -> `number` ~ No documentation has been written.
+- **UDPNetwork.ip** -> `string` ~ No documentation has been written.
 
-## class [WebSocketNetwork](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/old_voice/networks/WebSocketNetwork.ts)
+## class [WebSocketNetwork](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/old_voice/networks/WebSocketNetwork.ts)
 No documentation has been written at this time
 
 ### Constructors
@@ -1277,17 +1277,17 @@ new WebSocketNetwork(connection: VoiceConnection);
 ```
 
 ### Properties
-- **WebSocketNetwork.lastHeartbeatAckAt** -> number ~ No documentation has been written.
-- **WebSocketNetwork.lastHeartbeatAt** -> number ~ No documentation has been written.
-- **WebSocketNetwork.ready** -> boolean ~ No documentation has been written.
-- **WebSocketNetwork.acked** -> boolean ~ No documentation has been written.
-- **WebSocketNetwork.ssrc** -> string ~ No documentation has been written.
+- **WebSocketNetwork.lastHeartbeatAckAt** -> `number` ~ No documentation has been written.
+- **WebSocketNetwork.lastHeartbeatAt** -> `number` ~ No documentation has been written.
+- **WebSocketNetwork.ready** -> `boolean` ~ No documentation has been written.
+- **WebSocketNetwork.acked** -> `boolean` ~ No documentation has been written.
+- **WebSocketNetwork.ssrc** -> `string` ~ No documentation has been written.
 
-## class [RatelimitBucket](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/rest/RatelimitBucket.ts)
+## class [RatelimitBucket](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/rest/RatelimitBucket.ts)
 Represents a bucket for handling ratelimiting with Discord
 
 
-## class [RestClient](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/rest/RestClient.ts)
+## class [RestClient](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/rest/RestClient.ts)
 Represents a class to handle requests to Discord
 
 ### Constructors
@@ -1298,13 +1298,13 @@ new RestClient(client: Client<types.ClientOptions, WebSocketClientEvents>);
 ```
 
 ### Properties
-- **RestClient.lastDispatchedAt** -> number ~ The last time the rest client has dispatched a request (when [RestClient.dispatch] was called)
-- **RestClient.ratelimited** -> boolean ~ If we are being ratelimited or not
-- **RestClient.handling** -> boolean ~ If we are currently handling a request until completion
-- **RestClient.lastCallAt** -> number ~ The last rest call from Discord (when we receive a payload from [RestClient._handleRequest])
-- **RestClient.locked** -> boolean ~ If we are locked from making anymore requests
+- **RestClient.lastDispatchedAt** -> `number` ~ The last time the rest client has dispatched a request (when [RestClient.dispatch] was called)
+- **RestClient.ratelimited** -> `boolean` ~ If we are being ratelimited or not
+- **RestClient.handling** -> `boolean` ~ If we are currently handling a request until completion
+- **RestClient.lastCallAt** -> `number` ~ The last rest call from Discord (when we receive a payload from [RestClient._handleRequest])
+- **RestClient.locked** -> `boolean` ~ If we are locked from making anymore requests
 
-## class [Permission](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/util/Permissions.ts)
+## class [Permission](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/util/Permissions.ts)
 Utility to handle permissions
 
 ### Constructors
@@ -1315,10 +1315,10 @@ new Permission(allow: string, deny: string);
 ```
 
 ### Properties
-- **Permission.allow** -> number ~ The bit for the allowed permission
-- **Permission.denied** -> number ~ The bit for the denied permission
+- **Permission.allow** -> `number` ~ The bit for the allowed permission
+- **Permission.denied** -> `number` ~ The bit for the denied permission
 
-## class [Util](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/util/index.ts)
+## class [Util](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/util/index.ts)
 All utilities available to Wumpcord
 
 ### Constructors
@@ -1329,7 +1329,7 @@ new Util();
 ```
 
 
-## class [VoiceClient](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/voice/VoiceClient.ts)
+## class [VoiceClient](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/voice/VoiceClient.ts)
 Represents a client to interact and dispatch voice connections with.
 
 ### Joining a voice channel
@@ -1364,23 +1364,23 @@ new VoiceClient(client: WebSocketClient<ClientOptions, WebSocketClientEvents>);
 ```
 
 ### Properties
-- **VoiceClient.connections** -> Collection<string, VoiceConnection> ~ List of connection nodes that is attached to this [VoiceClient]
+- **VoiceClient.connections** -> `Collection<string, VoiceConnection>` ~ List of connection nodes that is attached to this [VoiceClient]
 
-## class [VoiceConnection](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/voice/VoiceConnection.ts)
+## class [VoiceConnection](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/voice/VoiceConnection.ts)
 No documentation has been written at this time
 
 
-## class [UDPNetwork](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/voice/networks/UDPNetwork.ts)
+## class [UDPNetwork](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/voice/networks/UDPNetwork.ts)
 No documentation has been written at this time
 
 
-## class [WebSocketNetwork](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/voice/networks/WebSocketNetwork.ts)
+## class [WebSocketNetwork](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/voice/networks/WebSocketNetwork.ts)
 No documentation has been written at this time
 
 
 # Type Aliases
 
-## type [GatewayEvent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/Constants.ts)
+## type [GatewayEvent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/Constants.ts)
 List of gateway events available
 
 ```ts
@@ -1396,7 +1396,7 @@ type GatewayEvent = 'READY' | 'RESUMED' | 'CHANNEL_CREATE' | 'CHANNEL_UPDATE'
   | 'INTERACTION_CREATE' | 'APPLICATION_COMMAND_UPDATE';
 ```
 
-## type [GuildFeature](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/Constants.ts)
+## type [GuildFeature](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/Constants.ts)
 List of guild features available
 
 ```ts
@@ -1405,7 +1405,7 @@ type GuildFeature = 'ANIMATED_ICON' | 'BANNER' | 'COMMERECE' | 'COMMUNITY'
   | 'NEWS' | 'PARTNERED' | 'VANITY_URL' | 'VERIFIED' | 'VIP_REGIONS' | 'WELCOME_SCREEN_ENABLED';
 ```
 
-## type [GatewayIntent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/Constants.ts)
+## type [GatewayIntent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/Constants.ts)
 List of gateway intents available
 
 ```ts
@@ -1415,84 +1415,84 @@ type GatewayIntent = 'guilds' | 'guildMembers' | 'guildBans' | 'guildEmojis'
   | 'directMessageReactions';
 ```
 
-## type [GuildTextableChannel](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/types.ts)
+## type [GuildTextableChannel](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/types.ts)
 Represents a guild textable channel
 
 ```ts
 type GuildTextableChannel = TextChannel | NewsChannel | StoreChannel;
 ```
 
-## type [TextableChannel](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/types.ts)
+## type [TextableChannel](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/types.ts)
 Represents a textable channel that is or not attached to a guild
 
 ```ts
 type TextableChannel = TextChannel | GroupChannel | DMChannel | NewsChannel;
 ```
 
-## type [AnyGuildChannel](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/types.ts)
+## type [AnyGuildChannel](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/types.ts)
 Represents all guild channels
 
 ```ts
 type AnyGuildChannel = TextChannel | VoiceChannel | NewsChannel | StoreChannel | CategoryChannel;
 ```
 
-## type [AnyGuildTextableChannel](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/types.ts)
+## type [AnyGuildTextableChannel](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/types.ts)
 Represents all guild textable channels
 
 ```ts
 type AnyGuildTextableChannel = TextChannel | NewsChannel;
 ```
 
-## type [AnyChannel](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/types.ts)
+## type [AnyChannel](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/types.ts)
 Represents all channel types
 
 ```ts
 type AnyChannel = TextChannel | VoiceChannel | CategoryChannel | DMChannel | GroupChannel | NewsChannel | StoreChannel;
 ```
 
-## type [MessageContent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/types.ts)
+## type [MessageContent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/types.ts)
 Represents of how a Discord message is constructed
 
 ```ts
 type MessageContent = string | MessageContentOptions;
 ```
 
-## type [Serializable](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/types.ts)
+## type [Serializable](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/types.ts)
 Represents a serialization strategy to use
 
 ```ts
 type Serializable = (...args: any[]) => string | Buffer;
 ```
 
-## type [Deserializable](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/types.ts)
+## type [Deserializable](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/types.ts)
 Represents a deserialization strategy to use
 
 ```ts
 type Deserializable<T = unknown> = (...args: any[]) => T;
 ```
 
-## type [OnlineStatus](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/types.ts)
+## type [OnlineStatus](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/types.ts)
 Represents all of the online statuses to set
 
 ```ts
 type OnlineStatus = 'online' | 'offline' | 'idle' | 'dnd';
 ```
 
-## type [MaybePromise](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/types.ts)
+## type [MaybePromise](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/types.ts)
 Represents a Promise-value or not
 
 ```ts
 type MaybePromise<T> = Promise<T> | T;
 ```
 
-## type [PartialEntity](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/types.ts)
+## type [PartialEntity](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/types.ts)
 Represents a partial entity
 
 ```ts
 type PartialEntity<T, P extends object = {}> = Partial<T> & { [K in keyof P]: P[K]; } & { id: string };
 ```
 
-## type [ApplicationCommandOptionChoiceArray](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/interactions/types.ts)
+## type [ApplicationCommandOptionChoiceArray](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/interactions/types.ts)
 No documentation has been written for this type alias.
 
 ```ts
@@ -1510,14 +1510,14 @@ type ApplicationCommandOptionChoiceArray = [
 ];
 ```
 
-## type [EditGuildRoleOptions](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/Guild.ts)
+## type [EditGuildRoleOptions](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/Guild.ts)
 No documentation has been written for this type alias.
 
 ```ts
 type EditGuildRoleOptions = CreateRoleOptions;
 ```
 
-## type [OriginalInteractionMessageContentOptions](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/InteractionMessage.ts)
+## type [OriginalInteractionMessageContentOptions](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/InteractionMessage.ts)
 No documentation has been written for this type alias.
 
 ```ts
@@ -1526,7 +1526,7 @@ type OriginalInteractionMessageContentOptions = Omit<MessageContentOptions, 'rep
 };
 ```
 
-## type [InteractionMessageContentOptions](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/InteractionMessage.ts)
+## type [InteractionMessageContentOptions](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/InteractionMessage.ts)
 No documentation has been written for this type alias.
 
 ```ts
@@ -1536,35 +1536,35 @@ type InteractionMessageContentOptions = Omit<MessageContentOptions, 'reply' | 'a
 };
 ```
 
-## type [OriginalInteractionMessageContent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/InteractionMessage.ts)
+## type [OriginalInteractionMessageContent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/InteractionMessage.ts)
 No documentation has been written for this type alias.
 
 ```ts
 type OriginalInteractionMessageContent = string | OriginalInteractionMessageContentOptions;
 ```
 
-## type [InteractionMessageContent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/InteractionMessage.ts)
+## type [InteractionMessageContent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/InteractionMessage.ts)
 No documentation has been written for this type alias.
 
 ```ts
 type InteractionMessageContent = string | InteractionMessageContentOptions;
 ```
 
-## type [EditedMessageContent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/Message.ts)
+## type [EditedMessageContent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/Message.ts)
 No documentation has been written for this type alias.
 
 ```ts
 type EditedMessageContent = string | Omit<MessageContentOptions, 'file'>;
 ```
 
-## type [ReplyMessageContent](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/Message.ts)
+## type [ReplyMessageContent](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/Message.ts)
 No documentation has been written for this type alias.
 
 ```ts
 type ReplyMessageContent = string | Omit<MessageContentOptions, 'reply'>;
 ```
 
-## type [UserFlag](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/User.ts)
+## type [UserFlag](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/User.ts)
 No documentation has been written for this type alias.
 
 ```ts
@@ -1585,14 +1585,14 @@ type UserFlag =
   | 'VerifiedBotDev';
 ```
 
-## type [SendWebhookMessage](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/Webhook.ts)
+## type [SendWebhookMessage](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/Webhook.ts)
 No documentation has been written for this type alias.
 
 ```ts
 type SendWebhookMessage = string | SendWebhookMessageOptions;
 ```
 
-## type [ClientStatus](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/presence/Presence.ts)
+## type [ClientStatus](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/presence/Presence.ts)
 No documentation has been written for this type alias.
 
 ```ts
@@ -1601,28 +1601,28 @@ type ClientStatus = {
 };
 ```
 
-## type [Filter](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/util/MessageCollector.ts)
+## type [Filter](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/util/MessageCollector.ts)
 No documentation has been written for this type alias.
 
 ```ts
 type Filter = (msg: Message) => boolean;
 ```
 
-## type [FilterFunction](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/util/ReactionCollector.ts)
+## type [FilterFunction](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/util/ReactionCollector.ts)
 No documentation has been written for this type alias.
 
 ```ts
 type FilterFunction = (message: Message) => boolean;
 ```
 
-## type [DisposeReason](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/models/util/ReactionCollector.ts)
+## type [DisposeReason](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/models/util/ReactionCollector.ts)
 No documentation has been written for this type alias.
 
 ```ts
 type DisposeReason = 'end' | 'max.tries' | 'min.tries' | 'none';
 ```
 
-## type [HttpMethod](https://github.com/auguwu/Wumpcord/blob/2a2e3f4027888659c1fb3f39e0358a48e663386e/src/rest/RestClient.ts)
+## type [HttpMethod](https://github.com/auguwu/Wumpcord/blob/bb2978881b77fb739192c6cdbc1185ae40ef4064/src/rest/RestClient.ts)
 No documentation has been written for this type alias.
 
 ```ts

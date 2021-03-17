@@ -227,7 +227,7 @@ async function main() {
       if (index === 0)
         block.push('### Properties');
 
-      block.push(`- **${className}.${name}** -> ${property.value.trim()} ~ ${property.docs.trim()}`);
+      block.push(`- **${className}.${name}** -> \`${getTypeName(property.value.trim())}\` ~ ${property.docs.trim()}`);
     }
 
     block.push('');
