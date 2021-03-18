@@ -51,6 +51,6 @@ export default class VoiceServerUpdateEvent extends Event<GatewayVoiceServerUpda
       token: this.data.token
     };
 
-    this.client.voiceConnections.onVoiceServerUpdate(this.data);
+    //this.client.voiceConnections.onVoiceServerUpdate(this.data);
   }
 }

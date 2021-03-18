@@ -52,10 +52,13 @@ export default class ShardManager extends Collection<number, WebSocketShard> {
    * @param id The ID
    * @param strategy The serialization strategy
    */
-  spawn(id: number, strategy: types.ClientOptions['strategy']) {
+  async spawn(id: number, strategy: types.ClientOptions['strategy']) {
     if (this.has(id)) {
       const shard = this.get(id)!;
-      return shard.connect();
+      if (shard.status === 'dead')
+        await shard.connect();
+
+      return true;
     }
 
     const shard = new WebSocketShard(this.client, id, strategy);

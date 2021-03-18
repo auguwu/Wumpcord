@@ -87,9 +87,6 @@ export interface ClientOptions {
   /** List of disabled gateway events to not emit */
   disabledEvents?: GatewayEvent[];
 
-  /** If we should enable the Interactions helper, to help with creating interactions */
-  interactions?: boolean;
-
   /** If we should call `WebSocketClient#requestGuildMembers` on all guilds once we are ready */
   getAllUsers?: boolean;
 
@@ -99,35 +96,51 @@ export interface ClientOptions {
   /** The serialization/deserialization strategy when encoding/decoding packets from Discord */
   strategy?: 'etf' | 'json';
 
+  /** The options for the [VoiceClient]. */
+  voice?: VoiceOptions;
+
   /** The token to use */
   token: string;
 
   /** The WebSocket options for Discord */
-  ws?: Partial<WebSocketOptions>;
+  ws?: WebSocketOptions;
 }
 
 /** The WebSocket options for Discord */
 export interface WebSocketOptions {
   /** Enables dispatching of guild subscription events (presence and typing events) */
-  guildSubscriptions: boolean;
+  guildSubscriptions?: boolean;
 
   /** Value between 50 and 250, total number of members where the gateway will stop sending offline members in the guild member list */
-  largeThreshold: number;
+  largeThreshold?: number;
 
   /** The connection timeout before closing the shard's connection */
-  connectTimeout: number;
+  connectTimeout?: number;
 
   /** The client options for [ws](https://npm.im/ws) (Do not mess with this unless you know what you're doing.) */
-  clientOptions: WebSocketClientOptions;
+  clientOptions?: WebSocketClientOptions;
 
   /** Whether this connection supports compression of packets */
-  compress: boolean;
+  compress?: boolean;
 
   /** The intents to connect with */
-  intents: number | number[] | GatewayIntent[];
+  intents?: number | number[] | GatewayIntent[];
 
   /** Number of tries before closing the shard's connection, leave it as `undefined` to indefintely keep re-connecting */
-  tries: number | undefined;
+  tries?: number | undefined;
+}
+
+export interface VoiceOptions {
+  /** The default encryption mode to use */
+  defaultEncryptionMode?: 'normal' | 'suffix' | 'lite';
+
+  /**
+   * The encoder to use
+   *
+   * - `opusscript`: Requires "opusscript" installed in the project
+   * - `discordjs`: Requires "@discordjs/opus" installed in the project
+   */
+  encoder?: 'opusscript' | 'discordjs';
 }
 
 export interface AllowedMentions {

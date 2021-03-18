@@ -59,7 +59,7 @@ jobs:
         run: npm i -g eslint
 
       - name: Installs all local dependencies
-        run: npm ci
+        run: npm i
 
       - name: Lints the repository for any code-checking errors
         run: npm run lint

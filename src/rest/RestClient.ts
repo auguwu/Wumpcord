@@ -32,6 +32,7 @@ import { Queue } from '@augu/collections';
 import FormData from 'form-data';
 import https from 'https';
 import Util from '../util';
+import { runInThisContext } from 'node:vm';
 
 export type HttpMethod =
   | 'GET'
@@ -74,24 +75,35 @@ interface RequestDispatch<T = unknown> {
   data?: T;
 }
 
+interface DiscordRequest<D = unknown> extends RequestDispatch<D> {
+  resolve(value: D | PromiseLike<D>): void;
+  reject(error?: Error): void;
+}
+
 // These don't require `content-type` headers
-const ContentMethods = ['get', 'head', 'GET', 'HEAD'] as const;
+const ContentMethods: readonly string[] = ['get', 'head', 'GET', 'HEAD'] as const;
 
 /**
  * Represents a class to handle requests to Discord
  */
 export default class RestClient {
+  protected _ratelimitTimes: { [x: string]: number } = {};
+  protected _lockTimeout?: NodeJS.Timer;
+
   /** The last time the rest client has dispatched a request (when [RestClient.dispatch] was called) */
   public lastDispatchedAt: number = -1;
 
   /** If we are being ratelimited or not */
   public ratelimited: boolean = false;
 
+  /** If we are currently handling a request until completion */
+  public handling: boolean = false;
+
   /** The last rest call from Discord (when we receive a payload from [RestClient._handleRequest]) */
   public lastCallAt: number = -1;
 
   /** List of requests to dispatch */
-  private requests: Queue<RequestDispatch>;
+  private requests: Queue<DiscordRequest>;
 
   /** If we are locked from making anymore requests */
   public locked: boolean;
@@ -119,13 +131,6 @@ export default class RestClient {
   }
 
   /**
-   * If the rest client is busy or not
-   */
-  get busy() {
-    return this.requests.size() === 0;
-  }
-
-  /**
    * Dispatch a request to Discord
    * @param options The request options
    * @typeparam TReturn The return value when dispatched
@@ -133,23 +138,46 @@ export default class RestClient {
    */
   dispatch<TReturn, Data = unknown>(options: RequestDispatch<Data>) {
     return new Promise<TReturn>((resolve, reject) => {
-      const request: RequestDispatch = {
+      const request: DiscordRequest = {
         headers: Util.get(options, 'headers', {}),
         endpoint: options.endpoint,
         method: options.method,
         data: Util.get(options, 'data', undefined),
-        file: Util.get(options, 'file', undefined)
+        file: Util.get(options, 'file', undefined),
+        resolve,
+        reject
       };
 
-      this._executeRequest<TReturn>(request)
-        .then((data) => {
-          this.lastDispatchedAt = Date.now();
-          return resolve(data);
-        }).catch((error) => {
-          this.lastDispatchedAt = Date.now();
-          return reject(error);
-        });
+      if (this.locked) {
+        return reject(new Error('[RestClient] is currently locked from making requests'));
+      }
+
+      this.requests.push(request);
+      this.execute();
     });
+  }
+
+  execute() {
+    if (this.handling) return;
+
+    const request = this.requests.shift()!;
+    this.handling = true;
+    return this
+      ._executeRequest(request)
+      .then((data: any) => {
+        this.handling = false;
+        request.resolve(data);
+
+        if (this.requests.size() > 0)
+          this.execute();
+      })
+      .catch((error) => {
+        this.handling = false;
+        request.reject(error);
+
+        if (this.requests.size() > 0)
+          this.execute();
+      });
   }
 
   /**
@@ -161,7 +189,7 @@ export default class RestClient {
     const form = request.file !== undefined ? new FormData() : null;
 
     if (
-      !ContentMethods.includes(request.method as any) &&
+      !ContentMethods.includes(request.method) &&
       !request.headers!.hasOwnProperty('content-type')
     ) {
       request.headers!['content-type'] = 'application/json';
@@ -232,13 +260,28 @@ export default class RestClient {
 
           if (res.statusCode! === 204) return resolve(null as any);
 
-          const ratelimit = await bucket.handle(request.endpoint, res);
+          const ratelimit = bucket.handle(request.endpoint, res);
           if (ratelimit.ratelimited) {
             this.locked = true;
             this.#client.debug('RestClient/Response', `Ratelimited on "${request.method.toUpperCase()} ${request.endpoint}", rest client is locked for ~${res.headers['retry-after']}ms`);
-            await Util.sleep(Number(res.headers['retry-after']));
 
-            return this._executeRequest(request);
+            if (this._ratelimitTimes[request.endpoint] > 5) {
+              return reject(new DiscordAPIError(429, `Too Many Requests on "${request.method.toUpperCase()} ${request.endpoint}"`));
+            }
+
+            this._ratelimitTimes[request.endpoint] = (this._ratelimitTimes[request.endpoint] ?? 0) + 1;
+            this._lockTimeout = setTimeout(() => {
+              this.#client.debug('RestClient', `Attempting to request to "${request.method.toUpperCase()} ${request.endpoint}" again...`);
+
+              // clear the global lock
+              this._lockTimeout = undefined;
+              return this
+                ._executeRequest<any>(request)
+                .then(resolve)
+                .catch(reject);
+            }, parseInt(res.headers['retry-after']!) * 1000);
+
+            return; // don't continue
           }
 
           if (res.statusCode! === 502) {
