@@ -26,7 +26,6 @@ import { Guild, GuildMember, SelfUser, User, VoiceChannel } from '../models';
 import type { Collection } from '@augu/collections';
 import type * as discord from 'discord-api-types/v8';
 import type * as types from '../types';
-import { VoiceClient } from '../voice';
 import * as Constants from '../Constants';
 import ShardManager from './ShardingManager';
 import { EventBus } from '@augu/utils';
@@ -140,9 +139,6 @@ export default class WebSocketClient<
   /** The shard manager available to this context. */
   public shards: ShardManager;
 
-  /** List of voice connections available to the client */
-  public voice: VoiceClient;
-
   /** If we are ready to be used or not. */
   public ready: boolean = false;
 
@@ -165,7 +161,7 @@ export default class WebSocketClient<
   constructor(options: Options) {
     super();
 
-    this.options = Util.merge<any>(<any> options, {
+    this.options = Util.merge(<any> options, {
       sweepUnneededCacheIn: 360000, // 1 hour
       populatePresences: false,
       allowedMentions: {
@@ -194,7 +190,6 @@ export default class WebSocketClient<
     this.channels = new ChannelManager(this);
     this.shards = new ShardManager(this);
     this.guilds = new GuildManager(this);
-    this.voice = new VoiceClient(this);
     this.users = new UserManager(this);
     this.token = options.token;
     this.rest = new RestClient(this);
@@ -403,28 +398,5 @@ export default class WebSocketClient<
 
   setStatus(status: types.OnlineStatus, options: types.SendActivityOptions) {
     for (const shard of this.shards.values()) shard.setStatus(status, options);
-  }
-
-  joinVoiceChannel(channelID: string, guildID: string) {
-    const channel = this.channels.get<VoiceChannel>(channelID);
-
-    if (!channel)
-      return Promise.reject(new TypeError(`Channel "${channelID}" was not cached`));
-
-    if (channel.type !== 'voice')
-      return Promise.reject(new TypeError(`Channel "${channelID}" was not a voice channel`));
-
-    if (channel.guild && channel.permissionsOf(this.user.id).has('voiceConnect'))
-      return Promise.reject(new TypeError('Misisng `voiceConnect` permission'));
-
-    const guild = this.guilds.get(guildID);
-    if (!guild)
-      return Promise.reject(new TypeError(`Guild "${guildID}" isn't cached, run GuildStore.fetch to cache it!`));
-
-    return this.voice.joinChannel(channel);
-  }
-
-  leaveVoiceChannel() {
-    // noop
   }
 }

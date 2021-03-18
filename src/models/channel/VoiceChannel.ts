@@ -81,12 +81,4 @@ export class VoiceChannel extends GuildChannel {
     if (overwrite !== undefined) permission = (permission & ~overwrite.permissions.denied) | overwrite.permissions.allow;
     return new Permission(String(permission));
   }
-
-  join() {
-    return this.client.voice.joinChannel(this);
-  }
-
-  leave() {
-    return this.client.voice.leaveChannel(this);
-  }
 }

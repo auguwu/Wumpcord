@@ -22,21 +22,21 @@
 
 const { version: pkgVersion } = require('../package.json');
 
+export { default as InteractionClient } from './interactions/InteractionClient';
 export { default as DiscordRestError } from './errors/DiscordRestError';
 export { default as DiscordAPIError } from './errors/DiscordAPIError';
 export { default as Client } from './gateway/WebSocketClient';
-export { default as InteractionClient } from './interactions/InteractionClient';
 
 export * as Constants from './Constants';
 
+export * from './interactions/types';
 export * from './events';
 export * from './models';
-export * from './voice';
 export * from './types';
 
 // export misc types
-export { WebSocketClientEvents } from './gateway/WebSocketClient';
 export { InteractionClientEvents } from './interactions/InteractionClient';
+export { WebSocketClientEvents } from './gateway/WebSocketClient';
 
 /** Returns the version of Wumpcord */
 export const version: string = pkgVersion;

@@ -1,7 +1,7 @@
 {
   "name": "wumpcord",
   "description": "🚣 Flexible, type-safe, and lightweight Discord API library",
-  "version": "1.1.0-next.3",
+  "version": "1.1.0-next.4",
   "main": "build/index.js",
   "license": "MIT",
   "author": "Chris \"August\" Hernandez <august@augu.dev>",
@@ -38,15 +38,12 @@
   "devDependencies": {
     "@augu/eslint-config": "1.10.0",
     "@augu/tsconfig": "1.0.1",
-    "@discordjs/opus": "0.4.0",
     "@types/node": "14.14.35",
     "@types/ws": "7.4.0",
     "@typescript-eslint/eslint-plugin": "4.18.0",
     "@typescript-eslint/parser": "4.18.0",
     "eslint": "7.22.0",
-    "opusscript": "0.0.8",
     "ts-morph": "10.0.1",
-    "tweetnacl": "1.0.3",
     "typescript": "4.2.3"
   },
   "peerDependencies": {
