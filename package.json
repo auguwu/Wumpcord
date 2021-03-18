@@ -1,7 +1,7 @@
 {
   "name": "wumpcord",
   "description": "🚣 Flexible, type-safe, and lightweight Discord API library",
-  "version": "1.1.0-next.2",
+  "version": "1.1.0-next.3",
   "main": "build/index.js",
   "license": "MIT",
   "author": "Chris \"August\" Hernandez <august@augu.dev>",
@@ -22,7 +22,7 @@
   "scripts": {
     "clean:node_modules": "rm -rf node_modules/@types/**/node_modules && rm -rf node_modules/@augu/**/node_modules",
     "clean:win:tar": "cp node_modules/@augu/collections/build/index.js.* node_modules/@augu/collections/build/index.js && rm node_modules/@augu/collections/build/index.js.*",
-    "prepare": "npm run build",
+    "prepare": "npm run build && npm run docgen",
     "docgen": "node scripts/docs.js",
     "build": "npm run lint && rm -rf build && tsc",
     "lint": "node scripts/lint.js"

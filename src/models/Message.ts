@@ -38,7 +38,8 @@ import {
   RESTPostAPIChannelMessageCrosspostResult,
   RESTGetAPIChannelMessageReactionsResult,
   RESTPatchAPIChannelMessageJSONBody,
-  RESTPostAPIChannelMessageJSONBody
+  RESTPostAPIChannelMessageJSONBody,
+  APISticker
 } from 'discord-api-types';
 
 type EditedMessageContent = string | Omit<MessageContentOptions, 'file'>;
@@ -63,6 +64,7 @@ export class Message<C extends TextableChannel = TextableChannel> extends Base<A
   public channelID!: string;
   public timestamp!: Date;
   public webhookID!: string;
+  public stickers?: APISticker[];
   public mentions!: string[];
   public activity!: APIMessageActivity;
   public content!: string;
@@ -99,8 +101,14 @@ export class Message<C extends TextableChannel = TextableChannel> extends Base<A
     if (data.mention_roles !== undefined)
       this.mentionRoles = data.mention_roles;
 
+    if (data.attachments !== undefined)
+      this.attachments = data.attachments.map(attachment => new Attachment(attachment));
+
     if (data.message_reference !== undefined)
       this.reference = data.message_reference;
+
+    if (data.stickers !== undefined)
+      this.stickers = data.stickers;
 
     if (data.channel_id !== undefined)
       this.channelID = data.channel_id;
