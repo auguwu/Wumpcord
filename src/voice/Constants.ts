@@ -19,3 +19,60 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+/**
+ * List of close codes available for the voice module
+ */
+export const enum CloseCodes {
+  Unknown = 4001,
+  FailedPayload,
+  NotAuthenicated,
+  AuthFailed,
+  AlreadyAuthenicated,
+  SessionInvalid,
+  SessionTimeout = 4009,
+  ServerNotFound = 4011,
+  UnknownProtocol,
+  Disconnected = 4014,
+  VoiceServerCrash,
+  UnknownEncryption
+}
+
+/**
+ * List of OPCodes available for the voice module
+ */
+export const enum OPCodes {
+  Identify,
+  SelectProtocol,
+  Ready,
+  Heartbeat,
+  SessionDescription,
+  Speaking,
+  HeartbeatAck,
+  Resume,
+  ClientDisconnect = 13
+}
+
+/**
+ * List of encryption modes available to use
+ */
+export const EncryptionModes: [
+  normal: string,
+  suffix: string,
+  lite: string
+] = [
+  'xsalsa20_poly1305', // Normal
+  'xsalsa20_poly1305_suffix', // Suffix
+  'xsalsa20_poly1305_lite' // Lite
+];
+
+/**
+ * List of unrecoverable codes
+ */
+export const UnrecoverableCodes = [
+  4014, // Disconnected
+  4006, // Session Invalid
+  4003, // Not Authenicated
+  4004, // Auth Failed
+  1000  // yes
+];

@@ -20,4 +20,7 @@
  * SOFTWARE.
  */
 
+/**
+ * Represents a voice connection
+ */
 export default class VoiceConnection {}

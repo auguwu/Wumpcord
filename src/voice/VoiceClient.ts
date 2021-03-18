@@ -20,10 +20,36 @@
  * SOFTWARE.
  */
 
+/* eslint-disable camelcase */
+
+import type { GatewayVoiceServerUpdateDispatchData } from 'discord-api-types';
 import type WebSocketClient from '../gateway/WebSocketClient';
 import VoiceConnection from './VoiceConnection';
 import { VoiceChannel } from '../models/channel/VoiceChannel';
 import { Collection } from '@augu/collections';
+import { OPCodes } from '../Constants';
+import Util from '../util';
+
+interface PendingGuildPacket {
+  resolve(value: VoiceConnection): void;
+  reject(error: Error): void;
+
+  channelID: string;
+  timeout: NodeJS.Timeout;
+  guildID: string;
+}
+
+export interface JoinChannelOptions {
+  /**
+   * If the bot should be deafened when joining a channel
+   */
+  deaf?: boolean;
+
+  /**
+   * If the bot should be muted when joining a voice channel
+   */
+  mute?: boolean;
+}
 
 /**
  * Represents a client to interact and dispatch voice connections with.
@@ -58,10 +84,12 @@ export default class VoiceClient {
    */
   public connections: Collection<string, VoiceConnection>;
 
+  #pending: { [x: string]: PendingGuildPacket };
   #client: WebSocketClient;
 
   constructor(client: WebSocketClient) {
     this.connections = new Collection();
+    this.#pending = {};
     this.#client = client;
   }
 
@@ -72,7 +100,8 @@ export default class VoiceClient {
    * @returns A Promise of the connected voice connection (if any) or
    * a new [VoiceConnection].
    */
-  joinChannel(channel: string | VoiceChannel) {
+  joinChannel(channel: string | VoiceChannel, options?: JoinChannelOptions) {
+    const joinOpts = Util.merge<JoinChannelOptions>(options!, { mute: false, deaf: false });
     let chan!: VoiceChannel;
 
     if (typeof channel === 'string') {
@@ -90,11 +119,35 @@ export default class VoiceClient {
       chan = channel;
     }
 
-    const connection = this.connections.get(`${chan.guild.id}:${chan.id}`);
+    const connection = this.connections.get(chan.guild.id);
     if (connection !== undefined)
       return Promise.resolve(connection);
 
-    return new VoiceConnection(); // noop fix
+    return new Promise<VoiceConnection>((resolve, reject) => {
+      this.#client.debug(`VoiceClient/${chan.id}/${chan.guild.id}`, 'Voice channel and guild are now pending for a connection...');
+      this.#pending[chan.guild.id] = {
+        resolve,
+        reject,
+
+        channelID: chan.id,
+        timeout: setTimeout(() => {
+          delete this.#pending[chan.guild.id];
+          return reject(new Error('Pending packet has timed out of a new connection.'));
+        }, 15000).unref(),
+        guildID: chan.guild.id
+      };
+
+      const shard = (this.#client.shards.get(chan.guild.shardID) ?? this.#client.shards.get(0))!;
+      shard.send(OPCodes.VoiceStateUpdate, {
+        channel_id: chan.id,
+        self_mute: joinOpts.mute,
+        self_deaf: joinOpts.deaf,
+        guild_id: chan.guild.id
+      });
+
+      const connection = new VoiceConnection(this.#client, chan);
+      this.connections.set(chan.guild.id, connection);
+    });
   }
 
   /**
@@ -107,6 +160,56 @@ export default class VoiceClient {
    * @returns A boolean value if a channel was left or not
    */
   leaveChannel(channel: string | VoiceChannel) {
-    // noop
+    let chan!: VoiceChannel;
+
+    if (typeof channel === 'string') {
+      const _chan = this.#client.channels.get<VoiceChannel>(channel);
+      if (!_chan)
+        throw new TypeError(`Channel '${channel}' was not found`);
+
+      if (_chan.type !== 'voice')
+        throw new TypeError(`Channel ${_chan.name ?? '(not a guild channel)'} was not a voice channel`);
+
+      chan = _chan;
+    } else if (!(channel instanceof VoiceChannel)) {
+      throw new TypeError(`\`channel\` param was not a voice channel, received ${(typeof channel === 'object' || typeof channel === 'function') ? (channel as any).constructor.name : typeof channel}`);
+    } else {
+      chan = channel;
+    }
+
+    if (this.#pending.hasOwnProperty(chan.guild.id)) {
+      const packet = this.#pending[chan.guild.id];
+      clearTimeout(packet.timeout);
+
+      delete this.#pending[chan.guild.id];
+    }
+
+    const connection = this.connections.get(chan.guild.id);
+    connection?.reset();
+
+    this.connections.delete(chan.guild.id);
+  }
+
+  onVoiceServerUpdate(packet: GatewayVoiceServerUpdateDispatchData) {
+    this.#client.debug('VoiceClient', `Received a voice server update packet for guild ${packet.guild_id}!`);
+
+    const pending = this.#pending[packet.guild_id];
+    if (!pending) {
+      this.#client.debug('VoiceClient', 'Missing pending packet from guild, assuming it\'s not us.');
+      return;
+    }
+
+    const connection = this.connections.get(packet.guild_id)!;
+    connection.onVoiceServerUpdate(packet);
+
+    const connectedHandler = () => {
+      this.#client.debug(`VoiceClient/${connection.channel.guild.id}/${connection.channel.id}`, 'Established a voice connection.');
+      pending.resolve(connection);
+
+      connection.removeListener('connected', connectedHandler);
+      delete this.#pending[packet.guild_id];
+    };
+
+    connection.once('connected', connectedHandler);
   }
 }

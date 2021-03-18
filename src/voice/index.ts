@@ -20,4 +20,6 @@
  * SOFTWARE.
  */
 
+export { default as VoiceConnection } from './VoiceConnection';
 export { default as VoiceClient } from './VoiceClient';
+export * as Constants from './Constants';
