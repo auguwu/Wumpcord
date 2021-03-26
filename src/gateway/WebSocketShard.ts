@@ -34,8 +34,12 @@ import Util from '../util';
 
 import * as events from '../events';
 
+interface ErlpackDefinition {
+  pack(data: any): Buffer;
+  unpack<T>(data: Buffer): T;
+}
 
-let Erlpack: typeof import('erlpack');
+let Erlpack: ErlpackDefinition;
 try {
   Erlpack = require('erlpack');
 } catch(ex) {
