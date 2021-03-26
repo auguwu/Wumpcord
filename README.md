@@ -18,27 +18,6 @@ $ npm i --no-optional wumpcord@indev
 Specific features require extra dependencies, this is a list that requires them
 
 #### Optional Dependencies
-> If `@discordjs/opus` or `opusscript` isn't installed, the library will error out and you will not have access to Voice
-
-- `tweetnacl`
-  - Required: Yes
-  - Native: No
-
-- `@discordjs/opus`
-  - Required: No
-  - Alternative: **opusscript**
-  - Native: Yes
-
-- `opusscript`
-  - Required: No
-  - Alternative: **@discordjs/opus**
-  - Native: Yes
-
-- `ogg`
-  - Required: No
-  - Native: Yes
-  - For: OGG decoding
-
 - `erlpack`
   - Required: No
   - Native: Yes
