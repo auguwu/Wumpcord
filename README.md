@@ -26,7 +26,7 @@ Specific features require extra dependencies, this is a list that requires them
 ## Need Support?
 You can join the server below and join in #support under the **Wumpcord** category
 
-[![discord embed owo](https://discord.com/api/v8/guilds/382725233695522816/widget.png?style=banner3)](https://discord.gg/JjHGR6vhcG)
+[![discord embed owo](https://discord.com/api/v8/guilds/824066105102303232/widget.png?style=banner3)](https://discord.gg/ATmjFH9kMH)
 
 ## Example Bot
 ```js
@@ -51,9 +51,6 @@ client.on('ready', async () => {
 client.connect();
 ```
 
-## Special Thanks To
-- [Ice](https://github.com/IceeMC) for writing the voice library <3
-
 ## Maintainers
 - [August](https://floofy.dev)
 
@@ -61,4 +58,4 @@ client.connect();
 None at the moment.
 
 ## License
-**Wumpcord** is released under the [MIT](/LICENSE) License. <3
+**Wumpcord** is released under the [MIT](/LICENSE) License. :sparkling_heart:
