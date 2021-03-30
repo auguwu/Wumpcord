@@ -25,6 +25,7 @@
 import type { AllowedMentions, MessageContent, MessageContentOptions, MessageFile } from '../types';
 import type WebSocketClient from '../gateway/WebSocketClient';
 import * as discord from 'discord-api-types';
+import { isObject } from '@augu/utils';
 import { Readable } from 'stream';
 
 /**
@@ -92,13 +93,13 @@ export default class Util {
   static formatMessage(client: WebSocketClient, content: MessageContent, options?: MessageContentOptions) {
     const data: discord.RESTPostAPIChannelMessageJSONBody & { file?: MessageFile | MessageFile[] } = {};
 
-    if (this.isObject(content) && (options !== undefined && Util.isObject(options)))
+    if (isObject(content) && (options !== undefined && isObject(options)))
       throw new TypeError('Conflicting message contents, choose one or the other.');
 
     if (typeof content === 'string' && options === undefined) {
       data.content = content;
       return data;
-    } else if (this.isObject(content) && options === undefined) {
+    } else if (isObject(content) && options === undefined) {
       if (content.attachments !== undefined)
         data.file = content.attachments;
 
@@ -116,7 +117,7 @@ export default class Util {
 
       if (content.tts !== undefined)
         data.tts = Boolean(data.tts);
-    } else if (typeof content === 'string' && (options !== undefined && this.isObject(options))) {
+    } else if (typeof content === 'string' && (options !== undefined && isObject(options))) {
       data.content = content;
 
       if (options.attachments !== undefined)
@@ -133,7 +134,7 @@ export default class Util {
 
       if (options.tts !== undefined)
         data.tts = Boolean(data.tts);
-    } else if (options !== undefined && this.isObject(options)) {
+    } else if (options !== undefined && isObject(options)) {
       if (options.attachments !== undefined)
         data.file = options.attachments;
 
@@ -158,6 +159,12 @@ export default class Util {
     return data;
   }
 
+  /**
+   * Formats the allowed mentions feature
+   * @param mentions The mentions provided by the user
+   * @param client The [[WebSocketClient]] for the default allowed mention
+   * @returns The formatted allowed mentions list
+   */
   static formatAllowedMentions(mentions: AllowedMentions, client: WebSocketClient): discord.APIAllowedMentionsSend {
     const data: discord.APIAllowedMentionsSend = {
       replied_user: mentions?.replied ?? client.options.allowedMentions?.replied ?? false,
@@ -185,10 +192,23 @@ export default class Util {
     return data;
   }
 
+  /**
+   * Checks if [[stream]] is a [[Readable]] stream.
+   * @param stream The value to check
+   */
   static isReadableStream(stream: unknown): stream is Readable {
     return stream instanceof Readable && typeof stream.read === 'function';
   }
 
+  /**
+   * Converts a [[Readable]] stream to a buffer. Due to the function being
+   * O(N), as the stream increases in data: the more it'll take to retrieve
+   * all buffers, so be cautious or append a [[Buffer]] if you're sending
+   * files.
+   *
+   * @param stream The [[Readable]] stream to retrieve all buffers
+   * @returns The buffer available
+   */
   static readableToBuffer(stream: Readable) {
     return new Promise<Buffer>((resolve, reject) => {
       const buffers: Buffer[] = [];
@@ -199,30 +219,20 @@ export default class Util {
     });
   }
 
+  /**
+   * Checks if [[value]] is a object or not.
+   * @param value The value to check
+   */
   static isObject(value: unknown): value is object {
     return typeof value === 'object' && value !== null && !Array.isArray(value);
   }
 
-  static hasNaclInstalled() {
-    try {
-      require('tweetnacl');
-
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  static tryRequire(mod: string) {
-    try {
-      require(mod);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  static objectToQuery<T extends object = object>(obj: T) {
+  /**
+   * Converts a key-value map into a querystring
+   * @param obj The key-value map
+   * @returns The querystring that is created
+   */
+  static objectToQuery<T extends object>(obj: T) {
     let url = '';
     if (!Object.keys(obj).length) throw new TypeError('Missing key-value pairs in `obj`');
 
@@ -240,7 +250,21 @@ export default class Util {
     return url;
   }
 
+  /**
+   * Converts a [[Buffer]] to Discord's [image data format](https://discord.com/developers/docs/reference#image-data)
+   * @param image The image buffer to use
+   * @param type The content type to use
+   * @returns The data image
+   */
   static bufferToBase64(image: Buffer, type?: 'png' | 'jpg' | 'gif') {
+    // Force the type to be .png if the headers match
+    // https://tools.ietf.org/html/rfc2083
+
+    if (image.length > 8 && image[0] === 0x89 && image[1] === 0x50 && image[2] === 0x4E && image[3] === 0x47 && image[4] === 0x0D && image[5] === 0x0A && image[6] === 0x1A && image[7] === 0x0A) {
+      if (type === undefined)
+        type = 'png';
+    }
+
     const base64 = image.toString('base64');
     return `data:image/${type ?? 'png'};base64,${base64}`;
   }

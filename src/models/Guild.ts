@@ -35,6 +35,7 @@ import { Collection } from '@augu/collections';
 import ChannelManager from '../managers/ChannelManager';
 import { VoiceState } from './VoiceState';
 import { Presence } from './presence';
+import { isObject } from '@augu/utils';
 import GuildPreview from './guild/GuildPreview';
 import { Readable } from 'stream';
 import GuildMember from './guild/GuildMember';
@@ -49,7 +50,7 @@ import GuildBan from './guild/GuildBan';
 import Base from './Base';
 import Util from '../util';
 
-import {
+import type {
   APIEmoji,
   APIGuild,
   APIGuildWelcomeScreen,
@@ -617,7 +618,7 @@ export class Guild extends Base<IGuild> {
   }
 
   getAuditLogs(opts: FetchAuditLogsOptions = { limit: 50 }) {
-    if (opts && !Util.isObject(opts)) throw new TypeError(`Expected \`object\`, but received ${typeof opts}`);
+    if (opts && !isObject(opts)) throw new TypeError(`Expected \`object\`, but received ${typeof opts}`);
 
     if (opts.actionType) {
       if (typeof opts.actionType !== 'number' || Number.isNaN(opts.actionType))
@@ -859,7 +860,7 @@ export class Guild extends Base<IGuild> {
 
   createRole(opts: CreateRoleOptions) {
     if (!opts) throw new TypeError('Missing `opts` object');
-    if (!Util.isObject(opts)) return new TypeError(`Expected \`object\`, but received ${typeof opts}`);
+    if (!isObject(opts)) return new TypeError(`Expected \`object\`, but received ${typeof opts}`);
 
     if (opts.name && typeof opts.name !== 'string') throw new TypeError(`Expected \`string\`, but received ${typeof opts.name}`);
     if (opts.color && (typeof opts.color !== 'number' || typeof opts.color !== 'string')) throw new TypeError(`Expected \`string\` or \`number\`, but received ${typeof opts.color}`);
@@ -899,7 +900,7 @@ export class Guild extends Base<IGuild> {
 
   modifyRole(roleID: string, opts: EditGuildRoleOptions, reason?: string) {
     if (!opts) throw new TypeError('Missing `opts` object');
-    if (!Util.isObject(opts)) return new TypeError(`Expected \`object\`, but received ${typeof opts}`);
+    if (!isObject(opts)) return new TypeError(`Expected \`object\`, but received ${typeof opts}`);
 
     if (opts.name && typeof opts.name !== 'string') throw new TypeError(`Expected \`string\`, but received ${typeof opts.name}`);
     if (opts.color && (typeof opts.color !== 'number' || typeof opts.color !== 'string')) throw new TypeError(`Expected \`string\` or \`number\`, but received ${typeof opts.color}`);
@@ -986,7 +987,7 @@ export class Guild extends Base<IGuild> {
 
   async createEmoji(options: CreateEmojiOptions) {
     if (!options) throw new TypeError('Missing `options` object');
-    if (!Util.isObject(options)) throw new TypeError(`Expecting \`object\`, but received ${typeof options === 'object' ? 'array' : options}`);
+    if (!isObject(options)) throw new TypeError(`Expecting \`object\`, but received ${typeof options === 'object' ? 'array' : options}`);
     if (Object.keys(options).length === 0) throw new TypeError('No keys were provided to create an emoji.');
 
     if (!options.name || !options.image)
@@ -1017,7 +1018,7 @@ export class Guild extends Base<IGuild> {
 
   modifyEmoji(options: ModifyEmojiOptions) {
     if (!options) throw new TypeError('Missing `options` object');
-    if (!Util.isObject(options)) throw new TypeError(`Expecting \`object\`, but received ${typeof options === 'object' ? 'array' : options}`);
+    if (!isObject(options)) throw new TypeError(`Expecting \`object\`, but received ${typeof options === 'object' ? 'array' : options}`);
     if (!options.id) throw new TypeError('Missing the emoji\'s ID.');
     if (Object.keys(options).length === 0) throw new TypeError('No keys were provided to modify an emoji.');
     if (typeof options.id !== 'string') throw new TypeError(`Expected \`string\`, but gotten ${typeof options.id}`);
