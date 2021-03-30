@@ -23,8 +23,9 @@
 /* eslint-disable camelcase */
 import type { AnyChannel, MessageContentOptions, TextableChannel, AllowedMentions } from '../types';
 import type { APIEmbed, APIUser } from 'discord-api-types';
+import type InteractionClient from '../interactions/InteractionClient';
+import { isObject } from '@augu/utils';
 import { User } from './User';
-import InteractionClient from '../interactions/InteractionClient';
 import Util from '../util';
 
 /** Represents the metadata of a [InteractionMessage] */
@@ -126,7 +127,7 @@ export class InteractionMessage<C extends AnyChannel = TextableChannel> {
     if (typeof content === 'string' && options === undefined) {
       data.content = content;
       return data;
-    } else if (Util.isObject(content) && options === undefined) {
+    } else if (isObject(content) && options === undefined) {
       if (content.mentions !== undefined)
         data.allowed_mentions = Util.formatAllowedMentions(content.mentions, this.#client);
 
@@ -141,7 +142,7 @@ export class InteractionMessage<C extends AnyChannel = TextableChannel> {
 
       if (content.tts !== undefined)
         data.tts = content.tts;
-    } else if (typeof content === 'string' && (options !== undefined && Util.isObject(options))) {
+    } else if (typeof content === 'string' && (options !== undefined && isObject(options))) {
       data.content = content;
 
       if (options.mentions !== undefined)

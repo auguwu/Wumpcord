@@ -157,7 +157,7 @@ export default class RestClient {
     });
   }
 
-  execute() {
+  private execute() {
     if (this.handling) return;
 
     const request = this.requests.shift()!;
@@ -180,10 +180,6 @@ export default class RestClient {
       });
   }
 
-  /**
-   * Executes the request and handles ratelimiting
-   * @param request The dispatched requeest
-   */
   private async _executeRequest<T>(request: RequestDispatch) {
     const bucket = new RatelimitBucket();
     const form = request.file !== undefined ? new FormData() : null;

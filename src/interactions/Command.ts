@@ -21,18 +21,29 @@
  */
 
 import type * as interactions from './types';
-import Option from './Option';
 import Base from '../models/Base';
 
 interface ApplicationCommand extends interactions.ApplicationCommand {
   is_guild?: boolean; // eslint-disable-line camelcase
 }
 
+/**
+ * Represents a interaction command
+ */
 export default class InteractionCommand extends Base<ApplicationCommand> {
+  /** The application's ID that this command belongs to */
   public applicationID!: string;
+
+  /** The description of the slash command */
   public description!: string;
+
+  /** If the slash command belongs to a guild or is global */
   public isGuild!: boolean;
-  public options!: Option[];
+
+  /** Any additional options used to run this slash command */
+  public options?: interactions.ApplicationCommandOption[];
+
+  /** The name of the slash command */
   public name!: string;
 
   constructor(data: ApplicationCommand) {
@@ -49,7 +60,7 @@ export default class InteractionCommand extends Base<ApplicationCommand> {
       this.description = data.description;
 
     if (data.options !== undefined)
-      this.options = data.options.map(option => new Option(option));
+      this.options = data.options;
 
     if (data.is_guild !== undefined)
       this.isGuild = data.is_guild ?? false; // we pass this, not discord
