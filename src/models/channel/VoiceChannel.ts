@@ -28,10 +28,10 @@ import Permission from '../../util/Permissions';
 
 export class VoiceChannel extends GuildChannel {
   /** The limit that users can join this [VoiceChannel] */
-  public userLimit!: number;
+  public userLimit?: number;
 
   /** The bitrate of the voice channel */
-  public bitrate!: number;
+  public bitrate?: number;
 
   /**
    * Creates a new [VoiceChannel] instance

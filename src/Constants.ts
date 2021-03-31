@@ -222,7 +222,8 @@ export const ChannelTypesObject = {
   3: 'group',
   4: 'category',
   5: 'news',
-  6: 'store'
+  6: 'store',
+  13: 'stage'
 } as const;
 
 export enum UserFlags {
