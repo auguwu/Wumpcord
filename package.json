@@ -6,6 +6,7 @@
   "license": "MIT",
   "author": "Chris \"August\" Hernandez <august@augu.dev>",
   "repository": "https://github.com/auguwu/Wumpcord",
+  "homepage": "https://wump.floofy.dev",
   "types": "./build/index.d.ts",
   "funding": {
     "url": "https://github.com/auguwu/Wumpcord?sponsor=1"
@@ -22,14 +23,14 @@
   "scripts": {
     "clean:node_modules": "rm -rf node_modules/@types/**/node_modules && rm -rf node_modules/@augu/**/node_modules",
     "clean:win:tar": "cp node_modules/@augu/collections/build/index.js.* node_modules/@augu/collections/build/index.js && rm node_modules/@augu/collections/build/index.js.*",
-    "prepare": "npm run build && npm run docgen",
-    "docgen": "node scripts/docs.js",
+    "prepare": "npm run build",
+    "docgen": "typedoc src --out docs --theme node_modules/eledoc/bin/default/ && cp CNAME docs/CNAME",
     "build": "npm run lint && rm -rf build && tsc",
     "lint": "node scripts/lint.js"
   },
   "dependencies": {
     "@augu/collections": "1.0.5",
-    "@augu/utils": "1.3.0",
+    "@augu/utils": "1.4.2",
     "discord-api-types": "0.11.2",
     "form-data": "4.0.0",
     "ws": "7.4.4"
@@ -37,12 +38,13 @@
   "devDependencies": {
     "@augu/eslint-config": "1.10.0",
     "@augu/tsconfig": "1.0.1",
-    "@types/node": "14.14.36",
+    "@types/node": "14.14.37",
     "@types/ws": "7.4.0",
-    "@typescript-eslint/eslint-plugin": "4.19.0",
-    "@typescript-eslint/parser": "4.19.0",
-    "eslint": "7.22.0",
-    "ts-morph": "10.0.2",
+    "@typescript-eslint/eslint-plugin": "4.20.0",
+    "@typescript-eslint/parser": "4.20.0",
+    "eledoc": "0.2.1",
+    "eslint": "7.23.0",
+    "typedoc": "0.20.34",
     "typescript": "4.2.3"
   },
   "peerDependencies": {
