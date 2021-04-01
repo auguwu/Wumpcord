@@ -7,7 +7,6 @@ on:
       - '.github/**'
       - '.vscode/**'
       - 'examples/'
-      - 'docs/'
       - '.eslintignore'
       - '.gitignore'
       - '.npmignore'
@@ -22,7 +21,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v2
-
-# haha yes
+      - name: Update documentation
+        run: |
+          mkdir ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+          kubectl rollout restart deployment/wump-docs
