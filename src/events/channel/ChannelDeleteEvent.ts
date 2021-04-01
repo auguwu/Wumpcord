@@ -42,7 +42,7 @@ export default class ChannelDeleteEvent extends Event<GatewayChannelDeleteDispat
 
     this.client.channels.remove(this.data.id);
     this.$refs = {
-      channel: this.client.channels.get<AnyChannel>(this.data.id) ?? Channel.from(this.client, this.data)
+      channel: this.client.channels.get<AnyChannel>(this.data.id) ?? Channel.from(this.client, this.data)!
     };
   }
 }

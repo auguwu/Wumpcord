@@ -1,0 +1,23 @@
+name: Deploy docs
+on:
+  push:
+    branches:
+      - 'master'
+    paths-ignore:
+      - '.github/**'
+      - '.vscode/**'
+      - 'examples/'
+      - 'docs/'
+      - '.eslintignore'
+      - '.gitignore'
+      - '.npmignore'
+      - '**.md'
+      - 'jest.config.js'
+      - 'LICENSE'
+      - 'package.json'
+      - 'renovate.json'
+      - 'tsconfig.json'
+      - 'tsconfig.test.json'
+jobs:
+  deploy-docs:
+    runs-on: ubuntu-latest

@@ -2,8 +2,10 @@ name: ESLint
 on:
   push:
     branches:
-      - 'indev'
+      - 'issue/**'
+      - 'feat/**'
       - 'master'
+      - 'indev'
     paths-ignore:
       - '.github/**'
       - '.vscode/**'
@@ -22,8 +24,8 @@ on:
 
   pull_request:
     branches:
-      - 'indev'
       - 'master'
+      - 'indev'
     paths-ignore:
       - '.github/**'
       - '.vscode/**'
