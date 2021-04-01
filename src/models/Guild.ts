@@ -50,7 +50,7 @@ import GuildBan from './guild/GuildBan';
 import Base from './Base';
 import Util from '../util';
 
-import type {
+import {
   APIEmoji,
   APIGuild,
   APIGuildWelcomeScreen,
@@ -61,6 +61,7 @@ import type {
   RESTGetAPIGuildChannelsResult,
   RESTGetAPIGuildEmojiResult,
   RESTGetAPIGuildEmojisResult,
+  RESTGetAPIGuildIntegrationsResult,
   RESTGetAPIGuildInvitesResult,
   RESTGetAPIGuildPreviewResult,
   RESTGetAPIGuildRolesResult,
@@ -179,6 +180,17 @@ interface ImageData {
 }
 
 type EditGuildRoleOptions = CreateRoleOptions;
+
+interface CreateGuildIntegrationOptions {
+  type: GuildIntegration['type'];
+  id: string;
+}
+
+interface ModifyGuildIntegrationOptions {
+  expireGracePeriod?: number;
+  expireBehaviour?: number;
+  emojis?: boolean;
+}
 
 export class Guild extends Base<IGuild> {
   // Properties that are added when constructing FIRST
@@ -375,9 +387,15 @@ export class Guild extends Base<IGuild> {
     if (data.channels !== undefined) {
       for (let i = 0; i < data.channels.length; i++) {
         const channel = data.channels[i];
+        const createdChan = Channel.from(this.client, channel);
 
-        this.client.channels.add(Channel.from(this.client, channel));
-        this.channels.add(Channel.from(this.client, channel));
+        if (createdChan === null) {
+          this.client.debug(`Guild [${this.id}] / Channels`, `Channel "${channel.id}" with type ${channel.type} is not implemented.`);
+          continue;
+        }
+
+        this.client.channels.add(createdChan);
+        this.channels.add(createdChan);
       }
     }
 
@@ -1040,6 +1058,21 @@ export class Guild extends Base<IGuild> {
       endpoint: `/guilds/${this.id}/emojis/${id}`,
       method: 'DELETE'
     });
+  }
+
+  getIntegrations() {
+    return this.client.rest.dispatch<RESTGetAPIGuildIntegrationsResult>({
+      endpoint: `/guilds/${this.id}/integrations`,
+      method: 'GET'
+    }).then(data => data.map(d => new GuildIntegration(this.client, d)));
+  }
+
+  modifyIntegration(id: string, opts: ModifyGuildIntegrationOptions) {
+    throw new SyntaxError('Method Guild.modifyIntegration is not available at this time.');
+  }
+
+  createIntegration(opts: CreateGuildIntegrationOptions) {
+    throw new SyntaxError('method Guild.createIntegration is not available at this time');
   }
 
   toString() {
