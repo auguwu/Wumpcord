@@ -1,0 +1,28 @@
+name: Deploy docs
+on:
+  push:
+    branches:
+      - 'master'
+    paths-ignore:
+      - '.github/**'
+      - '.vscode/**'
+      - 'examples/'
+      - 'docs/'
+      - '.eslintignore'
+      - '.gitignore'
+      - '.npmignore'
+      - '**.md'
+      - 'jest.config.js'
+      - 'LICENSE'
+      - 'package.json'
+      - 'renovate.json'
+      - 'tsconfig.json'
+      - 'tsconfig.test.json'
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
+# haha yes

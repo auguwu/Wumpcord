@@ -46,6 +46,6 @@ export default class ChannelCreateEvent extends Event<GatewayChannelCreateDispat
     this.client.channels.add(channel);
     (guild as Guild | undefined)?.channels?.add(channel);
 
-    this.$refs = { channel, guild };
+    this.$refs = { channel: channel!, guild };
   }
 }
