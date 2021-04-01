@@ -40,7 +40,7 @@ export class Channel extends Base<APIPartialChannel> {
     this.type = ChannelTypesObject[data.type];
   }
 
-  static from(client: WebSocketClient, data: any): AnyChannel {
+  static from<T extends AnyChannel = AnyChannel>(client: WebSocketClient, data: any): T | null {
     const { NewsChannel } = require('./channel/NewsChannel');
     const { DMChannel } = require('./channel/DMChannel');
     const { TextChannel } = require('./channel/TextChannel');
@@ -58,7 +58,8 @@ export class Channel extends Base<APIPartialChannel> {
       case 5: return new NewsChannel(client, data);
       case 6: return new StoreChannel(client, data);
       default:
-        throw new SyntaxError(`Type "${data.type}" was not implemented (new channel type? make a pr!)`);
+        client.debug(`Unknown Type [${data.type}]`, 'Channel type is not available on this version of Wumpcord you\'re running. Switch to indev branch or submit a PR?');
+        return null;
     }
   }
 }

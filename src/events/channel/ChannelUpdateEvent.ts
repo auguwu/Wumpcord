@@ -44,13 +44,13 @@ export default class ChannelUpdateEvent extends Event<GatewayChannelUpdateDispat
     if (!guild || !guild.hasOwnProperty('channels')) {
       this.$refs = {
         old: null,
-        new: Channel.from(this.client, this.data)
+        new: Channel.from(this.client, this.data)!
       };
 
       return;
     }
 
-    const updated = Channel.from(this.client, this.data);
+    const updated = Channel.from(this.client, this.data)!;
     const old = (guild as Guild).channels.get<AnyChannel>(this.data.id);
     if (old === null) {
       this.$refs = {
