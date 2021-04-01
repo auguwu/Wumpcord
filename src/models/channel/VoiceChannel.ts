@@ -20,11 +20,20 @@
  * SOFTWARE.
  */
 
+/* eslint-disable camelcase */
+
 import type WebSocketClient from '../../gateway/WebSocketClient';
 import type { APIChannel } from 'discord-api-types/v8';
 import { Permissions } from '../../Constants';
 import GuildChannel from './GuildChannel';
 import Permission from '../../util/Permissions';
+
+interface APIVoiceChannel extends Pick<APIChannel, 'guild_id' | 'position' | 'permission_overwrites' | 'name' | 'topic' | 'nsfw' | 'bitrate' | 'user_limit' | 'id' | 'type'> {
+  /**
+   * The voice region of the stage channel. (`null`: automatic based on the guild)
+   */
+  rtc_region: string | null;
+}
 
 export class VoiceChannel extends GuildChannel {
   /** The limit that users can join this [VoiceChannel] */
@@ -33,18 +42,21 @@ export class VoiceChannel extends GuildChannel {
   /** The bitrate of the voice channel */
   public bitrate?: number;
 
+  /** The voice region of the stage channel. (`null`: automatic based on the guild) */
+  public region!: string | null;
+
   /**
    * Creates a new [VoiceChannel] instance
    * @param client The [WebSocket] client attached to this [VoiceChannel]
    * @param data The data from Discord
    */
-  constructor(client: WebSocketClient, data: APIChannel) {
+  constructor(client: WebSocketClient, data: APIVoiceChannel) {
     super(client, data);
 
     this.patch(data);
   }
 
-  patch(data: APIChannel) {
+  patch(data: APIVoiceChannel) {
     super.patch(data);
 
     if (data.bitrate !== undefined)
@@ -52,33 +64,8 @@ export class VoiceChannel extends GuildChannel {
 
     if (data.user_limit !== undefined)
       this.userLimit = data.user_limit;
-  }
 
-  permissionsOf(memberID: string) {
-    if (!this.guild) throw new TypeError('Guild isn\'t cached');
-
-    const member = this.guild.members.get(memberID);
-    if (member === null) return new Permission('0');
-
-    let permission = member.permission.allow;
-    if (permission & Permissions.administrator) return new Permission(String(Permissions.all));
-
-    let overwrite = this.permissionOverwrites.get(this.guild.id);
-    if (overwrite) permission = (permission & ~overwrite.permissions.denied) | overwrite.permissions.allow;
-
-    let deny = 0;
-    let allow = 0;
-    for (const role of member.roles) {
-      if ((overwrite = this.permissionOverwrites.get(role.id)) !== undefined) {
-        deny |= overwrite.permissions.denied;
-        allow |= overwrite.permissions.allow;
-      }
-    }
-
-    permission = (permission & ~deny) | allow;
-    overwrite = this.permissionOverwrites.get(memberID);
-
-    if (overwrite !== undefined) permission = (permission & ~overwrite.permissions.denied) | overwrite.permissions.allow;
-    return new Permission(String(permission));
+    if (data.rtc_region !== undefined)
+      this.region = data.rtc_region;
   }
 }

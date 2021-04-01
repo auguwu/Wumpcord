@@ -23,9 +23,11 @@
 import type WebSocketClient from '../../gateway/WebSocketClient';
 import { PermissionOverwrite } from '../PermissionOverwrite';
 import type { APIChannel } from 'discord-api-types/v8';
+import { Permissions } from '../../Constants';
 import { Collection } from '@augu/collections';
 import type { Guild } from '../Guild';
 import { Channel } from '../Channel';
+import Permission from '../../util/Permissions';
 
 export default class GuildChannel extends Channel {
   /** List of permission overwrites for this [GuildChannel] */
@@ -88,5 +90,33 @@ export default class GuildChannel extends Channel {
         this.permissionOverwrites?.set(overwrite.id, new PermissionOverwrite(overwrite));
       }
     }
+  }
+
+  permissionsOf(memberID: string) {
+    if (!this.guild) throw new TypeError('Guild isn\'t cached');
+
+    const member = this.guild.members.get(memberID);
+    if (member === null) return new Permission('0');
+
+    let permission = member.permission.allow;
+    if (permission & Permissions.administrator) return new Permission(String(Permissions.all));
+
+    let overwrite = this.permissionOverwrites.get(this.guild.id);
+    if (overwrite) permission = (permission & ~overwrite.permissions.denied) | overwrite.permissions.allow;
+
+    let deny = 0;
+    let allow = 0;
+    for (const role of member.roles) {
+      if ((overwrite = this.permissionOverwrites.get(role.id)) !== undefined) {
+        deny |= overwrite.permissions.denied;
+        allow |= overwrite.permissions.allow;
+      }
+    }
+
+    permission = (permission & ~deny) | allow;
+    overwrite = this.permissionOverwrites.get(memberID);
+
+    if (overwrite !== undefined) permission = (permission & ~overwrite.permissions.denied) | overwrite.permissions.allow;
+    return new Permission(String(permission));
   }
 }

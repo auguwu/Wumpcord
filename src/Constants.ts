@@ -137,6 +137,7 @@ export enum Permissions {
   manageWebhooks       = 1 << 29,
   manageEmojis         = 1 << 30,
   stageRequestToSpeak  = 4294967296,
+  stageModerator       = 1 << 4 | 1 << 22 | 1 << 24,
   all                  = 0b1111111111111111111111111111111,
   allGuild             = 0b1111100000010000000000010111111,
   allText              = 0b0110000000001111111110001010001,
