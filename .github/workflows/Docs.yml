@@ -19,5 +19,10 @@ on:
       - 'tsconfig.json'
       - 'tsconfig.test.json'
 jobs:
-  deploy-docs:
+  deploy:
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
+# haha yes
