@@ -247,22 +247,22 @@ export enum UserFlags {
 }
 
 export enum GatewayIntents {
-  guilds                 = 1 << 0,
-  guildMembers           = 1 << 1,
-  guildBans              = 1 << 2,
-  guildEmojis            = 1 << 3,
-  guildIntegrations      = 1 << 4,
-  guildWebhooks          = 1 << 5,
-  guildInvites           = 1 << 6,
-  guildVoiceStates       = 1 << 7,
-  guildPresences         = 1 << 8,
-  guildMessages          = 1 << 9,
-  guildMessageReactions  = 1 << 10,
-  guildMessageTyping     = 1 << 11,
-  directMessages         = 1 << 12,
-  directMessageReactions = 1 << 13,
-  directMessageTyping    = 1 << 14,
-  privileged             = guildMembers | guildPresences
+  GUILDS                   = 1 << 0,
+  GUILD_MEMBERS            = 1 << 1,
+  GUILD_BANS               = 1 << 2,
+  GUILD_EMOJIS             = 1 << 3,
+  GUILD_INTEGRATIONS       = 1 << 4,
+  GUILD_WEBHOOKS           = 1 << 5,
+  GUILD_INVITES            = 1 << 6,
+  GUILD_VOICE_STATES       = 1 << 7,
+  GUILD_PRESENCES          = 1 << 8,
+  GUILD_MESSAGES           = 1 << 9,
+  GUILD_MESSAGE_REACTIONS  = 1 << 10,
+  GUILD_MESSAGE_TYPING     = 1 << 11,
+  DIRECT_MESSAGES          = 1 << 12,
+  DIRECT_MESSAGE_REACTIONS = 1 << 13,
+  DIRECT_MESSAGE_TYPING    = 1 << 14,
+  PRIVILEGED               = GUILD_MEMBERS | GUILD_PRESENCES
 }
 
 export enum GatewayEvents {
