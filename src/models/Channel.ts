@@ -60,12 +60,12 @@ export class Channel extends Base<APIPartialChannel> {
     switch (data.type) {
       case 0: return new TextChannel(client, data);
       case 1: return new DMChannel(client, data);
-      case 2: return new VoiceChannel(client, data);
+      case 2: return new VoiceChannel(data);
       case 3: return new GroupChannel(client, data);
-      case 4: return new CategoryChannel(client, data);
+      case 4: return new CategoryChannel(data);
       case 5: return new NewsChannel(client, data);
       case 6: return new StoreChannel(client, data);
-      case 13: return new StageChannel(client, data);
+      case 13: return new StageChannel(data);
       default:
         client.debug(`Unknown Type [${data.type}]`, 'Channel type is not available on this version of Wumpcord you\'re running. Switch to indev branch or submit a PR?');
         return null;

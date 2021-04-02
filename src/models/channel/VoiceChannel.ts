@@ -50,8 +50,8 @@ export class VoiceChannel extends GuildChannel {
    * @param client The [WebSocket] client attached to this [VoiceChannel]
    * @param data The data from Discord
    */
-  constructor(client: WebSocketClient, data: APIVoiceChannel) {
-    super(client, data);
+  constructor(data: APIVoiceChannel) {
+    super(data);
 
     this.patch(data);
   }

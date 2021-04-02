@@ -49,7 +49,7 @@ export class DMChannel extends TextableChannel<APIChannel> {
     if (data.last_message_id !== undefined)
       this.lastMessageID = data.last_message_id;
 
-    this.recipient = this.client.users.add(new User(this.client, data.recipients![0]));
+    this.recipient = this['client'].users.add(new User(this['client'], data.recipients![0]));
   }
 
   toString() {

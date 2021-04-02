@@ -23,7 +23,6 @@
 /* eslint-disable camelcase */
 
 import type { APIChannel } from 'discord-api-types';
-import WebSocketClient from '../../gateway/WebSocketClient';
 import GuildChannel from './GuildChannel';
 
 interface APIStageChannel extends Pick<APIChannel, 'guild_id' | 'position' | 'permission_overwrites' | 'name' | 'topic' | 'nsfw' | 'bitrate' | 'user_limit' | 'id' | 'type'> {
@@ -51,8 +50,8 @@ export class StageChannel extends GuildChannel {
    * @param client The [[WebSocketClient]] attached
    * @param data The data passed in from Discord
    */
-  constructor(client: WebSocketClient, data: APIStageChannel) {
-    super(client, data);
+  constructor(data: APIStageChannel) {
+    super(data);
 
     this.patch(data);
   }

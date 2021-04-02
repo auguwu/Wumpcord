@@ -61,7 +61,6 @@ export default class GuildTextableChannel extends TextableChannel<APIChannel> {
 
     this.permissionOverwrites = new Collection();
     this.guildID = data.guild_id;
-    this.client = client;
 
     this.patch(data);
   }
@@ -95,11 +94,11 @@ export default class GuildTextableChannel extends TextableChannel<APIChannel> {
     const member = this.guild.members.get(memberID);
     if (member === null) return new Permission('0');
 
-    let permission = member.permission.allow;
+    let permission = BigInt(member.permission.allow);
     if (permission & Permissions.administrator) return new Permission(String(Permissions.all));
 
     let overwrite = this.permissionOverwrites.get(this.guild.id);
-    if (overwrite) permission = (permission & ~overwrite.permissions.denied) | overwrite.permissions.allow;
+    if (overwrite) permission = (permission & BigInt(~overwrite.permissions.denied)) | BigInt(overwrite.permissions.allow);
 
     let deny = 0;
     let allow = 0;
@@ -110,10 +109,10 @@ export default class GuildTextableChannel extends TextableChannel<APIChannel> {
       }
     }
 
-    permission = (permission & ~deny) | allow;
+    permission = (permission & BigInt(~deny)) | BigInt(allow);
     overwrite = this.permissionOverwrites.get(memberID);
 
-    if (overwrite !== undefined) permission = (permission & ~overwrite.permissions.denied) | overwrite.permissions.allow;
+    if (overwrite !== undefined) permission = (permission & BigInt(~overwrite.permissions.denied)) | BigInt(overwrite.permissions.allow);
     return new Permission(String(permission));
   }
 }

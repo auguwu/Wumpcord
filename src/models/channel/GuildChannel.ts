@@ -45,9 +45,6 @@ export default class GuildChannel extends Channel {
   /** The guild that this [GuildChannel] is attached to */
   public guild!: Guild;
 
-  /** The [WebSocketClient] attached */
-  public client: WebSocketClient;
-
   /** The name of this [GuildChannel] instance */
   public name!: string;
 
@@ -59,12 +56,11 @@ export default class GuildChannel extends Channel {
    * @param client The WebSocket client attached
    * @param data The data supplied from Discord
    */
-  constructor(client: WebSocketClient, data: APIChannel) {
+  constructor(data: APIChannel) {
     super(data);
 
     this.permissionOverwrites = new Collection();
     this.guildID = data.guild_id;
-    this.client = client;
 
     this.patch(data);
   }
@@ -98,11 +94,11 @@ export default class GuildChannel extends Channel {
     const member = this.guild.members.get(memberID);
     if (member === null) return new Permission('0');
 
-    let permission = member.permission.allow;
+    let permission = BigInt(member.permission.allow);
     if (permission & Permissions.administrator) return new Permission(String(Permissions.all));
 
     let overwrite = this.permissionOverwrites.get(this.guild.id);
-    if (overwrite) permission = (permission & ~overwrite.permissions.denied) | overwrite.permissions.allow;
+    if (overwrite) permission = (permission & BigInt(~overwrite.permissions.denied)) | BigInt(overwrite.permissions.allow);
 
     let deny = 0;
     let allow = 0;
@@ -113,10 +109,10 @@ export default class GuildChannel extends Channel {
       }
     }
 
-    permission = (permission & ~deny) | allow;
+    permission = (permission & BigInt(~deny)) | BigInt(allow);
     overwrite = this.permissionOverwrites.get(memberID);
 
-    if (overwrite !== undefined) permission = (permission & ~overwrite.permissions.denied) | overwrite.permissions.allow;
+    if (overwrite !== undefined) permission = (permission & BigInt(~overwrite.permissions.denied)) | BigInt(overwrite.permissions.allow);
     return new Permission(String(permission));
   }
 }
