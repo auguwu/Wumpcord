@@ -22,20 +22,17 @@
 
 /* eslint-disable camelcase */
 
-import type WebSocketClient from '../../gateway/WebSocketClient';
-import type { APIChannel } from 'discord-api-types/v8';
-import { Permissions } from '../../Constants';
+import type { APIChannel } from 'discord-api-types';
 import GuildChannel from './GuildChannel';
-import Permission from '../../util/Permissions';
 
-interface APIVoiceChannel extends Pick<APIChannel, 'guild_id' | 'position' | 'permission_overwrites' | 'name' | 'topic' | 'nsfw' | 'bitrate' | 'user_limit' | 'id' | 'type'> {
+interface APIStageChannel extends Pick<APIChannel, 'guild_id' | 'position' | 'permission_overwrites' | 'name' | 'topic' | 'nsfw' | 'bitrate' | 'user_limit' | 'id' | 'type'> {
   /**
    * The voice region of the stage channel. (`null`: automatic based on the guild)
    */
   rtc_region: string | null;
 }
 
-export class VoiceChannel extends GuildChannel {
+export class StageChannel extends GuildChannel {
   /** The limit that users can join this [VoiceChannel] */
   public userLimit?: number;
 
@@ -45,19 +42,26 @@ export class VoiceChannel extends GuildChannel {
   /** The voice region of the stage channel. (`null`: automatic based on the guild) */
   public region!: string | null;
 
+  /** The topic people are discussing in this [[StageChannel]]. `null` is set when there is nobody in the stage channel. */
+  public topic!: string | null;
+
   /**
-   * Creates a new [VoiceChannel] instance
-   * @param client The [WebSocket] client attached to this [VoiceChannel]
-   * @param data The data from Discord
+   * Constructs a new [[StageChannel]] instance
+   * @param client The [[WebSocketClient]] attached
+   * @param data The data passed in from Discord
    */
-  constructor(data: APIVoiceChannel) {
+  constructor(data: APIStageChannel) {
     super(data);
 
     this.patch(data);
   }
 
-  patch(data: APIVoiceChannel) {
-    super.patch(data);
+  /**
+   * Patch any updates from Discord
+   * @param data The partial data
+   */
+  patch(data: Partial<APIStageChannel>) {
+    super.patch(data as APIStageChannel);
 
     if (data.bitrate !== undefined)
       this.bitrate = data.bitrate;
@@ -67,5 +71,8 @@ export class VoiceChannel extends GuildChannel {
 
     if (data.rtc_region !== undefined)
       this.region = data.rtc_region;
+
+    if (data.topic !== undefined)
+      this.topic = data.topic;
   }
 }

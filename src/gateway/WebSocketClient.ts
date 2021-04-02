@@ -103,16 +103,8 @@ interface EntityEvents {
   presenceUpdate(event: events.PresenceUpdateEvent): void;
   typingStart(event: events.TypingStartEvent): void;
   userUpdate(event: events.UserUpdateEvent): void;
-
-  raw(
-    type: string,
-    data: object // TODO: add safety to this
-  ): void;
-
-  rawShard(
-    id: number,
-    data: object
-  ): void;
+  unknown(id: number, data: object): void;
+  rawWS(id: number, data: discord.GatewayReceivePayload): void;
 }
 
 /**
@@ -161,6 +153,9 @@ export default class WebSocketClient<
   constructor(options: Options) {
     super();
 
+    if (options.intents !== undefined && options.ws?.intents !== undefined)
+      throw new TypeError('[options.intents] and [options.ws.intents] cannot clash into each other, use [options.intents]');
+
     this.options = Util.merge(<any> options, {
       sweepUnneededCacheIn: 360000, // 1 hour
       populatePresences: false,
@@ -175,6 +170,7 @@ export default class WebSocketClient<
       getAllUsers: false,
       shardCount: 'auto',
       strategy: 'json',
+      intents: [],
       token: options.token,
       ws: {
         guildSubscriptions: true,
@@ -182,7 +178,6 @@ export default class WebSocketClient<
         connectTimeout: 30000,
         clientOptions: undefined,
         compress: false,
-        intents: [],
         tries: 10
       }
     });
@@ -205,6 +200,30 @@ export default class WebSocketClient<
         this._sweepInterval = setInterval(this._unsweep.bind(this)).unref();
       }
     });
+  }
+
+  /**
+   * Returns the intents by it's numeric value
+   */
+  get intents() {
+    const intents = this.options.ws!.intents !== undefined ? this.options.ws!.intents : this.options.intents!;
+
+    if (typeof intents === 'undefined') return 0;
+    else if (typeof intents === 'number') return intents;
+    else {
+      let bitfield = 0;
+      for (let i = 0; i < intents.length; i++) {
+        const intent = intents[i];
+        if (typeof intent === 'number') {
+          bitfield |= intent;
+        } else {
+          if (!Constants.GatewayIntents.hasOwnProperty(intent)) continue;
+          bitfield |= Constants.GatewayIntents[intent];
+        }
+      }
+
+      return bitfield;
+    }
   }
 
   private _unsweep() {
@@ -269,28 +288,6 @@ export default class WebSocketClient<
   }
 
   /**
-   * Returns the intents by it's numeric value
-   */
-  get intents() {
-    if (typeof this.options.ws!.intents === 'undefined') return 0;
-    else if (typeof this.options.ws!.intents === 'number') return this.options.ws!.intents;
-    else {
-      let intents = 0;
-      for (let i = 0; i < this.options.ws!.intents.length; i++) {
-        const intent = this.options.ws!.intents[i];
-        if (typeof intent === 'number') {
-          intents |= intent;
-        } else {
-          if (!Constants.GatewayIntents.hasOwnProperty(intent)) continue;
-          intents |= Constants.GatewayIntents[intent] as any;
-        }
-      }
-
-      return intents;
-    }
-  }
-
-  /**
    * Returns the bot's gateway information
    */
   getBotGateway() {
@@ -311,7 +308,7 @@ export default class WebSocketClient<
   }
 
   /**
-   * Returns the shard information
+   * Returns shard info for the bot
    */
   async getShardInfo(): Promise<types.ShardInfo> {
     const data = this.options.shardCount === 'auto' ?
@@ -337,15 +334,22 @@ export default class WebSocketClient<
     };
   }
 
+  /**
+   * Requests all guild members.
+   *
+   * @remarks
+   * This function is O(N) time-complexity. Larger the guilds, larger
+   * it takes to calculate.
+   */
   async requestGuildMembers() {
-    if (!(this.intents & Constants.GatewayIntents.guildMembers)) {
+    if (!(this.intents & Constants.GatewayIntents.GUILD_MEMBERS)) {
       this.debug('Get Guild Members', 'Missing `guildMembers` intent, skipping');
       return;
     }
 
     const promises = this.guilds.cache.map<Promise<Collection<string, GuildMember> | null>>(guild => {
       if (!guild.unavailable) {
-        if (this.options.populatePresences && !(this.intents & Constants.GatewayIntents.guildPresences)) {
+        if (this.options.populatePresences && !(this.intents & Constants.GatewayIntents.GUILD_PRESENCES)) {
           this.debug('Get Guild Members | Populate Presences', 'Missing `guildPresences` intent');
           this.options.populatePresences = false;
         }
@@ -379,6 +383,10 @@ export default class WebSocketClient<
     });
   }
 
+  /**
+   * Disconnects the bot from Discord
+   * @param reconnect If we should reconnect all shards again
+   */
   disconnect(reconnect: boolean = false) {
     if (reconnect) {
       this.debug('End Of Life', 'Reconnecting all shards to Discord...');
@@ -396,6 +404,11 @@ export default class WebSocketClient<
     this.shards.clear();
   }
 
+  /**
+   * Sets the status of the bot on all shards
+   * @param status The online status to use
+   * @param options Any additional options to use
+   */
   setStatus(status: types.OnlineStatus, options: types.SendActivityOptions) {
     for (const shard of this.shards.values()) shard.setStatus(status, options);
   }

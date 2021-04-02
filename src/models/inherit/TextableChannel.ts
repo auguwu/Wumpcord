@@ -20,20 +20,15 @@
  * SOFTWARE.
  */
 
-import { APIMessage, APIPartialChannel, APIWebhook, RESTPostAPIChannelMessageJSONBody, RESTPostAPIChannelMessagesBulkDeleteJSONBody } from 'discord-api-types';
+import type { APIMessage, APIPartialChannel, APIWebhook, RESTPostAPIChannelMessageJSONBody, RESTPostAPIChannelMessagesBulkDeleteJSONBody } from 'discord-api-types';
 import type { MessageContent, MessageContentOptions } from '../../types';
 import MessageCollector, { Filter } from '../util/MessageCollector';
-import type { PermissionOverwrite } from '../PermissionOverwrite';
 import ChannelMessagesManager from '../../managers/ChannelMessagesManager';
-import type { GuildMember } from '..';
-import { Permissions } from '../../Constants';
 import WebSocketClient from '../../gateway/WebSocketClient';
 import { Message } from '../Message';
 import { Channel } from '../Channel';
-import Permission from '../../util/Permissions';
-import Util from '../../util';
-import { Guild } from '../Guild';
 import { Webhook } from '../Webhook';
+import Util from '../../util';
 
 interface GetMessagesOptions {
   around?: string;
@@ -41,10 +36,10 @@ interface GetMessagesOptions {
   after?: string;
 }
 
-export default class TextableChannel<T extends APIPartialChannel> extends Channel {
-  public collector: MessageCollector;
+export default class TextableChannel<T extends APIPartialChannel = APIPartialChannel> extends Channel {
+  private collector: MessageCollector;
   public messages: ChannelMessagesManager;
-  public client: WebSocketClient;
+  private client: WebSocketClient;
 
   constructor(client: WebSocketClient, data: T) {
     super(data);
@@ -109,36 +104,6 @@ export default class TextableChannel<T extends APIPartialChannel> extends Channe
       endpoint: `/channels/${this.id}/messages/pins`,
       method: 'GET'
     }).then(data => data.map(val => new Message(this.client, val)));
-  }
-
-  permissionsOf(memberID: string) {
-    const self = this as any;
-    if (!self.guild) throw new TypeError(`TextableChannel "${this.constructor.name}" is not a Guild channel.`);
-
-    const guild: Guild = self.guild;
-    const member: GuildMember | null = self.guild.members.get(memberID);
-    if (member === null) return new Permission('0');
-
-    let permission = member.permission.allow;
-    if (permission & Permissions.administrator) return new Permission(String(Permissions.all));
-
-    let overwrite: PermissionOverwrite = (this as any).permissionOverwrites.get(guild?.id ?? self.guildID);
-    if (overwrite) permission = (permission & ~overwrite.permissions.denied) | overwrite.permissions.allow;
-
-    let deny = 0;
-    let allow = 0;
-    for (const role of member.roles) {
-      if ((overwrite = self.permissionOverwrites.get(role.id)) !== undefined) {
-        deny |= overwrite.permissions.denied;
-        allow |= overwrite.permissions.allow;
-      }
-    }
-
-    permission = (permission & ~deny) | allow;
-    overwrite = self.permissionOverwrites.get(memberID);
-
-    if (overwrite !== undefined) permission = (permission & ~overwrite.permissions.denied) | overwrite.permissions.allow;
-    return new Permission(String(permission));
   }
 
   getWebhooks() {

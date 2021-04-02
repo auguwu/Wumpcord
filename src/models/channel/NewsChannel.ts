@@ -40,7 +40,7 @@ export class NewsChannel extends GuildTextableChannel {
    * @returns The result, if it was a success or not
    */
   follow(channelID: string) {
-    return this.client.rest.dispatch<FollowedChannel, { webhook_channel_id: string }>({
+    return this['client'].rest.dispatch<FollowedChannel, { webhook_channel_id: string }>({
       endpoint: `/channels/${this.id}/followers`,
       method: 'post',
       data: {
@@ -57,17 +57,17 @@ export class NewsChannel extends GuildTextableChannel {
    * @returns A new [Message] instance indicating it was sent
    */
   crosspost(messageID: string, content: MessageContent, options?: MessageContentOptions) {
-    const data = Util.formatMessage(this.client, content, options);
+    const data = Util.formatMessage(this['client'], content, options);
     const file = data.file;
 
     // delete it so it doesn't bleed when sending
     delete data.file;
 
-    return this.client.rest.dispatch<APIMessage, RESTPostAPIChannelMessageJSONBody>({
+    return this['client'].rest.dispatch<APIMessage, RESTPostAPIChannelMessageJSONBody>({
       endpoint: `/channels/${this.id}/messages/${messageID}/crosspost`,
       method: 'post',
       file,
       data
-    }).then(data => new Message(this.client, data));
+    }).then(data => new Message(this['client'], data));
   }
 }

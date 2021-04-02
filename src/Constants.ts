@@ -104,43 +104,46 @@ export enum OPCodes {
   SyncCall
 }
 
-export enum Permissions {
-  createInstantInvite  = 1,
-  kickMembers          = 1 << 1,
-  banMembers           = 1 << 2,
-  administrator        = 1 << 3,
-  manageChannels       = 1 << 4,
-  manageGuild          = 1 << 5,
-  addReactions         = 1 << 6,
-  viewAuditLogs        = 1 << 7,
-  voicePrioritySpeaker = 1 << 8,
-  stream               = 1 << 9,
-  readMessages         = 1 << 10,
-  sendMessages         = 1 << 11,
-  sendTTSMessages      = 1 << 12,
-  manageMessages       = 1 << 13,
-  embedLinks           = 1 << 14,
-  attachFiles          = 1 << 15,
-  readMessageHistory   = 1 << 16,
-  mentionEveryone      = 1 << 17,
-  externalEmojis       = 1 << 18,
-  viewGuildInsights    = 1 << 19,
-  voiceConnect         = 1 << 20,
-  voiceSpeak           = 1 << 21,
-  voiceMuteMembers     = 1 << 22,
-  voiceDeafenMembers   = 1 << 23,
-  voiceMoveMembers     = 1 << 24,
-  voiceUseVAD          = 1 << 25,
-  changeNickname       = 1 << 26,
-  manageNicknames      = 1 << 27,
-  manageRoles          = 1 << 28,
-  manageWebhooks       = 1 << 29,
-  manageEmojis         = 1 << 30,
-  all                  = 0b1111111111111111111111111111111,
-  allGuild             = 0b1111100000010000000000010111111,
-  allText              = 0b0110000000001111111110001010001,
-  allVoice             = 0b0110011111100000000001100010001
-}
+export const Permissions = {
+  createInstantInvite:  1n,
+  kickMembers:          1n << 1n,
+  banMembers:           1n << 2n,
+  administrator:        1n << 3n,
+  manageChannels:       1n << 4n,
+  manageGuild:          1n << 5n,
+  addReactions:         1n << 6n,
+  viewAuditLogs:        1n << 7n,
+  voicePrioritySpeaker: 1n << 8n,
+  stream:               1n << 9n,
+  readMessages:         1n << 10n,
+  sendMessages:         1n << 11n,
+  sendTTSMessages:      1n << 12n,
+  manageMessages:       1n << 13n,
+  embedLinks:           1n << 14n,
+  attachFiles:          1n << 15n,
+  readMessageHistory:   1n << 16n,
+  mentionEveryone:      1n << 17n,
+  externalEmojis:       1n << 18n,
+  viewGuildInsights:    1n << 19n,
+  voiceConnect:         1n << 20n,
+  voiceSpeak:           1n << 21n,
+  voiceMuteMembers:     1n << 22n,
+  voiceDeafenMembers:   1n << 23n,
+  voiceMoveMembers:     1n << 24n,
+  voiceUseVAD:          1n << 25n,
+  changeNickname:       1n << 26n,
+  manageNicknames:      1n << 27n,
+  manageRoles:          1n << 28n,
+  manageWebhooks:       1n << 29n,
+  manageEmojis:         1n << 30n,
+  useSlashCommands:     1n << 31n,
+  stageRequestToSpeak:  1n << 32n,
+  stageModerator:       1n << 4n | 1n << 22n | 1n << 24n,
+  all:                  BigInt(0b1111111111111111111111111111111),
+  allGuild:             BigInt(0b1111100000010000000000010111111),
+  allText:              BigInt(0b0110000000001111111110001010001),
+  allVoice:             BigInt(0b0110011111100000000001100010001)
+} as const;
 
 export enum AuditLogAction {
   GuildUpdate = 1,
@@ -222,42 +225,44 @@ export const ChannelTypesObject = {
   3: 'group',
   4: 'category',
   5: 'news',
-  6: 'store'
+  6: 'store',
+  13: 'stage'
 } as const;
 
 export enum UserFlags {
   None,
-  Staff = 1 << 0,
-  Partner = 1 << 1,
+  Staff           = 1 << 0,
+  Partner         = 1 << 1,
   HypesquadEvents = 1 << 2,
   BugHunterLevel1 = 1 << 3,
-  Bravery = 1 << 6,
-  Brillance = 1 << 7,
-  Balance = 1 << 8, // the best house dont @ me <3
-  EarlySupporter = 1 << 9,
-  TeamUser = 1 << 10,
-  System = 1 << 12,
+  Bravery         = 1 << 6,
+  Brillance       = 1 << 7,
+  Balance         = 1 << 8, // the best house dont @ me <3
+  EarlySupporter  = 1 << 9,
+  TeamUser        = 1 << 10,
+  System          = 1 << 12,
   BugHunterLevel2 = 1 << 14,
-  VerifiedBot = 1 << 16,
-  VerifiedBotDev = 1 << 17
+  VerifiedBot     = 1 << 16,
+  VerifiedBotDev  = 1 << 17
 }
 
 export enum GatewayIntents {
-  guilds                 = 1 << 0,
-  guildMembers           = 1 << 1,
-  guildBans              = 1 << 2,
-  guildEmojis            = 1 << 3,
-  guildIntegrations      = 1 << 4,
-  guildWebhooks          = 1 << 5,
-  guildInvites           = 1 << 6,
-  guildVoiceStates       = 1 << 7,
-  guildPresences         = 1 << 8,
-  guildMessages          = 1 << 9,
-  guildMessageReactions  = 1 << 10,
-  guildMessageTyping     = 1 << 11,
-  directMessages         = 1 << 12,
-  directMessageReactions = 1 << 13,
-  directMessageTyping    = 1 << 14
+  GUILDS                   = 1 << 0,
+  GUILD_MEMBERS            = 1 << 1,
+  GUILD_BANS               = 1 << 2,
+  GUILD_EMOJIS             = 1 << 3,
+  GUILD_INTEGRATIONS       = 1 << 4,
+  GUILD_WEBHOOKS           = 1 << 5,
+  GUILD_INVITES            = 1 << 6,
+  GUILD_VOICE_STATES       = 1 << 7,
+  GUILD_PRESENCES          = 1 << 8,
+  GUILD_MESSAGES           = 1 << 9,
+  GUILD_MESSAGE_REACTIONS  = 1 << 10,
+  GUILD_MESSAGE_TYPING     = 1 << 11,
+  DIRECT_MESSAGES          = 1 << 12,
+  DIRECT_MESSAGE_REACTIONS = 1 << 13,
+  DIRECT_MESSAGE_TYPING    = 1 << 14,
+  PRIVILEGED               = GUILD_MEMBERS | GUILD_PRESENCES
 }
 
 export enum GatewayEvents {
@@ -315,10 +320,4 @@ export enum ShardStatus {
   Nearly           = 'nearly',
   Dead             = 'dead',
   WaitingForGuilds = 'waiting_for_guilds'
-}
-
-export enum StickerType {
-  PNG,
-  APNG,
-  Lottie
 }

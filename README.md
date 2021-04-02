@@ -32,8 +32,8 @@ You can join the server below and join in #support under the **Wumpcord** catego
 ```js
 const { Client } = require('wumpcord');
 const client = new Client({
-  token: '',
-  ws: { intents: ['guilds', 'guildMessages'] }
+  intents: ['guilds', 'guildMessages'],
+  token: ''
 });
 
 client.on('message', event => {
