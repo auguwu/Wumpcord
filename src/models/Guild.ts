@@ -373,7 +373,7 @@ export class Guild extends Base<IGuild> {
     if (data.voice_states !== undefined) {
       for (let i = 0; i < data.voice_states.length; i++) {
         const voiceState = data.voice_states[i];
-        this.voiceStates.add(new VoiceState({ guild_id: this.id, ...voiceState }));
+        this.voiceStates.add(new VoiceState(this.client, { guild_id: this.id, ...voiceState }));
       }
     }
 
