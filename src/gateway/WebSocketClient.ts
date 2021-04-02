@@ -342,14 +342,14 @@ export default class WebSocketClient<
    * it takes to calculate.
    */
   async requestGuildMembers() {
-    if (!(this.intents & Constants.GatewayIntents.guildMembers)) {
+    if (!(this.intents & Constants.GatewayIntents.GUILD_MEMBERS)) {
       this.debug('Get Guild Members', 'Missing `guildMembers` intent, skipping');
       return;
     }
 
     const promises = this.guilds.cache.map<Promise<Collection<string, GuildMember> | null>>(guild => {
       if (!guild.unavailable) {
-        if (this.options.populatePresences && !(this.intents & Constants.GatewayIntents.guildPresences)) {
+        if (this.options.populatePresences && !(this.intents & Constants.GatewayIntents.GUILD_PRESENCES)) {
           this.debug('Get Guild Members | Populate Presences', 'Missing `guildPresences` intent');
           this.options.populatePresences = false;
         }
