@@ -39,7 +39,7 @@
     "@augu/eslint-config": "1.10.0",
     "@augu/tsconfig": "1.0.1",
     "@types/node": "14.14.37",
-    "@types/ws": "7.4.0",
+    "@types/ws": "7.4.1",
     "@typescript-eslint/eslint-plugin": "4.20.0",
     "@typescript-eslint/parser": "4.20.0",
     "eledoc": "0.2.1",
