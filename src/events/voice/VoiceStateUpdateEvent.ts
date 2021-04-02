@@ -53,19 +53,11 @@ export default class VoiceStateUpdateEvent extends Event<GatewayVoiceStateUpdate
       ? this.client.guilds.get(this.data.guild_id) || { id: this.data.guild_id }
       : null;
 
-    const voiceState = new VoiceState(this.data);
+    const voiceState = new VoiceState(this.client, this.data);
     this.$refs = {
       channel,
       guild,
       state: voiceState
     };
-
-    if (channel !== null && guild !== null && (channel as AnyChannel).type === 'voice') {
-      this.shard.debug('Checking if there is an active voice connection...');
-
-      //const connection = this.client.voiceConnections.get(guild.id);
-      //if (connection !== undefined)
-      //  connection.onVoiceStateUpdate(this.data);
-    }
   }
 }

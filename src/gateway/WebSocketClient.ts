@@ -103,16 +103,8 @@ interface EntityEvents {
   presenceUpdate(event: events.PresenceUpdateEvent): void;
   typingStart(event: events.TypingStartEvent): void;
   userUpdate(event: events.UserUpdateEvent): void;
-
-  raw(
-    type: string,
-    data: object // TODO: add safety to this
-  ): void;
-
-  rawShard(
-    id: number,
-    data: object
-  ): void;
+  unknown(id: number, data: object): void;
+  rawWS(id: number, data: discord.GatewayReceivePayload): void;
 }
 
 /**

@@ -63,12 +63,13 @@ export default class ShardManager extends Collection<number, WebSocketShard> {
 
     const shard = new WebSocketShard(this.client, id, strategy);
     shard
-      .on('unknown', (id, data) => this.client.emit('rawShard', id, data))
+      .on('unknown', (id, data) => this.client.emit('unknown', id, data))
       .on('disconnect', (id) => this.client.emit('shardDisconnect', id))
       .on('establish', (id)  => this.client.emit('shardSpawn', id))
       .on('debug', (id, msg) => this.client.debug(`Shard #${id}`, msg))
       .on('error', (id, error) => this.client.emit('shardError', id, error))
       .on('close', (id, error, recoverable) => this.client.emit('shardClose', id, error, recoverable))
+      .on('raw', (id, packet) => this.client.emit('rawWS', id, packet as any))
       .on('ready', (id, unavailable) => {
         this.client.emit('shardReady', id, unavailable);
         this.checkReady();

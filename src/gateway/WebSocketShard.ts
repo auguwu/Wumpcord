@@ -55,6 +55,7 @@ interface WebSocketShardEvents {
   error(id: number, error: Error): void;
   disconnect(id: number): void;
   establish(id: number): void;
+  raw(id: number, packet: object): void;
 }
 
 export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
@@ -482,6 +483,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
     }
 
     if (data.op === 0) this.debug(`Received new gateway event "${(data as discord.GatewayDispatchPayload).t}"`);
+    this.emit('raw', this.id, data);
 
     switch (data.op as number) {
       case Constants.OPCodes.Event: {
@@ -854,7 +856,7 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
       } break;
 
       default:
-        this.client.emit('raw', data.t, data.d);
+        this.emit('unknown', this.id, data);
         break;
     }
   }

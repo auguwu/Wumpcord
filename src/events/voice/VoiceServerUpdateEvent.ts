@@ -50,7 +50,5 @@ export default class VoiceServerUpdateEvent extends Event<GatewayVoiceServerUpda
       guild: this.client.guilds.get(this.data.guild_id) || { id: this.data.guild_id },
       token: this.data.token
     };
-
-    //this.client.voiceConnections.onVoiceServerUpdate(this.data);
   }
 }
