@@ -20,11 +20,11 @@
  * SOFTWARE.
  */
 
-import DiscordRestValidationError from '../errors/DiscordRestValidationError';
-import RequestAbortedError from '../errors/RequestAbortedError';
-import DiscordRestError from '../errors/DiscordRestError';
-import DiscordAPIError from '../errors/DiscordAPIError';
-import RatelimitBucket from './RatelimitBucket';
+import { DiscordRestValidationError } from '../errors/DiscordRestValidationError';
+import { RequestAbortedError } from '../errors/RequestAbortedError';
+import { RatelimitBucket } from './RatelimitBucket';
+import { DiscordRestError } from '../errors/DiscordRestError';
+import { DiscordAPIError } from '../errors/DiscordAPIError';
 import * as Constants from '../Constants';
 import type Client from '../gateway/WebSocketClient';
 import * as types from '../types';
@@ -32,31 +32,27 @@ import { Queue } from '@augu/collections';
 import FormData from 'form-data';
 import https from 'https';
 import Util from '../util';
-import { runInThisContext } from 'node:vm';
 
+/**
+ * The http method verb used
+ */
 export type HttpMethod =
   | 'GET'
   | 'POST'
   | 'PUT'
   | 'PATCH'
   | 'DELETE'
-  | 'CONNECT'
-  | 'OPTIONS'
-  | 'TRACE'
   | 'get'
   | 'post'
   | 'put'
   | 'patch'
-  | 'delete'
-  | 'connect'
-  | 'options'
-  | 'trace';
+  | 'delete';
 
 /**
  * Represents a dispatched request
  */
 interface RequestDispatch<T = unknown> {
-  /** discord is bullshit so this is here because yes i mean- The audit log reason to show up */
+  /** A reason to put up in audit logs */
   auditLogReason?: string;
 
   /** The headers to send out */
@@ -75,8 +71,18 @@ interface RequestDispatch<T = unknown> {
   data?: T;
 }
 
-interface DiscordRequest<D = unknown> extends RequestDispatch<D> {
+/**
+ * Represents a promise to fulfill a request dispatch
+ */
+interface RequestDispatchPromise<D = unknown> extends RequestDispatch<D> {
+  /**
+   * Resolves the dispatch promise and returns the data from Discord
+   */
   resolve(value: D | PromiseLike<D>): void;
+
+  /**
+   * Rejects the dispatch promise and throws a error
+   */
   reject(error?: Error): void;
 }
 
@@ -86,7 +92,7 @@ const ContentMethods: readonly string[] = ['get', 'head', 'GET', 'HEAD'] as cons
 /**
  * Represents a class to handle requests to Discord
  */
-export default class RestClient {
+export class RestClient {
   protected _ratelimitTimes: { [x: string]: number } = {};
   protected _lockTimeout?: NodeJS.Timer;
 
@@ -103,7 +109,7 @@ export default class RestClient {
   public lastCallAt: number = -1;
 
   /** List of requests to dispatch */
-  private requests: Queue<DiscordRequest>;
+  private requests: Queue<RequestDispatchPromise>;
 
   /** If we are locked from making anymore requests */
   public locked: boolean;
@@ -138,7 +144,7 @@ export default class RestClient {
    */
   dispatch<TReturn, Data = unknown>(options: RequestDispatch<Data>) {
     return new Promise<TReturn>((resolve, reject) => {
-      const request: DiscordRequest = {
+      const request: RequestDispatchPromise = {
         headers: Util.get(options, 'headers', {}),
         endpoint: options.endpoint,
         method: options.method,

@@ -27,10 +27,10 @@ import { Permissions } from '../Constants';
  */
 export default class Permission {
   /** The bit for the allowed permission */
-  public allow: number;
+  public allow: bigint;
 
   /** The bit for the denied permission */
-  public denied: number;
+  public denied: bigint;
 
   /**
    * Utility to handle permissions
@@ -38,8 +38,8 @@ export default class Permission {
    * @param deny The denied permissions
    */
   constructor(allow: string, deny: string = '0') {
-    this.denied = Number(deny);
-    this.allow = Number(allow);
+    this.denied = BigInt(deny);
+    this.allow = BigInt(allow);
   }
 
   /**
@@ -63,7 +63,7 @@ export default class Permission {
    * Checks if `key` exists in the bitfield
    * @param key The key to check
    */
-  has(key: string) {
+  has(key: keyof typeof Permissions) {
     if (!Permissions.hasOwnProperty(key)) return false;
 
     return !!(this.allow & Permissions[key]);

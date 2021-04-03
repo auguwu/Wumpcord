@@ -51,7 +51,14 @@ export type GatewayIntent = 'guilds' | 'guildMembers' | 'guildBans' | 'guildEmoj
   | 'guildMessages' | 'guildMessageReactions' | 'directMessages' | 'directMessageTyping'
   | 'directMessageReactions';
 
+/**
+ * List of strategy types available
+ */
 export const StrategyTypes = ['etf', 'json'];
+
+/**
+ * List of uncoverable connection codes
+ */
 export const UnrecoverableCodes = [
   1005, // no idea
   4004, // unable to login
@@ -61,8 +68,19 @@ export const UnrecoverableCodes = [
   4014  // disallowed intents
 ];
 
+/**
+ * Returns the gateway version
+ */
 export const GatewayVersion = 8;
+
+/**
+ * Returns the REST version
+ */
 export const RestVersion = 8;
+
+/**
+ * List of acceptable image formats
+ */
 export const ImageFormats = [
   'png',
   'jpg',
@@ -71,22 +89,41 @@ export const ImageFormats = [
   'jpeg'
 ];
 
+/**
+ * The `User-Agent` header value in the [[RestClient]]
+ */
 export const UserAgent = `DiscordBot (https://github.com/auguwu/Wumpcord, v${version})`;
+
+/**
+ * CDN url for images, banners, etc
+ */
 export const CDNUrl = 'https://cdn.discordapp.com';
+
+/**
+ * REST API URL for interacting with Discord
+ */
 export const RestUrl = 'https://discord.com/api';
 
-// The first type index at 1, so it's gonna be null
+/**
+ * List of webhook types, the first type index at 1, so it's gonna be null
+ */
 export const WebhookTypes: [first: null, ...rest: string[]] = [null, 'Incoming', 'Channel Following'];
 
+/**
+ * List of activity statuses available
+ */
 export enum ActivityStatus {
   Playing,
   Streaming,
   Listening,
-  // 3 is hidden (Watching)
-  Custom = 4,
+  Watching,
+  Custom,
   Competing
 }
 
+/**
+ * List of OPCodes to send/receive to the gateway
+ */
 export enum OPCodes {
   Event,
   Heartbeat,
@@ -104,6 +141,9 @@ export enum OPCodes {
   SyncCall
 }
 
+/**
+ * List of Permissions available
+ */
 export const Permissions = {
   createInstantInvite:  1n,
   kickMembers:          1n << 1n,
@@ -145,6 +185,9 @@ export const Permissions = {
   allVoice:             BigInt(0b0110011111100000000001100010001)
 } as const;
 
+/**
+ * Represents the audit log action type
+ */
 export enum AuditLogAction {
   GuildUpdate = 1,
   ChannelCreate = 10,
@@ -183,6 +226,9 @@ export enum AuditLogAction {
   IntegrationDelete = 82
 }
 
+/**
+ * Messages flags for [[Message.flags]]
+ */
 export enum MessageFlags {
   Crossposted = 1 << 0,
   IsCrosspost = 1 << 1,
@@ -191,6 +237,9 @@ export enum MessageFlags {
   Urgent = 1 << 4
 }
 
+/**
+ * Message types for [[Message.type]]
+ */
 export enum MessageTypes {
   Default,
   RecipientAdd,
@@ -206,18 +255,14 @@ export enum MessageTypes {
   UserPremiumGuildSubscriptionTier3,
   ChannelFollowAdd,
   GuildDiscoveryDisqualified = 15,
-  GuildDiscoveryRequalified
+  GuildDiscoveryRequalified,
+  Reply = 19,
+  ApplicationCommand
 }
 
-export enum ChannelTypes {
-  Text,
-  DM,
-  Voice,
-  Group,
-  News,
-  Store
-}
-
+/**
+ * The channel types as their name
+ */
 export const ChannelTypesObject = {
   0: 'text',
   1: 'dm',
@@ -229,6 +274,9 @@ export const ChannelTypesObject = {
   13: 'stage'
 } as const;
 
+/**
+ * List of user flags available
+ */
 export enum UserFlags {
   None,
   Staff           = 1 << 0,
@@ -246,6 +294,9 @@ export enum UserFlags {
   VerifiedBotDev  = 1 << 17
 }
 
+/**
+ * List of gateway intents for [[ClientOptions.intents]] / [[WebSocketOptions.intents]]
+ */
 export enum GatewayIntents {
   GUILDS                   = 1 << 0,
   GUILD_MEMBERS            = 1 << 1,
@@ -265,6 +316,9 @@ export enum GatewayIntents {
   PRIVILEGED               = GUILD_MEMBERS | GUILD_PRESENCES
 }
 
+/**
+ * List of gateway events from the `Event` payload
+ */
 export enum GatewayEvents {
   Ready                      = 'READY',
   Resumed                    = 'RESUMED',
@@ -305,6 +359,9 @@ export enum GatewayEvents {
   ApplicationCommandUpdate   = 'APPLICATION_COMMAND_UPDATE'
 }
 
+/**
+ * Activity flags
+ */
 export enum ActivityFlags {
   Instance = 1 << 0,
   Join = 1 << 1,
@@ -314,6 +371,9 @@ export enum ActivityFlags {
   Play = 1 << 5
 }
 
+/**
+ * List of shard statuses for [[WebSocketShard.status]]
+ */
 export enum ShardStatus {
   Connected        = 'connected',
   Handshaking      = 'handshaking',

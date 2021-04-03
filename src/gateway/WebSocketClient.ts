@@ -22,14 +22,14 @@
 
 /* eslint-disable camelcase */
 
-import { Guild, GuildMember, SelfUser, User, VoiceChannel } from '../models';
+import { Guild, GuildMember, SelfUser, User } from '../models';
 import type { Collection } from '@augu/collections';
 import type * as discord from 'discord-api-types/v8';
 import type * as types from '../types';
 import * as Constants from '../Constants';
+import { RestClient } from '../rest/RestClient';
 import ShardManager from './ShardingManager';
 import { EventBus } from '@augu/utils';
-import RestClient from '../rest/RestClient';
 import Util from '../util';
 
 import ChannelManager from '../managers/ChannelManager';
@@ -109,6 +109,8 @@ interface EntityEvents {
 
 /**
  * Handles everything related to Discord and is the entrypoint to your Discord bot.
+ * @typeparam Options The WebSocket client options available, must extend [[types.ClientOptions]]
+ * @typeparam Events The events to attach to this [[WebSocketClient]], must extend [[WebSocketClientEvents]]
  */
 export default class WebSocketClient<
   Options extends types.ClientOptions = types.ClientOptions,

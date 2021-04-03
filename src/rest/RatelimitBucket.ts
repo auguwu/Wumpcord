@@ -21,11 +21,24 @@
  */
 
 import type { IncomingMessage } from 'http';
-import Util from '../util';
 
+/**
+ * Represents the ratelimit information for [[Ratelimit.handle]]
+ */
 export interface RatelimitInfo {
+  /**
+   * If we have been ratelimited or not
+   */
   ratelimited: boolean;
+
+  /**
+   * How many times Wumpcord can create a request until being hit
+   */
   remaining: number;
+
+  /**
+   * The reset duration in milliseconds
+   */
   resetTime: number;
 }
 
@@ -35,9 +48,7 @@ const calculate = (reset: number, serverDate: string) => new Date(reset * 1000).
 /**
  * Represents a bucket for handling ratelimiting with Discord
  */
-export default class RatelimitBucket {
-  private _globalTimer!: Promise<unknown> | undefined;
-
+export class RatelimitBucket {
   /** The remaining requests we can do before locking the rest client */
   private remaining: number = 0;
 
