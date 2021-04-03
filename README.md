@@ -1,5 +1,5 @@
 # Wumpcord
-> :rowboat: **Flexible, type-safe, and lightweight Discord API library made in TypeScript**
+> 🚣 **Flexible, type-safe, and lightweight Discord API library made in TypeScript**
 
 ## Installation
 You can install **Wumpcord** under NPM, as follows:
