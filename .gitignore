@@ -1,6 +1,6 @@
 node_modules/
+.husky/_/
 build/
-src/old_voice/
 test/
 
 *.lock
