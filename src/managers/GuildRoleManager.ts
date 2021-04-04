@@ -21,8 +21,8 @@
  */
 
 import type WebSocketClient from '../gateway/WebSocketClient';
+import { DiscordRestError } from '../errors/DiscordRestError';
 import type { APIRole } from 'discord-api-types';
-import DiscordRestError from '../errors/DiscordRestError';
 import BaseManager from './BaseManager';
 import GuildRole from '../models/guild/GuildRole';
 

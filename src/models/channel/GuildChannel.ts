@@ -100,8 +100,8 @@ export default class GuildChannel extends Channel {
     let overwrite = this.permissionOverwrites.get(this.guild.id);
     if (overwrite) permission = (permission & BigInt(~overwrite.permissions.denied)) | BigInt(overwrite.permissions.allow);
 
-    let deny = 0;
-    let allow = 0;
+    let deny = 0n;
+    let allow = 0n;
     for (const role of member.roles) {
       if ((overwrite = this.permissionOverwrites.get(role.id)) !== undefined) {
         deny |= overwrite.permissions.denied;
