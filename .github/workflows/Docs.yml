@@ -25,4 +25,4 @@ jobs:
         run: |
           mkdir ~/.kube
           echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
-          kubectl rollout restart deployment/wump-docs
+          kubectl rollout restart deployment/wumpdocs
