@@ -23,9 +23,11 @@
 import type WebSocketClient from '../../gateway/WebSocketClient';
 import { PermissionOverwrite } from '../PermissionOverwrite';
 import type { APIChannel } from 'discord-api-types/v8';
+import { Permissions } from '../../Constants';
 import { Collection } from '@augu/collections';
 import type { Guild } from '../Guild';
 import { Channel } from '../Channel';
+import Permission from '../../util/Permissions';
 
 export default class GuildChannel extends Channel {
   /** List of permission overwrites for this [GuildChannel] */
@@ -43,9 +45,6 @@ export default class GuildChannel extends Channel {
   /** The guild that this [GuildChannel] is attached to */
   public guild!: Guild;
 
-  /** The [WebSocketClient] attached */
-  public client: WebSocketClient;
-
   /** The name of this [GuildChannel] instance */
   public name!: string;
 
@@ -57,12 +56,11 @@ export default class GuildChannel extends Channel {
    * @param client The WebSocket client attached
    * @param data The data supplied from Discord
    */
-  constructor(client: WebSocketClient, data: APIChannel) {
+  constructor(data: APIChannel) {
     super(data);
 
     this.permissionOverwrites = new Collection();
     this.guildID = data.guild_id;
-    this.client = client;
 
     this.patch(data);
   }
@@ -88,5 +86,33 @@ export default class GuildChannel extends Channel {
         this.permissionOverwrites?.set(overwrite.id, new PermissionOverwrite(overwrite));
       }
     }
+  }
+
+  permissionsOf(memberID: string) {
+    if (!this.guild) throw new TypeError('Guild isn\'t cached');
+
+    const member = this.guild.members.get(memberID);
+    if (member === null) return new Permission('0');
+
+    let permission = BigInt(member.permission.allow);
+    if (permission & Permissions.administrator) return new Permission(String(Permissions.all));
+
+    let overwrite = this.permissionOverwrites.get(this.guild.id);
+    if (overwrite) permission = (permission & BigInt(~overwrite.permissions.denied)) | BigInt(overwrite.permissions.allow);
+
+    let deny = 0n;
+    let allow = 0n;
+    for (const role of member.roles) {
+      if ((overwrite = this.permissionOverwrites.get(role.id)) !== undefined) {
+        deny |= overwrite.permissions.denied;
+        allow |= overwrite.permissions.allow;
+      }
+    }
+
+    permission = (permission & BigInt(~deny)) | BigInt(allow);
+    overwrite = this.permissionOverwrites.get(memberID);
+
+    if (overwrite !== undefined) permission = (permission & BigInt(~overwrite.permissions.denied)) | BigInt(overwrite.permissions.allow);
+    return new Permission(String(permission));
   }
 }

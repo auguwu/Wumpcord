@@ -96,8 +96,8 @@ export interface ClientOptions {
   /** The serialization/deserialization strategy when encoding/decoding packets from Discord */
   strategy?: 'etf' | 'json';
 
-  /** The options for the [VoiceClient]. */
-  voice?: VoiceOptions;
+  /** List of intents to connect with */
+  intents?: number | number[] | GatewayIntent[];
 
   /** The token to use */
   token: string;
@@ -123,24 +123,16 @@ export interface WebSocketOptions {
   /** Whether this connection supports compression of packets */
   compress?: boolean;
 
-  /** The intents to connect with */
+  /**
+   * The intents to connect with
+   *
+   * @deprecated This option is deprecated and will be removed in a later release. This option will error if this
+   * and [[ClientOptions.intents]] are both specified.
+   */
   intents?: number | number[] | GatewayIntent[];
 
   /** Number of tries before closing the shard's connection, leave it as `undefined` to indefintely keep re-connecting */
   tries?: number | undefined;
-}
-
-export interface VoiceOptions {
-  /** The default encryption mode to use */
-  defaultEncryptionMode?: 'normal' | 'suffix' | 'lite';
-
-  /**
-   * The encoder to use
-   *
-   * - `opusscript`: Requires "opusscript" installed in the project
-   * - `discordjs`: Requires "@discordjs/opus" installed in the project
-   */
-  encoder?: 'opusscript' | 'discordjs';
 }
 
 export interface AllowedMentions {

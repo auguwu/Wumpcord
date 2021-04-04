@@ -20,16 +20,19 @@
  * SOFTWARE.
  */
 
-/** Represents the validation errors Discord provices */
+/** Represents the validation errors Discord provides */
 interface ErrorType {
   message: string;
   code: string;
   key: string;
 }
 
-export default class DiscordRestValidationError extends Error {
+/**
+ * Represents a error that a validation error has occured
+ */
+export class DiscordRestValidationError extends Error {
   constructor(endpoint: string, method: string, code: number, message: string, errors: ErrorType[]) {
-    super(`${method.toUpperCase()} ${endpoint}: ${message}\n${errors.map((error) => `\n- '${error.key}' [${error.code}]: ${error.message}`).join('\n')}`);
+    super(`${method.toUpperCase()} ${endpoint}: ${message}\n${errors.map((error) => `- '${error.key}' [${error.code}]: ${error.message}`).join('\n')}`);
 
     this.name = `DiscordRestValidationError [${code}]`;
   }

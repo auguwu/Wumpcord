@@ -44,6 +44,9 @@ export default class ChannelManager extends BaseManager<Channel> {
     }).then(data => this.add(Channel.from(this.client, data)) as T);
   }
 
+  /**
+   * @inheritdoc
+   */
   get<T extends Channel = Channel>(id: string) {
     return super.get(id) as T | null;
   }

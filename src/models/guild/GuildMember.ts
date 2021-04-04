@@ -100,11 +100,11 @@ export default class GuildMember extends Base<IGuildMember> {
     if (!this._guild) return new Permission('0');
     if (this.id === this._guild.ownerID) return new Permission(String(Permissions.all));
 
-    let permission = this._guild.roles.get(this._guild.id)?.permissions.allow ?? 0;
+    let permission = BigInt(this._guild.roles.get(this._guild.id)?.permissions.allow ?? 0);
     this.roles.forEach(role => {
       if (role === null) return;
 
-      const permissions = role.permissions.allow;
+      const permissions = BigInt(role.permissions.allow);
       if (permissions & Permissions.administrator) {
         permission = Permissions.all;
         return;

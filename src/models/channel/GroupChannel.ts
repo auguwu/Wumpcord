@@ -73,7 +73,7 @@ export class GroupChannel extends TextableChannel<APIChannel> {
     if (data.icon !== undefined)
       this.icon = data.icon;
 
-    this.recipients = data.recipients!.map(data => this.client.users.add(new User(this.client, data)));
+    this.recipients = data.recipients!.map(data => this['client'].users.add(new User(this['client'], data)));
   }
 
   toString() {

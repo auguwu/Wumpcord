@@ -27,10 +27,10 @@ export class CategoryChannel extends GuildChannel {
   /**
    * Returns the childern list of this [CategoryChannel]
    */
-  get children() {
-    return this.client.channels.cache.filter((channel) =>
-      (channel.hasOwnProperty('parentID') && (channel as GuildChannel).parentID !== null) &&
-      (channel as GuildChannel).parentID === this.id
-    ) as AnyGuildChannel[];
+  get children(): AnyGuildChannel[] {
+    return this['client'].channels.cache.filter((channel: GuildChannel) =>
+      (channel.hasOwnProperty('parentID') && channel.parentID !== null) &&
+      channel.parentID === this.id
+    );
   }
 }

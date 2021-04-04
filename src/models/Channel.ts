@@ -28,7 +28,7 @@ import Base from './Base';
 
 export class Channel extends Base<APIPartialChannel> {
   /** The type of channel */
-  public type!: 'text' | 'dm' | 'voice' | 'group' | 'category' | 'news' | 'store';
+  public type!: 'text' | 'dm' | 'voice' | 'group' | 'category' | 'news' | 'store' | 'stage';
 
   constructor(data: APIPartialChannel) {
     super(data.id);
@@ -40,6 +40,13 @@ export class Channel extends Base<APIPartialChannel> {
     this.type = ChannelTypesObject[data.type];
   }
 
+  /**
+   * Statically create a channel from it's type
+   * @param client The client to construct a channel
+   * @param data The data received from Discord
+   * @returns An [[AnyChannel]] type of what was received. Use the [T] generic
+   * to return whatever you specified (for TypeScript users)
+   */
   static from<T extends AnyChannel = AnyChannel>(client: WebSocketClient, data: any): T | null {
     const { NewsChannel } = require('./channel/NewsChannel');
     const { DMChannel } = require('./channel/DMChannel');
@@ -48,15 +55,17 @@ export class Channel extends Base<APIPartialChannel> {
     const { VoiceChannel } = require('./channel/VoiceChannel');
     const { StoreChannel } = require('./channel/StoreChannel');
     const { GroupChannel } = require('./channel/GroupChannel');
+    const { StageChannel } = require('./channel/StageChannel');
 
     switch (data.type) {
       case 0: return new TextChannel(client, data);
       case 1: return new DMChannel(client, data);
-      case 2: return new VoiceChannel(client, data);
+      case 2: return new VoiceChannel(data);
       case 3: return new GroupChannel(client, data);
-      case 4: return new CategoryChannel(client, data);
+      case 4: return new CategoryChannel(data);
       case 5: return new NewsChannel(client, data);
       case 6: return new StoreChannel(client, data);
+      case 13: return new StageChannel(data);
       default:
         client.debug(`Unknown Type [${data.type}]`, 'Channel type is not available on this version of Wumpcord you\'re running. Switch to indev branch or submit a PR?');
         return null;

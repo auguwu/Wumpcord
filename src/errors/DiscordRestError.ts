@@ -23,7 +23,7 @@
 /**
  * Represents a error related to the rest client
  */
-export default class DiscordRestError extends Error {
+export class DiscordRestError extends Error {
   /**
    * Creates a new [DiscordAPIError] instance
    * @param code The code Discord gave us
