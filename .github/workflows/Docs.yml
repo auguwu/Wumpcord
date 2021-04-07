@@ -3,20 +3,8 @@ on:
   push:
     branches:
       - 'master'
-    paths-ignore:
-      - '.github/**'
-      - '.vscode/**'
-      - 'examples/'
-      - '.eslintignore'
-      - '.gitignore'
-      - '.npmignore'
-      - '**.md'
-      - 'jest.config.js'
-      - 'LICENSE'
-      - 'package.json'
-      - 'renovate.json'
-      - 'tsconfig.json'
-      - 'tsconfig.test.json'
+    paths:
+      - 'docs/**'
 jobs:
   deploy:
     runs-on: ubuntu-latest
