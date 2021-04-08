@@ -7,11 +7,12 @@
   "author": "Chris \"August\" Hernandez <august@augu.dev>",
   "repository": "https://github.com/auguwu/Wumpcord",
   "homepage": "https://wump.floofy.dev",
-  "types": "./build/index.d.ts",
+  "types": "index.d.ts",
   "funding": {
     "url": "https://github.com/auguwu/Wumpcord?sponsor=1"
   },
   "files": [
+    "index.d.ts",
     "build/"
   ],
   "maintainers": [

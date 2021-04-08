@@ -24,7 +24,6 @@ import type WebSocketClient from './WebSocketClient';
 import type * as types from '../types';
 import { Collection } from '@augu/collections';
 import WebSocketShard from './WebSocketShard';
-import { ShardStatus } from '../Constants';
 
 export default class ShardManager extends Collection<number, WebSocketShard> {
   /** Reference for creating a [WebSocketShard] */
