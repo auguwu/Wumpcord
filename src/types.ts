@@ -63,6 +63,11 @@ export type MaybePromise<T> = Promise<T> | T;
 /** Represents a partial entity */
 export type PartialEntity<T, P extends object = {}> = Partial<T> & { [K in keyof P]: P[K]; } & { id: string };
 
+/** Make all objects and nested objects required */
+export type DeepRequired<T> = {
+  [P in keyof T]: Required<T>;
+}
+
 /** Represents a file to send to Discord */
 export interface MessageFile {
   /** The name of the file, it'll default to `file.png` if not found. */
@@ -88,6 +93,9 @@ export interface ClientOptions {
 
   /** List of disabled gateway events to not emit */
   disabledEvents?: GatewayEvent[];
+
+  /** The default cache strategy class to use */
+  cacheStrategy?: AbstractEntityCache;
 
   /** If we should call `WebSocketClient#requestGuildMembers` on all guilds once we are ready */
   getAllUsers?: boolean;
@@ -127,14 +135,6 @@ export interface WebSocketOptions {
 
   /** Whether this connection supports compression of packets */
   compress?: boolean;
-
-  /**
-   * The intents to connect with
-   *
-   * @deprecated This option is deprecated and will be removed in a later release. This option will error if this
-   * and [[ClientOptions.intents]] are both specified.
-   */
-  intents?: number | number[] | GatewayIntent[];
 
   /** Number of tries before closing the shard's connection, leave it as `undefined` to indefintely keep re-connecting */
   tries?: number | undefined;

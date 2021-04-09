@@ -20,19 +20,19 @@
  * SOFTWARE.
  */
 
-import type WebSocketClient from './WebSocketClient';
+import type { WebSocketClient } from './WebSocketClient';
 import type * as types from '../types';
 import { Collection } from '@augu/collections';
 import WebSocketShard from './WebSocketShard';
 
 export default class ShardManager extends Collection<number, WebSocketShard> {
   /** Reference for creating a [WebSocketShard] */
-  private client: WebSocketClient;
+  #client: WebSocketClient;
 
   constructor(client: WebSocketClient) {
     super();
 
-    this.client = client;
+    this.#client = client;
   }
 
   /**
@@ -60,17 +60,17 @@ export default class ShardManager extends Collection<number, WebSocketShard> {
       return true;
     }
 
-    const shard = new WebSocketShard(this.client, id, strategy);
+    const shard = new WebSocketShard(this.#client, id, strategy);
     shard
-      .on('unknown', (id, data) => this.client.emit('unknown', id, data))
-      .on('disconnect', (id) => this.client.emit('shardDisconnect', id))
-      .on('establish', (id)  => this.client.emit('shardSpawn', id))
-      .on('debug', (id, msg) => this.client.debug(`Shard #${id}`, msg))
-      .on('error', (id, error) => this.client.emit('shardError', id, error))
-      .on('close', (id, error, recoverable) => this.client.emit('shardClose', id, error, recoverable))
-      .on('raw', (id, packet) => this.client.emit('rawWS', id, packet as any))
+      .on('unknown', (id, data) => this.#client.emit('unknown', id, data))
+      .on('disconnect', (id) => this.#client.emit('shardDisconnect', id))
+      .on('establish', (id)  => this.#client.emit('shardSpawn', id))
+      .on('debug', (id, msg) => this.#client.debug(`Shard #${id}`, msg))
+      .on('error', (id, error) => this.#client.emit('shardError', id, error))
+      .on('close', (id, error, recoverable) => this.#client.emit('shardClose', id, error, recoverable))
+      .on('raw', (id, packet) => this.#client.emit('rawWS', id, packet as any))
       .on('ready', (id, unavailable) => {
-        this.client.emit('shardReady', id, unavailable);
+        this.#client.emit('shardReady', id, unavailable);
         this.checkReady();
       });
 
@@ -105,14 +105,14 @@ export default class ShardManager extends Collection<number, WebSocketShard> {
   }
 
   private checkReady() {
-    if (this.client.ready) return;
+    if (this.#client.ready) return;
 
     for (const shard of this.values()) {
       if (!shard.ready)
         return;
     }
 
-    this.client.ready = true;
-    this.client.emit('ready');
+    this.#client.ready = true;
+    this.#client.emit('ready');
   }
 }

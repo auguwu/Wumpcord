@@ -38,6 +38,34 @@ import UserManager from '../managers/UserManager';
 
 import type * as events from '../events';
 import type TextableChannel from '../models/inherit/TextableChannel';
+import { MemoryCache } from '../cache/MemoryCache';
+import { NoopEntityCache } from '../cache/NoopCache';
+
+const defaultOptions: OmitUndefinedOrNull<Omit<Required<types.ClientOptions>, 'token' | 'cache'>> = {
+  sweepUnneededCacheIn: 360000,
+  populatePresences: false,
+  allowedMentions: {
+    everyone: false,
+    replied: false,
+    roles: false,
+    users: false
+  },
+  reconnectTimeout: 7000,
+  disabledEvents: [],
+  cacheStrategy: new MemoryCache(),
+  getAllUsers: false,
+  shardCount: 'auto',
+  strategy: 'json',
+  intents: [],
+  ws: {
+    guildSubscriptions: false,
+    largeThreshold: 250,
+    connectTimeout: 30000,
+    clientOptions: undefined,
+    compress: false,
+    tries: 10
+  }
+};
 
 export interface WebSocketClientEvents extends EntityEvents {
   // Gateway
@@ -112,7 +140,7 @@ interface EntityEvents {
  * @typeparam Options The WebSocket client options available, must extend [[types.ClientOptions]]
  * @typeparam Events The events to attach to this [[WebSocketClient]], must extend [[WebSocketClientEvents]]
  */
-export default class WebSocketClient<
+export class WebSocketClient<
   Options extends types.ClientOptions = types.ClientOptions,
   Events extends WebSocketClientEvents = WebSocketClientEvents
 > extends EventBus<Events> {
@@ -155,33 +183,20 @@ export default class WebSocketClient<
   constructor(options: Options) {
     super();
 
-    if (options.intents !== undefined && options.ws?.intents !== undefined)
-      throw new TypeError('[options.intents] and [options.ws.intents] cannot clash into each other, use [options.intents]');
-
     this.options = Util.merge(<any> options, {
-      sweepUnneededCacheIn: 360000, // 1 hour
-      populatePresences: false,
-      allowedMentions: {
-        everyone: false,
-        replied: false,
-        roles: false,
-        users: false
-      },
-      reconnectTimeout: 7000,
-      disabledEvents: [],
-      getAllUsers: false,
-      shardCount: 'auto',
-      strategy: 'json',
-      intents: [],
       token: options.token,
-      ws: {
-        guildSubscriptions: true,
-        largeThreshold: 250,
-        connectTimeout: 30000,
-        clientOptions: undefined,
-        compress: false,
-        tries: 10
-      }
+      cache: {
+        channelMessages: options.cacheStrategy,
+        guildPresences: options.cacheStrategy,
+        guildMembers: options.cacheStrategy,
+        guildEmojis: options.cacheStrategy,
+        voiceStates: options.cacheStrategy,
+        guilds: options.cacheStrategy,
+        roles: options.cacheStrategy,
+        users: options.cacheStrategy
+      },
+
+      ...defaultOptions
     });
 
     this.channels = new ChannelManager(this);
@@ -208,7 +223,7 @@ export default class WebSocketClient<
    * Returns the intents by it's numeric value
    */
   get intents() {
-    const intents = this.options.ws!.intents !== undefined ? this.options.ws!.intents : this.options.intents!;
+    const intents = this.options.intents!;
 
     if (typeof intents === 'undefined') return 0;
     else if (typeof intents === 'number') return intents;

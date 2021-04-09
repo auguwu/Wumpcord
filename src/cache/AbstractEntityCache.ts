@@ -23,7 +23,7 @@
 /**
  * The [[AbstractEntityCache]]'s purpose is to extend cache throughout Wumpcord
  * using any methods you want to use, i.e Redis. Note that all functions must
- * be synchronous due to the architecture on how entities and cach work.
+ * be synchronous due to the architecture on how entities and cache work.
  */
 export abstract class AbstractEntityCache {
   /**

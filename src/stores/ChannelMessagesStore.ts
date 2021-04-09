@@ -20,41 +20,20 @@
  * SOFTWARE.
  */
 
-import type { APIPartialChannel } from 'discord-api-types';
-import { ChannelTypesObject } from '../Constants';
-import { BaseEntity } from './BaseEntity';
+import type { RESTGetAPIChannelMessageResult } from 'discord-api-types';
+import type { WebSocketClient } from '../gateway/WebSocketClient';
+import { BaseStore } from './BaseStore';
 
-/**
- * Represents the channel type for a [[Chanell]]
- */
-export type ChannelType = typeof ChannelTypesObject[keyof typeof ChannelTypesObject];
-
-/**
- * Represent a channel on Discord. This is just a no-op channel
- * for backwards compatibility and using the [[Channel#from]]
- * method to get a channel
- */
-export class Channel extends BaseEntity<APIPartialChannel> {
-  /**
-   * The type this [[Channel]] is
-   */
-  public type: ChannelType;
-
-  /**
-   * Creates a new [[Channel]] instance
-   * @param data The data from Discord
-   */
-  constructor(data: APIPartialChannel) {
-    super(data.id);
-
-    this.type = ChannelTypesObject[data.type];
+/** @inheritdoc */
+export class ChannelMessagesStore extends BaseStore<any> {
+  constructor(client: WebSocketClient) {
+    super(client, 'channelMessages');
   }
 
-  static from<T>(data: APIPartialChannel): T | null {
-    return null;
-  }
-
-  toString() {
-    return `[wumpcord.Channel<${this.id}>]`;
+  fetch(channelID: string, messageID: string) {
+    return this.client.rest.dispatch<any, RESTGetAPIChannelMessageResult>({
+      endpoint: `/channels/${channelID}/messages/${messageID}`,
+      method: 'GET'
+    });
   }
 }
