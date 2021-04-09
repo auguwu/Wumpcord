@@ -20,26 +20,29 @@
  * SOFTWARE.
  */
 
-const { version: pkgVersion } = require('../package.json');
+import { AbstractEntityCache } from './AbstractEntityCache';
 
-export { AbstractEntityCache } from './cache/AbstractEntityCache';
-export { MemoryCache } from './cache/MemoryCache';
-export { NoopEntityCache } from './cache/NoopCache';
-export { default as InteractionClient } from './interactions/InteractionClient';
-export { DiscordRestError } from './errors/DiscordRestError';
-export { default as Client } from './gateway/WebSocketClient';
-export { DiscordAPIError } from './errors/DiscordAPIError';
+/**
+ * Represents a entity cache for the purpose of not being cached to reduce
+ * memory usage or overhead on other caching solutions.
+ */
+export class NoopEntityCache extends AbstractEntityCache {
+  constructor() {
+    super('noop');
+  }
 
-export * as Constants from './Constants';
+  /** @inheritdoc */
+  get(id: string) {
+    return undefined;
+  }
 
-export * from './interactions/types';
-export * from './events';
-export * from './models';
-export * from './types';
+  /** @inheritdoc */
+  put<D extends any = any>(data: D): D {
+    return data;
+  }
 
-// export misc types
-export { InteractionClientEvents } from './interactions/InteractionClient';
-export { WebSocketClientEvents } from './gateway/WebSocketClient';
-
-/** Returns the version of Wumpcord */
-export const version: string = pkgVersion;
+  /** @inheritdoc */
+  remove(id: string) {
+    return true;
+  }
+}

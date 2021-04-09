@@ -27,7 +27,81 @@
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
-declare namespace Wumpcord {}
+/**
+ * Main entrypoint to `wumpcord`
+ */
+declare namespace Wumpcord {
+  /**
+   * The [[AbstractEntityCache]]'s purpose is to extend cache throughout Wumpcord
+   * using any methods you want to use, i.e Redis. Note that all functions must
+   * be synchronous due to the architecture on how entities and cach work.
+   */
+  export abstract class AbstractEntityCache {
+    /**
+     * Creates a new instance of this class.
+     * @param name The name of this [[AbstractEntityCache]] class
+     */
+    constructor(name: string);
+
+    /**
+     * The name of this [[AbstractEntityCache]] class
+     */
+    public name: string;
+
+    /**
+     * Abstract method to return data from cache or `null` if nothing is found
+     * @param id The Snowflake to use
+     * @returns The entity found in cache or `null`.
+     */
+    abstract get(id: string): any;
+
+    /**
+     * Abstract method to add data to cache with the newly
+     * entity created or an Error thrown if it couldn't
+     * succeed.
+     *
+     * @param data The data from Discord
+     * @returns The entity created or a [[UnableToCreateEntityError]] if something went wrong.
+     */
+    abstract put<D extends any = any>(data: D): D;
+
+    /**
+     * Abstract method to remove data from cache
+     * @param id Snowflake to remove
+     * @returns A boolean if it was successful or not
+     */
+    abstract remove(id: string): boolean;
+  }
+
+  /**
+   * Represents cache that is pulled in-memory using collections provided
+   * from `@augu/collections`. This is the default entity cache that is used
+   * but you can create your own using a [[AbstractEntityCache]] or if you
+   * don't need to cache anything specific, use the [[NoopEntityCache]] class
+   * on specific entities or *all* of them.
+   */
+  export class MemoryCache extends Wumpcord.AbstractEntityCache {
+    /** @inheritdoc */
+    public get(id: string): any;
+
+    /** @inheritdoc */
+    public put<D extends any = any>(data: D): D;
+
+    /** @inheritdoc */
+    public remove(id: string): boolean;
+  }
+
+  export class NoopEntityCache extends Wumpcord.AbstractEntityCache {
+    /** @inheritdoc */
+    public get(id: string): undefined;
+
+    /** @inheritdoc */
+    public put<D extends any = any>(data: D): D;
+
+    /** @inheritdoc */
+    public remove(id: string): boolean;
+  }
+}
 
 export = Wumpcord;
 export as namespace Wumpcord;

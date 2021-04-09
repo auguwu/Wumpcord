@@ -19,11 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 /* eslint-disable camelcase */
 
 import type { TextChannel, VoiceChannel, StoreChannel, NewsChannel, GroupChannel, DMChannel, CategoryChannel } from './models';
 import type { ClientOptions as WebSocketClientOptions } from 'ws';
 import type { GatewayEvent, GatewayIntent } from './Constants';
+import type { AbstractEntityCache } from './cache/AbstractEntityCache';
 import type { RatelimitInfo } from './rest/RatelimitBucket';
 import type { HttpMethod } from './rest/RestClient';
 import type * as discord from 'discord-api-types';
@@ -98,6 +100,9 @@ export interface ClientOptions {
 
   /** List of intents to connect with */
   intents?: number | number[] | GatewayIntent[];
+
+  /** Caching options for caching entities */
+  cache?: CachingOptions | 'all' | 'none';
 
   /** The token to use */
   token: string;
@@ -205,4 +210,50 @@ export interface SendActivityOptions {
   type: number;
   url?: string;
   afk?: boolean;
+}
+
+/**
+ * Represents the options for caching, if any intents specified is disallowed from Discord
+ * it will not cache at all.
+ */
+export interface CachingOptions {
+  /**
+   * The [[AbstractEntityCache]] solution for channel messages
+   */
+  channelMessages?: AbstractEntityCache;
+
+  /**
+   * The [[AbstractEntityCache]] solution for guild presences
+   */
+  guildPresences?: AbstractEntityCache;
+
+  /**
+   * The [[AbstractEntityCache]] solution for guild members
+   */
+  guildMembers?: AbstractEntityCache;
+
+  /**
+   * The [[AbstractEntityCache]] solution for guild emojis
+   */
+  guildEmojis?: AbstractEntityCache;
+
+  /**
+   * The [[AbstractEntityCache]] solution for voice states
+   */
+  voiceStates?: AbstractEntityCache;
+
+  /**
+   * The [[AbstractEntityCache]] solution for guild cache
+   */
+  guilds?: AbstractEntityCache;
+
+  /**
+   * The [[AbstractEntityCache]] solution for member roles
+   */
+  roles?: AbstractEntityCache;
+
+  /**
+   * The [[AbstractEntityCache]] solution for users
+   */
+  users?: AbstractEntityCache;
 }

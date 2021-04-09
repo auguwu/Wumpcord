@@ -20,26 +20,14 @@
  * SOFTWARE.
  */
 
-const { version: pkgVersion } = require('../package.json');
+/**
+ * Error represented that a entity cache pool couldn't create
+ * the entity to place in cache
+ */
+export class UnableToCreateEntityError extends Error {
+  constructor(message: string, data: any) {
+    super(`Unable to create entity: ${message} (d=${JSON.stringify(data).slice(0, 250)}...)`);
 
-export { AbstractEntityCache } from './cache/AbstractEntityCache';
-export { MemoryCache } from './cache/MemoryCache';
-export { NoopEntityCache } from './cache/NoopCache';
-export { default as InteractionClient } from './interactions/InteractionClient';
-export { DiscordRestError } from './errors/DiscordRestError';
-export { default as Client } from './gateway/WebSocketClient';
-export { DiscordAPIError } from './errors/DiscordAPIError';
-
-export * as Constants from './Constants';
-
-export * from './interactions/types';
-export * from './events';
-export * from './models';
-export * from './types';
-
-// export misc types
-export { InteractionClientEvents } from './interactions/InteractionClient';
-export { WebSocketClientEvents } from './gateway/WebSocketClient';
-
-/** Returns the version of Wumpcord */
-export const version: string = pkgVersion;
+    this.name = 'UnableToCreateEntityError';
+  }
+}
