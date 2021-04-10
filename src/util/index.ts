@@ -23,7 +23,7 @@
 /* eslint-disable camelcase */
 
 import type { AllowedMentions, MessageContent, MessageContentOptions, MessageFile } from '../types';
-import type WebSocketClient from '../gateway/WebSocketClient';
+import type { WebSocketClient } from '../gateway/WebSocketClient';
 import * as discord from 'discord-api-types';
 import { isObject } from '@augu/utils';
 import { Readable } from 'stream';
@@ -113,7 +113,7 @@ export default class Util {
         data.embed = content.embed;
 
       if (content.reply !== undefined)
-        data.message_reference = { message_id: content.reply };
+        data.message_reference = { message_id: content.reply as discord.Snowflake };
 
       if (content.tts !== undefined)
         data.tts = Boolean(data.tts);
@@ -130,7 +130,7 @@ export default class Util {
         data.embed = options.embed;
 
       if (options.reply !== undefined)
-        data.message_reference = { message_id: options.reply };
+        data.message_reference = { message_id: options.reply as discord.Snowflake };
 
       if (options.tts !== undefined)
         data.tts = Boolean(data.tts);
@@ -148,7 +148,7 @@ export default class Util {
         data.embed = options.embed;
 
       if (options.reply !== undefined)
-        data.message_reference = { message_id: options.reply };
+        data.message_reference = { message_id: options.reply as discord.Snowflake };
 
       if (options.tts !== undefined)
         data.tts = Boolean(data.tts);
@@ -165,8 +165,8 @@ export default class Util {
    * @param client The [[WebSocketClient]] for the default allowed mention
    * @returns The formatted allowed mentions list
    */
-  static formatAllowedMentions(mentions: AllowedMentions, client: WebSocketClient): discord.APIAllowedMentionsSend {
-    const data: discord.APIAllowedMentionsSend = {
+  static formatAllowedMentions(mentions: AllowedMentions, client: WebSocketClient): discord.APIAllowedMentions {
+    const data: discord.APIAllowedMentions = {
       replied_user: mentions?.replied ?? client.options.allowedMentions?.replied ?? false,
       parse: []
     };
@@ -176,8 +176,8 @@ export default class Util {
       if (client.options.allowedMentions?.roles === true) data.parse!.push(discord.AllowedMentionsTypes.Role);
       if (client.options.allowedMentions?.users === true) data.parse!.push(discord.AllowedMentionsTypes.User);
 
-      if (Array.isArray(client.options.allowedMentions?.roles)) data.roles = client.options.allowedMentions?.roles;
-      if (Array.isArray(client.options.allowedMentions?.users)) data.users = client.options.allowedMentions?.users;
+      if (Array.isArray(client.options.allowedMentions?.roles)) data.roles = client.options.allowedMentions?.roles as discord.Snowflake[];
+      if (Array.isArray(client.options.allowedMentions?.users)) data.users = client.options.allowedMentions?.users as discord.Snowflake[];
 
       return data;
     }
@@ -186,8 +186,8 @@ export default class Util {
     if (mentions.roles === true) data.parse!.push(discord.AllowedMentionsTypes.Role);
     if (mentions.users === true) data.parse!.push(discord.AllowedMentionsTypes.User);
 
-    if (Array.isArray(mentions.roles)) data.roles = mentions.roles;
-    if (Array.isArray(mentions.users)) data.users = mentions.users;
+    if (Array.isArray(mentions.roles)) data.roles = mentions.roles as discord.Snowflake[];
+    if (Array.isArray(mentions.users)) data.users = mentions.users as discord.Snowflake[];
 
     return data;
   }

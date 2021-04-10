@@ -19,3 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+export * from './BaseEntity';
+export * from './CategoryChannel';
+export * from './Channel';
+export * from './DMChannel';
+export * from './GroupChannel';
+export * from './Guild';
+export * from './Member';
+export * from './Message';
+export * from './NewsChannel';
+export * from './PermissionOverwrite';
+export * from './Role';
+export * from './SelfUser';
+export * from './StageChannel';
+export * from './StoreChannel';
+export * from './TextChannel';
+export * from './VoiceChannel';
+export * from './VoiceState';
+export * from './Webhook';
+export * from './util';
+export * from './User';

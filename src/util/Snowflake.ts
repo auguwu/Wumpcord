@@ -27,16 +27,11 @@ import type { Snowflake as SnowflakeValue } from 'discord-api-types';
  */
 export class Snowflake {
   /**
-   * The value provided from Discord
-   */
-  #id: string;
-
-  /**
    * Returns Discord's epoch date for snowflake conversion (`'2015-01-01T00:00:00.000Z'`)
    */
-  static get epoch() {
-    return 1420070400000;
-  }
+  public static epoch: number = 1420070400000;
+  #id: string;
+
 
   /**
    * Creates a new [[Snowflake]] instance
@@ -50,6 +45,13 @@ export class Snowflake {
    * Returns the primitive value for this [[Snowflake]]
    */
   valueOf() {
+    return this.#id;
+  }
+
+  /**
+   * Returns a string representation of this Object
+   */
+  toString() {
     return this.#id;
   }
 
