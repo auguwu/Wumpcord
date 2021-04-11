@@ -275,6 +275,15 @@ export const ChannelTypesObject = {
 } as const;
 
 /**
+ * The nitro subscription type
+ */
+export const NitroSubscription = {
+  0: 'none',
+  1: 'classic',
+  2: 'full'
+} as const;
+
+/**
  * List of user flags available
  */
 export enum UserFlags {
