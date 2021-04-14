@@ -98,10 +98,13 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
   /** The [WebSocketClient | InteractionClient] attached to this shard */
   private client: Client;
 
+  /**
+   * If this shard is ready or not
+   */
   public ready: boolean = false;
 
   /** The status of the shard */
-  public status: 'connected' | 'handshaking' | 'nearly' | 'dead' | 'waiting_for_guilds';
+  public status: typeof Constants.ShardStatus[keyof typeof Constants.ShardStatus];
 
   /** Guild cache for this shard, this is disabled if not provided. */
   public guilds: Set<string>;
@@ -297,7 +300,6 @@ export default class WebSocketShard extends EventBus<WebSocketShardEvents> {
     this.debug('Identifying....');
 
     const packet: discord.GatewayIdentifyData = {
-      guild_subscriptions: Boolean(this.client.options.ws?.guildSubscriptions ?? false),
       large_threshold: this.client.options.ws?.largeThreshold ?? 250,
       compress: false,
       intents: this.client.intents,

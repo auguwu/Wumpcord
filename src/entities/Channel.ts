@@ -21,6 +21,7 @@
  */
 
 import type { APIPartialChannel } from 'discord-api-types';
+import type { WebSocketClient } from '../gateway/WebSocketClient';
 import { ChannelTypesObject } from '../Constants';
 import { BaseEntity } from './BaseEntity';
 
@@ -50,7 +51,7 @@ export class Channel extends BaseEntity<APIPartialChannel> {
     this.type = ChannelTypesObject[data.type];
   }
 
-  static from<T>(data: APIPartialChannel): T | null {
+  static from<T>(client: WebSocketClient, data: APIPartialChannel): T | null {
     return null;
   }
 

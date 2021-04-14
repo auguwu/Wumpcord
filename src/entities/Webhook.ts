@@ -163,7 +163,7 @@ export class Webhook extends BaseEntity<APIWebhook> {
       this.avatar = data.avatar;
 
     if (data.type !== undefined)
-      this.type = WebhookTypes[data.type];
+      this.type = WebhookTypes[data.type]!;
 
     if (data.name !== undefined)
       this.name = data.name;

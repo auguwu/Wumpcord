@@ -27,6 +27,7 @@ import type { WebSocketClient } from '../gateway/WebSocketClient';
 import * as discord from 'discord-api-types';
 import { isObject } from '@augu/utils';
 import { Readable } from 'stream';
+import * as is from './is';
 
 /**
  * All utilities available to Wumpcord
@@ -257,12 +258,17 @@ export default class Util {
    * @returns The data image
    */
   static bufferToBase64(image: Buffer, type?: 'png' | 'jpg' | 'gif') {
-    // Force the type to be .png if the headers match
-    // https://tools.ietf.org/html/rfc2083
-
-    if (image.length > 8 && image[0] === 0x89 && image[1] === 0x50 && image[2] === 0x4E && image[3] === 0x47 && image[4] === 0x0D && image[5] === 0x0A && image[6] === 0x1A && image[7] === 0x0A) {
-      if (type === undefined)
+    // check the buffer ourselves
+    // to determine the type
+    if (type === undefined) {
+      if (is.png(image))
         type = 'png';
+
+      if (is.jpg(image))
+        type = 'jpg';
+
+      if (is.gif(image))
+        type = 'gif';
     }
 
     const base64 = image.toString('base64');

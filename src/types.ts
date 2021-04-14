@@ -121,9 +121,6 @@ export interface ClientOptions {
 
 /** The WebSocket options for Discord */
 export interface WebSocketOptions {
-  /** Enables dispatching of guild subscription events (presence and typing events) */
-  guildSubscriptions?: boolean;
-
   /** Value between 50 and 250, total number of members where the gateway will stop sending offline members in the guild member list */
   largeThreshold?: number;
 

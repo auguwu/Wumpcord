@@ -22,13 +22,13 @@
 
 /* eslint-disable camelcase */
 
+import type { APIUser, APIChannel, RESTPostAPICurrentUserCreateDMChannelJSONBody } from 'discord-api-types';
 import type { MessageContent, MessageContentOptions } from '../types';
-import type { APIUser, APIChannel } from 'discord-api-types';
 import type { WebSocketClient } from '../gateway/WebSocketClient';
-import { CDNUrl, UserFlags } from '../Constants';
 import { DynamicImage } from './inheritable/DynamicImage';
 import { BaseEntity } from './BaseEntity';
-import { Snowflake } from '../util/Snowflake';
+import { UserFlags } from '../Constants';
+import { Channel } from './Channel';
 
 /**
  * https://discord.com/developers/docs/resources/user
@@ -98,6 +98,13 @@ class User extends BaseEntity<APIUser> {
   }
 
   /**
+   * Returns the default avatar URL
+   */
+  get defaultAvatar() {
+    return Number(this.discriminator) % 5;
+  }
+
+  /**
    * Returns the mention of this User
    */
   get mention() {
@@ -109,6 +116,86 @@ class User extends BaseEntity<APIUser> {
    */
   get tag() {
     return `${this.username}#${this.discriminator}`;
+  }
+
+  /**
+   * Checks if a user has a specific user flag
+   * @param flag The flag to check for
+   * @returns A boolean value if it exists or not
+   */
+  flag(bit: keyof typeof UserFlags) {
+    if (!UserFlags.hasOwnProperty(bit))
+      return false;
+
+    return !!((this.flags ?? 0) & UserFlags[bit]);
+  }
+
+  /**
+   * Creates a DM channel with the bot and this user, possibly
+   * caches it if needed.
+   *
+   * @returns The DM channel created or a [[DiscordRestError]] if anything occured.
+   */
+  createDM() {
+    if (this.dmChannel !== undefined)
+      return Promise.resolve(this.dmChannel);
+
+    return this.client.rest.dispatch<APIChannel, RESTPostAPICurrentUserCreateDMChannelJSONBody>({
+      endpoint: '/users/@me/channels',
+      method: 'GET',
+      data: {
+        recipient_id: this.id.toString()
+      }
+    }).then(channel => {
+      if (this.client.channels.has(channel.id)) {
+        const chan = this.client.channels.get(channel.id)!;
+        return chan;
+      }
+
+      const chan = Channel.from(this.client, channel);
+      this.client.channels.add(chan);
+
+      return chan;
+    });
+  }
+
+  /**
+   * Leaves the DM with this user and bot and removes it from cache.
+   *
+   * @returns The DM channel the bot had access to, `undefined` if the bot had never create a DM, or a [[DiscordRestError]]
+   * if anything occured.
+   */
+  leaveDM() {
+    if (this.dmChannel === undefined)
+      return Promise.resolve();
+
+    return this.client.rest.dispatch({
+      endpoint: `/channels/${this.dmChannel.id}`,
+      method: 'DELETE'
+    }).then(() => {
+      const channel = this.dmChannel!;
+      delete this.dmChannel;
+
+      return channel;
+    });
+  }
+
+  /**
+   * Sends a message to this user. This is a simple function to not repeat:
+   * ```js
+   * const user = <client>.users.get('280158289667555328');
+   * const channel = await user.createDM();
+   * channel.send('hi ur cute');
+   * ```
+   *
+   * @param message The message content to send
+   * @param options Any additional options, if needed
+   * @returns The message created or a [[DiscordRestError]] if
+   * any errors occured.
+   */
+  async send(message: MessageContent, options?: MessageContentOptions) {
+    const channel = await this.createDM();
+    return channel.send(message, options);
   }
 }
 
