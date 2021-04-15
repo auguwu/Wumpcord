@@ -30,6 +30,7 @@ import { WebhookTypes } from '../Constants';
 import { BaseEntity } from './BaseEntity';
 import { Snowflake } from '../util/Snowflake';
 import { isObject } from '@augu/utils';
+import { User } from './User';
 import Util from '../util';
 
 /**
@@ -139,7 +140,7 @@ export class Webhook extends BaseEntity<APIWebhook> {
   /**
    * The user this webhook created
    */
-  public user?: any;
+  public user?: User;
 
   constructor(client: WebSocketClient, data: APIWebhook) {
     super(data.id);
@@ -168,8 +169,8 @@ export class Webhook extends BaseEntity<APIWebhook> {
     if (data.name !== undefined)
       this.name = data.name;
 
-    // if (data.user !== undefined)
-    //    data.user = new User(this.client, data.user);
+    if (data.user !== undefined)
+      this.user = new User(this.client, data.user);
   }
 
   /**

@@ -257,7 +257,7 @@ export default class Util {
    * @param type The content type to use
    * @returns The data image
    */
-  static bufferToBase64(image: Buffer, type?: 'png' | 'jpg' | 'gif') {
+  static bufferToBase64(image: Buffer, type?: 'png' | 'jpeg' | 'gif') {
     // check the buffer ourselves
     // to determine the type
     if (type === undefined) {
@@ -265,7 +265,7 @@ export default class Util {
         type = 'png';
 
       if (is.jpg(image))
-        type = 'jpg';
+        type = 'jpeg';
 
       if (is.gif(image))
         type = 'gif';
