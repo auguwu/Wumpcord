@@ -33,11 +33,15 @@ export class BaseStore<D> {
    * The [[WebSocketClient]] attached to this [[BaseStore]]
    */
   public client: WebSocketClient;
-  #cache: AbstractEntityCache;
+
+  /**
+   * The cache solution available for this [[BaseStore]]
+   */
+  public cache: AbstractEntityCache;
 
   constructor(client: WebSocketClient, type: keyof CachingOptions) {
     this.client = client;
-    this.#cache = client.options.cache === 'none'
+    this.cache = client.options.cache === 'none'
       ? new NoopEntityCache()
       : client.options.cache === 'all'
         ? client.options.cacheStrategy!
@@ -51,7 +55,7 @@ export class BaseStore<D> {
    * or a promise that rejects this request and throws a [[DiscordRestError]]
    * on why it failed.
    */
-  fetch(...args: any[]): Promise<D> {
+  fetch(...args: any[]): Promise<any> {
     return Promise.reject(new TypeError(`${this.constructor.name}#fetch is not implemented`));
   }
 
@@ -63,7 +67,7 @@ export class BaseStore<D> {
    * @returns The resolved data or `undefined` if not cached
    */
   get(id: string): D | undefined {
-    return this.#cache.get(id);
+    return this.cache.get(id);
   }
 
   /**
@@ -74,7 +78,7 @@ export class BaseStore<D> {
    * @returns The resolved data or a error on why it failed
    */
   put(data: D) {
-    return this.#cache.put(data);
+    return this.cache.put(data);
   }
 
   /**
@@ -86,7 +90,7 @@ export class BaseStore<D> {
    * @returns The resolved data or a error on why it failed
    */
   add(data: D) {
-    return this.#cache.put(data);
+    return this.cache.put(data);
   }
 
   /**
@@ -96,6 +100,6 @@ export class BaseStore<D> {
    * @param id The snowflake to resolve
    */
   remove(id: string) {
-    return this.#cache.remove(id);
+    return this.cache.remove(id);
   }
 }

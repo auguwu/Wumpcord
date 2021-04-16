@@ -70,6 +70,13 @@ export class MemoryCache extends AbstractEntityCache {
   /**
    * @inheritdoc
    */
+  has(id: string) {
+    return this.#cache.has(id);
+  }
+
+  /**
+   * @inheritdoc
+   */
   remove(id: string) {
     return this.#cache.delete(id);
   }

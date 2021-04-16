@@ -240,6 +240,11 @@ export interface CachingOptions {
   voiceStates?: AbstractEntityCache;
 
   /**
+   * The [[AbstractEntityCache]] solution for all channels
+   */
+  channels?: AbstractEntityCache;
+
+  /**
    * The [[AbstractEntityCache]] solution for guild cache
    */
   guilds?: AbstractEntityCache;

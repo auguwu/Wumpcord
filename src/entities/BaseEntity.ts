@@ -49,8 +49,7 @@ export class BaseEntity<D extends any> {
   }
 
   /**
-   * Returns when the entity was created at
-   * @deprecated Use [[Snowflake.createdAt]] instead, this will be removed in a future release
+   * Returns when the entity was created at, a shortcut for [[Snowflake.createdAt]]
    */
   get createdAt() {
     return this.id.createdAt;

@@ -22,7 +22,7 @@
 
 /* eslint-disable camelcase */
 
-import { Guild, GuildMember, SelfUser, User } from '../models';
+import { Guild, GuildMember, SelfUser, User } from '../entities';
 import type { Collection } from '@augu/collections';
 import type * as discord from 'discord-api-types/v8';
 import type * as types from '../types';
@@ -39,7 +39,6 @@ import UserManager from '../managers/UserManager';
 import type * as events from '../events';
 import type TextableChannel from '../models/inherit/TextableChannel';
 import { MemoryCache } from '../cache/MemoryCache';
-import { NoopEntityCache } from '../cache/NoopCache';
 
 const defaultOptions: OmitUndefinedOrNull<Omit<Required<types.ClientOptions>, 'token' | 'cache'>> = {
   sweepUnneededCacheIn: 360000,
@@ -58,7 +57,6 @@ const defaultOptions: OmitUndefinedOrNull<Omit<Required<types.ClientOptions>, 't
   strategy: 'json',
   intents: [],
   ws: {
-    guildSubscriptions: false,
     largeThreshold: 250,
     connectTimeout: 30000,
     clientOptions: undefined,

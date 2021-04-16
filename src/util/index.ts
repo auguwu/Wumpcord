@@ -25,7 +25,7 @@
 import type { AllowedMentions, MessageContent, MessageContentOptions, MessageFile } from '../types';
 import type { WebSocketClient } from '../gateway/WebSocketClient';
 import * as discord from 'discord-api-types';
-import { isObject } from '@augu/utils';
+import utils, { isObject } from '@augu/utils';
 import { Readable } from 'stream';
 import * as is from './is';
 
@@ -229,7 +229,7 @@ export default class Util {
   }
 
   /**
-   * Converts a key-value map into a querystring
+   * Converts a key-value map into a querystring, omits undefined / null values
    * @param obj The key-value map
    * @returns The querystring that is created
    */
@@ -237,13 +237,14 @@ export default class Util {
     let url = '';
     if (!Object.keys(obj).length) throw new TypeError('Missing key-value pairs in `obj`');
 
-    const entries = Object.entries(obj);
+    const allEntries = utils.omitUndefinedOrNull(obj);
+    const entries = Object.entries(allEntries);
     for (let i = 0; i < entries.length; i++) {
       const prefix = i === 0 ? '?' : '&';
       const [k, v] = entries[i];
 
-      // Skip on undefined, null, or empty string values
-      if (v === undefined || v === null || v === '') continue;
+      // Skip empty string values
+      if (v === '') continue;
 
       url += `${prefix}${k}=${v}`;
     }

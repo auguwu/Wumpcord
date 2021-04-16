@@ -42,6 +42,11 @@ export class NoopEntityCache extends AbstractEntityCache {
   }
 
   /** @inheritdoc */
+  has(id: string) {
+    return false;
+  }
+
+  /** @inheritdoc */
   remove(id: string) {
     return true;
   }

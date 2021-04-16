@@ -50,6 +50,15 @@ export abstract class AbstractEntityCache {
   abstract put<D extends any = any>(data: D): D;
 
   /**
+   * Abstract method to check if a entity exists
+   * in this current cache entity.
+   *
+   * @param id The snowflake to use
+   * @returns A boolean value if it exists or not
+   */
+  abstract has(id: string): boolean;
+
+  /**
    * Abstract method to remove data from cache
    * @param id Snowflake to remove
    * @returns A boolean if it was successful or not

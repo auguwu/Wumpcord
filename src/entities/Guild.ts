@@ -19,3 +19,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+/* eslint-disable camelcase */
+
+import type {
+  APIEmoji,
+  APIGuild as _APIGuild,
+  APIGuildWelcomeScreen,
+  APIRole,
+  GatewayRequestGuildMembersData,
+  RESTGetAPIAuditLogResult,
+  RESTGetAPIGuildBansResult,
+  RESTGetAPIGuildChannelsResult,
+  RESTGetAPIGuildEmojiResult,
+  RESTGetAPIGuildEmojisResult,
+  RESTGetAPIGuildIntegrationsResult,
+  RESTGetAPIGuildInvitesResult,
+  RESTGetAPIGuildPreviewResult,
+  RESTGetAPIGuildRolesResult,
+  RESTGetAPIGuildVoiceRegionsResult,
+  RESTGetAPIGuildWebhooksResult,
+  RESTPatchAPIGuildChannelPositionsJSONBody,
+  RESTPatchAPIGuildEmojiJSONBody,
+  RESTPatchAPIGuildJSONBody,
+  RESTPatchAPIGuildMemberJSONBody,
+  RESTPatchAPIGuildRoleJSONBody,
+  RESTPatchAPIGuildRolePositionsJSONBody,
+  RESTPostAPIGuildChannelJSONBody,
+  RESTPostAPIGuildEmojiJSONBody,
+  RESTPostAPIGuildPruneJSONBody,
+  RESTPostAPIGuildRoleJSONBody,
+  RESTPutAPIGuildBanJSONBody
+} from 'discord-api-types';
+
+/**
+ * https://discord.com/developers/docs/resources/guild#guild-object-guild-structure
+ */
+interface APIGuild extends _APIGuild {
+  /**
+   * The shard ID this [[APIGuild]] belongs to.
+   */
+  shard_id: number;
+}
+
+/**
+ * https://discord.com/developers/docs/resources/guild
+ */
+export class Guild {}

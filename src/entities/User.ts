@@ -162,7 +162,7 @@ class User extends BaseEntity<APIUser> {
   /**
    * Leaves the DM with this user and bot and removes it from cache.
    *
-   * @returns The DM channel the bot had access to, `undefined` if the bot had never create a DM, or a [[DiscordRestError]]
+   * @returns The DM channel the bot had access to, `undefined` if the bot had never create a dm, or a [[DiscordRestError]]
    * if anything occured.
    */
   leaveDM() {
