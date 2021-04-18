@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@augu/collections": "1.0.8",
-    "@augu/utils": "1.4.2",
+    "@augu/utils": "1.5.0",
     "discord-api-types": "0.15.1",
     "form-data": "4.0.0",
     "ws": "7.4.4"
