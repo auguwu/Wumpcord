@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import { ImageFormats } from '../../Constants';
+import { ImageFormats } from '@wumpcord/rest';
 import type { User } from '../User';
 
 /**

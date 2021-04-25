@@ -2,6 +2,7 @@ node_modules/
 .husky/_/
 build/
 test/
+old/
 
 *.lock
 *.log
