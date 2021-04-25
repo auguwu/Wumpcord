@@ -20,45 +20,4 @@
  * SOFTWARE.
  */
 
-import type { Snowflake as SnowflakeValue } from 'discord-api-types';
-
-/**
- * Represents a Snowflake, an ID-representation for Discord entities
- */
-export class Snowflake {
-  /**
-   * Returns Discord's epoch date for snowflake conversion (`'2015-01-01T00:00:00.000Z'`)
-   */
-  public static epoch: number = 1420070400000;
-  #id: string;
-
-  /**
-   * Creates a new [[Snowflake]] instance
-   * @param value The value Discord provided
-   */
-  constructor(value: SnowflakeValue) {
-    this.#id = value;
-  }
-
-  /**
-   * Returns the primitive value for this [[Snowflake]]
-   */
-  valueOf() {
-    return this.#id;
-  }
-
-  /**
-   * Returns a string representation of this Object
-   */
-  toString() {
-    return this.#id;
-  }
-
-  /**
-   * Returns when the entity was created at
-   */
-  get createdAt() {
-    const delta = BigInt(this.#id) / 4194304n;
-    return new Date(Math.floor(Number(delta + BigInt(Snowflake.epoch))));
-  }
-}
+export class InteractionHelper {}

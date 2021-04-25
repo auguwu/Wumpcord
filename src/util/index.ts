@@ -23,10 +23,10 @@
 /* eslint-disable camelcase */
 
 import type { AllowedMentions, MessageContent, MessageContentOptions, MessageFile } from '../types';
-import type { WebSocketClient } from '../gateway/WebSocketClient';
+import type { WebSocketClient } from '../Client';
 import * as discord from 'discord-api-types';
-import utils, { isObject } from '@augu/utils';
 import { Readable } from 'stream';
+import * as utils from '@augu/utils';
 import * as is from './is';
 
 /**
@@ -94,13 +94,13 @@ export default class Util {
   static formatMessage(client: WebSocketClient, content: MessageContent, options?: MessageContentOptions) {
     const data: discord.RESTPostAPIChannelMessageJSONBody & { file?: MessageFile | MessageFile[] } = {};
 
-    if (isObject(content) && (options !== undefined && isObject(options)))
+    if (utils.isObject(content) && (options !== undefined && utils.isObject(options)))
       throw new TypeError('Conflicting message contents, choose one or the other.');
 
     if (typeof content === 'string' && options === undefined) {
       data.content = content;
       return data;
-    } else if (isObject(content) && options === undefined) {
+    } else if (utils.isObject<MessageContentOptions>(content) && options === undefined) {
       if (content.attachments !== undefined)
         data.file = content.attachments;
 
@@ -118,7 +118,7 @@ export default class Util {
 
       if (content.tts !== undefined)
         data.tts = Boolean(data.tts);
-    } else if (typeof content === 'string' && (options !== undefined && isObject(options))) {
+    } else if (typeof content === 'string' && (options !== undefined && utils.isObject<MessageContentOptions>(options))) {
       data.content = content;
 
       if (options.attachments !== undefined)
@@ -135,7 +135,7 @@ export default class Util {
 
       if (options.tts !== undefined)
         data.tts = Boolean(data.tts);
-    } else if (options !== undefined && isObject(options)) {
+    } else if (options !== undefined && utils.isObject<MessageContentOptions>(options)) {
       if (options.attachments !== undefined)
         data.file = options.attachments;
 

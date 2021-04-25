@@ -20,7 +20,8 @@
  * SOFTWARE.
  */
 
-import { ImageFormats } from '@wumpcord/rest';
+import type { ImageFormat, ImageSize } from '@wumpcord/rest';
+import { ImageFormats } from '../../Constants';
 import type { User } from '../User';
 
 /**
@@ -52,7 +53,7 @@ export class DynamicImage {
    * @param format The format to use (default `'png'`)
    * @param size The size to use (default `1024`)
    */
-  dynamicAvatarUrl(this: any, format: string = 'png', size: number = 1024) {
+  dynamicAvatarUrl(this: any, format: ImageFormat = 'png', size: ImageSize = 1024) {
     if (this.avatar === null) {
       if (this instanceof (<{ User: typeof User }> require('../User')).User) {
         return `https://cdn.discordapp.com/embed/avatars/${this.discriminator}`;
