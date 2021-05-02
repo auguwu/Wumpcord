@@ -20,42 +20,14 @@
  * SOFTWARE.
  */
 
-import type { APIPartialChannel } from 'discord-api-types';
-import type { WebSocketClient } from '../Client';
-import { ChannelTypesObject } from '../Constants';
-import { BaseEntity } from './BaseEntity';
-
 /**
- * Represents the channel type for a [[Chanell]]
+ * Error represented that a entity cache pool couldn't create
+ * the entity to place in cache
  */
-export type ChannelType = typeof ChannelTypesObject[keyof typeof ChannelTypesObject];
+export class UnableToCreateEntityError extends Error {
+  constructor(message: string, data: any) {
+    super(`Unable to create entity: ${message} (d=${JSON.stringify(data).slice(0, 250)}...)`);
 
-/**
- * Represent a channel on Discord. This is just a no-op channel
- * for backwards compatibility and using the [[Channel#from]]
- * method to get a channel
- */
-export class Channel extends BaseEntity<APIPartialChannel> {
-  /**
-   * The type this [[Channel]] is
-   */
-  public type: ChannelType;
-
-  /**
-   * Creates a new [[Channel]] instance
-   * @param data The data from Discord
-   */
-  constructor(data: APIPartialChannel) {
-    super(data.id);
-
-    this.type = ChannelTypesObject[data.type];
-  }
-
-  static from<T>(client: WebSocketClient, data: APIPartialChannel): T | null {
-    return null;
-  }
-
-  toString() {
-    return `[wumpcord.Channel<${this.id}>]`;
+    this.name = 'UnableToCreateEntityError';
   }
 }

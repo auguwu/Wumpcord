@@ -22,9 +22,9 @@
 
 /* eslint-disable camelcase */
 
-import type { APIEmbed, APIMessage, APIWebhook, RESTPatchAPIWebhookJSONBody, RESTPostAPIWebhookWithTokenJSONBody } from 'discord-api-types';
+import type { APIEmbed, APIMessage, APIWebhook, RESTPatchAPIWebhookJSONBody, RESTPatchAPIWebhookWithTokenJSONBody, RESTPatchAPIWebhookWithTokenMessageJSONBody, RESTPostAPIWebhookWithTokenJSONBody } from 'discord-api-types';
 import type { MessageContentOptions } from '../types';
-import { WebSocketClient } from '../gateway/WebSocketClient';
+import { WebSocketClient } from '../Client';
 import type { Readable } from 'stream';
 import { WebhookTypes } from '../Constants';
 import { BaseEntity } from './BaseEntity';
@@ -179,7 +179,7 @@ export class Webhook extends BaseEntity<APIWebhook> {
    * [`/webhooks/{webhook.id}`](https://discord.com/developers/docs/resources/webhook#get-webhook). It's still the same, but if you want to, it's there.
    */
   fetch(auth: boolean = false) {
-    return this.client.rest.dispatch<APIWebhook>({
+    return this.client.rest.dispatch<void, APIWebhook>({
       endpoint: `/webhooks/${this.id}${auth ? `/${this.token}` : ''}`,
       method: 'GET'
     }).then(data => {
@@ -193,7 +193,7 @@ export class Webhook extends BaseEntity<APIWebhook> {
    * @param options The options to use
    */
   async modify(options: ModifyWebhookOptions = {}) {
-    if (!isObject(options))
+    if (!isObject<ModifyWebhookOptions>(options))
       throw new TypeError(`Expected \`object\`, but received ${typeof options === 'object' ? 'array/null' : typeof options}`);
 
     if (options.image && (!Util.isReadableStream(options.image) || !Buffer.isBuffer(options.image) || typeof options.image !== 'string'))
@@ -217,7 +217,7 @@ export class Webhook extends BaseEntity<APIWebhook> {
       }
     }
 
-    return this.client.rest.dispatch<APIWebhook, RESTPatchAPIWebhookJSONBody>({
+    return this.client.rest.dispatch<RESTPatchAPIWebhookJSONBody, APIWebhook>({
       endpoint: `/webhooks/${this.id}${options.auth ? `/${this.token}` : ''}`,
       method: 'GET',
       data: {
@@ -243,15 +243,16 @@ export class Webhook extends BaseEntity<APIWebhook> {
     const message = Util.formatMessage(this.client, content, options);
     let wait = false;
 
-    if (isObject(options))
+    if (isObject<SendWebhookMessageOptions>(options))
       wait = options.wait ?? false;
-    else if (isObject(content))
+    else if (isObject<SendWebhookMessageOptions>(content))
       wait = content.wait ?? false;
 
-    return this.client.rest.dispatch<APIMessage | void, RESTPostAPIWebhookWithTokenJSONBody>({
+    // @ts-ignore
+    return this.client.rest.dispatch<RESTPostAPIWebhookWithTokenJSONBody, APIMessage | void>({
       endpoint: `/webhooks/${this.id}/${this.token}${wait === true ? '?wait=true' : ''}`,
       method: 'POST',
-      file: message.file,
+      file: message.file as any,
       data: {
         avatar_url: typeof content === 'string' ? undefined : typeof options !== 'undefined' ? options.avatarUrl : content.avatarUrl,
         username: typeof content === 'string' ? undefined : typeof options !== 'undefined' ? options.username : content.username,
@@ -291,7 +292,7 @@ export class Webhook extends BaseEntity<APIWebhook> {
    */
   editMessage(messageID: string, content: string | Omit<SendWebhookMessageOptions, 'wait'>, options?: Omit<SendWebhookMessageOptions, 'wait'>) {
     const message = Util.formatMessage(this.client, content, options);
-    return this.client.rest.dispatch<APIMessage>({
+    return this.client.rest.dispatch<any, APIMessage>({
       endpoint: `/webhooks/${this.id}/${this.token}/messages/${messageID}`,
       method: 'PATCH',
       data: {
@@ -307,7 +308,7 @@ export class Webhook extends BaseEntity<APIWebhook> {
    * @param messageID The message ID
    */
   deleteMessage(messageID: string) {
-    return this.client.rest.dispatch<void>({
+    return this.client.rest.dispatch<void, void>({
       endpoint: `/webhooks/${this.id}/${this.token}/messages/${messageID}`,
       method: 'DELETE'
     });

@@ -22,8 +22,9 @@
 
 /* eslint-disable camelcase */
 
-import type { AllowedMentions, MessageContent, MessageContentOptions, MessageFile } from '../types';
+import type { AllowedMentions, MessageContent, MessageContentOptions } from '../types';
 import type { WebSocketClient } from '../Client';
+import type { MessageFile } from '@wumpcord/rest';
 import * as discord from 'discord-api-types';
 import { Readable } from 'stream';
 import * as utils from '@augu/utils';
@@ -114,7 +115,10 @@ export default class Util {
         data.embed = content.embed;
 
       if (content.reply !== undefined)
-        data.message_reference = { message_id: content.reply as discord.Snowflake };
+        data.message_reference = { message_id: content.reply as unknown as discord.Snowflake };
+
+      if (content.file !== undefined)
+        data.file = content.file;
 
       if (content.tts !== undefined)
         data.tts = Boolean(data.tts);
@@ -131,7 +135,10 @@ export default class Util {
         data.embed = options.embed;
 
       if (options.reply !== undefined)
-        data.message_reference = { message_id: options.reply as discord.Snowflake };
+        data.message_reference = { message_id: options.reply as unknown as discord.Snowflake };
+
+      if (options.file !== undefined)
+        data.file = options.file;
 
       if (options.tts !== undefined)
         data.tts = Boolean(data.tts);
@@ -149,7 +156,10 @@ export default class Util {
         data.embed = options.embed;
 
       if (options.reply !== undefined)
-        data.message_reference = { message_id: options.reply as discord.Snowflake };
+        data.message_reference = { message_id: options.reply as unknown as discord.Snowflake };
+
+      if (options.file !== undefined)
+        data.file = options.file;
 
       if (options.tts !== undefined)
         data.tts = Boolean(data.tts);
@@ -173,12 +183,12 @@ export default class Util {
     };
 
     if (!mentions) {
-      if (client.options.allowedMentions?.everyone === true) data.parse!.push(discord.AllowedMentionsTypes.Everyone);
-      if (client.options.allowedMentions?.roles === true) data.parse!.push(discord.AllowedMentionsTypes.Role);
-      if (client.options.allowedMentions?.users === true) data.parse!.push(discord.AllowedMentionsTypes.User);
+      if (client.options.allowedMentions.everyone === true) data.parse!.push(discord.AllowedMentionsTypes.Everyone);
+      if (client.options.allowedMentions.roles === true) data.parse!.push(discord.AllowedMentionsTypes.Role);
+      if (client.options.allowedMentions.users === true) data.parse!.push(discord.AllowedMentionsTypes.User);
 
-      if (Array.isArray(client.options.allowedMentions?.roles)) data.roles = client.options.allowedMentions?.roles as discord.Snowflake[];
-      if (Array.isArray(client.options.allowedMentions?.users)) data.users = client.options.allowedMentions?.users as discord.Snowflake[];
+      if (Array.isArray(client.options.allowedMentions.roles)) data.roles = client.options.allowedMentions?.roles as discord.Snowflake[];
+      if (Array.isArray(client.options.allowedMentions.users)) data.users = client.options.allowedMentions?.users as discord.Snowflake[];
 
       return data;
     }

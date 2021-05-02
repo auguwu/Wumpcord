@@ -24,7 +24,7 @@
 
 import type { APIUser, APIChannel, RESTPostAPICurrentUserCreateDMChannelJSONBody } from 'discord-api-types';
 import type { MessageContent, MessageContentOptions } from '../types';
-import type { WebSocketClient } from '../gateway/WebSocketClient';
+import type { WebSocketClient } from '../Client';
 import { DynamicImage } from './inheritable/DynamicImage';
 import { BaseEntity } from './BaseEntity';
 import { UserFlags } from '../Constants';
@@ -140,7 +140,7 @@ class User extends BaseEntity<APIUser> {
     if (this.dmChannel !== undefined)
       return Promise.resolve(this.dmChannel);
 
-    return this.client.rest.dispatch<APIChannel, RESTPostAPICurrentUserCreateDMChannelJSONBody>({
+    return this.client.rest.dispatch<RESTPostAPICurrentUserCreateDMChannelJSONBody, APIChannel>({
       endpoint: '/users/@me/channels',
       method: 'GET',
       data: {
@@ -149,11 +149,14 @@ class User extends BaseEntity<APIUser> {
     }).then(channel => {
       if (this.client.channels.has(channel.id)) {
         const chan = this.client.channels.get(channel.id)!;
+        this.dmChannel = chan;
+
         return chan;
       }
 
       const chan = Channel.from(this.client, channel);
       this.client.channels.add(chan);
+      this.dmChannel = chan;
 
       return chan;
     });

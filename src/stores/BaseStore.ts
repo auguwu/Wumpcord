@@ -24,6 +24,7 @@ import type { AbstractEntityCache } from '../cache/AbstractEntityCache';
 import type { WebSocketClient } from '../Client';
 import type { CachingOptions } from '../types';
 import { NoopEntityCache } from '../cache/NoopCache';
+import { MemoryCache } from '../cache/MemoryCache';
 
 /**
  * Represents a "store", to handling and retrieving entity cache
@@ -39,13 +40,15 @@ export class BaseStore<D> {
    */
   public cache: AbstractEntityCache;
 
-  constructor(client: WebSocketClient, type: keyof CachingOptions) {
+  constructor(client: WebSocketClient, type: keyof Omit<CachingOptions, 'engine'>) {
+    const t = client.options.cache[type];
+
     this.client = client;
-    this.cache = client.options.cache === 'none'
-      ? new NoopEntityCache()
-      : client.options.cache === 'all'
-        ? client.options.cacheStrategy!
-        : client.options.cache![type]!;
+    this.cache = t === 'memory'
+      ? new MemoryCache()
+      : t === 'no-op'
+        ? new NoopEntityCache()
+        : t as AbstractEntityCache;
   }
 
   /**
