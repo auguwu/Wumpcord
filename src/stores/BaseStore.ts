@@ -26,6 +26,16 @@ import type { CachingOptions } from '../types';
 import { NoopEntityCache } from '../cache/NoopCache';
 import { MemoryCache } from '../cache/MemoryCache';
 
+function getCacheEngine(options: CachingOptions) {
+  if (options.engine === 'memory')
+    return new MemoryCache();
+
+  if (options.engine === 'no-op')
+    return new NoopEntityCache();
+
+  return options.engine ?? new MemoryCache();
+}
+
 /**
  * Represents a "store", to handling and retrieving entity cache
  */
@@ -36,19 +46,20 @@ export class BaseStore<D> {
   public client: WebSocketClient;
 
   /**
-   * The cache solution available for this [[BaseStore]]
+   * The cache engine available for this [[BaseStore]]
    */
-  public cache: AbstractEntityCache;
+  public engine: AbstractEntityCache;
 
   constructor(client: WebSocketClient, type: keyof Omit<CachingOptions, 'engine'>) {
     const t = client.options.cache[type];
 
     this.client = client;
-    this.cache = t === 'memory'
-      ? new MemoryCache()
-      : t === 'no-op'
-        ? new NoopEntityCache()
-        : t as AbstractEntityCache;
+    this.engine = t === undefined ? getCacheEngine(client.options.cache) :
+      t === 'memory'
+        ? new MemoryCache()
+        : t === 'no-op'
+          ? new NoopEntityCache()
+          : t as AbstractEntityCache;
   }
 
   /**
@@ -70,7 +81,7 @@ export class BaseStore<D> {
    * @returns The resolved data or `undefined` if not cached
    */
   get(id: string): D | undefined {
-    return this.cache.get(id);
+    return this.engine.get(id);
   }
 
   /**
@@ -81,7 +92,7 @@ export class BaseStore<D> {
    * @returns The resolved data or a error on why it failed
    */
   put(data: D) {
-    return this.cache.put(data);
+    return this.engine.put(data);
   }
 
   /**
@@ -93,7 +104,7 @@ export class BaseStore<D> {
    * @returns The resolved data or a error on why it failed
    */
   add(data: D) {
-    return this.cache.put(data);
+    return this.engine.put(data);
   }
 
   /**
@@ -103,6 +114,17 @@ export class BaseStore<D> {
    * @param id The snowflake to resolve
    */
   remove(id: string) {
-    return this.cache.remove(id);
+    return this.engine.remove(id);
+  }
+
+  /**
+   * Simpiler method for [[AbstractEntityCache.has]] since entity cache is privated in this class,
+   * but this method checks if a entity exists in cache.
+   *
+   * @param id The snowflake to resolve
+   * @returns Returns a boolean value if the value exists
+   */
+  has(id: string) {
+    return this.engine.has(id);
   }
 }

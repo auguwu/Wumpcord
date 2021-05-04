@@ -32,7 +32,15 @@ import { Collection } from '@augu/collections';
  * on specific entities or *all* of them.
  */
 export class MemoryCache extends AbstractEntityCache {
-  #cache: Collection<string, any> = new Collection();
+  public cache: Collection<string, any> = new Collection();
+
+  /**
+   * Represents cache that is pulled in-memory using collections provided
+   * from `@augu/collections`. This is the default entity cache that is used
+   * but you can create your own using a [[AbstractEntityCache]] or if you
+   * don't need to cache anything specific, use the [[NoopEntityCache]] class
+   * on specific entities or *all* of them.
+   */
   constructor() {
     super('memory');
   }
@@ -41,7 +49,7 @@ export class MemoryCache extends AbstractEntityCache {
    * @inheritdoc
    */
   get(id: string) {
-    return this.#cache.get(id);
+    return this.cache.get(id);
   }
 
   /**
@@ -54,16 +62,16 @@ export class MemoryCache extends AbstractEntityCache {
     if ((data as any).id === undefined)
       throw new UnableToCreateEntityError('Entity didn\'t specify an ID, is this a malformed packet?', data);
 
-    if (this.#cache.has((data as any).id)) {
+    if (this.cache.has((data as any).id)) {
       const cached = this.get((data as any).id);
       cached.patch?.(data);
 
-      this.#cache.delete((data as any).id);
-      this.#cache.set((data as any).id, cached);
+      this.cache.delete((data as any).id);
+      this.cache.set((data as any).id, cached);
       return cached;
     }
 
-    this.#cache.set((data as any).id, data);
+    this.cache.set((data as any).id, data);
     return data;
   }
 
@@ -71,13 +79,13 @@ export class MemoryCache extends AbstractEntityCache {
    * @inheritdoc
    */
   has(id: string) {
-    return this.#cache.has(id);
+    return this.cache.has(id);
   }
 
   /**
    * @inheritdoc
    */
   remove(id: string) {
-    return this.#cache.delete(id);
+    return this.cache.delete(id);
   }
 }

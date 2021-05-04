@@ -690,7 +690,8 @@ export class Shard extends EventBus<ShardEvents> {
         this.debug(`[HEARTBEAT] Recieved heartbeat ack, latency of ~${this.lastReceivedAt - this.lastAckedAt}ms`);
         break;
 
-      default: break; // don't do anything
+      default:
+        break; // don't do anything
     }
   }
 

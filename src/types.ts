@@ -131,12 +131,6 @@ export interface WebSocketOptions {
    * @default false
    */
   compress?: boolean;
-
-  /**
-   * Number of tries before making the bot go into limbo.
-   * @default 5
-   */
-  tries?: number;
 }
 
 /**

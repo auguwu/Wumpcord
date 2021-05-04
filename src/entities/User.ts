@@ -154,8 +154,8 @@ class User extends BaseEntity<APIUser> {
         return chan;
       }
 
-      const chan = Channel.from(this.client, channel);
-      this.client.channels.add(chan);
+      const chan = Channel.from<any>(this.client, channel);
+      this.client.channels.put(chan);
       this.dmChannel = chan;
 
       return chan;
