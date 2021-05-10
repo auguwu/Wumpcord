@@ -23,6 +23,7 @@
 /* eslint-disable camelcase */
 
 import { APIApplicationCommandOption } from 'discord-api-types';
+import { InteractionOptionBuilder } from './InteractionOptionBuilder';
 
 const COMMAND_NAME_REGEX = /^[\w-]{1,32}$/;
 
@@ -79,9 +80,12 @@ export class InteractionCommandBuilder {
    * @param option The option object to use
    * @returns This builder to chain methods
    */
-  addOption(option: APIApplicationCommandOption) {
+  addOption(option: APIApplicationCommandOption | InteractionOptionBuilder) {
     if (this.options.length > 25)
       throw new TypeError(`Slash command options must have 25 parameters. You went over ${this.options.length - 25} over the limit.`);
+
+    if (option instanceof InteractionOptionBuilder)
+      option = option.build();
 
     this.options.push(option);
     return this;

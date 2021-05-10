@@ -20,4 +20,17 @@
  * SOFTWARE.
  */
 
-export class InteractionOptionBuilder {}
+import { APIApplicationCommandOption } from 'discord-api-types';
+
+/**
+ * Represents a builder class to create a option for a slash command,
+ * this is represented as an argument which can have nested parameters.
+ */
+export class InteractionOptionBuilder {
+  /**
+   * Returns the raw options you created using this [[InteractionBuilderOption]].
+   */
+  build(): APIApplicationCommandOption {
+    return {};
+  }
+}

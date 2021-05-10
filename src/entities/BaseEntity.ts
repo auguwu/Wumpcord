@@ -21,7 +21,6 @@
  */
 
 import type { Snowflake as SnowflakeValue } from 'discord-api-types';
-import { Snowflake } from '../util/Snowflake';
 
 /**
  * Represents a base entity for entities to extend from
@@ -30,14 +29,14 @@ export class BaseEntity<D extends any> {
   /**
    * The ID of this [[BaseEntity]].
    */
-  public id: Snowflake;
+  public id: string;
 
   /**
    * Creates a new [[BaseEntity]] instance
    * @param id The ID from Discord
    */
   constructor(id: SnowflakeValue) {
-    this.id = new Snowflake(id);
+    this.id = id;
   }
 
   /**
@@ -52,6 +51,7 @@ export class BaseEntity<D extends any> {
    * Returns when the entity was created at, a shortcut for [[Snowflake.createdAt]]
    */
   get createdAt() {
-    return this.id.createdAt;
+    const delta = BigInt(this.id) / 4194304n;
+    return new Date(Math.floor(Number(delta + BigInt(1420070400000))));
   }
 }

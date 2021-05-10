@@ -93,7 +93,7 @@ export default class Util {
    * @param options Any additional options, if needed
    */
   static formatMessage(client: WebSocketClient, content: MessageContent, options?: MessageContentOptions) {
-    const data: discord.RESTPostAPIChannelMessageJSONBody & { file?: MessageFile | MessageFile[] } = {};
+    const data: discord.RESTPostAPIChannelMessageJSONBody & { file?: MessageFile } = {};
 
     if (utils.isObject(content) && (options !== undefined && utils.isObject(options)))
       throw new TypeError('Conflicting message contents, choose one or the other.');
@@ -103,7 +103,7 @@ export default class Util {
       return data;
     } else if (utils.isObject<MessageContentOptions>(content) && options === undefined) {
       if (content.attachments !== undefined)
-        data.file = content.attachments;
+        data.file = content.attachments[0];
 
       if (content.mentions !== undefined)
         data.allowed_mentions = this.formatAllowedMentions(content.mentions, client);
@@ -126,7 +126,7 @@ export default class Util {
       data.content = content;
 
       if (options.attachments !== undefined)
-        data.file = options.attachments;
+        data.file = options.attachments[0];
 
       if (options.mentions !== undefined)
         data.allowed_mentions = this.formatAllowedMentions(options.mentions, client);
@@ -144,7 +144,7 @@ export default class Util {
         data.tts = Boolean(data.tts);
     } else if (options !== undefined && utils.isObject<MessageContentOptions>(options)) {
       if (options.attachments !== undefined)
-        data.file = options.attachments;
+        data.file = options.attachments[0];
 
       if (options.mentions !== undefined)
         data.allowed_mentions = this.formatAllowedMentions(options.mentions, client);
