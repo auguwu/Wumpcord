@@ -22,7 +22,7 @@
 
 import type { ClientOptions as WebSocketClientOptions } from 'ws';
 import type { RestClientOptions, MessageFile } from '@wumpcord/rest';
-import type { AbstractEntityCache } from './cache/AbstractEntityCache';
+import type { AbstractEntityCache } from './cache';
 import type { GatewayIntent } from './Constants';
 import type { BaseEntity } from './entities/BaseEntity';
 import type * as discord from 'discord-api-types';
@@ -202,6 +202,15 @@ export interface CachingOptions {
    * the built in ones: `'memory'` or `'no-op'`
    */
   users?: AbstractEntityCache | 'memory' | 'no-op';
+
+  /**
+   * Engine to use when caching guild roles
+   *
+   * > **NOTE**: If you do not want to construct a new instance
+   * of an [[AbstractEntityCache]] engine, you can just specify
+   * the built in ones: `'memory'` or `'no-op'`
+   */
+  roles?: AbstractEntityCache | 'memory' | 'no-op';
 }
 
 /**

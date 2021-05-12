@@ -21,7 +21,7 @@
  */
 
 import { UnableToCreateEntityError } from '../errors/UnableToCreateEntityError';
-import { AbstractEntityCache } from './AbstractEntityCache';
+import type { AbstractEntityCache } from '.';
 import { Collection } from '@augu/collections';
 
 /**
@@ -31,47 +31,36 @@ import { Collection } from '@augu/collections';
  * don't need to cache anything specific, use the [[NoopEntityCache]] class
  * on specific entities or *all* of them.
  */
-export class MemoryCache extends AbstractEntityCache {
-  public cache: Collection<string, any> = new Collection();
-
-  /**
-   * Represents cache that is pulled in-memory using collections provided
-   * from `@augu/collections`. This is the default entity cache that is used
-   * but you can create your own using a [[AbstractEntityCache]] or if you
-   * don't need to cache anything specific, use the [[NoopEntityCache]] class
-   * on specific entities or *all* of them.
-   */
-  constructor() {
-    super('memory');
-  }
+export class MemoryCache extends Collection<string, any> implements AbstractEntityCache {
+  public name: string = 'memory';
 
   /**
    * @inheritdoc
    */
   get(id: string) {
-    return this.cache.get(id);
+    return this.get(id);
   }
 
   /**
    * @inheritdoc
    */
-  put<D extends any = any>(data: D): D {
+  put(data: any) {
     if (data === undefined)
       throw new UnableToCreateEntityError('Entity didn\'t specify any data', data);
 
     if ((data as any).id === undefined)
       throw new UnableToCreateEntityError('Entity didn\'t specify an ID, is this a malformed packet?', data);
 
-    if (this.cache.has((data as any).id)) {
+    if (this.has((data as any).id)) {
       const cached = this.get((data as any).id);
       cached.patch?.(data);
 
-      this.cache.delete((data as any).id);
-      this.cache.set((data as any).id, cached);
+      this.delete((data as any).id);
+      this.set((data as any).id, cached);
       return cached;
     }
 
-    this.cache.set((data as any).id, data);
+    this.set((data as any).id, data);
     return data;
   }
 
@@ -79,13 +68,13 @@ export class MemoryCache extends AbstractEntityCache {
    * @inheritdoc
    */
   has(id: string) {
-    return this.cache.has(id);
+    return this.has(id);
   }
 
   /**
    * @inheritdoc
    */
   remove(id: string) {
-    return this.cache.delete(id);
+    return this.delete(id);
   }
 }

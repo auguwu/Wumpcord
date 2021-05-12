@@ -22,7 +22,7 @@
 
 /* eslint-disable camelcase */
 
-import { APIApplicationCommandOption } from 'discord-api-types';
+import { APIApplicationCommandOption, APIApplicationCommandOptionChoice, APIApplicationCommandSubCommandOptions } from 'discord-api-types';
 import { InteractionOptionBuilder } from './InteractionOptionBuilder';
 
 const COMMAND_NAME_REGEX = /^[\w-]{1,32}$/;
@@ -39,7 +39,7 @@ export class InteractionCommandBuilder {
   /**
    * A 1-100 character description of this slash command
    */
-  private description?: string;
+  private description!: string;
 
   /**
    * A list of options for the parameters of this slash command
@@ -49,7 +49,7 @@ export class InteractionCommandBuilder {
   /**
    * The name of the slash command
    */
-  private name?: string;
+  private name!: string;
 
   /**
    * Sets the default permission for this [[InteractionCommandBuilder]]
@@ -85,9 +85,9 @@ export class InteractionCommandBuilder {
       throw new TypeError(`Slash command options must have 25 parameters. You went over ${this.options.length - 25} over the limit.`);
 
     if (option instanceof InteractionOptionBuilder)
-      option = option.build();
+      option = option.build() as any;
 
-    this.options.push(option);
+    this.options.push(option as any);
     return this;
   }
 
@@ -98,11 +98,13 @@ export class InteractionCommandBuilder {
    * @param options The options array to use
    * @returns This builder to chain methods
    */
-  addOptions(options: APIApplicationCommandOption[]) {
+  // eslint-disable-next-line @typescript-eslint/array-type
+  addOptions(options: Array<APIApplicationCommandOptionChoice | InteractionOptionBuilder>) {
     if (this.options.length > 25)
       throw new TypeError(`Slash command options must have 25 parameters. You went over ${this.options.length - 25} over the limit.`);
 
-    this.options = this.options.concat(options);
+    const all = options.map(option => option instanceof InteractionOptionBuilder ? option.build() as any : option);
+    this.options = this.options.concat(all);
     return this;
   }
 

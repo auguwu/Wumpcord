@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import type { AbstractEntityCache } from '../cache/AbstractEntityCache';
+import type { AbstractEntityCache } from '../cache';
 import type { WebSocketClient } from '../Client';
 import type { CachingOptions } from '../types';
 import { NoopEntityCache } from '../cache/NoopCache';
@@ -115,16 +115,5 @@ export class BaseStore<D> {
    */
   remove(id: string) {
     return this.engine.remove(id);
-  }
-
-  /**
-   * Simpiler method for [[AbstractEntityCache.has]] since entity cache is privated in this class,
-   * but this method checks if a entity exists in cache.
-   *
-   * @param id The snowflake to resolve
-   * @returns Returns a boolean value if the value exists
-   */
-  has(id: string) {
-    return this.engine.has(id);
   }
 }

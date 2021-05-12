@@ -20,16 +20,14 @@
  * SOFTWARE.
  */
 
-import { AbstractEntityCache } from './AbstractEntityCache';
+import type { AbstractEntityCache } from '.';
 
 /**
  * Represents a entity cache for the purpose of not being cached to reduce
  * memory usage or overhead on other caching solutions.
  */
-export class NoopEntityCache extends AbstractEntityCache {
-  constructor() {
-    super('noop');
-  }
+export class NoopEntityCache implements AbstractEntityCache {
+  public name = 'noop';
 
   /** @inheritdoc */
   get(id: string) {

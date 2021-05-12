@@ -20,24 +20,26 @@
  * SOFTWARE.
  */
 
+import { isObject } from '@augu/utils';
+
 /**
  * The [[AbstractEntityCache]]'s purpose is to extend cache throughout Wumpcord
  * using any methods you want to use, i.e Redis. Note that all functions must
  * be synchronous due to the architecture on how entities and cache work.
  */
-export abstract class AbstractEntityCache {
+export interface AbstractEntityCache {
   /**
-   * Creates a new instance of this class.
-   * @param name The name of this [[AbstractEntityCache]] class
+   * The name of this [[AbstractEntityCache]] class
    */
-  constructor(public name: string) {}
+  name: string;
 
   /**
    * Abstract method to return data from cache or `null` if nothing is found
    * @param id The Snowflake to use
    * @returns The entity found in cache or `null`.
    */
-  abstract get(id: string): any;
+  get(id: string): any;
+  get<T>(id: string): T;
 
   /**
    * Abstract method to add data to cache with the newly
@@ -47,21 +49,36 @@ export abstract class AbstractEntityCache {
    * @param data The data from Discord
    * @returns The entity created or a [[UnableToCreateEntityError]] if something went wrong.
    */
-  abstract put<D extends any = any>(data: D): D;
-
-  /**
-   * Abstract method to check if a entity exists
-   * in this current cache entity.
-   *
-   * @param id The snowflake to use
-   * @returns A boolean value if it exists or not
-   */
-  abstract has(id: string): boolean;
+  put(data: any): any;
 
   /**
    * Abstract method to remove data from cache
    * @param id Snowflake to remove
    * @returns A boolean if it was successful or not
    */
-  abstract remove(id: string): boolean;
+  remove(id: string): boolean;
 }
+
+/**
+ * Returns if [[value]] can be represented as a [[AbstractEntityCache]]-like object.
+ * @example
+ * ```js
+ * const { isAbstractCacheLike, MemoryCache } = require('wumpcord');
+ *
+ * isAbstractCacheLike(new MemoryCache()); // true
+ * isAbstractCacheLike({ name: 'name', get() {}, put() {}, remove() {} }); // true
+ * isAbstractCacheLike('abcd'); // false
+ * ```
+ */
+export function isAbstractCacheLike(value: unknown): value is AbstractEntityCache {
+  return (
+    isObject<AbstractEntityCache>(value) &&
+    typeof value.name !== 'undefined' &&
+    typeof value.get === 'function' &&
+    typeof value.put === 'function' &&
+    typeof value.remove === 'function'
+  );
+}
+
+export * from './MemoryCache';
+export * from './NoopCache';
