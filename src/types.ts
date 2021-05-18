@@ -72,6 +72,12 @@ export interface ClientOptions {
   strategy?: 'etf' | 'json';
 
   /**
+   * Enables compression of data packets, it requires
+   * the `zlib-sync` module to be enabled.
+   */
+  compress?: boolean;
+
+  /**
    * The shard count to use, for automatic sharding, use `'auto'`
    */
   shardCount?: number | 'auto';
@@ -79,7 +85,7 @@ export interface ClientOptions {
   /**
    * List of intents to use for this bot.
    */
-  intents?: number | number[] | GatewayIntent | GatewayIntent[];
+  intents?: number | GatewayIntent[];
 
   /**
    * The caching strategy to customize the cache you need

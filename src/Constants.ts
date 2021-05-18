@@ -46,10 +46,7 @@ export type GuildFeature = 'ANIMATED_ICON' | 'BANNER' | 'COMMERECE' | 'COMMUNITY
 /**
  * List of gateway intents available
  */
-export type GatewayIntent = 'guilds' | 'guildMembers' | 'guildBans' | 'guildEmojis'
-  | 'guildIntegrations' | 'guildInvites' | 'guildVoiceStates' | 'guildPresences'
-  | 'guildMessages' | 'guildMessageReactions' | 'directMessages' | 'directMessageTyping'
-  | 'directMessageReactions';
+export type GatewayIntent = keyof typeof GatewayIntents;
 
 /**
  * List of strategy types available

@@ -24,12 +24,15 @@
 
 import { RestClientEvents as IRestClientEvents, RestClient } from '@wumpcord/rest';
 import type { ShardEvents as IShardEvents } from './gateway/Shard';
+import { EventBus, sleep } from '@augu/utils';
+import type * as discord from 'discord-api-types';
 import { ShardManager } from './gateway/ShardManager';
 import type * as types from './types';
 import { MemoryCache } from './cache/MemoryCache';
-import { EventBus } from '@augu/utils';
 
 import { ChannelStore } from './stores/ChannelStore';
+import { GatewayIntents, GatewayVersion } from './Constants';
+import { InteractionCommandBuilder } from './builders/InteractionCommandBuilder';
 
 type RestClientEvents = {
   [P in keyof IRestClientEvents as `rest${Capitalize<P>}`]: IRestClientEvents[P];
@@ -89,15 +92,26 @@ const defaults: Omit<types.ClientOptions, 'token'> = {
 /**
  * Defines a "WebSocketClient", where this is your main entrypoint
  * of running your Discord bot! ✧･ﾟ: \*✧･ﾟ:\*(\*❦ω❦)\*:･ﾟ✧*:･ﾟ✧
- *
- * @typeparam O **~** Represents a custom object for creating libraries
- * of Wumpcord that extend the functionality of this class.
- *
- * @typeparam E **~** Represents a custom object for library creation
- * of this class to extend the event bus.
+ * 
+ * @example
+ * ```js
+ * const { Client } = require('wumpcord');
+ * const client = new Client({ token: '<token>', intents: ['GUILD_MESSAGES'] });
+ * 
+ * client.on('message', msg => {
+ *    if (msg.content === '!ping') return msg.channel.send('Pong!');
+ * });
+ * 
+ * client.connect();
+ * ```
  */
 export class WebSocketClient extends EventBus<WebSocketClientEvents> {
   protected _sweepInterval?: NodeJS.Timer;
+
+  /**
+   * The cached gateway URL from Discord
+   */
+   public gatewayUrl!: string;
 
   /**
    * All of the channels this bot is apart of and managed by
@@ -171,6 +185,35 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
     });
   }
 
+  static get encoding() {
+    try {
+      require('erlpack');
+      return 'etf';
+    } catch {
+      return 'json';
+    }
+  }
+
+  /**
+   * Returns the client's intents by their numeric value
+   */
+  get intents() {
+    if (Array.isArray(this.options.intents)) {
+      let bits = 0;
+      for (let i = 0; i < this.options.intents.length; i++) {
+        const intent = this.options.intents[i];
+        if (!GatewayIntents.hasOwnProperty(intent))
+          continue;
+
+        bits |= GatewayIntents[intent];
+      }
+
+      return bits;
+    } else {
+      return this.options.intents;
+    }
+  }
+
   private debug(message: string) {
     this.emit('debug', message);
   }
@@ -180,40 +223,169 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
     // todo: this
   }
 
+  /**
+   * Function call to connect to the gateway, this is your entrypoint
+   * to connecting your bot to the stars! **✧( ु•⌄• )◞◟( •⌄• ू )✧**
+   */
   async connect() {
-    // todo: this
+    const shardInfo = await this.fetchShardInfo();
+    this.gatewayUrl = `${shardInfo.url}/?v=${GatewayVersion}&encoding=${WebSocketClient.encoding}${this.options.compress ? '&encoding=zlib-stream' : ''}`;
+
+    if (this.options.shardCount === 'auto')
+      this.options.shardCount = shardInfo.shards;
+
+    this.debug(`[Session Limit] ${shardInfo.session ? `${shardInfo.session.remaining}/${shardInfo.session.remaining} left` : 'Not auto-sharding'}`);
+    for (let i = 0; i < (this.options.shardCount === 1 ? 1 : (this.options.shardCount as number) - 1); i++) {
+      await this.shards.connect(i);
+      await sleep(5000);
+    }
   }
 
+  /**
+   * Disposes all shard connections if [`reconnect`] is set to `false`, or it'll
+   * attempt to re-connect all shards if [`reconnect`] is `true` or `undefined`.
+   * 
+   * @param reconnect If the client should start all shards
+   */
   dispose(reconnect: boolean = true) {
-    // todo: this
+    if (reconnect) {
+      this.debug('[End of Life] Attempting to reconnect all shards to Discord...');
+      for (const shard of this.shards.values())
+        shard.dispose(true);
+
+      return;
+    }
+
+    this.debug('[End of Life] Told to disconnect...');
+    for (const shard of this.shards.values())
+      shard.dispose(false);
+
+    this.shards.clear();
   }
 
-  async shardInfo() {
-    // todo: this
+  /**
+   * Method to retrieve shard information from Discord
+   */
+  async fetchShardInfo(): Promise<types.ShardingInfo> {
+    const data = this.options.shardCount === 'auto'
+      ? await this.getBotGateway()
+      : await this.getGatewayInfo();
+
+    if (!data.url || (this.options.shardCount === 'auto' && !(data as any).shards))
+      throw new TypeError('Unable to retrieve shard information');
+
+    const session: discord.APIGatewaySessionStartLimit | undefined =
+      data.hasOwnProperty('session_start_limit') ? (data as discord.APIGatewayBotInfo).session_start_limit : undefined;
+
+    if (session !== undefined && session.remaining <= 0) {
+      const error = new Error('Exceeded the amount of tries to connect.');
+
+      this.emit('error', error);
+      return Promise.reject(error);
+    }
+
+    return {
+      session,
+      shards: this.options.shardCount === 'auto' ? (data as discord.APIGatewayBotInfo).shards : this.options.shardCount,
+      url: data.url
+    };
+  }
+
+  /**
+   * Authenicated function to retrieve the gateway URL from Discord
+   * and extra sharding metadata
+   */
+  getBotGateway() {
+    return this.rest.dispatch<unknown, discord.RESTGetAPIGatewayBotResult>({
+      endpoint: '/gateway/bot',
+      method: 'GET'
+    });
+  }
+
+  /**
+   * Unauthenicated function to retrieve the gateway URL
+   */
+  getGatewayInfo() {
+    return this.rest.dispatch<unknown, discord.RESTGetAPIGatewayResult>({
+      endpoint: '/gateway',
+      method: 'GET'
+    });
   }
 
   setActivity() {
     // noop
   }
 
-  requestGuildMembers() {
+  async requestGuildMembers() {
     // noop
   }
 
+  /**
+   * Method to retrieve all global slash commands
+   * 
+   * [`Discord Docs`](https://discord.com/developers/docs/interactions/slash-commands#get-global-application-commands)
+   */
   getGlobalSlashCommands() {
+    return this.rest.dispatch<unknown, discord.RESTGetAPIApplicationCommandsResult>({
+      endpoint: '/applications/:id',
+      query: { id: '' },
+      method: 'GET'
+    });
+  }
+
+  /**
+   * Method to retrieve a specific slash command by it's [[`commandID`]]
+   * 
+   * [`Discord Docs`](https://discord.com/developers/docs/interactions/slash-commands#get-guild-application-command)
+   * @param guildID The guild ID to retrieve the slash command for
+   * @param commandID The command ID to retrieve
+   */
+  getGuildSlashCommand(guildID: string, commandID: string) {
     // todo: this
   }
 
-  getGuildSlashCommands(guildID: string) {
-    // todo: this
+  /**
+   * Method to create a guild slash command
+   * 
+   * [`Discord Docs`](https://discord.com/developers/docs/interactions/slash-commands#create-guild-application-command)
+   * @param guildID The guild's ID
+   * @param data The metadata or a [[InteractionCommandBuilder]] instance
+   */
+  createGuildSlashCommand(guildID: string, data: InteractionCommandBuilder | discord.RESTPostAPIApplicationGuildCommandsJSONBody) {
+    if (data instanceof InteractionCommandBuilder)
+      data = data.build();
+
+    return this.rest.dispatch<discord.RESTPostAPIApplicationGuildCommandsJSONBody, void>({
+      endpoint: '/applications/:appID/guilds/:guildID/commands',
+      method: 'POST',
+      query: {
+        appID: '',
+        guildID
+      },
+
+      data
+    });
   }
 
-  createGuildSlashCommand(guildID: string) {
-    // todo: this
-  }
+  /**
+   * Method to create a global slash command
+   * 
+   * [`Discord Docs`](https://discord.com/developers/docs/interactions/slash-commands#create-global-application-command)
+   * @param data The metadata or a [[InteractionCommandBuilder]].
+   */
+  createGlobalSlashCommand(data: InteractionCommandBuilder | discord.RESTPostAPIApplicationGuildCommandsJSONBody) {
+    if (data instanceof InteractionCommandBuilder)
+      data = data.build();
 
-  createGlobalSlashCommand(guildID: string) {
-    // todo: this
+    return this.rest.dispatch<discord.RESTPostAPIApplicationGuildCommandsJSONBody, void>({
+      endpoint: '/applications/:appID/commands',
+      method: 'POST',
+      query: {
+        appID: ''
+      },
+
+      data
+    });
   }
 
   editGuildSlashCommand(guildID: string, commandID: string) {

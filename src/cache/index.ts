@@ -52,6 +52,12 @@ export interface AbstractEntityCache {
   put(data: any): any;
 
   /**
+   * Abstract method to check if a entity exists in this [[AbstractEntityCache]] instance
+   * @param id The snowflake
+   */
+  has(id: string): boolean;
+
+  /**
    * Abstract method to remove data from cache
    * @param id Snowflake to remove
    * @returns A boolean if it was successful or not

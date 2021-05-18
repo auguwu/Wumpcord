@@ -28,7 +28,6 @@ import { WebSocketClient } from '../Client';
 import type { Readable } from 'stream';
 import { WebhookTypes } from '../Constants';
 import { BaseEntity } from './BaseEntity';
-import { Snowflake } from '../util/Snowflake';
 import { isObject } from '@augu/utils';
 import { User } from './User';
 import Util from '../util';
@@ -88,7 +87,7 @@ interface SendWebhookMessageOptions extends Omit<MessageContentOptions, 'embed'>
 }
 
 /**
- * Type alias for [[Webhook#send]]
+ * Type alias for [[Webhook.send]]
  */
 type SendWebhookMessage = string | SendWebhookMessageOptions;
 
@@ -105,12 +104,12 @@ export class Webhook extends BaseEntity<APIWebhook> {
   /**
    * The channel ID this webhook belongs to
    */
-  public channelID!: Snowflake;
+  public channelID!: string;
 
   /**
    * The guild ID this webhook is for
    */
-  public guildID?: Snowflake;
+  public guildID?: string;
 
   /**
    * The [[WebSocketClient]] that is attached to this webhook
@@ -155,10 +154,10 @@ export class Webhook extends BaseEntity<APIWebhook> {
       this.applicationID = data.application_id;
 
     if (data.channel_id !== undefined)
-      this.channelID = new Snowflake(data.channel_id);
+      this.channelID = data.channel_id;
 
     if (data.guild_id !== undefined)
-      this.guildID = new Snowflake(data.guild_id);
+      this.guildID = data.guild_id;
 
     if (data.avatar !== undefined)
       this.avatar = data.avatar;
@@ -221,7 +220,7 @@ export class Webhook extends BaseEntity<APIWebhook> {
       endpoint: `/webhooks/${this.id}${options.auth ? `/${this.token}` : ''}`,
       method: 'GET',
       data: {
-        channel_id: options.channelID as `${bigint}`, // stupid hack to not collide with Wumpcord.Snowflake
+        channel_id: options.channelID as `${bigint}`, // stupid hack so "string" == "`${bigint}`"
         avatar: image,
         name: options.name
       }
