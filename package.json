@@ -27,7 +27,7 @@
     "prepare": "npm run clean:node_modules && npm run build",
     "docgen": "typedoc src --out docs --theme node_modules/eledoc/bin/default/",
     "build": "npm run lint && rm -rf build && tsc",
-    "lint": "node scripts/lint.js"
+    "lint": "eslint src --ext .ts --fix"
   },
   "dependencies": {
     "@augu/collections": "1.0.8",
