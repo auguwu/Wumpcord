@@ -92,16 +92,16 @@ const defaults: Omit<types.ClientOptions, 'token'> = {
 /**
  * Defines a "WebSocketClient", where this is your main entrypoint
  * of running your Discord bot! ✧･ﾟ: \*✧･ﾟ:\*(\*❦ω❦)\*:･ﾟ✧*:･ﾟ✧
- * 
+ *
  * @example
  * ```js
  * const { Client } = require('wumpcord');
  * const client = new Client({ token: '<token>', intents: ['GUILD_MESSAGES'] });
- * 
+ *
  * client.on('message', msg => {
  *    if (msg.content === '!ping') return msg.channel.send('Pong!');
  * });
- * 
+ *
  * client.connect();
  * ```
  */
@@ -244,7 +244,7 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
   /**
    * Disposes all shard connections if [`reconnect`] is set to `false`, or it'll
    * attempt to re-connect all shards if [`reconnect`] is `true` or `undefined`.
-   * 
+   *
    * @param reconnect If the client should start all shards
    */
   dispose(reconnect: boolean = true) {
@@ -322,7 +322,7 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
 
   /**
    * Method to retrieve all global slash commands
-   * 
+   *
    * [`Discord Docs`](https://discord.com/developers/docs/interactions/slash-commands#get-global-application-commands)
    */
   getGlobalSlashCommands() {
@@ -335,7 +335,7 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
 
   /**
    * Method to retrieve a specific slash command by it's [[`commandID`]]
-   * 
+   *
    * [`Discord Docs`](https://discord.com/developers/docs/interactions/slash-commands#get-guild-application-command)
    * @param guildID The guild ID to retrieve the slash command for
    * @param commandID The command ID to retrieve
@@ -346,7 +346,7 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
 
   /**
    * Method to create a guild slash command
-   * 
+   *
    * [`Discord Docs`](https://discord.com/developers/docs/interactions/slash-commands#create-guild-application-command)
    * @param guildID The guild's ID
    * @param data The metadata or a [[InteractionCommandBuilder]] instance
@@ -369,7 +369,7 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
 
   /**
    * Method to create a global slash command
-   * 
+   *
    * [`Discord Docs`](https://discord.com/developers/docs/interactions/slash-commands#create-global-application-command)
    * @param data The metadata or a [[InteractionCommandBuilder]].
    */
