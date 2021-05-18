@@ -226,12 +226,16 @@ export class Shard extends EventBus<ShardEvents> {
   /**
    * The resolver function from [WebSocketShard._createConnection]
    */
-  private resolver?: () => void;
+  private resolver?: (shard: this) => void;
 
   /**
    * The rejecter function from [WebSocketShard._createConnection]
    */
   private rejecter?: (error: any) => void;
+
+  /**
+   * The zlib inflate class if compression support is enabled
+   */
   private inflate?: ZlibInflate;
 
   /**
@@ -305,7 +309,26 @@ export class Shard extends EventBus<ShardEvents> {
 
     this.debug(`${this.sessionID !== undefined ? 'Resuming the' : 'Establishing a'} end to end connection...`);
     this.status = 'Handshaking';
-    return new Promise<this>((resolve, reject) => void 0);
+    return new Promise<this>((resolve, reject) => {
+      this.resolver = resolve as any;
+      this.rejecter = reject;
+
+      this.socket = new WebSocket(this.#client.gatewayUrl, this.#client.options.ws.clientOptions);
+      this
+        .socket
+        .on('message', this._onMessage.bind(this))
+        .on('error', this._onError.bind(this))
+        .on('close', this._onClose.bind(this))
+        .on('open', this._onOpen.bind(this));
+
+      this._connectTimeout = setTimeout(() => {
+        this.debug('Didn\'t create session in time, reconnecting...');
+        this.dispose(true);
+
+        this.rejecter?.(new Error('Didn\'t create session in time.'));
+        delete this.rejecter;
+      }, this.#client.options.ws.connectTimeout ?? 25000);
+    });
   }
 
   /**

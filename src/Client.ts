@@ -33,6 +33,7 @@ import { MemoryCache } from './cache/MemoryCache';
 import { ChannelStore } from './stores/ChannelStore';
 import { GatewayIntents, GatewayVersion } from './Constants';
 import { InteractionCommandBuilder } from './builders/InteractionCommandBuilder';
+import { Application } from './entities/Application';
 
 type RestClientEvents = {
   [P in keyof IRestClientEvents as `rest${Capitalize<P>}`]: IRestClientEvents[P];
@@ -185,6 +186,9 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
     });
   }
 
+  /**
+   * Returns the encoding strategy to use for [`WebSocketClient.gatewayUrl`]
+   */
   static get encoding() {
     try {
       require('erlpack');
@@ -312,8 +316,24 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
     });
   }
 
-  setActivity() {
-    // noop
+  /**
+   * Sets the current activity for all shards
+   * @param status The status to use
+   * @param options The activity options
+   */
+  setActivity(status: types.OnlineStatus, options: types.SendActivityOptions) {
+    for (const shard of this.shards.values())
+      shard.setActivity(status, options);
+  }
+
+  /**
+   * Returns the OAuth2 application of this client
+   */
+  getOAuthApplication() {
+    return this.rest.dispatch<unknown, discord.APIApplication>({
+      endpoint: '/oauth2/applications/@me',
+      method: 'GET'
+    }).then(data => new Application(this, data));
   }
 
   async requestGuildMembers() {
