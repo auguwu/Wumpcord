@@ -20,52 +20,50 @@
  * SOFTWARE.
  */
 
-import { Permissions } from '../Constants';
+import type { WebSocketClient } from '../Client';
+import type { APIUser } from 'discord-api-types';
+import { User } from './User';
 
-/**
- * Utility to handle permissions
- */
-export class Permission {
-  /** The bit for the allowed permission */
-  public allow: bigint;
-
-  /** The bit for the denied permission */
-  public denied: bigint;
+export class SelfUser extends User {
+  /**
+   * The premium type of this bot.
+   */
+  public premiumType?: number;
 
   /**
-   * Utility to handle permissions
-   * @param allow The allowed permission
-   * @param deny The denied permissions
+   * If Multi Factor Authenication is enabled.
    */
-  constructor(allow: string, deny: string = '0') {
-    this.denied = BigInt(deny);
-    this.allow = BigInt(allow);
+  public mfaEnabled?: boolean; // why do bots have this
+
+  /**
+   * If the bot is verified or not
+   */
+  public verified!: boolean;
+
+  /**
+   * The email of this bot
+   */
+  public email?: string | null; // discord why
+
+  constructor(client: WebSocketClient, data: APIUser) {
+    super(client, data);
+
+    this.patch(data);
   }
 
-  /**
-   * Returns a JSON structure of all the permissions available to this class
-   */
-  toJSON() {
-    const json = {};
-    for (const key of Object.keys(Permissions)) {
-      if (!key.startsWith('all')) {
-        if (this.allow & Permissions[key])
-          json[key] = true;
-        else if (this.denied & Permissions[key])
-          json[key] = false;
-      }
-    }
+  patch(data: Partial<APIUser>) {
+    super.patch(data as APIUser);
 
-    return json;
-  }
+    if (data.premium_type !== undefined)
+      this.premiumType = data.premium_type;
 
-  /**
-   * Checks if `key` exists in the bitfield
-   * @param key The key to check
-   */
-  has(key: keyof typeof Permissions) {
-    if (!Permissions.hasOwnProperty(key)) return false;
+    if (data.mfa_enabled !== undefined)
+      this.mfaEnabled = data.mfa_enabled;
 
-    return !!(this.allow & Permissions[key]);
+    if (data.verified !== undefined)
+      this.verified = data.verified;
+
+    if (data.email !== undefined)
+      this.email = data.email;
   }
 }

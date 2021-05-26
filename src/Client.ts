@@ -34,6 +34,7 @@ import { ChannelStore } from './stores/ChannelStore';
 import { GatewayIntents, GatewayVersion } from './Constants';
 import { InteractionCommandBuilder } from './builders/InteractionCommandBuilder';
 import { Application } from './entities/Application';
+import { SelfUser } from './entities';
 
 type RestClientEvents = {
   [P in keyof IRestClientEvents as `rest${Capitalize<P>}`]: IRestClientEvents[P];
@@ -144,6 +145,11 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
    * The rest client available to make requests to Discord's REST API
    */
   public rest: RestClient;
+
+  /**
+   * The current self user.
+   */
+  public user!: SelfUser;
 
   /**
    * Defines a "WebSocketClient", where this is your main entrypoint

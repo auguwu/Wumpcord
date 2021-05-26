@@ -20,52 +20,35 @@
  * SOFTWARE.
  */
 
-import { Permissions } from '../Constants';
+import { APIOverwrite, OverwriteType } from 'discord-api-types';
+import { Permission } from '..';
+import { BaseEntity } from './BaseEntity';
 
 /**
- * Utility to handle permissions
+ * https://discord.com/developers/docs/topics/permissions#permission-overwrites
  */
-export class Permission {
-  /** The bit for the allowed permission */
-  public allow: bigint;
-
-  /** The bit for the denied permission */
-  public denied: bigint;
+export class PermissionOverwrite extends BaseEntity<APIOverwrite> {
+  /**
+   * List of permissions available for this [[PermissionOverwrite]].
+   */
+  public permissions!: Permission;
 
   /**
-   * Utility to handle permissions
-   * @param allow The allowed permission
-   * @param deny The denied permissions
+   * The overwrite type
    */
-  constructor(allow: string, deny: string = '0') {
-    this.denied = BigInt(deny);
-    this.allow = BigInt(allow);
+  public type!: 'role' | 'member';
+
+  constructor(data: APIOverwrite) {
+    super(data.id);
+
+    this.patch(data);
   }
 
-  /**
-   * Returns a JSON structure of all the permissions available to this class
-   */
-  toJSON() {
-    const json = {};
-    for (const key of Object.keys(Permissions)) {
-      if (!key.startsWith('all')) {
-        if (this.allow & Permissions[key])
-          json[key] = true;
-        else if (this.denied & Permissions[key])
-          json[key] = false;
-      }
-    }
+  patch(data: Partial<APIOverwrite>) {
+    if (data.allow !== undefined)
+      this.permissions = new Permission(data.allow as `${bigint}`, data.deny);
 
-    return json;
-  }
-
-  /**
-   * Checks if `key` exists in the bitfield
-   * @param key The key to check
-   */
-  has(key: keyof typeof Permissions) {
-    if (!Permissions.hasOwnProperty(key)) return false;
-
-    return !!(this.allow & Permissions[key]);
+    if (data.type !== undefined)
+      this.type = data.type === OverwriteType.Role ? 'role' : 'member';
   }
 }

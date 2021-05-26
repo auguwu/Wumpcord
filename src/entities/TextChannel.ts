@@ -19,20 +19,3 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-//export * from './builders';
-//export * from './entities';
-export * from './cache';
-
-export * from './util/Extensions';
-export { default as Util } from './util';
-export { Permission } from './util/Permissions';
-
-export * as Constants from './Constants';
-export { WebSocketClient as Client } from './Client';
-export * from './types';
-
-/**
- * Returns the version of Wumpcord
- */
-export const version: string = require('../package.json').version;

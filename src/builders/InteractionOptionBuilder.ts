@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import { APIApplicationCommandArgumentOptions, APIApplicationCommandOption, APIApplicationCommandOptionChoice, APIApplicationCommandSubCommandOptions } from 'discord-api-types';
+import type { APIApplicationCommandArgumentOptions, APIApplicationCommandOption, APIApplicationCommandOptionChoice, APIApplicationCommandSubCommandOptions } from 'discord-api-types';
 
 // discord-api-types please make this not a const enum :sob:
 enum ApplicationCommandOptionType {

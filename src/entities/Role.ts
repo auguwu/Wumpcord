@@ -24,7 +24,7 @@
 
 import type { APIRole as _APIRole, APIRoleTags as _APIRoleTags } from 'discord-api-types';
 import { BaseEntity } from './BaseEntity';
-import Permission from '../util/Permissions';
+import { Permission } from '../util/Permissions';
 
 /**
  * The role tags for this [[Role]].

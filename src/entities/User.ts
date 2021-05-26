@@ -94,7 +94,7 @@ class User extends BaseEntity<APIUser> {
 
     // don't know why you would call patch but hey
     this.system = data.system ?? this.system ?? false;
-    this.bot = data.bot ?? this.system ?? false;
+    this.bot = data.bot ?? this.bot ?? false;
   }
 
   /**

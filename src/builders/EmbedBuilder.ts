@@ -26,7 +26,7 @@ import type { APIEmbed, APIEmbedAuthor, APIEmbedField, APIEmbedFooter, APIEmbedI
 import { omitUndefinedOrNull } from '@augu/utils';
 import { Role } from '../entities/Role';
 
-export default class EmbedBuilder {
+export class EmbedBuilder {
   public description?: string;
   public timestamp?: string;
   public thumbnail?: APIEmbedThumbnail;

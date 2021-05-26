@@ -22,7 +22,7 @@
 
 /* eslint-disable camelcase */
 
-import type { APIEmbed, APIMessage, APIWebhook, RESTPatchAPIWebhookJSONBody, RESTPatchAPIWebhookWithTokenJSONBody, RESTPatchAPIWebhookWithTokenMessageJSONBody, RESTPostAPIWebhookWithTokenJSONBody } from 'discord-api-types';
+import type { APIEmbed, APIMessage, APIWebhook, RESTPatchAPIWebhookJSONBody, RESTPostAPIWebhookWithTokenJSONBody } from 'discord-api-types';
 import type { MessageContentOptions } from '../types';
 import { WebSocketClient } from '../Client';
 import type { Readable } from 'stream';
