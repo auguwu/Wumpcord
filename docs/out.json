@@ -7055,7 +7055,7 @@
 			"flags": {},
 			"children": [
 				{
-					"id": 1614,
+					"id": 1678,
 					"name": "EmbedBuilder",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -7070,7 +7070,7 @@
 					"target": 2
 				},
 				{
-					"id": 1612,
+					"id": 1676,
 					"name": "InteractionCommandBuilder",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -7089,7 +7089,7 @@
 					"target": 64
 				},
 				{
-					"id": 1613,
+					"id": 1677,
 					"name": "InteractionOptionBuilder",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -7109,9 +7109,9 @@
 					"title": "References",
 					"kind": 16777216,
 					"children": [
-						1614,
-						1612,
-						1613
+						1678,
+						1676,
+						1677
 					]
 				}
 			],
@@ -9172,7 +9172,7 @@
 			"flags": {},
 			"children": [
 				{
-					"id": 1615,
+					"id": 1679,
 					"name": "MemoryCache",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -9180,7 +9180,7 @@
 					"target": 150
 				},
 				{
-					"id": 1616,
+					"id": 1680,
 					"name": "NoopEntityCache",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -9511,8 +9511,8 @@
 					"title": "References",
 					"kind": 16777216,
 					"children": [
-						1615,
-						1616
+						1679,
+						1680
 					]
 				},
 				{
@@ -12884,7 +12884,7 @@
 			"flags": {},
 			"children": [
 				{
-					"id": 1625,
+					"id": 1691,
 					"name": "APIRoleTags",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -12892,7 +12892,7 @@
 					"target": 892
 				},
 				{
-					"id": 1620,
+					"id": 1686,
 					"name": "Application",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -12900,7 +12900,7 @@
 					"target": 712
 				},
 				{
-					"id": 1624,
+					"id": 1690,
 					"name": "Channel",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -12908,7 +12908,7 @@
 					"target": 763
 				},
 				{
-					"id": 1623,
+					"id": 1689,
 					"name": "ChannelType",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -12916,7 +12916,7 @@
 					"target": 762
 				},
 				{
-					"id": 1619,
+					"id": 1683,
 					"name": "DynamicImage",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -12924,7 +12924,23 @@
 					"target": 813
 				},
 				{
-					"id": 1626,
+					"id": 1685,
+					"name": "GuildChannel",
+					"kind": 16777216,
+					"kindString": "Reference",
+					"flags": {},
+					"target": 782
+				},
+				{
+					"id": 1684,
+					"name": "PermissionOverwrite",
+					"kind": 16777216,
+					"kindString": "Reference",
+					"flags": {},
+					"target": 879
+				},
+				{
+					"id": 1692,
 					"name": "RGBValue",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -12932,7 +12948,7 @@
 					"target": 895
 				},
 				{
-					"id": 1617,
+					"id": 1681,
 					"name": "RetrieveMessagesOptions",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -12940,7 +12956,7 @@
 					"target": 837
 				},
 				{
-					"id": 1627,
+					"id": 1693,
 					"name": "Role",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -12948,7 +12964,7 @@
 					"target": 896
 				},
 				{
-					"id": 1621,
+					"id": 1687,
 					"name": "SelfUser",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -12956,7 +12972,7 @@
 					"target": 923
 				},
 				{
-					"id": 1618,
+					"id": 1682,
 					"name": "TextableChannel",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -12964,7 +12980,7 @@
 					"target": 842
 				},
 				{
-					"id": 1628,
+					"id": 1694,
 					"name": "User",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -12979,7 +12995,7 @@
 					"target": 964
 				},
 				{
-					"id": 1622,
+					"id": 1688,
 					"name": "Webhook",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -12992,18 +13008,20 @@
 					"title": "References",
 					"kind": 16777216,
 					"children": [
-						1625,
-						1620,
-						1624,
-						1623,
-						1619,
-						1626,
-						1617,
-						1627,
-						1621,
-						1618,
-						1628,
-						1622
+						1691,
+						1686,
+						1690,
+						1689,
+						1683,
+						1685,
+						1684,
+						1692,
+						1681,
+						1693,
+						1687,
+						1682,
+						1694,
+						1688
 					]
 				}
 			],
@@ -15346,7 +15364,7 @@
 							],
 							"type": {
 								"type": "reference",
-								"id": 1599,
+								"id": 1663,
 								"name": "Permission"
 							}
 						},
@@ -15820,7 +15838,7 @@
 							],
 							"type": {
 								"type": "reference",
-								"id": 1599,
+								"id": 1663,
 								"name": "Permission"
 							}
 						},
@@ -25907,7 +25925,23 @@
 			"flags": {},
 			"children": [
 				{
-					"id": 1634,
+					"id": 1706,
+					"name": "APIComponentActionRow",
+					"kind": 16777216,
+					"kindString": "Reference",
+					"flags": {},
+					"target": 1566
+				},
+				{
+					"id": 1705,
+					"name": "APIComponentButton",
+					"kind": 16777216,
+					"kindString": "Reference",
+					"flags": {},
+					"target": 1555
+				},
+				{
+					"id": 1702,
 					"name": "AbstractEntityCache",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -25915,7 +25949,7 @@
 					"target": 132
 				},
 				{
-					"id": 1644,
+					"id": 1719,
 					"name": "AllowedMentions",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -25923,7 +25957,31 @@
 					"target": 1495
 				},
 				{
-					"id": 1643,
+					"id": 1710,
+					"name": "ButtonBuilder",
+					"kind": 16777216,
+					"kindString": "Reference",
+					"flags": {},
+					"target": 1523
+				},
+				{
+					"id": 1709,
+					"name": "ButtonStyle",
+					"kind": 16777216,
+					"kindString": "Reference",
+					"flags": {},
+					"target": 1522
+				},
+				{
+					"id": 1708,
+					"name": "ButtonStyles",
+					"kind": 16777216,
+					"kindString": "Reference",
+					"flags": {},
+					"target": 1516
+				},
+				{
+					"id": 1718,
 					"name": "CachingOptions",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -25931,7 +25989,7 @@
 					"target": 1486
 				},
 				{
-					"id": 1632,
+					"id": 1696,
 					"name": "Client",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -25946,7 +26004,7 @@
 					"target": 362
 				},
 				{
-					"id": 1641,
+					"id": 1716,
 					"name": "ClientOptions",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -25954,7 +26012,15 @@
 					"target": 1468
 				},
 				{
-					"id": 1631,
+					"id": 1707,
+					"name": "ComponentTreeBuilder",
+					"kind": 16777216,
+					"kindString": "Reference",
+					"flags": {},
+					"target": 1569
+				},
+				{
+					"id": 1697,
 					"name": "Constants",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -25962,22 +26028,71 @@
 					"sources": [
 						{
 							"fileName": "src/index.ts",
-							"line": 31,
+							"line": 33,
 							"character": 21
 						}
 					],
 					"target": 482
 				},
 				{
-					"id": 1637,
+					"id": 1700,
+					"name": "EmbedBuilder",
+					"kind": 16777216,
+					"kindString": "Reference",
+					"flags": {},
+					"sources": [
+						{
+							"fileName": "src/builders/index.ts",
+							"line": 25,
+							"character": 21
+						}
+					],
+					"target": 1678
+				},
+				{
+					"id": 1712,
 					"name": "Extensions",
 					"kind": 16777216,
 					"kindString": "Reference",
 					"flags": {},
-					"target": 1516
+					"target": 1580
 				},
 				{
-					"id": 1635,
+					"id": 1698,
+					"name": "InteractionCommandBuilder",
+					"kind": 16777216,
+					"kindString": "Reference",
+					"flags": {},
+					"comment": {
+						"shortText": "Copyright (c) 2020-2021 August",
+						"text": "Permission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n"
+					},
+					"sources": [
+						{
+							"fileName": "src/builders/index.ts",
+							"line": 23,
+							"character": 34
+						}
+					],
+					"target": 1676
+				},
+				{
+					"id": 1699,
+					"name": "InteractionOptionBuilder",
+					"kind": 16777216,
+					"kindString": "Reference",
+					"flags": {},
+					"sources": [
+						{
+							"fileName": "src/builders/index.ts",
+							"line": 24,
+							"character": 33
+						}
+					],
+					"target": 1677
+				},
+				{
+					"id": 1703,
 					"name": "MemoryCache",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -25985,7 +26100,7 @@
 					"target": 150
 				},
 				{
-					"id": 1640,
+					"id": 1715,
 					"name": "MessageContent",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -25993,7 +26108,7 @@
 					"target": 1467
 				},
 				{
-					"id": 1645,
+					"id": 1720,
 					"name": "MessageContentOptions",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -26001,7 +26116,7 @@
 					"target": 1500
 				},
 				{
-					"id": 1636,
+					"id": 1704,
 					"name": "NoopEntityCache",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -26009,7 +26124,7 @@
 					"target": 291
 				},
 				{
-					"id": 1639,
+					"id": 1714,
 					"name": "OnlineStatus",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -26017,7 +26132,7 @@
 					"target": 1466
 				},
 				{
-					"id": 1638,
+					"id": 1713,
 					"name": "PartialEntity",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -26025,22 +26140,15 @@
 					"target": 1460
 				},
 				{
-					"id": 1630,
+					"id": 1711,
 					"name": "Permission",
 					"kind": 16777216,
 					"kindString": "Reference",
 					"flags": {},
-					"sources": [
-						{
-							"fileName": "src/index.ts",
-							"line": 29,
-							"character": 19
-						}
-					],
-					"target": 1599
+					"target": 1663
 				},
 				{
-					"id": 1647,
+					"id": 1722,
 					"name": "SendActivityOptions",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -26048,7 +26156,7 @@
 					"target": 1512
 				},
 				{
-					"id": 1646,
+					"id": 1721,
 					"name": "ShardingInfo",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -26056,7 +26164,7 @@
 					"target": 1508
 				},
 				{
-					"id": 1629,
+					"id": 1695,
 					"name": "Util",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -26068,10 +26176,10 @@
 							"character": 24
 						}
 					],
-					"target": 1536
+					"target": 1600
 				},
 				{
-					"id": 1642,
+					"id": 1717,
 					"name": "WebSocketOptions",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -26079,7 +26187,7 @@
 					"target": 1481
 				},
 				{
-					"id": 1633,
+					"id": 1701,
 					"name": "isAbstractCacheLike",
 					"kind": 16777216,
 					"kindString": "Reference",
@@ -26100,7 +26208,7 @@
 					"sources": [
 						{
 							"fileName": "src/index.ts",
-							"line": 38,
+							"line": 39,
 							"character": 20
 						}
 					],
@@ -26116,25 +26224,34 @@
 					"title": "References",
 					"kind": 16777216,
 					"children": [
-						1634,
-						1644,
-						1643,
-						1632,
-						1641,
-						1631,
-						1637,
-						1635,
-						1640,
-						1645,
-						1636,
-						1639,
-						1638,
-						1630,
-						1647,
-						1646,
-						1629,
-						1642,
-						1633
+						1706,
+						1705,
+						1702,
+						1719,
+						1710,
+						1709,
+						1708,
+						1718,
+						1696,
+						1716,
+						1707,
+						1697,
+						1700,
+						1712,
+						1698,
+						1699,
+						1703,
+						1715,
+						1720,
+						1704,
+						1714,
+						1713,
+						1711,
+						1722,
+						1721,
+						1695,
+						1717,
+						1701
 					]
 				},
 				{
@@ -29532,14 +29649,1238 @@
 			]
 		},
 		{
-			"id": 1535,
+			"id": 1578,
+			"name": "uikit",
+			"kind": 1,
+			"kindString": "Module",
+			"flags": {},
+			"children": [
+				{
+					"id": 1724,
+					"name": "APIComponentActionRow",
+					"kind": 16777216,
+					"kindString": "Reference",
+					"flags": {},
+					"target": 1566
+				},
+				{
+					"id": 1723,
+					"name": "APIComponentButton",
+					"kind": 16777216,
+					"kindString": "Reference",
+					"flags": {},
+					"target": 1555
+				},
+				{
+					"id": 1728,
+					"name": "ButtonBuilder",
+					"kind": 16777216,
+					"kindString": "Reference",
+					"flags": {},
+					"target": 1523
+				},
+				{
+					"id": 1727,
+					"name": "ButtonStyle",
+					"kind": 16777216,
+					"kindString": "Reference",
+					"flags": {},
+					"target": 1522
+				},
+				{
+					"id": 1726,
+					"name": "ButtonStyles",
+					"kind": 16777216,
+					"kindString": "Reference",
+					"flags": {},
+					"target": 1516
+				},
+				{
+					"id": 1725,
+					"name": "ComponentTreeBuilder",
+					"kind": 16777216,
+					"kindString": "Reference",
+					"flags": {},
+					"target": 1569
+				}
+			],
+			"groups": [
+				{
+					"title": "References",
+					"kind": 16777216,
+					"children": [
+						1724,
+						1723,
+						1728,
+						1727,
+						1726,
+						1725
+					]
+				}
+			],
+			"sources": [
+				{
+					"fileName": "src/uikit/index.ts",
+					"line": 1,
+					"character": 0
+				}
+			]
+		},
+		{
+			"id": 1515,
+			"name": "uikit/ButtonBuilder",
+			"kind": 1,
+			"kindString": "Module",
+			"flags": {},
+			"children": [
+				{
+					"id": 1516,
+					"name": "ButtonStyles",
+					"kind": 4,
+					"kindString": "Enumeration",
+					"flags": {},
+					"comment": {
+						"shortText": "List of button styles for a [[ButtonBuilder]] instance."
+					},
+					"children": [
+						{
+							"id": 1520,
+							"name": "Danger",
+							"kind": 16,
+							"kindString": "Enumeration member",
+							"flags": {},
+							"comment": {
+								"shortText": "Represents a \"danger\" button, colour is gonna be Red."
+							},
+							"sources": [
+								{
+									"fileName": "src/uikit/ButtonBuilder.ts",
+									"line": 51,
+									"character": 8
+								}
+							],
+							"defaultValue": "4"
+						},
+						{
+							"id": 1521,
+							"name": "Link",
+							"kind": 16,
+							"kindString": "Enumeration member",
+							"flags": {},
+							"comment": {
+								"shortText": "Represents a \"link\" button, which will navigate to a URL."
+							},
+							"sources": [
+								{
+									"fileName": "src/uikit/ButtonBuilder.ts",
+									"line": 56,
+									"character": 6
+								}
+							],
+							"defaultValue": "5"
+						},
+						{
+							"id": 1517,
+							"name": "Primary",
+							"kind": 16,
+							"kindString": "Enumeration member",
+							"flags": {},
+							"comment": {
+								"shortText": "Represents a \"primary\" button, the colour is gonna be Blurple."
+							},
+							"sources": [
+								{
+									"fileName": "src/uikit/ButtonBuilder.ts",
+									"line": 36,
+									"character": 9
+								}
+							],
+							"defaultValue": "1"
+						},
+						{
+							"id": 1518,
+							"name": "Secondary",
+							"kind": 16,
+							"kindString": "Enumeration member",
+							"flags": {},
+							"comment": {
+								"shortText": "Represents a secondary button, colour is gonna be Grey."
+							},
+							"sources": [
+								{
+									"fileName": "src/uikit/ButtonBuilder.ts",
+									"line": 41,
+									"character": 11
+								}
+							],
+							"defaultValue": "2"
+						},
+						{
+							"id": 1519,
+							"name": "Success",
+							"kind": 16,
+							"kindString": "Enumeration member",
+							"flags": {},
+							"comment": {
+								"shortText": "Represents a \"success\" button, colour is gonna be Green."
+							},
+							"sources": [
+								{
+									"fileName": "src/uikit/ButtonBuilder.ts",
+									"line": 46,
+									"character": 9
+								}
+							],
+							"defaultValue": "3"
+						}
+					],
+					"groups": [
+						{
+							"title": "Enumeration members",
+							"kind": 16,
+							"children": [
+								1520,
+								1521,
+								1517,
+								1518,
+								1519
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "src/uikit/ButtonBuilder.ts",
+							"line": 32,
+							"character": 24
+						}
+					]
+				},
+				{
+					"id": 1523,
+					"name": "ButtonBuilder",
+					"kind": 128,
+					"kindString": "Class",
+					"flags": {},
+					"comment": {
+						"shortText": "Represents a builder class to easily construct buttons in a [[ComponentTreeBuilder]].",
+						"tags": [
+							{
+								"tag": "example",
+								"text": "\n```js\nconst { Client, ComponentTreeBuilder, ButtonBuilder } = require('wumpcord');\nconst client = new Client({ token: '', intents: ['GUILD_MESSAGES', 'GUILDS'] });\n\nclient.on('message', msg => {\n   if (msg.content === '!test')\n      return msg.channel.send({\n         content: 'Hello, world!',\n         components: new ComponentTreeBuilder()\n              .addButton(new ButtonBuilder().setLabel('hi world').setEmoji('id', 'name').setStyle('primary').build())\n              .build()\n      });\n});\n```\n"
+							},
+							{
+								"tag": "docs",
+								"text": "{@link https://discord.com/developers/docs/interactions/message-components#buttons}\n"
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 1524,
+							"name": "constructor",
+							"kind": 512,
+							"kindString": "Constructor",
+							"flags": {},
+							"signatures": [
+								{
+									"id": 1525,
+									"name": "new ButtonBuilder",
+									"kind": 16384,
+									"kindString": "Constructor signature",
+									"flags": {},
+									"type": {
+										"type": "reference",
+										"id": 1523,
+										"name": "ButtonBuilder"
+									}
+								}
+							]
+						},
+						{
+							"id": 1552,
+							"name": "build",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "src/uikit/ButtonBuilder.ts",
+									"line": 167,
+									"character": 7
+								}
+							],
+							"signatures": [
+								{
+									"id": 1553,
+									"name": "build",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Builds this [[ButtonBuilder]] that is passable to Discord."
+									},
+									"type": {
+										"type": "reference",
+										"typeArguments": [
+											{
+												"type": "reference",
+												"id": 1555,
+												"name": "APIComponentButton"
+											}
+										],
+										"name": "OmitUndefinedOrNull"
+									}
+								}
+							]
+						},
+						{
+							"id": 1538,
+							"name": "setCustomID",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "src/uikit/ButtonBuilder.ts",
+									"line": 120,
+									"character": 13
+								}
+							],
+							"signatures": [
+								{
+									"id": 1539,
+									"name": "setCustomID",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Sets a custom ID for this button, a developer-defined unique ID.\nIf none is specified, it'll generate a random one.",
+										"returns": "This [[ButtonBuilder]] for chaining methods.\n"
+									},
+									"parameters": [
+										{
+											"id": 1540,
+											"name": "id",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {
+												"isOptional": true
+											},
+											"comment": {
+												"text": "The unique ID for this button, if none is specified,\nit'll auto-generate."
+											},
+											"type": {
+												"type": "intrinsic",
+												"name": "string"
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"id": 1523,
+										"name": "ButtonBuilder"
+									}
+								}
+							]
+						},
+						{
+							"id": 1547,
+							"name": "setDisabled",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "src/uikit/ButtonBuilder.ts",
+									"line": 150,
+									"character": 13
+								}
+							],
+							"signatures": [
+								{
+									"id": 1548,
+									"name": "setDisabled",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Make this button disabled.",
+										"returns": "This [[ButtonBuilder]] for chaining methods.\n"
+									},
+									"type": {
+										"type": "reference",
+										"id": 1523,
+										"name": "ButtonBuilder"
+									}
+								}
+							]
+						},
+						{
+							"id": 1541,
+							"name": "setEmoji",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "src/uikit/ButtonBuilder.ts",
+									"line": 132,
+									"character": 10
+								}
+							],
+							"signatures": [
+								{
+									"id": 1542,
+									"name": "setEmoji",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Sets a emoji on this button.",
+										"returns": "This [[ButtonBuilder]] for chaining methods.\n"
+									},
+									"parameters": [
+										{
+											"id": 1543,
+											"name": "emoji",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"comment": {
+												"text": "The emoji instance from the client or guild."
+											},
+											"type": {
+												"type": "intrinsic",
+												"name": "any"
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"id": 1523,
+										"name": "ButtonBuilder"
+									}
+								},
+								{
+									"id": 1544,
+									"name": "setEmoji",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Sets a emoji on this button.",
+										"returns": "This [[ButtonBuilder]] for chaining methods.\n"
+									},
+									"parameters": [
+										{
+											"id": 1545,
+											"name": "emojiID",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"comment": {
+												"text": "The emoji's ID"
+											},
+											"type": {
+												"type": "intrinsic",
+												"name": "string"
+											}
+										},
+										{
+											"id": 1546,
+											"name": "name",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"comment": {
+												"text": "The emoji name, it can be `null` if it's a unicode emoji."
+											},
+											"type": {
+												"type": "union",
+												"types": [
+													{
+														"type": "literal",
+														"value": null
+													},
+													{
+														"type": "intrinsic",
+														"name": "string"
+													}
+												]
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"id": 1523,
+										"name": "ButtonBuilder"
+									}
+								}
+							]
+						},
+						{
+							"id": 1532,
+							"name": "setLabel",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "src/uikit/ButtonBuilder.ts",
+									"line": 97,
+									"character": 10
+								}
+							],
+							"signatures": [
+								{
+									"id": 1533,
+									"name": "setLabel",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Sets a label of this button.",
+										"returns": "This [[ButtonBuilder]] for chaining methods.\n"
+									},
+									"parameters": [
+										{
+											"id": 1534,
+											"name": "label",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"comment": {
+												"text": "The label for this button"
+											},
+											"type": {
+												"type": "intrinsic",
+												"name": "string"
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"id": 1523,
+										"name": "ButtonBuilder"
+									}
+								}
+							]
+						},
+						{
+							"id": 1535,
+							"name": "setStyle",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "src/uikit/ButtonBuilder.ts",
+									"line": 107,
+									"character": 10
+								}
+							],
+							"signatures": [
+								{
+									"id": 1536,
+									"name": "setStyle",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Sets the style of this button, this is required.",
+										"returns": "This [[ButtonBuilder]] for chaining methods.\n"
+									},
+									"parameters": [
+										{
+											"id": 1537,
+											"name": "style",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"comment": {
+												"text": "The style to use"
+											},
+											"type": {
+												"type": "union",
+												"types": [
+													{
+														"type": "literal",
+														"value": "primary"
+													},
+													{
+														"type": "literal",
+														"value": "secondary"
+													},
+													{
+														"type": "literal",
+														"value": "success"
+													},
+													{
+														"type": "literal",
+														"value": "danger"
+													},
+													{
+														"type": "literal",
+														"value": "link"
+													}
+												]
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"id": 1523,
+										"name": "ButtonBuilder"
+									}
+								}
+							]
+						},
+						{
+							"id": 1549,
+							"name": "setUrl",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "src/uikit/ButtonBuilder.ts",
+									"line": 159,
+									"character": 8
+								}
+							],
+							"signatures": [
+								{
+									"id": 1550,
+									"name": "setUrl",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Sets a clickable URL for this button.",
+										"returns": "This [[ButtonBuilder]] for chaining methods.\n"
+									},
+									"parameters": [
+										{
+											"id": 1551,
+											"name": "url",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"type": {
+												"type": "intrinsic",
+												"name": "string"
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"id": 1523,
+										"name": "ButtonBuilder"
+									}
+								}
+							]
+						}
+					],
+					"groups": [
+						{
+							"title": "Constructors",
+							"kind": 512,
+							"children": [
+								1524
+							]
+						},
+						{
+							"title": "Methods",
+							"kind": 2048,
+							"children": [
+								1552,
+								1538,
+								1547,
+								1541,
+								1532,
+								1535,
+								1549
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "src/uikit/ButtonBuilder.ts",
+							"line": 84,
+							"character": 26
+						}
+					]
+				},
+				{
+					"id": 1522,
+					"name": "ButtonStyle",
+					"kind": 4194304,
+					"kindString": "Type alias",
+					"flags": {},
+					"comment": {
+						"shortText": "Type alias for a lowercased version of the keys in [[ButtonStyles]]."
+					},
+					"sources": [
+						{
+							"fileName": "src/uikit/ButtonBuilder.ts",
+							"line": 62,
+							"character": 23
+						}
+					],
+					"type": {
+						"type": "reference",
+						"typeArguments": [
+							{
+								"type": "typeOperator",
+								"operator": "keyof",
+								"target": {
+									"type": "query",
+									"queryType": {
+										"type": "reference",
+										"id": 1516,
+										"name": "ButtonStyles"
+									}
+								}
+							}
+						],
+						"name": "Lowercase"
+					}
+				}
+			],
+			"groups": [
+				{
+					"title": "Enumerations",
+					"kind": 4,
+					"children": [
+						1516
+					]
+				},
+				{
+					"title": "Classes",
+					"kind": 128,
+					"children": [
+						1523
+					]
+				},
+				{
+					"title": "Type aliases",
+					"kind": 4194304,
+					"children": [
+						1522
+					]
+				}
+			],
+			"sources": [
+				{
+					"fileName": "src/uikit/ButtonBuilder.ts",
+					"line": 1,
+					"character": 0
+				}
+			]
+		},
+		{
+			"id": 1554,
+			"name": "uikit/ComponentTreeBuilder",
+			"kind": 1,
+			"kindString": "Module",
+			"flags": {},
+			"children": [
+				{
+					"id": 1569,
+					"name": "ComponentTreeBuilder",
+					"kind": 128,
+					"kindString": "Class",
+					"flags": {},
+					"comment": {
+						"shortText": "Represents a builder to create a component tree for sending messages\nthrough interactions or the gateway. This is just an action row that\nis passable through the [[`TextChannel#send`]], [[`InteractionMessage#reply`]], etc methods.",
+						"tags": [
+							{
+								"tag": "docs",
+								"text": "{@link https://discord.com/developers/docs/interactions/message-components#actionrow}\n"
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 1570,
+							"name": "constructor",
+							"kind": 512,
+							"kindString": "Constructor",
+							"flags": {},
+							"signatures": [
+								{
+									"id": 1571,
+									"name": "new ComponentTreeBuilder",
+									"kind": 16384,
+									"kindString": "Constructor signature",
+									"flags": {},
+									"type": {
+										"type": "reference",
+										"id": 1569,
+										"name": "ComponentTreeBuilder"
+									}
+								}
+							]
+						},
+						{
+							"id": 1573,
+							"name": "addButton",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "src/uikit/ComponentTreeBuilder.ts",
+									"line": 66,
+									"character": 11
+								}
+							],
+							"signatures": [
+								{
+									"id": 1574,
+									"name": "addButton",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Adds a button to this action row.",
+										"returns": "This [[ComponentTreeBuilder]] instance to chain methods.\n"
+									},
+									"parameters": [
+										{
+											"id": 1575,
+											"name": "button",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"comment": {
+												"text": "The button builder or the raw JSON data."
+											},
+											"type": {
+												"type": "union",
+												"types": [
+													{
+														"type": "reference",
+														"id": 1523,
+														"name": "ButtonBuilder"
+													},
+													{
+														"type": "reference",
+														"id": 1555,
+														"name": "APIComponentButton"
+													}
+												]
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"id": 1569,
+										"name": "ComponentTreeBuilder"
+									}
+								}
+							]
+						},
+						{
+							"id": 1576,
+							"name": "build",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "src/uikit/ComponentTreeBuilder.ts",
+									"line": 77,
+									"character": 7
+								}
+							],
+							"signatures": [
+								{
+									"id": 1577,
+									"name": "build",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Returns the raw JSON data that is passable to Discord."
+									},
+									"type": {
+										"type": "reference",
+										"typeArguments": [
+											{
+												"type": "reference",
+												"id": 1566,
+												"name": "APIComponentActionRow"
+											}
+										],
+										"name": "OmitUndefinedOrNull"
+									}
+								}
+							]
+						}
+					],
+					"groups": [
+						{
+							"title": "Constructors",
+							"kind": 512,
+							"children": [
+								1570
+							]
+						},
+						{
+							"title": "Methods",
+							"kind": 2048,
+							"children": [
+								1573,
+								1576
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "src/uikit/ComponentTreeBuilder.ts",
+							"line": 58,
+							"character": 33
+						}
+					]
+				},
+				{
+					"id": 1566,
+					"name": "APIComponentActionRow",
+					"kind": 256,
+					"kindString": "Interface",
+					"flags": {},
+					"comment": {
+						"shortText": "https://discord.com/developers/docs/interactions/message-components#actionrow"
+					},
+					"children": [
+						{
+							"id": 1568,
+							"name": "components",
+							"kind": 1024,
+							"kindString": "Property",
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "src/uikit/ComponentTreeBuilder.ts",
+									"line": 48,
+									"character": 12
+								}
+							],
+							"type": {
+								"type": "array",
+								"elementType": {
+									"type": "reference",
+									"id": 1555,
+									"name": "APIComponentButton"
+								}
+							}
+						},
+						{
+							"id": 1567,
+							"name": "type",
+							"kind": 1024,
+							"kindString": "Property",
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "src/uikit/ComponentTreeBuilder.ts",
+									"line": 47,
+									"character": 6
+								}
+							],
+							"type": {
+								"type": "literal",
+								"value": 1
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"kind": 1024,
+							"children": [
+								1568,
+								1567
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "src/uikit/ComponentTreeBuilder.ts",
+							"line": 46,
+							"character": 38
+						}
+					]
+				},
+				{
+					"id": 1555,
+					"name": "APIComponentButton",
+					"kind": 256,
+					"kindString": "Interface",
+					"flags": {},
+					"comment": {
+						"shortText": "https://discord.com/developers/docs/interactions/message-components#buttons"
+					},
+					"children": [
+						{
+							"id": 1563,
+							"name": "custom_id",
+							"kind": 1024,
+							"kindString": "Property",
+							"flags": {
+								"isOptional": true
+							},
+							"sources": [
+								{
+									"fileName": "src/uikit/ComponentTreeBuilder.ts",
+									"line": 37,
+									"character": 11
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						},
+						{
+							"id": 1565,
+							"name": "disabled",
+							"kind": 1024,
+							"kindString": "Property",
+							"flags": {
+								"isOptional": true
+							},
+							"sources": [
+								{
+									"fileName": "src/uikit/ComponentTreeBuilder.ts",
+									"line": 39,
+									"character": 10
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "boolean"
+							}
+						},
+						{
+							"id": 1559,
+							"name": "emoji",
+							"kind": 1024,
+							"kindString": "Property",
+							"flags": {
+								"isOptional": true
+							},
+							"sources": [
+								{
+									"fileName": "src/uikit/ComponentTreeBuilder.ts",
+									"line": 36,
+									"character": 7
+								}
+							],
+							"type": {
+								"type": "reflection",
+								"declaration": {
+									"id": 1560,
+									"name": "__type",
+									"kind": 65536,
+									"kindString": "Type literal",
+									"flags": {},
+									"children": [
+										{
+											"id": 1561,
+											"name": "id",
+											"kind": 1024,
+											"kindString": "Property",
+											"flags": {},
+											"sources": [
+												{
+													"fileName": "src/uikit/ComponentTreeBuilder.ts",
+													"line": 36,
+													"character": 14
+												}
+											],
+											"type": {
+												"type": "intrinsic",
+												"name": "string"
+											}
+										},
+										{
+											"id": 1562,
+											"name": "name",
+											"kind": 1024,
+											"kindString": "Property",
+											"flags": {},
+											"sources": [
+												{
+													"fileName": "src/uikit/ComponentTreeBuilder.ts",
+													"line": 36,
+													"character": 28
+												}
+											],
+											"type": {
+												"type": "union",
+												"types": [
+													{
+														"type": "literal",
+														"value": null
+													},
+													{
+														"type": "intrinsic",
+														"name": "string"
+													}
+												]
+											}
+										}
+									],
+									"groups": [
+										{
+											"title": "Properties",
+											"kind": 1024,
+											"children": [
+												1561,
+												1562
+											]
+										}
+									]
+								}
+							}
+						},
+						{
+							"id": 1558,
+							"name": "label",
+							"kind": 1024,
+							"kindString": "Property",
+							"flags": {
+								"isOptional": true
+							},
+							"sources": [
+								{
+									"fileName": "src/uikit/ComponentTreeBuilder.ts",
+									"line": 35,
+									"character": 7
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						},
+						{
+							"id": 1557,
+							"name": "style",
+							"kind": 1024,
+							"kindString": "Property",
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "src/uikit/ComponentTreeBuilder.ts",
+									"line": 34,
+									"character": 7
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "number"
+							}
+						},
+						{
+							"id": 1556,
+							"name": "type",
+							"kind": 1024,
+							"kindString": "Property",
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "src/uikit/ComponentTreeBuilder.ts",
+									"line": 33,
+									"character": 6
+								}
+							],
+							"type": {
+								"type": "literal",
+								"value": 2
+							}
+						},
+						{
+							"id": 1564,
+							"name": "url",
+							"kind": 1024,
+							"kindString": "Property",
+							"flags": {
+								"isOptional": true
+							},
+							"sources": [
+								{
+									"fileName": "src/uikit/ComponentTreeBuilder.ts",
+									"line": 38,
+									"character": 5
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"kind": 1024,
+							"children": [
+								1563,
+								1565,
+								1559,
+								1558,
+								1557,
+								1556,
+								1564
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "src/uikit/ComponentTreeBuilder.ts",
+							"line": 32,
+							"character": 35
+						}
+					]
+				}
+			],
+			"groups": [
+				{
+					"title": "Classes",
+					"kind": 128,
+					"children": [
+						1569
+					]
+				},
+				{
+					"title": "Interfaces",
+					"kind": 256,
+					"children": [
+						1566,
+						1555
+					]
+				}
+			],
+			"sources": [
+				{
+					"fileName": "src/uikit/ComponentTreeBuilder.ts",
+					"line": 1,
+					"character": 0
+				}
+			]
+		},
+		{
+			"id": 1599,
 			"name": "util",
 			"kind": 1,
 			"kindString": "Module",
 			"flags": {},
 			"children": [
 				{
-					"id": 1536,
+					"id": 1600,
 					"name": "default",
 					"kind": 128,
 					"kindString": "Class",
@@ -29549,28 +30890,28 @@
 					},
 					"children": [
 						{
-							"id": 1586,
+							"id": 1650,
 							"name": "constructor",
 							"kind": 512,
 							"kindString": "Constructor",
 							"flags": {},
 							"signatures": [
 								{
-									"id": 1587,
+									"id": 1651,
 									"name": "new default",
 									"kind": 16384,
 									"kindString": "Constructor signature",
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"id": 1536,
+										"id": 1600,
 										"name": "default"
 									}
 								}
 							]
 						},
 						{
-							"id": 1582,
+							"id": 1646,
 							"name": "bufferToBase64",
 							"kind": 2048,
 							"kindString": "Method",
@@ -29586,7 +30927,7 @@
 							],
 							"signatures": [
 								{
-									"id": 1583,
+									"id": 1647,
 									"name": "bufferToBase64",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -29597,7 +30938,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1584,
+											"id": 1648,
 											"name": "image",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -29611,7 +30952,7 @@
 											}
 										},
 										{
-											"id": 1585,
+											"id": 1649,
 											"name": "type",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -29648,7 +30989,7 @@
 							]
 						},
 						{
-							"id": 1565,
+							"id": 1629,
 							"name": "formatAllowedMentions",
 							"kind": 2048,
 							"kindString": "Method",
@@ -29664,7 +31005,7 @@
 							],
 							"signatures": [
 								{
-									"id": 1566,
+									"id": 1630,
 									"name": "formatAllowedMentions",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -29675,7 +31016,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1567,
+											"id": 1631,
 											"name": "mentions",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -29690,7 +31031,7 @@
 											}
 										},
 										{
-											"id": 1568,
+											"id": 1632,
 											"name": "client",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -29713,7 +31054,7 @@
 							]
 						},
 						{
-							"id": 1558,
+							"id": 1622,
 							"name": "formatMessage",
 							"kind": 2048,
 							"kindString": "Method",
@@ -29729,7 +31070,7 @@
 							],
 							"signatures": [
 								{
-									"id": 1559,
+									"id": 1623,
 									"name": "formatMessage",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -29739,7 +31080,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1560,
+											"id": 1624,
 											"name": "client",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -29754,7 +31095,7 @@
 											}
 										},
 										{
-											"id": 1561,
+											"id": 1625,
 											"name": "content",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -29769,7 +31110,7 @@
 											}
 										},
 										{
-											"id": 1562,
+											"id": 1626,
 											"name": "options",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -29796,14 +31137,14 @@
 											{
 												"type": "reflection",
 												"declaration": {
-													"id": 1563,
+													"id": 1627,
 													"name": "__type",
 													"kind": 65536,
 													"kindString": "Type literal",
 													"flags": {},
 													"children": [
 														{
-															"id": 1564,
+															"id": 1628,
 															"name": "file",
 															"kind": 1024,
 															"kindString": "Property",
@@ -29828,7 +31169,7 @@
 															"title": "Properties",
 															"kind": 1024,
 															"children": [
-																1564
+																1628
 															]
 														}
 													]
@@ -29840,7 +31181,7 @@
 							]
 						},
 						{
-							"id": 1537,
+							"id": 1601,
 							"name": "get",
 							"kind": 2048,
 							"kindString": "Method",
@@ -29856,7 +31197,7 @@
 							],
 							"signatures": [
 								{
-									"id": 1538,
+									"id": 1602,
 									"name": "get",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -29867,7 +31208,7 @@
 									},
 									"typeParameter": [
 										{
-											"id": 1539,
+											"id": 1603,
 											"name": "T",
 											"kind": 131072,
 											"kindString": "Type parameter",
@@ -29878,7 +31219,7 @@
 											}
 										},
 										{
-											"id": 1540,
+											"id": 1604,
 											"name": "K",
 											"kind": 131072,
 											"kindString": "Type parameter",
@@ -29904,7 +31245,7 @@
 									],
 									"parameters": [
 										{
-											"id": 1541,
+											"id": 1605,
 											"name": "obj",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -29918,7 +31259,7 @@
 											}
 										},
 										{
-											"id": 1542,
+											"id": 1606,
 											"name": "prop",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -29932,7 +31273,7 @@
 											}
 										},
 										{
-											"id": 1543,
+											"id": 1607,
 											"name": "defaultValue",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -29968,7 +31309,7 @@
 							]
 						},
 						{
-							"id": 1552,
+							"id": 1616,
 							"name": "getKey",
 							"kind": 2048,
 							"kindString": "Method",
@@ -29984,7 +31325,7 @@
 							],
 							"signatures": [
 								{
-									"id": 1553,
+									"id": 1617,
 									"name": "getKey",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -29995,7 +31336,7 @@
 									},
 									"typeParameter": [
 										{
-											"id": 1554,
+											"id": 1618,
 											"name": "T",
 											"kind": 131072,
 											"kindString": "Type parameter",
@@ -30006,7 +31347,7 @@
 											}
 										},
 										{
-											"id": 1555,
+											"id": 1619,
 											"name": "K",
 											"kind": 131072,
 											"kindString": "Type parameter",
@@ -30032,7 +31373,7 @@
 									],
 									"parameters": [
 										{
-											"id": 1556,
+											"id": 1620,
 											"name": "obj",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -30046,7 +31387,7 @@
 											}
 										},
 										{
-											"id": 1557,
+											"id": 1621,
 											"name": "key",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -30075,7 +31416,7 @@
 							]
 						},
 						{
-							"id": 1575,
+							"id": 1639,
 							"name": "isObject",
 							"kind": 2048,
 							"kindString": "Method",
@@ -30091,7 +31432,7 @@
 							],
 							"signatures": [
 								{
-									"id": 1576,
+									"id": 1640,
 									"name": "isObject",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -30101,7 +31442,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1577,
+											"id": 1641,
 											"name": "value",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -30128,7 +31469,7 @@
 							]
 						},
 						{
-							"id": 1569,
+							"id": 1633,
 							"name": "isReadableStream",
 							"kind": 2048,
 							"kindString": "Method",
@@ -30144,7 +31485,7 @@
 							],
 							"signatures": [
 								{
-									"id": 1570,
+									"id": 1634,
 									"name": "isReadableStream",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -30154,7 +31495,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1571,
+											"id": 1635,
 											"name": "stream",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -30181,7 +31522,7 @@
 							]
 						},
 						{
-							"id": 1547,
+							"id": 1611,
 							"name": "merge",
 							"kind": 2048,
 							"kindString": "Method",
@@ -30197,7 +31538,7 @@
 							],
 							"signatures": [
 								{
-									"id": 1548,
+									"id": 1612,
 									"name": "merge",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -30207,7 +31548,7 @@
 									},
 									"typeParameter": [
 										{
-											"id": 1549,
+											"id": 1613,
 											"name": "T",
 											"kind": 131072,
 											"kindString": "Type parameter",
@@ -30216,7 +31557,7 @@
 									],
 									"parameters": [
 										{
-											"id": 1550,
+											"id": 1614,
 											"name": "given",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -30230,7 +31571,7 @@
 											}
 										},
 										{
-											"id": 1551,
+											"id": 1615,
 											"name": "def",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -30252,7 +31593,7 @@
 							]
 						},
 						{
-							"id": 1578,
+							"id": 1642,
 							"name": "objectToQuery",
 							"kind": 2048,
 							"kindString": "Method",
@@ -30268,7 +31609,7 @@
 							],
 							"signatures": [
 								{
-									"id": 1579,
+									"id": 1643,
 									"name": "objectToQuery",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -30279,7 +31620,7 @@
 									},
 									"typeParameter": [
 										{
-											"id": 1580,
+											"id": 1644,
 											"name": "T",
 											"kind": 131072,
 											"kindString": "Type parameter",
@@ -30292,7 +31633,7 @@
 									],
 									"parameters": [
 										{
-											"id": 1581,
+											"id": 1645,
 											"name": "obj",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -30314,7 +31655,7 @@
 							]
 						},
 						{
-							"id": 1572,
+							"id": 1636,
 							"name": "readableToBuffer",
 							"kind": 2048,
 							"kindString": "Method",
@@ -30330,7 +31671,7 @@
 							],
 							"signatures": [
 								{
-									"id": 1573,
+									"id": 1637,
 									"name": "readableToBuffer",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -30341,7 +31682,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1574,
+											"id": 1638,
 											"name": "stream",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -30369,7 +31710,7 @@
 							]
 						},
 						{
-							"id": 1544,
+							"id": 1608,
 							"name": "sleep",
 							"kind": 2048,
 							"kindString": "Method",
@@ -30385,7 +31726,7 @@
 							],
 							"signatures": [
 								{
-									"id": 1545,
+									"id": 1609,
 									"name": "sleep",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -30395,7 +31736,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1546,
+											"id": 1610,
 											"name": "ms",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -30428,24 +31769,24 @@
 							"title": "Constructors",
 							"kind": 512,
 							"children": [
-								1586
+								1650
 							]
 						},
 						{
 							"title": "Methods",
 							"kind": 2048,
 							"children": [
-								1582,
-								1565,
-								1558,
-								1537,
-								1552,
-								1575,
-								1569,
-								1547,
-								1578,
-								1572,
-								1544
+								1646,
+								1629,
+								1622,
+								1601,
+								1616,
+								1639,
+								1633,
+								1611,
+								1642,
+								1636,
+								1608
 							]
 						}
 					],
@@ -30463,7 +31804,7 @@
 					"title": "Classes",
 					"kind": 128,
 					"children": [
-						1536
+						1600
 					]
 				}
 			],
@@ -30476,14 +31817,14 @@
 			]
 		},
 		{
-			"id": 1515,
+			"id": 1579,
 			"name": "util/Extensions",
 			"kind": 1,
 			"kindString": "Module",
 			"flags": {},
 			"children": [
 				{
-					"id": 1516,
+					"id": 1580,
 					"name": "Extensions",
 					"kind": 128,
 					"kindString": "Class",
@@ -30493,28 +31834,28 @@
 					},
 					"children": [
 						{
-							"id": 1533,
+							"id": 1597,
 							"name": "constructor",
 							"kind": 512,
 							"kindString": "Constructor",
 							"flags": {},
 							"signatures": [
 								{
-									"id": 1534,
+									"id": 1598,
 									"name": "new Extensions",
 									"kind": 16384,
 									"kindString": "Constructor signature",
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"id": 1516,
+										"id": 1580,
 										"name": "Extensions"
 									}
 								}
 							]
 						},
 						{
-							"id": 1517,
+							"id": 1581,
 							"name": "extenables",
 							"kind": 262144,
 							"kindString": "Accessor",
@@ -30533,7 +31874,7 @@
 							],
 							"getSignature": [
 								{
-									"id": 1518,
+									"id": 1582,
 									"name": "extenables",
 									"kind": 524288,
 									"kindString": "Get signature",
@@ -30563,7 +31904,7 @@
 							]
 						},
 						{
-							"id": 1525,
+							"id": 1589,
 							"name": "extend",
 							"kind": 2048,
 							"kindString": "Method",
@@ -30579,7 +31920,7 @@
 							],
 							"signatures": [
 								{
-									"id": 1526,
+									"id": 1590,
 									"name": "extend",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -30599,7 +31940,7 @@
 									},
 									"typeParameter": [
 										{
-											"id": 1527,
+											"id": 1591,
 											"name": "K",
 											"kind": 131072,
 											"kindString": "Type parameter",
@@ -30612,7 +31953,7 @@
 									],
 									"parameters": [
 										{
-											"id": 1528,
+											"id": 1592,
 											"name": "key",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -30623,7 +31964,7 @@
 											}
 										},
 										{
-											"id": 1529,
+											"id": 1593,
 											"name": "callback",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -30634,21 +31975,21 @@
 											"type": {
 												"type": "reflection",
 												"declaration": {
-													"id": 1530,
+													"id": 1594,
 													"name": "__type",
 													"kind": 65536,
 													"kindString": "Type literal",
 													"flags": {},
 													"signatures": [
 														{
-															"id": 1531,
+															"id": 1595,
 															"name": "__type",
 															"kind": 4096,
 															"kindString": "Call signature",
 															"flags": {},
 															"parameters": [
 																{
-																	"id": 1532,
+																	"id": 1596,
 																	"name": "value",
 																	"kind": 32768,
 																	"kindString": "Parameter",
@@ -30685,7 +32026,7 @@
 							]
 						},
 						{
-							"id": 1519,
+							"id": 1583,
 							"name": "get",
 							"kind": 2048,
 							"kindString": "Method",
@@ -30701,7 +32042,7 @@
 							],
 							"signatures": [
 								{
-									"id": 1520,
+									"id": 1584,
 									"name": "get",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -30711,7 +32052,7 @@
 									},
 									"typeParameter": [
 										{
-											"id": 1522,
+											"id": 1586,
 											"name": "T",
 											"kind": 131072,
 											"kindString": "Type parameter",
@@ -30723,7 +32064,7 @@
 													{
 														"type": "reflection",
 														"declaration": {
-															"id": 1521,
+															"id": 1585,
 															"name": "__type",
 															"kind": 65536,
 															"kindString": "Type literal",
@@ -30739,7 +32080,7 @@
 											}
 										},
 										{
-											"id": 1523,
+											"id": 1587,
 											"name": "K",
 											"kind": 131072,
 											"kindString": "Type parameter",
@@ -30752,7 +32093,7 @@
 									],
 									"parameters": [
 										{
-											"id": 1524,
+											"id": 1588,
 											"name": "key",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -30785,22 +32126,22 @@
 							"title": "Constructors",
 							"kind": 512,
 							"children": [
-								1533
+								1597
 							]
 						},
 						{
 							"title": "Accessors",
 							"kind": 262144,
 							"children": [
-								1517
+								1581
 							]
 						},
 						{
 							"title": "Methods",
 							"kind": 2048,
 							"children": [
-								1525,
-								1519
+								1589,
+								1583
 							]
 						}
 					],
@@ -30818,7 +32159,7 @@
 					"title": "Classes",
 					"kind": 128,
 					"children": [
-						1516
+						1580
 					]
 				}
 			],
@@ -30831,14 +32172,14 @@
 			]
 		},
 		{
-			"id": 1598,
+			"id": 1662,
 			"name": "util/Permissions",
 			"kind": 1,
 			"kindString": "Module",
 			"flags": {},
 			"children": [
 				{
-					"id": 1599,
+					"id": 1663,
 					"name": "Permission",
 					"kind": 128,
 					"kindString": "Class",
@@ -30848,14 +32189,14 @@
 					},
 					"children": [
 						{
-							"id": 1600,
+							"id": 1664,
 							"name": "constructor",
 							"kind": 512,
 							"kindString": "Constructor",
 							"flags": {},
 							"signatures": [
 								{
-									"id": 1601,
+									"id": 1665,
 									"name": "new Permission",
 									"kind": 16384,
 									"kindString": "Constructor signature",
@@ -30865,7 +32206,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1602,
+											"id": 1666,
 											"name": "allow",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -30879,7 +32220,7 @@
 											}
 										},
 										{
-											"id": 1603,
+											"id": 1667,
 											"name": "deny",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -30896,14 +32237,14 @@
 									],
 									"type": {
 										"type": "reference",
-										"id": 1599,
+										"id": 1663,
 										"name": "Permission"
 									}
 								}
 							]
 						},
 						{
-							"id": 1604,
+							"id": 1668,
 							"name": "allow",
 							"kind": 1024,
 							"kindString": "Property",
@@ -30926,7 +32267,7 @@
 							}
 						},
 						{
-							"id": 1605,
+							"id": 1669,
 							"name": "denied",
 							"kind": 1024,
 							"kindString": "Property",
@@ -30949,7 +32290,7 @@
 							}
 						},
 						{
-							"id": 1609,
+							"id": 1673,
 							"name": "has",
 							"kind": 2048,
 							"kindString": "Method",
@@ -30963,7 +32304,7 @@
 							],
 							"signatures": [
 								{
-									"id": 1610,
+									"id": 1674,
 									"name": "has",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -30973,7 +32314,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1611,
+											"id": 1675,
 											"name": "key",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -31148,7 +32489,7 @@
 							]
 						},
 						{
-							"id": 1606,
+							"id": 1670,
 							"name": "toJSON",
 							"kind": 2048,
 							"kindString": "Method",
@@ -31162,7 +32503,7 @@
 							],
 							"signatures": [
 								{
-									"id": 1607,
+									"id": 1671,
 									"name": "toJSON",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -31173,7 +32514,7 @@
 									"type": {
 										"type": "reflection",
 										"declaration": {
-											"id": 1608,
+											"id": 1672,
 											"name": "__type",
 											"kind": 65536,
 											"kindString": "Type literal",
@@ -31189,23 +32530,23 @@
 							"title": "Constructors",
 							"kind": 512,
 							"children": [
-								1600
+								1664
 							]
 						},
 						{
 							"title": "Properties",
 							"kind": 1024,
 							"children": [
-								1604,
-								1605
+								1668,
+								1669
 							]
 						},
 						{
 							"title": "Methods",
 							"kind": 2048,
 							"children": [
-								1609,
-								1606
+								1673,
+								1670
 							]
 						}
 					],
@@ -31223,7 +32564,7 @@
 					"title": "Classes",
 					"kind": 128,
 					"children": [
-						1599
+						1663
 					]
 				}
 			],
@@ -31236,7 +32577,7 @@
 			]
 		},
 		{
-			"id": 1588,
+			"id": 1652,
 			"name": "util/is",
 			"kind": 1,
 			"kindString": "Module",
@@ -31247,7 +32588,7 @@
 			},
 			"children": [
 				{
-					"id": 1595,
+					"id": 1659,
 					"name": "gif",
 					"kind": 64,
 					"kindString": "Function",
@@ -31263,7 +32604,7 @@
 					],
 					"signatures": [
 						{
-							"id": 1596,
+							"id": 1660,
 							"name": "gif",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -31273,7 +32614,7 @@
 							},
 							"parameters": [
 								{
-									"id": 1597,
+									"id": 1661,
 									"name": "buffer",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -31295,7 +32636,7 @@
 					]
 				},
 				{
-					"id": 1592,
+					"id": 1656,
 					"name": "jpg",
 					"kind": 64,
 					"kindString": "Function",
@@ -31311,7 +32652,7 @@
 					],
 					"signatures": [
 						{
-							"id": 1593,
+							"id": 1657,
 							"name": "jpg",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -31321,7 +32662,7 @@
 							},
 							"parameters": [
 								{
-									"id": 1594,
+									"id": 1658,
 									"name": "buffer",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -31343,7 +32684,7 @@
 					]
 				},
 				{
-					"id": 1589,
+					"id": 1653,
 					"name": "png",
 					"kind": 64,
 					"kindString": "Function",
@@ -31359,7 +32700,7 @@
 					],
 					"signatures": [
 						{
-							"id": 1590,
+							"id": 1654,
 							"name": "png",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -31369,7 +32710,7 @@
 							},
 							"parameters": [
 								{
-									"id": 1591,
+									"id": 1655,
 									"name": "buffer",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -31396,9 +32737,9 @@
 					"title": "Functions",
 					"kind": 64,
 					"children": [
-						1595,
-						1592,
-						1589
+						1659,
+						1656,
+						1653
 					]
 				}
 			],
@@ -31446,10 +32787,13 @@
 				1407,
 				1433,
 				1459,
-				1535,
+				1578,
 				1515,
-				1598,
-				1588
+				1554,
+				1599,
+				1579,
+				1662,
+				1652
 			]
 		}
 	]
