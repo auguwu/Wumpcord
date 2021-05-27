@@ -19,3 +19,70 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+import type { WebSocketClient } from '../Client';
+import { GuildTextableChannel } from './GuildTextableChannel';
+import type { APIChannel } from 'discord-api-types';
+
+/**
+ * https://discord.com/developers/docs/resources/channel#channel-object
+ */
+export class TextChannel extends GuildTextableChannel {
+  /**
+   * Date-represented value of when the last pinned message was pinned. Returns `null`
+   * if there is no pinned messages.
+   */
+  public lastPinTimestamp?: Date | null;
+
+  /**
+   * Amount of seconds a user has to wait before sending another message, in range of
+   * 0 - 21600. Bots, as well users with permissions `MANAGE_MESSAGES` or `MANAGE_CHANNEL` are unaffected.
+   */
+  public ratelimitPerUser?: number;
+
+  /**
+   * The last message of this [[TextChannel]] mapped by ID.
+   * Use [[TextChannel.lastMessage]] to return the last, cached
+   * message.
+   */
+  public lastMessageID?: string | null;
+
+  /**
+   * The channel's topic, returns `null` if none is set.
+   */
+  public topic!: string | null;
+
+  constructor(client: WebSocketClient, data: APIChannel) {
+    super(client, data);
+
+    this.patch(data);
+  }
+
+  patch(data: Partial<APIChannel>) {
+    super.patch(data);
+
+    if (data.last_pin_timestamp !== undefined)
+      this.lastPinTimestamp = data.last_pin_timestamp !== null ? new Date(data.last_pin_timestamp) : null;
+
+    if (data.rate_limit_per_user !== undefined)
+      this.ratelimitPerUser = data.rate_limit_per_user;
+
+    if (data.last_message_id !== undefined)
+      this.lastMessageID = data.last_message_id;
+
+    if (data.topic !== undefined)
+      this.topic = data.topic;
+  }
+
+  /**
+   * Returns the last cached message of this [[TextChannel]]. Requires the
+   * message cache entity to be present.
+   */
+  get lastMessage() {
+    return null;
+  }
+
+  toString() {
+    return `[wumpcord.TextChannel (${this.name})]`;
+  }
+}

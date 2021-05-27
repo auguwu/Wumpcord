@@ -21,6 +21,7 @@
  */
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
+/* eslint-disable camelcase */
 
 import { RestClientEvents as IRestClientEvents, RestClient } from '@wumpcord/rest';
 import type { ShardEvents as IShardEvents } from './gateway/Shard';
@@ -31,7 +32,7 @@ import type * as types from './types';
 import { MemoryCache } from './cache/MemoryCache';
 
 import { ChannelStore } from './stores/ChannelStore';
-import { GatewayIntents, GatewayVersion } from './Constants';
+import { GatewayIntents, GatewayVersion, StageInstancePrivacyLevel } from './Constants';
 import { InteractionCommandBuilder } from './builders/InteractionCommandBuilder';
 import { Application } from './entities/Application';
 import { SelfUser } from './entities';
@@ -44,7 +45,17 @@ type ShardEvents = {
   [P in keyof IShardEvents as `shard${Capitalize<P>}`]: IShardEvents[P];
 }
 
-interface EntityBasedEvents {}
+export interface EntityBasedEvents {}
+
+/**
+ * Options object for [[WebSocketClient.editStageInstance]]
+ *
+ * [`Discord Docs`]({@link https://discord.com/developers/docs/resources/stage-instance#update-stage-instance-json-params})
+ */
+export interface ModifyStageInstance {
+  privacy_level?: StageInstancePrivacyLevel;
+  topic?: string;
+}
 
 /**
  * Represents the default events that can emit with the attached [[WebSocketClient]].
@@ -354,7 +365,7 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
   getGlobalSlashCommands() {
     return this.rest.dispatch<unknown, discord.RESTGetAPIApplicationCommandsResult>({
       endpoint: '/applications/:id',
-      query: { id: '' },
+      query: { id: this.user.id },
       method: 'GET'
     });
   }
@@ -385,7 +396,7 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
       endpoint: '/applications/:appID/guilds/:guildID/commands',
       method: 'POST',
       query: {
-        appID: '',
+        appID: this.user.id,
         guildID
       },
 
@@ -447,6 +458,18 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
   }
 
   bulkOverwriteGuildSlashCommands(guildID: string) {
+    // todo: this
+  }
+
+  createStageInstance(channelID: string, topic: string, privacyLevel?: StageInstancePrivacyLevel) {
+    // todo: this
+  }
+
+  editStageInstance(channelID: string, data?: ModifyStageInstance) {
+    // todo: this
+  }
+
+  deleteStageInstance(channelID: string) {
     // todo: this
   }
 }

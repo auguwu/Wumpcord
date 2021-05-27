@@ -245,6 +245,20 @@ export enum MessageTypes {
 /**
  * The channel types as their name
  */
+export enum ChannelTypes {
+  Text,
+  DM,
+  Voice,
+  Group,
+  Category,
+  News,
+  Store,
+  NewsThread = 10,
+  PublicThread,
+  PrivateThread,
+  State
+}
+
 export const ChannelTypesObject = {
   0: 'text',
   1: 'dm',
@@ -253,17 +267,20 @@ export const ChannelTypesObject = {
   4: 'category',
   5: 'news',
   6: 'store',
+  10: 'news_thread',
+  11: 'public_thread',
+  12: 'private_thread',
   13: 'stage'
 } as const;
 
 /**
  * The nitro subscription type
  */
-export const NitroSubscription = {
-  0: 'none',
-  1: 'classic',
-  2: 'full'
-} as const;
+export enum NitroSubscription {
+  None,
+  Classic,
+  Nitro
+}
 
 /**
  * List of user flags available
@@ -371,4 +388,9 @@ export enum ShardStatus {
   Nearly           = 'nearly',
   Dead             = 'dead',
   WaitingForGuilds = 'waiting_for_guilds'
+}
+
+export enum StageInstancePrivacyLevel {
+  Public = 1,
+  GuildOnly
 }
