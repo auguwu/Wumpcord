@@ -20,7 +20,9 @@
  * SOFTWARE.
  */
 
+import { VoiceChannel } from './VoiceChannel';
+
 /**
  * A voice channel but for hosting events with an audience
  */
-export class StageChannel {}
+export class StageChannel extends VoiceChannel {}

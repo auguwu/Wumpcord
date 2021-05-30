@@ -287,19 +287,20 @@ export enum NitroSubscription {
  */
 export enum UserFlags {
   None,
-  Staff           = 1 << 0,
-  Partner         = 1 << 1,
-  HypesquadEvents = 1 << 2,
-  BugHunterLevel1 = 1 << 3,
-  Bravery         = 1 << 6,
-  Brillance       = 1 << 7,
-  Balance         = 1 << 8, // the best house dont @ me <3
-  EarlySupporter  = 1 << 9,
-  TeamUser        = 1 << 10,
-  System          = 1 << 12,
-  BugHunterLevel2 = 1 << 14,
-  VerifiedBot     = 1 << 16,
-  VerifiedBotDev  = 1 << 17
+  Staff              = 1 << 0,
+  Partner            = 1 << 1,
+  HypesquadEvents    = 1 << 2,
+  BugHunterLevel1    = 1 << 3,
+  Bravery            = 1 << 6,
+  Brillance          = 1 << 7,
+  Balance            = 1 << 8, // the best house dont @ me <3
+  EarlySupporter     = 1 << 9,
+  TeamUser           = 1 << 10,
+  System             = 1 << 12,
+  BugHunterLevel2    = 1 << 14,
+  VerifiedBot        = 1 << 16,
+  VerifiedBotDev     = 1 << 17,
+  CertifiedModerator = 1 << 18
 }
 
 /**

@@ -31,7 +31,6 @@ export * from './util/Extensions';
 
 export { WebSocketClient as Client } from './Client';
 export * as Constants from './Constants';
-export * from './types';
 
 /**
  * Returns the version of Wumpcord

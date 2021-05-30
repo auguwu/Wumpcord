@@ -37,6 +37,7 @@ import { InteractionCommandBuilder } from './builders/InteractionCommandBuilder'
 import { Application } from './entities/Application';
 import { SelfUser } from './entities';
 import { UserStore } from './stores/UserStore';
+import { APIStageInstance, StageInstance } from './entities/StageInstance';
 
 type RestClientEvents = {
   [P in keyof IRestClientEvents as `rest${Capitalize<P>}`]: IRestClientEvents[P];
@@ -56,6 +57,15 @@ export interface EntityBasedEvents {}
 export interface ModifyStageInstance {
   privacy_level?: StageInstancePrivacyLevel;
   topic?: string;
+}
+
+/**
+ * https://discord.com/developers/docs/resources/stage-instance#create-stage-instance-json-params
+ */
+export interface CreateStageInstance {
+  privacy_level?: StageInstancePrivacyLevel;
+  channel_id: string;
+  topic: string;
 }
 
 /**
@@ -371,7 +381,7 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
    * [`Discord Docs`](https://discord.com/developers/docs/interactions/slash-commands#get-global-application-commands)
    */
   getGlobalSlashCommands() {
-    return this.rest.dispatch<unknown, discord.RESTGetAPIApplicationCommandsResult>({
+    return this.rest.dispatch<never, discord.RESTGetAPIApplicationCommandsResult>({
       endpoint: '/applications/:id',
       query: { id: this.user.id },
       method: 'GET'
@@ -469,15 +479,64 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
     // todo: this
   }
 
+  /**
+   * Retrieves a stage instance, if exists
+   * @param channelID The stage channel ID
+   */
+  getStageInstance(channelID: string) {
+    return this.rest.dispatch<APIStageInstance, never>({
+      endpoint: '/stage-instances/:id',
+      method: 'GET',
+      query: { id: channelID }
+    }).then(data => new StageInstance(this, data));
+  }
+
+  /**
+   * Creates a stage instance asscoiated with the stage channel. The bot must
+   * be a moderator of that stage channel.
+   *
+   * @param channelID The channel's ID
+   * @param topic The topic to set
+   * @param privacyLevel The privacy level to use
+   */
   createStageInstance(channelID: string, topic: string, privacyLevel?: StageInstancePrivacyLevel) {
-    // todo: this
+    return this.rest.dispatch<CreateStageInstance, APIStageInstance>({
+      endpoint: '/stage-instances',
+      method: 'POST',
+      data: {
+        privacy_level: privacyLevel,
+        channel_id: channelID,
+        topic
+      }
+    }).then(data => new StageInstance(this, data));
   }
 
+  /**
+   * Modifies fields of that stage instance
+   * @param channelID The channel ID
+   * @param data The data to modify
+   */
   editStageInstance(channelID: string, data?: ModifyStageInstance) {
-    // todo: this
+    return this.rest.dispatch<ModifyStageInstance, void>({
+      endpoint: '/stage-instances/:id',
+      method: 'PATCH',
+      query: { id: channelID },
+      data: {
+        privacy_level: data?.privacy_level,
+        topic: data?.topic
+      }
+    });
   }
 
+  /**
+   * Deletes the stage instance associated to that stage channel.
+   * @param channelID The channel's ID
+   */
   deleteStageInstance(channelID: string) {
-    // todo: this
+    return this.rest.dispatch<never, void>({
+      endpoint: '/stage-instances/:id',
+      method: 'DELETE',
+      query: { id: channelID }
+    });
   }
 }
