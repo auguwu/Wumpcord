@@ -73,17 +73,26 @@ export type ButtonStyle = Lowercase<keyof typeof ButtonStyles>;
  *       return msg.channel.send({
  *          content: 'Hello, world!',
  *          components: new ComponentTreeBuilder()
- *               .addButton(new ButtonBuilder().setLabel('hi world').setEmoji('id', 'name').setStyle('primary').build())
+ *               .addButton(new ButtonBuilder().setLabel('hi world').setEmoji('id', 'name').setStyle('primary').setCustomID('abutton').build())
  *               .build()
  *       });
  * });
+ *
+ * client.on('buttonClicked', (msg, button) => {
+ *    console.log(`Button ${button.customID} has been clicked.`);
+ *    if (msg.author.id !== 'some id' || button.customID !== 'abutton') return;
+ *
+ *    return msg.reply('i dunno im just a button.');
+ * });
+ *
+ * client.connect();
  * ```
  *
  * @docs {@link https://discord.com/developers/docs/interactions/message-components#buttons}
  */
 export class ButtonBuilder {
-  private customID?: string;
   private disabled?: boolean;
+  private customID: string = `wumpcord-button-${randomBytes(8).toString('hex')}`;
   private emoji?: [id: string, name: string | null];
   private label?: string;
   private style?: number;
@@ -118,7 +127,7 @@ export class ButtonBuilder {
    * @returns This [[ButtonBuilder]] for chaining methods.
    */
   setCustomID(id?: string) {
-    const uid = id !== undefined ? id : `wumpcord-button-${randomBytes(32).toString('hex')}`;
+    const uid = id !== undefined ? id : `wumpcord-button-${randomBytes(8).toString('hex')}`;
     this.customID = uid;
 
     return this;
@@ -137,9 +146,9 @@ export class ButtonBuilder {
    * @param name The emoji name, it can be `null` if it's a unicode emoji.
    * @returns This [[ButtonBuilder]] for chaining methods.
    */
-  setEmoji(emojiID: string, name: string | null): this;
-  setEmoji(emojiID: string, name?: string | null) {
-    this.emoji = typeof emojiID === 'string' ? [emojiID, name!] : [(emojiID as any).id, (emojiID as any).name];
+  setEmoji(emojiID: string, name?: string | null): this;
+  setEmoji(emojiID: string, name: string | null = null) {
+    this.emoji = typeof emojiID === 'string' ? [emojiID, name] : [(emojiID as any).id, (emojiID as any).name];
     return this;
   }
 
@@ -169,7 +178,7 @@ export class ButtonBuilder {
       type: 2,
       style: this.style!,
       label: this.label,
-      emoji: this.emoji !== undefined ? { id: this.emoji[0], name: this.emoji[1] } : undefined,
+      emoji: this.emoji !== undefined ? { id: this.emoji[0], name: this.emoji[1] ?? null } : undefined,
       custom_id: this.customID,
       url: this.url,
       disabled: this.disabled

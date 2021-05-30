@@ -19,20 +19,3 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-/// Type Definitions for "wumpcord"
-/// Project: https://github.com/auguwu/Wumpcord
-/// Contributors:
-///      - August <cutie@floofy.dev>
-
-/* eslint-disable @typescript-eslint/no-empty-interface */
-
-/**
- * Main entrypoint to `wumpcord`
- */
-declare namespace Wumpcord {
-
-}
-
-export = Wumpcord;
-export as namespace Wumpcord;

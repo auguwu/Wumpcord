@@ -37,6 +37,11 @@ export class ChannelStore extends BaseStore<Channel> {
     super(client, 'channels');
   }
 
+  /** @inheritdoc */
+  get<T extends Channel = Channel>(id: string) {
+    return super.get(id) as T | undefined;
+  }
+
   /**
    * Method to fetch a channel from Discord (and possibly cast it from the `T` generic)
    * @param id The snowflake to use

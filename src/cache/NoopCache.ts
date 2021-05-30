@@ -31,7 +31,7 @@ export class NoopEntityCache implements AbstractEntityCache {
 
   /** @inheritdoc */
   get(id: string) {
-    return undefined;
+    return null;
   }
 
   /** @inheritdoc */

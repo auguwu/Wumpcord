@@ -29,7 +29,7 @@ import { CDN } from '@wumpcord/rest';
 /**
  * https://discord.com/developers/docs/resources/application#application-resource
  */
-export class Application extends BaseEntity<APIApplication> { // terms_of_service_url?
+export class Application extends BaseEntity<APIApplication> {
   /**
    * URI of the Terms of Service of this [Application]
    */

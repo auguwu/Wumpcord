@@ -85,9 +85,9 @@ export class InteractionCommandBuilder {
       throw new TypeError(`Slash command options must have 25 parameters. You went over ${this.options.length - 25} over the limit.`);
 
     if (option instanceof InteractionOptionBuilder)
-      option = option.build() as any;
+      option = option.build();
 
-    this.options.push(option as any);
+    this.options.push(option);
     return this;
   }
 
@@ -103,8 +103,7 @@ export class InteractionCommandBuilder {
     if (this.options.length > 25)
       throw new TypeError(`Slash command options must have 25 parameters. You went over ${this.options.length - 25} over the limit.`);
 
-    const all = options.map(option => option instanceof InteractionOptionBuilder ? option.build() as any : option);
-    this.options = this.options.concat(all);
+    this.options = this.options.concat(options.map(option => option instanceof InteractionOptionBuilder ? option.build() as any : option));
     return this;
   }
 
