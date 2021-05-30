@@ -19,3 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+import { GuildChannel } from './GuildChannel';
+
+/**
+ * Represents a [Message] instance but this is mainly for the use
+ * of interactions (events [[EntityBasedEvents.interactionReceive]], [[EntityBasedEvents.buttonClicked]])
+ */
+export class InteractionMessage<C extends GuildChannel = GuildChannel> {}

@@ -49,7 +49,7 @@ export class ChannelStore extends BaseStore<Channel> {
    * a promise that rejects this request and throws a [[DiscordRestError]] on why it failed.
    */
   fetch<T extends Channel = Channel>(id: string) {
-    return this.client.rest.dispatch<any, APIChannel>({
+    return this.client.rest.dispatch<never, APIChannel>({
       endpoint: '/channels/:id',
       method: 'GET',
       query: { id }

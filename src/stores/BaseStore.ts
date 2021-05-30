@@ -104,7 +104,7 @@ export class BaseStore<D> {
    * @returns The resolved data or a error on why it failed
    */
   add(data: D) {
-    return this.engine.put(data);
+    return this.engine.put(data) as D;
   }
 
   /**

@@ -19,3 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+/**
+ * A channel that users with `MANAGE_MESSAGES` permission can crosspost messages
+ * to servers.
+ */
+export class NewsChannel {}

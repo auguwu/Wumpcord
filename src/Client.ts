@@ -36,6 +36,7 @@ import { GatewayIntents, GatewayVersion, StageInstancePrivacyLevel } from './Con
 import { InteractionCommandBuilder } from './builders/InteractionCommandBuilder';
 import { Application } from './entities/Application';
 import { SelfUser } from './entities';
+import { UserStore } from './stores/UserStore';
 
 type RestClientEvents = {
   [P in keyof IRestClientEvents as `rest${Capitalize<P>}`]: IRestClientEvents[P];
@@ -153,6 +154,12 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
   public ready: boolean = false;
 
   /**
+   * All the users that this bot can see and managed
+   * by the cache engine.
+   */
+  public users: UserStore;
+
+  /**
    * The rest client available to make requests to Discord's REST API
    */
   public rest: RestClient;
@@ -180,6 +187,7 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
 
     this.channels = new ChannelStore(this);
     this.shards = new ShardManager(this);
+    this.users = new UserStore(this);
     this.rest = new RestClient(this.options.rest);
 
     Object.defineProperty(this, 'token', { value: this.options.token });
@@ -418,7 +426,7 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
       endpoint: '/applications/:appID/commands',
       method: 'POST',
       query: {
-        appID: ''
+        appID: this.user.id
       },
 
       data

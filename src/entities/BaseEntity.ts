@@ -29,14 +29,15 @@ export class BaseEntity<D extends any> {
   /**
    * The ID of this [[BaseEntity]].
    */
-  public id: string;
+  public id!: string;
 
   /**
    * Creates a new [[BaseEntity]] instance
    * @param id The ID from Discord
    */
-  constructor(id: SnowflakeValue) {
-    this.id = id;
+  constructor(id?: SnowflakeValue) {
+    if (id)
+      this.id = id;
   }
 
   /**

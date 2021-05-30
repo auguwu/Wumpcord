@@ -20,7 +20,32 @@
  * SOFTWARE.
  */
 
+import type { WebSocketClient } from '../Client';
+import type { APIUser } from 'discord-api-types';
+import { BaseStore } from './BaseStore';
+import { User } from '../entities';
+
 /**
- * A voice channel but for hosting events with an audience
+ * Entity store for users
  */
-export class StageChannel {}
+export class UserStore extends BaseStore<User> {
+  constructor(client: WebSocketClient) {
+    super(client, 'users');
+  }
+
+  /**
+   * Method to fetch a user from Discord.
+   *
+   * @param id The snowflake to use
+   * @returns A promise that has the class resolved and *possibly* cached or
+   * a promise that rejects this request and throws a [[DiscordRestError]] on why it failed.
+   */
+  fetch(id: string) {
+    return this.client.rest.dispatch<never, APIUser>({
+      endpoint: '/users/:id',
+      method: 'GET',
+      query: { id },
+      auth: true
+    }).then(data => this.put(new User(this.client, data)));
+  }
+}

@@ -19,3 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+import type { Channel } from './Channel';
+
+/**
+ * https://discord.com/developers/docs/resources/channel#message-object
+ */
+export class Message<C extends Channel = Channel> {}
