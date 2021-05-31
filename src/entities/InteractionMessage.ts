@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import { GuildChannel } from './GuildChannel';
+import { GuildChannel } from './channels/GuildChannel';
 
 /**
  * Represents a [Message] instance but this is mainly for the use

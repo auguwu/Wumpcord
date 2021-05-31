@@ -56,7 +56,7 @@ export interface RetrieveMessagesOptions {
  * Represents a "textable" channel, where it inherits stuff like `.send` for an example.
  */
 export class TextableChannel extends Channel {
-  #client: WebSocketClient;
+  private client: WebSocketClient;
 
   /**
    * Creates a new [[TextableChannel]] instance
@@ -66,7 +66,14 @@ export class TextableChannel extends Channel {
   constructor(client: WebSocketClient, data: APIChannel) {
     super(data);
 
-    this.#client = client;
+    this.client = client;
+  }
+
+  /**
+   * Returns a boolean if this channel can cross-post messages.
+   */
+  get crosspostable() {
+    return this.type === 'news';
   }
 
   /**
@@ -85,7 +92,7 @@ export class TextableChannel extends Channel {
 
     if (shouldDelete.length === 1) {
       const id = shouldDelete[0];
-      return this.#client.rest.dispatch<any, void>({
+      return this.client.rest.dispatch<any, void>({
         endpoint: '/channels/:channelID/messages/:id',
         method: 'DELETE',
         query: {
@@ -95,7 +102,7 @@ export class TextableChannel extends Channel {
       }).then(() => 1);
     }
 
-    return this.#client.rest.dispatch<RESTPostAPIChannelMessagesBulkDeleteJSONBody, void>({
+    return this.client.rest.dispatch<RESTPostAPIChannelMessagesBulkDeleteJSONBody, void>({
       endpoint: '/channels/:id/messages/bulk-delete',
       method: 'POST',
       query: { id: this.id },
@@ -113,7 +120,7 @@ export class TextableChannel extends Channel {
     options = Object.assign(options, { limit: 50 });
 
     const query = Util.objectToQuery(options);
-    return this.#client.rest.dispatch<unknown, APIMessage[]>({
+    return this.client.rest.dispatch<unknown, APIMessage[]>({
       endpoint: `/channels/:id/messages${query}`,
       method: 'GET',
       query: { id: this.id }
@@ -124,7 +131,7 @@ export class TextableChannel extends Channel {
    * Triggers the "user typing" indicator. ([`Discord Docs`](https://discord.com/developers/docs/resources/channel#trigger-typing-indicator))
    */
   sendTyping() {
-    return this.#client.rest.dispatch<unknown, void>({
+    return this.client.rest.dispatch<unknown, void>({
       endpoint: '/channels/:id/typing',
       method: 'POST',
       query: { id: this.id }
@@ -135,7 +142,7 @@ export class TextableChannel extends Channel {
    * Retrieves all the pins of this [[TextableChannel]] ([`Discord Docs`](https://discord.com/developers/docs/resources/channel#get-pinned-messages))
    */
   getPins() {
-    return this.#client.rest.dispatch<unknown, APIMessage[]>({
+    return this.client.rest.dispatch<unknown, APIMessage[]>({
       endpoint: '/channels/:id/messages/pins',
       method: 'GET',
       query: { id: this.id }
@@ -146,11 +153,11 @@ export class TextableChannel extends Channel {
    * Retrieves all of the webhooks available in this [[TextableChannel]]. ([`Discord Docs`](https://discord.com/developers/docs/resources/webhook#get-channel-webhooks))
    */
   getWebhooks() {
-    return this.#client.rest.dispatch<unknown, APIWebhook[]>({
+    return this.client.rest.dispatch<unknown, APIWebhook[]>({
       endpoint: '/channels/:id/webhooks',
       method: 'GET',
       query: { id: this.id }
-    }).then(data => data.map(v => new Webhook(this.#client, v)));
+    }).then(data => data.map(v => new Webhook(this.client, v)));
   }
 
   /**
@@ -159,12 +166,12 @@ export class TextableChannel extends Channel {
    * @param options Any additional options to use to send this message
    */
   send(content: MessageContent, options?: MessageContentOptions) {
-    const data = Util.formatMessage(this.#client, content, options);
+    const data = Util.formatMessage(this.client, content, options);
     const file = data.file;
 
     delete data.file;
 
-    return this.#client.rest.dispatch<RESTPostAPIChannelMessageJSONBody, APIMessage>({
+    return this.client.rest.dispatch<RESTPostAPIChannelMessageJSONBody, APIMessage>({
       endpoint: '/channels/:id/messages',
       method: 'POST',
       query: { id: this.id },

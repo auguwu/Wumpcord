@@ -63,6 +63,15 @@ export interface AbstractEntityCache {
    * @returns A boolean if it was successful or not
    */
   remove(id: string): boolean;
+
+  /**
+   * Filters any value from the `callback` function to return a list of entities
+   * that the threshold of the `callback` returned true.
+   *
+   * @param callback The callback function
+   * @param thisArg The `this` context, if needed.
+   */
+  filter<Value = any, ThisArg = AbstractEntityCache>(callback: (this: ThisArg, value: Value) => boolean, thisArg?: ThisArg): Value[];
 }
 
 /**

@@ -22,9 +22,20 @@
 
 export * from './inheritable/TextableChannel';
 export * from './inheritable/DynamicImage';
+export * from './channels';
 
+export * from './Application';
+export * from './AuditLogEntry';
+export * from './Channel';
+export * from './Emoji';
+export * from './Guild';
+export * from './Invite';
+export * from './Member';
+export * from './InteractionMessage';
+export * from './Message';
+export * from './Presence';
+export * from './StageInstance';
 export * from './PermissionOverwrite';
-export * from './GuildChannel';
 export * from './Application';
 export * from './SelfUser';
 export * from './Webhook';

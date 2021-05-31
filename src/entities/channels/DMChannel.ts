@@ -20,37 +20,34 @@
  * SOFTWARE.
  */
 
-import type { AbstractEntityCache } from '.';
+import type { WebSocketClient } from '../../Client';
+import type { APIChannel } from 'discord-api-types';
+import { TextableChannel } from '../inheritable/TextableChannel';
+import { User } from '../User';
 
 /**
- * Represents a entity cache for the purpose of not being cached to reduce
- * memory usage or overhead on other caching solutions.
+ * Represents a private channel with the user and the bot as the main participants.
  */
-export class NoopEntityCache implements AbstractEntityCache {
-  public name = 'noop';
+export class DMChannel extends TextableChannel {
+  /** Represents the last message ID, useful for fetching messages in this channel */
+  public lastMessageID?: string | null;
 
-  /** @inheritdoc */
-  get(id: string) {
-    return null;
+  /** List of recipients that are in this group DM */
+  public recipient!: User;
+
+  constructor(client: WebSocketClient, data: APIChannel) {
+    super(client, data);
+
+    this.patch(data);
   }
 
-  /** @inheritdoc */
-  put<D extends any = any>(data: D): D {
-    return data;
-  }
+  patch(data: Partial<APIChannel>) {
+    super.patch(data as APIChannel);
 
-  /** @inheritdoc */
-  has(id: string) {
-    return false;
-  }
+    if (data.last_message_id !== undefined)
+      this.lastMessageID = data.last_message_id;
 
-  /** @inheritdoc */
-  remove(id: string) {
-    return true;
-  }
-
-  /** {@inheritdoc AbstractEntityCache.filter} */
-  filter<Val = any, ThisArg = NoopEntityCache>(callback: (value: Val) => boolean, thisArg?: ThisArg) {
-    return [] as Val[];
+    if (data.recipients !== undefined)
+      this.recipient = this['client'].users.put(new User(this['client'], data.recipients[0]));
   }
 }

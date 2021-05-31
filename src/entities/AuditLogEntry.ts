@@ -21,7 +21,7 @@
  */
 
 import type { APIAuditLogEntry, APIAuditLogChange } from 'discord-api-types';
-import type { GuildTextableChannel } from './GuildTextableChannel';
+import type { GuildTextableChannel } from './channels/GuildTextableChannel';
 import type { WebSocketClient } from '../Client';
 import { AuditLogAction } from '../Constants';
 import { BaseEntity } from './BaseEntity';
@@ -65,7 +65,7 @@ export class AuditLogEntry extends BaseEntity<APIAuditLogEntry> {
   public role?: string;
 
   /** The user who performed the audit log action */
-  public user!: string | null;
+  public user!: User | null;
 
   constructor(client: WebSocketClient, data: APIAuditLogEntry) {
     super(data.id);
@@ -101,7 +101,7 @@ export class AuditLogEntry extends BaseEntity<APIAuditLogEntry> {
       this.reason = data.reason;
 
     if (data.user_id !== undefined)
-      this.user = data.user_id;
+      this.user = data.user_id !== null ? this.client.users.get(data.user_id) ?? null : null;
 
     if (data.options !== undefined) {
       if (this.actionType === AuditLogAction.MemberPrune) {

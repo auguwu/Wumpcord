@@ -24,7 +24,7 @@
 
 import type { ModifyStageInstance, WebSocketClient } from '../Client';
 import { StageInstancePrivacyLevel } from '../Constants';
-import type { StageChannel } from './StageChannel';
+import type { StageChannel } from './channels/StageChannel';
 import type { Snowflake } from 'discord-api-types';
 import { BaseEntity } from './BaseEntity';
 

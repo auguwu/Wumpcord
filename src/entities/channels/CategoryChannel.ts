@@ -20,37 +20,23 @@
  * SOFTWARE.
  */
 
-import type { AbstractEntityCache } from '.';
+import { GuildChannel } from './GuildChannel';
 
 /**
- * Represents a entity cache for the purpose of not being cached to reduce
- * memory usage or overhead on other caching solutions.
+ * Represents a parent channel to have children channels
+ * below it.
+ *
+ * This class is for documentation purposes + type checking,
+ * only property it has is `children`.
  */
-export class NoopEntityCache implements AbstractEntityCache {
-  public name = 'noop';
-
-  /** @inheritdoc */
-  get(id: string) {
-    return null;
-  }
-
-  /** @inheritdoc */
-  put<D extends any = any>(data: D): D {
-    return data;
-  }
-
-  /** @inheritdoc */
-  has(id: string) {
-    return false;
-  }
-
-  /** @inheritdoc */
-  remove(id: string) {
-    return true;
-  }
-
-  /** {@inheritdoc AbstractEntityCache.filter} */
-  filter<Val = any, ThisArg = NoopEntityCache>(callback: (value: Val) => boolean, thisArg?: ThisArg) {
-    return [] as Val[];
+export class CategoryChannel extends GuildChannel {
+  /**
+   * Returns the list of children of channels from this category channel.
+   */
+  get children() {
+    return this['client'].channels.engine.filter<GuildChannel>(channel =>
+      (channel.hasOwnProperty('parentID') && channel.parentID !== null) &&
+      channel.parentID === this.id
+    );
   }
 }

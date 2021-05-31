@@ -20,33 +20,23 @@
  * SOFTWARE.
  */
 
+import type { WebSocketClient } from '../../Client';
 import type { APIChannel } from 'discord-api-types';
-import { Collection } from '@augu/collections';
-import { GuildChannel } from './GuildChannel';
-import type { Member } from './Member';
+import { VoiceChannel } from './VoiceChannel';
 
 /**
- * https://discord.com/developers/docs/resources/channel#channel-object
+ * A voice channel but for hosting events with an audience.
+ *
+ * This class is only used for documentation purposes + type checking.
  */
-export class VoiceChannel extends GuildChannel {
+export class StageChannel extends VoiceChannel {
   /**
-   * The limit of users that can connect to this voice channel
+   * The topic of the stage channel
    */
-  public userLimit?: number;
+  public topic!: string | null;
 
-  /**
-   * The bitrate that this voice channel is in.
-   */
-  public bitrate?: number;
-
-  /**
-   * The region of this voice channel, returns `null` if it's
-   * automatic.
-   */
-  public region!: string | null;
-
-  constructor(data: APIChannel) {
-    super(data);
+  constructor(client: WebSocketClient, data: APIChannel) {
+    super(client, data);
 
     this.patch(data);
   }
@@ -54,27 +44,7 @@ export class VoiceChannel extends GuildChannel {
   patch(data: Partial<APIChannel>) {
     super.patch(data);
 
-    if (data.rtc_region !== undefined)
-      this.region = data.rtc_region;
-
-    if (data.user_limit !== undefined)
-      this.userLimit = data.user_limit;
-
-    if (data.bitrate !== undefined)
-      this.bitrate = data.bitrate;
-  }
-
-  /**
-   * Check if the bot can join this voice channel
-   */
-  get joinable() {
-    return false;
-  }
-
-  /**
-   * Returns the members of this voice channel
-   */
-  get members() {
-    return new Collection<string, Member>();
+    if (data.topic !== undefined)
+      this.topic = data.topic;
   }
 }

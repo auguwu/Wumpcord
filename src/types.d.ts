@@ -162,6 +162,15 @@ export interface CachingOptions {
   presences?: AbstractEntityCache | 'memory' | 'no-op';
 
   /**
+   * Engine to use when caching channel messages
+   *
+   * > **NOTE**: If you do not want to construct a new instance
+   * of an [[AbstractEntityCache]] engine, you can just specify
+   * the built in ones: `'memory'` or `'no-op'`
+   */
+  messages?: AbstractEntityCache | 'memory' | 'no-op';
+
+  /**
    * Engine to use when caching channels
    *
    * > **NOTE**: If you do not want to construct a new instance

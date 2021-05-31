@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import type { WebSocketClient } from '../Client';
+import type { WebSocketClient } from '../../Client';
 import { GuildTextableChannel } from './GuildTextableChannel';
 import type { APIChannel } from 'discord-api-types';
 
