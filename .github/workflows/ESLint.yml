@@ -21,6 +21,7 @@ on:
       - 'renovate.json'
       - 'tsconfig.json'
       - 'tsconfig.test.json'
+      - '.husky'
 
   pull_request:
     branches:
