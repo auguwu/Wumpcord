@@ -21,7 +21,9 @@
  */
 
 import type { APIChannel } from 'discord-api-types';
+import { Collection } from '@augu/collections';
 import { GuildChannel } from './GuildChannel';
+import type { Member } from './Member';
 
 /**
  * https://discord.com/developers/docs/resources/channel#channel-object
@@ -60,5 +62,19 @@ export class VoiceChannel extends GuildChannel {
 
     if (data.bitrate !== undefined)
       this.bitrate = data.bitrate;
+  }
+
+  /**
+   * Check if the bot can join this voice channel
+   */
+  get joinable() {
+    return false;
+  }
+
+  /**
+   * Returns the members of this voice channel
+   */
+  get members() {
+    return new Collection<string, Member>();
   }
 }

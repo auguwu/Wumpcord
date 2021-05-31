@@ -45,22 +45,22 @@ export class MemoryCache extends Collection<string, any> implements AbstractEnti
    * @inheritdoc
    */
   put(data: any) {
-    if (data === undefined)
+    if (data === undefined || data === null)
       throw new UnableToCreateEntityError('Entity didn\'t specify any data', data);
 
-    if ((data as any).id === undefined)
+    if (data.id === undefined)
       throw new UnableToCreateEntityError('Entity didn\'t specify an ID, is this a malformed packet?', data);
 
-    if (this.has((data as any).id)) {
-      const cached = this.get((data as any).id);
+    if (this.has(data.id)) {
+      const cached = this.get(data.id);
       cached.patch?.(data);
 
-      this.delete((data as any).id);
-      this.set((data as any).id, cached);
+      this.delete(data.id);
+      this.set(data.id, cached);
       return cached;
     }
 
-    this.set((data as any).id, data);
+    this.set(data.id, data);
     return data;
   }
 

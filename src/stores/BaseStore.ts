@@ -25,6 +25,7 @@ import type { WebSocketClient } from '../Client';
 import type { CachingOptions } from '../types';
 import { NoopEntityCache } from '../cache/NoopCache';
 import { MemoryCache } from '../cache/MemoryCache';
+import { Deprecated } from '../decorators/Deprecated';
 
 function getCacheEngine(options: CachingOptions) {
   if (options.engine === 'memory')
@@ -99,10 +100,11 @@ export class BaseStore<D> {
    * Simpler method for [[AbstractEntityCache#put]] since entity cache is privated in this class,
    * which adds data to cache with the newly entity created or an Error thrown if it couldn't succeed.
    *
-   * @deprecated This method is deprecated and removed in a future release, use [[BaseStore#put]] instead
+   * @deprecated
    * @param data The data to place
    * @returns The resolved data or a error on why it failed
    */
+  @Deprecated.Method
   add(data: D) {
     return this.engine.put(data) as D;
   }

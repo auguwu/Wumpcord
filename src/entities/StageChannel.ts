@@ -20,9 +20,30 @@
  * SOFTWARE.
  */
 
+import type { APIChannel } from 'discord-api-types';
 import { VoiceChannel } from './VoiceChannel';
 
 /**
- * A voice channel but for hosting events with an audience
+ * A voice channel but for hosting events with an audience.
+ *
+ * This class is only used for documentation purposes + type checking.
  */
-export class StageChannel extends VoiceChannel {}
+export class StageChannel extends VoiceChannel {
+  /**
+   * The topic of the stage channel
+   */
+  public topic!: string | null;
+
+  constructor(data: APIChannel) {
+    super(data);
+
+    this.patch(data);
+  }
+
+  patch(data: Partial<APIChannel>) {
+    super.patch(data);
+
+    if (data.topic !== undefined)
+      this.topic = data.topic;
+  }
+}

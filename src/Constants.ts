@@ -256,7 +256,7 @@ export enum ChannelTypes {
   NewsThread = 10,
   PublicThread,
   PrivateThread,
-  State
+  Stage
 }
 
 export const ChannelTypesObject = {
@@ -394,4 +394,9 @@ export enum ShardStatus {
 export enum StageInstancePrivacyLevel {
   Public = 1,
   GuildOnly
+}
+
+export enum InviteTargetType {
+  Stream = 1,
+  EmbeddedApp
 }

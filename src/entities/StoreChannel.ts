@@ -24,6 +24,7 @@ import { GuildChannel } from './GuildChannel';
 
 /**
  * A channel where you can sell your game and people can buy it.
+ *
  * This class is only here for documentation purposes, it doesn't
  * extend anything.
  */
