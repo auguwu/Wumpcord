@@ -30,7 +30,7 @@
     "lint": "eslint src --ext .ts --fix"
   },
   "dependencies": {
-    "@augu/collections": "1.0.10",
+    "@augu/collections": "1.0.11",
     "@augu/utils": "1.5.3",
     "@wumpcord/rest": "1.2.1",
     "discord-api-types": "0.18.1",
@@ -42,8 +42,8 @@
     "@augu/tsconfig": "1.1.0",
     "@types/node": "15.0.3",
     "@types/ws": "7.4.4",
-    "@typescript-eslint/eslint-plugin": "4.25.0",
-    "@typescript-eslint/parser": "4.25.0",
+    "@typescript-eslint/eslint-plugin": "4.26.0",
+    "@typescript-eslint/parser": "4.26.0",
     "eslint": "7.27.0",
     "husky": "6.0.0",
     "typedoc": "0.20.36",
