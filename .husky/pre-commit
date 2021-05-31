@@ -4,7 +4,7 @@
 echo '❓ lint ~ ❓ project - checking eslint for errors'
 eslint src --ext .ts # `--fix` would normally be here but it should only print and not fix
 
-#echo '✔ lint ~ ❓ project - compiling project for errors'
-#tsc --noEmit
+echo '✔ lint ~ ❓ project - compiling project for errors'
+tsc --noEmit
 
 echo '✔ lint ~ ✔ project - we are done here'
