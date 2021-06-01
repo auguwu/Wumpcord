@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+import type { CategoryChannel, DMChannel, GroupChannel, NewsChannel, StageChannel, StoreChannel, TextChannel, VoiceChannel } from './entities';
 import type { ClientOptions as WebSocketClientOptions } from 'ws';
 import type { RestClientOptions, MessageFile } from '@wumpcord/rest';
 import type { AbstractEntityCache } from './cache';
@@ -27,11 +28,24 @@ import type { GatewayIntent } from './Constants';
 import type { BaseEntity } from './entities/BaseEntity';
 import type * as discord from 'discord-api-types';
 
+
 /** Represents a partial entity with `id` and any additional properties visible if not cached */
 export type PartialEntity<T extends BaseEntity<any>, Props = {}> = Partial<T> & { [P in keyof Props]: Props[P]; } & { id: string };
 
 /** Represents all of the online statuses to set */
-export type OnlineStatus = 'online' | 'offline' | 'idle' | 'dnd';
+export type OnlineStatus = 'online' | 'offline' | 'idle' | 'dnd' | 'invisible';
+
+/** Represents any channel */
+export type AnyChannel = CategoryChannel | DMChannel | GroupChannel | NewsChannel | StageChannel | StoreChannel | VoiceChannel | TextChannel;
+
+/** Represents any guild channel, which has more properties than DMChannel and GroupChannel. */
+export type AnyGuildChannel = CategoryChannel | NewsChannel | StageChannel | StoreChannel | VoiceChannel | TextChannel;
+
+/** Represents any textable channel, which can send messages */
+export type AnyTextableChannel = NewsChannel | TextChannel | DMChannel | GroupChannel;
+
+/** Represents any guild textable channel, which are text channels in guilds */
+export type AnyGuildTextableChannel = NewsChannel | TextChannel;
 
 /**
  * Represents of how a Discord message is constructed
@@ -277,7 +291,7 @@ export interface MessageContentOptions {
    * If we should send a message with a reply of this message's ID
    * as the reply reference.
    */
-  reply?: boolean;
+  reply?: string;
 
   /**
    * A file to send on Discord

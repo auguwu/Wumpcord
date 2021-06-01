@@ -19,3 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+import type { WebSocketClient } from '../Client';
+import type { Presence } from '../entities/Presence';
+import { BaseStore } from './BaseStore';
+
+export class GuildVoiceStateStore extends BaseStore<Presence> {
+  constructor(client: WebSocketClient) {
+    super(client, 'presences');
+  }
+
+  // You cannot retrieve guild presences from REST, so `fetch()` will throw an error.
+}

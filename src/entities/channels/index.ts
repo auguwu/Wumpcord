@@ -21,6 +21,7 @@
  */
 
 export * from './GuildTextableChannel';
+export * from './CategoryChannel';
 export * from './GroupChannel';
 export * from './StageChannel';
 export * from './StoreChannel';

@@ -19,3 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+import type { WebSocketClient } from '../Client';
+import { APIMessage, Message } from '../entities';
+import { BaseStore } from './BaseStore';
+
+export class ChannelMessageStore extends BaseStore<Message> {
+  constructor(client: WebSocketClient) {
+    super(client, 'messages');
+  }
+
+  /**
+   * Method to retrieve a message from a channel
+   * @param channelID The channel's ID
+   * @param messageID The message's ID
+   */
+  fetch(channelID: string, messageID: string) {
+    return this.client.rest.dispatch<never, APIMessage>({
+      endpoint: `/channels/${channelID}/messages/${messageID}`,
+      method: 'GET'
+    }).then(data => this.put(new Message(this.client, data)));
+  }
+}

@@ -52,6 +52,9 @@ export class BaseEntity<D extends any> {
    * Returns when the entity was created at, a shortcut for [[Snowflake.createdAt]]
    */
   get createdAt() {
+    if (!this.id)
+      return new Date();
+
     const delta = BigInt(this.id) / 4194304n;
     return new Date(Math.floor(Number(delta + BigInt(1420070400000))));
   }

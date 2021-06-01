@@ -23,6 +23,7 @@
 import { APIChannel, APIMessage, APIWebhook, RESTPostAPIChannelMessageJSONBody, RESTPostAPIChannelMessagesBulkDeleteJSONBody } from 'discord-api-types';
 import type { MessageContent, MessageContentOptions } from '../../types';
 import type { WebSocketClient } from '../../Client';
+import { ChannelMessageStore } from '../../stores/ChannelMessageStore';
 import { Channel } from '../Channel';
 import { Webhook } from '../Webhook';
 import Util from '../../util';
@@ -56,7 +57,15 @@ export interface RetrieveMessagesOptions {
  * Represents a "textable" channel, where it inherits stuff like `.send` for an example.
  */
 export class TextableChannel extends Channel {
-  private client: WebSocketClient;
+  /**
+   * Cached messages for this channel
+   */
+  public messages: ChannelMessageStore;
+
+  /**
+   * The client connection for this textable channel
+   */
+  public client: WebSocketClient;
 
   /**
    * Creates a new [[TextableChannel]] instance
@@ -66,6 +75,7 @@ export class TextableChannel extends Channel {
   constructor(client: WebSocketClient, data: APIChannel) {
     super(data);
 
+    this.messages = new ChannelMessageStore(client);
     this.client = client;
   }
 
