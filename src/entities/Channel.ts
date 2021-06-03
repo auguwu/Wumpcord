@@ -52,7 +52,25 @@ export class Channel extends BaseEntity<APIPartialChannel> {
   }
 
   static from<T>(client: WebSocketClient, data: APIPartialChannel): T | null {
-    return null;
+    // prevents circular references
+    const { CategoryChannel, DMChannel, GroupChannel, NewsChannel, StageChannel, StoreChannel, TextChannel, VoiceChannel } = require('./channels');
+    const channels = {
+      0: TextChannel,
+      1: DMChannel,
+      2: VoiceChannel,
+      3: GroupChannel,
+      4: CategoryChannel,
+      5: NewsChannel,
+      6: StoreChannel,
+      13: StageChannel
+    };
+
+    if (channels.hasOwnProperty(data.type))
+      return new channels[data.type](client, data);
+    else {
+      client['debug'](`Channel ${data.type} (${ChannelTypesObject[data.type]}) is not available at this moment, create a PR maybe?`);
+      return null;
+    }
   }
 
   toString() {

@@ -81,7 +81,7 @@ export class ShardManager extends Collection<number, Shard> {
   async connect(id: number) {
     let shard = this.get(id);
     if (shard !== undefined && shard.status !== 'Dead')
-      throw new TypeError(`Shard #${id} already exists & is not dead.`);
+      throw new TypeError(`Shard #${id} already exists and is not dead.`);
 
     if (shard !== undefined && shard.status === 'Dead') {
       await shard.connect();

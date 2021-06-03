@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-import { UnableToCreateEntityError } from '../errors/UnableToCreateEntityError';
 import type { AbstractEntityCache } from '.';
 import { Collection } from '@augu/collections';
 
@@ -38,7 +37,7 @@ export class MemoryCache extends Collection<string, any> implements AbstractEnti
    * @inheritdoc
    */
   get(id: string) {
-    return this.get(id);
+    return super.get(id);
   }
 
   /**
@@ -46,10 +45,10 @@ export class MemoryCache extends Collection<string, any> implements AbstractEnti
    */
   put(data: any) {
     if (data === undefined || data === null)
-      throw new UnableToCreateEntityError('Entity didn\'t specify any data', data);
+      return data;
 
     if (data.id === undefined)
-      throw new UnableToCreateEntityError('Entity didn\'t specify an ID, is this a malformed packet?', data);
+      return data;
 
     if (this.has(data.id)) {
       const cached = this.get(data.id);
@@ -58,17 +57,17 @@ export class MemoryCache extends Collection<string, any> implements AbstractEnti
       this.delete(data.id);
       this.set(data.id, cached);
       return cached;
+    } else {
+      this.set(data.id, data);
+      return data;
     }
-
-    this.set(data.id, data);
-    return data;
   }
 
   /**
    * @inheritdoc
    */
   has(id: string) {
-    return this.has(id);
+    return super.has(id);
   }
 
   /**

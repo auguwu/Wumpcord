@@ -38,6 +38,8 @@ import { Application } from './entities/Application';
 import { SelfUser } from './entities';
 import { UserStore } from './stores/UserStore';
 import { APIStageInstance, StageInstance } from './entities/StageInstance';
+import Util from './util';
+import type { ButtonClickContext } from './gateway/events';
 
 type RestClientEvents = {
   [P in keyof IRestClientEvents as `rest${Capitalize<P>}`]: IRestClientEvents[P];
@@ -47,7 +49,32 @@ type ShardEvents = {
   [P in keyof IShardEvents as `shard${Capitalize<P>}`]: IShardEvents[P];
 }
 
-export interface EntityBasedEvents {}
+/**
+ * List of events related to any entity from the dispatch event.
+ */
+export interface EntityBasedEvents {
+  /**
+   * Emitted when the bot has received a slash command interaction
+   * in a guild.
+   *
+   * @param data The guild interaction message
+   */
+  receiveGuildInteraction(data: null): void;
+
+  /**
+   * Emitted when the bot has received a slash command interaction
+   * in DMs.
+   *
+   * @param data The DM interaction message
+   */
+  receiveDMInteraction(data: null): void;
+
+  /**
+   * Emitted when a button was clicked from a message
+   * @param context The context of the button click
+   */
+  buttonClick(context: ButtonClickContext): void;
+}
 
 /**
  * Options object for [[WebSocketClient.editStageInstance]]
@@ -188,7 +215,8 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
   constructor(options: types.ClientOptions) {
     super();
 
-    this.options = Object.assign(options, defaults, {
+    this.options = Util.merge<any>(options, {
+      ...defaults,
       token: options.token,
       rest: {
         token: options.token
@@ -208,6 +236,7 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
       .on('debug', (message) => this.emit('restDebug', message))
       .on('call', (properties) => this.emit('restCall', properties));
 
+    /*
     this.once('ready', async() => {
       if (this.options.getAllUsers) {
         this.debug('[MEMBERS] Requesting all guild members...');
@@ -219,6 +248,7 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
         this._sweepInterval = setInterval(this._unsweep.bind(this)).unref();
       }
     });
+    */
   }
 
   /**
@@ -335,7 +365,7 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
    * and extra sharding metadata
    */
   getBotGateway() {
-    return this.rest.dispatch<unknown, discord.RESTGetAPIGatewayBotResult>({
+    return this.rest.dispatch<never, discord.RESTGetAPIGatewayBotResult>({
       endpoint: '/gateway/bot',
       method: 'GET'
     });
@@ -345,7 +375,7 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
    * Unauthenicated function to retrieve the gateway URL
    */
   getGatewayInfo() {
-    return this.rest.dispatch<unknown, discord.RESTGetAPIGatewayResult>({
+    return this.rest.dispatch<never, discord.RESTGetAPIGatewayResult>({
       endpoint: '/gateway',
       method: 'GET'
     });
@@ -385,6 +415,23 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
       endpoint: '/applications/:id',
       query: { id: this.user.id },
       method: 'GET'
+    });
+  }
+
+  /**
+   * Method to retrieve all guild slash commands
+   *
+   * [`Discord Docs`](https://discord.com/developers/docs/interactions/slash-commands#get-guild-application-commands)
+   * @param guildID The guild's ID
+   */
+  getGuildSlashCommands(guildID: string) {
+    return this.rest.dispatch<never, discord.RESTGetAPIApplicationGuildCommandsResult>({
+      endpoint: '/applications/:id/guilds/:guildID/commands',
+      method: 'GET',
+      query: {
+        id: this.user.id,
+        guildID
+      }
     });
   }
 

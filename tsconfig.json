@@ -4,7 +4,8 @@
     "moduleResolution": "node",
     "rootDir": "./src",
     "types": ["node"],
-    "outDir": "./build"
+    "outDir": "./build",
+    "useDefineForClassFields": true
   },
   "exclude": ["node_modules"],
   "include": ["src/**/*.ts", "src/types.d.ts"]

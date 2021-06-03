@@ -329,7 +329,7 @@ export interface SendActivityOptions {
   /**
    * The list of activities to display
    */
-  activities: discord.GatewayActivity[];
+  activities: discord.GatewayActivityUpdateData[];
 
   /**
    * Whenther or not the client is AFK

@@ -30,6 +30,8 @@ import { EventBus } from '@augu/utils';
 import WebSocket from 'ws';
 import Util from '../util';
 
+import * as events from './events';
+
 export interface ShardEvents {
   /**
    * Emitted when this shard disconnects from Discord and is resuming
@@ -234,6 +236,11 @@ export class Shard extends EventBus<ShardEvents> {
   private rejecter?: (error: any) => void;
 
   /**
+   * The client connection attached to this shard
+   */
+  public client: WebSocketClient;
+
+  /**
    * The zlib inflate class if compression support is enabled
    */
   private inflate?: ZlibInflate;
@@ -241,7 +248,7 @@ export class Shard extends EventBus<ShardEvents> {
   /**
    * The actual end to end connection with Discord
    */
-  public socket!: WebSocket | null;
+  public socket: WebSocket | null = null;
 
   /**
    * The status of the shard
@@ -267,7 +274,6 @@ export class Shard extends EventBus<ShardEvents> {
    * This shard's ID
    */
   public id: number;
-  #client: WebSocketClient;
 
   /**
    * Creates a new [[Shard]] instance. Represents a connection to Discord that deals with emitting gateway events.
@@ -283,7 +289,7 @@ export class Shard extends EventBus<ShardEvents> {
         to: Erlpack === undefined ? 'string' : ''
       });
 
-    this.#client = client;
+    this.client = client;
     this.id = id;
   }
 
@@ -313,7 +319,7 @@ export class Shard extends EventBus<ShardEvents> {
       this.resolver = resolve as any;
       this.rejecter = reject;
 
-      this.socket = new WebSocket(this.#client.gatewayUrl, this.#client.options.ws.clientOptions);
+      this.socket = new WebSocket(this.client.gatewayUrl, this.client.options.ws.clientOptions);
       this
         .socket
         .on('message', this._onMessage.bind(this))
@@ -327,7 +333,7 @@ export class Shard extends EventBus<ShardEvents> {
 
         this.rejecter?.(new Error('Didn\'t create session in time.'));
         delete this.rejecter;
-      }, this.#client.options.ws.connectTimeout ?? 25000);
+      }, this.client.options.ws.connectTimeout ?? 25000);
     });
   }
 
@@ -380,7 +386,7 @@ export class Shard extends EventBus<ShardEvents> {
       return;
     } else {
       this.debug('[DISPOSE] Told to reconnect.');
-      return void this.#client.shards.connect(this.id);
+      return void this.client.shards.connect(this.id);
     }
   }
 
@@ -412,8 +418,46 @@ export class Shard extends EventBus<ShardEvents> {
     });
   }
 
-  private debug(message: string) {
+  /**
+   * Emits any debug events in this shard, emitted from typings
+   * @internal
+   * @param message The message to send
+   */
+  debug(message: string) {
     this.emit('debug', this.id, message);
+  }
+
+  /**
+   * @internal
+   */
+  _checkReady() {
+    if (this._readyTimeout !== undefined)
+      clearTimeout(this._readyTimeout);
+
+    if (!this.unavailableGuilds.size) {
+      this.debug('Received all guilds from Discord, marking this shard as ready');
+
+      this.status = 'Connected';
+      this.ready = true;
+      this.emit('ready', this.id);
+
+      this.resolver?.(this);
+
+      delete this.resolver;
+      delete this._readyTimeout;
+      return;
+    }
+
+    this._readyTimeout = setTimeout(() => {
+      this.debug(`Didn't receive any more guild packets in the last 15 seconds. Marking shard as ready with ${this.unavailableGuilds.size} unavailable guilds.`);
+      this.resolver?.(this);
+
+      delete this.resolver;
+      delete this._readyTimeout;
+      this.status = 'Connected';
+      this.ready = true;
+      this.emit('ready', this.id, this.unavailableGuilds);
+    }, 15000);
   }
 
   private deserialize<T = {}>(packet: Buffer | string) {
@@ -441,7 +485,7 @@ export class Shard extends EventBus<ShardEvents> {
           d = Buffer.concat(d);
         }
 
-        if (Zlib !== undefined) {
+        if (Zlib !== undefined && this.client.options.compress === true) {
           const l = (d as any).length;
           const shouldFlush = l >= 4
             && data[l - 4] === 0x00
@@ -464,41 +508,32 @@ export class Shard extends EventBus<ShardEvents> {
     }
   }
 
-  private _checkReady() {
-    if (this._readyTimeout !== undefined)
-      clearTimeout(this._readyTimeout);
-
-    if (!this.unavailableGuilds.size) {
-      this.debug('Received all guilds from Discord, marking this shard as ready');
-
-      this.status = 'Connected';
-      this.ready = true;
-      this.emit('ready', this.id);
-
-      delete this._readyTimeout;
-      return;
-    }
-
-    this._readyTimeout = setTimeout(() => {
-      this.debug(`Didn't receive any more guild packets in the last 15 seconds. Marking this shard as ready with ${this.unavailableGuilds.size} unavailable guilds.`);
-
-      delete this._readyTimeout;
-      this.status = 'Connected';
-      this.ready = true;
-      this.emit('ready', this.id, this.unavailableGuilds);
-    }, 15000);
-  }
-
   private _identify() {
     this.debug('Identifying a connection...');
-    // todo: this
+
+    const packet: discord.GatewayIdentifyData = {
+      large_threshold: this.client.options.ws.largeThreshold ?? 250,
+      compress: this.client.options.compress,
+      intents: this.client.intents,
+      token: this.client.token,
+      properties: {
+        $browser: 'Wumpcord',
+        $device: 'Wumpcord',
+        $os: process.platform
+      }
+    };
+
+    if (this.client.options.shardCount > 0)
+      packet.shard = [this.id, this.client.options.shardCount as number];
+
+    return this.send(OPCodes.Identify, packet);
   }
 
   private _resume() {
     this.debug('Sending resume packet...');
     this.send<discord.GatewayResumeData>(OPCodes.Resume, {
       session_id: this.sessionID!,
-      token: this.#client.token,
+      token: this.client.token,
       seq: this.closeSeq
     });
   }
@@ -561,7 +596,7 @@ export class Shard extends EventBus<ShardEvents> {
           error = new Error('Authenication failed while logging in');
 
           this.sessionID = undefined;
-          this.emit('error', this.id, new Error(`Invalid token "${this.#client.token}"`));
+          this.emit('error', this.id, new Error(`Invalid token "${this.client.token}"`));
         } break;
 
         case 4005: {
@@ -624,7 +659,7 @@ export class Shard extends EventBus<ShardEvents> {
       this.status = 'Dead';
       setTimeout(() => {
         this.debug('Attempting to re-connect...');
-        this.#client.shards.connect(this.id);
+        this.client.shards.connect(this.id);
       }, 5000);
     }
 
@@ -719,6 +754,13 @@ export class Shard extends EventBus<ShardEvents> {
   }
 
   private async wsEvent(data: discord.GatewayDispatchPayload) {
-    // todo: this
+    if (data.t === 'RESUMED') {
+      return events.RESUME(this, { s: data.s });
+    } else {
+      if (events[data.t] === undefined)
+        return;
+
+      return await events[data.t](this, data.d);
+    }
   }
 }

@@ -22,10 +22,14 @@
 
 /* eslint-disable camelcase */
 
-import type { AnyTextableChannel, MessageContentOptions, MessageContent } from '../types';
+import type { AnyTextableChannel, MessageContentOptions } from '../types';
+import type { APIComponentActionRow, APIComponentButton } from '../uikit';
+import type { WebSocketClient } from '../Client';
+import { isObject } from '@augu/utils';
 import { BaseEntity } from './BaseEntity';
 import { Emoji } from './Emoji';
 import { User } from './User';
+import Util from '../util';
 
 import type {
   APIEmbed,
@@ -41,10 +45,6 @@ import type {
   APIMessageInteraction,
   APIUser
 } from 'discord-api-types';
-import { APIComponentActionRow, APIComponentButton } from '../uikit';
-import { WebSocketClient } from '../Client';
-import { isObject } from '@augu/utils';
-import Util from '../util';
 
 /**
  * Type-alias for the content to send with [Message.edit]
