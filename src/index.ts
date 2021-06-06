@@ -21,7 +21,7 @@
  */
 
 export * from './builders';
-//export * from './entities';
+export * from './entities';
 export * from './cache';
 export * from './uikit';
 
@@ -31,6 +31,7 @@ export * from './util/Extensions';
 
 export { WebSocketClient as Client } from './Client';
 export * as Constants from './Constants';
+export * from './types'; // used for documentation purposes
 
 /**
  * Returns the version of Wumpcord

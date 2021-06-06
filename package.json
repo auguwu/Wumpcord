@@ -25,7 +25,7 @@
     "clean:node_modules": "rm -rf node_modules/@types/**/node_modules && rm -rf node_modules/@augu/**/node_modules && rm -rf node_modules/@wumpcord/**/node_modules",
     "clean:win:tar": "cp node_modules/@augu/collections/build/index.js.* node_modules/@augu/collections/build/index.js && rm node_modules/@augu/collections/build/index.js.*",
     "prepare": "npm run clean:node_modules && npm run build",
-    "docgen": "typedoc src --json ./docs/out.json",
+    "docgen": "typedoc src/index.ts --out ./docs",
     "build": "npm run lint && rm -rf build && tsc",
     "lint": "eslint src --ext .ts --fix"
   },
@@ -39,12 +39,12 @@
   },
   "devDependencies": {
     "@augu/eslint-config": "2.1.0",
-    "@augu/tsconfig": "1.1.0",
-    "@types/node": "15.0.3",
+    "@augu/tsconfig": "1.1.1",
+    "@types/node": "15.12.1",
     "@types/ws": "7.4.4",
     "@typescript-eslint/eslint-plugin": "4.26.0",
     "@typescript-eslint/parser": "4.26.0",
-    "eslint": "7.27.0",
+    "eslint": "7.28.0",
     "husky": "6.0.0",
     "typedoc": "0.20.36",
     "typescript": "4.2.4"
