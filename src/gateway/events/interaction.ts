@@ -40,7 +40,7 @@ export const INTERACTION_CREATE: ShardEventProcessor<GatewayInteractionCreateDis
       await onSlashCommand(shard, data);
       break;
 
-    // @ts-expect-error Not implemented in discord-api-types
+    // @ts-ignore Not implemented in discord-api-types
     case 3:
       await onButtonClick(shard, data);
       break;
