@@ -51,7 +51,7 @@ export class Channel extends BaseEntity<APIPartialChannel> {
     this.type = ChannelTypesObject[data.type];
   }
 
-  static from<T>(client: WebSocketClient, data: APIPartialChannel): T | null {
+  static from<T extends Channel = Channel>(client: WebSocketClient, data: APIPartialChannel): T | null {
     // prevents circular references
     const { CategoryChannel, DMChannel, GroupChannel, NewsChannel, StageChannel, StoreChannel, TextChannel, VoiceChannel } = require('./channels');
     const channels = {

@@ -1,4 +1,5 @@
 {
+  "excludeInternal": true,
   "excludeProtected": true,
   "excludePrivate": true,
   "tsconfig": "tsconfig.json",

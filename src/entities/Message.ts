@@ -45,6 +45,7 @@ import type {
   APIMessageInteraction,
   APIUser
 } from 'discord-api-types';
+import { Member } from '..';
 
 /**
  * Type-alias for the content to send with [Message.edit]
@@ -210,7 +211,7 @@ export class Message<C extends AnyTextableChannel = AnyTextableChannel> extends 
   /**
    * Guild member object of this message
    */
-  public member?: any;
+  public member?: Member;
 
   /**
    * The author of the message
@@ -310,7 +311,7 @@ export class Message<C extends AnyTextableChannel = AnyTextableChannel> extends 
       this.pinned = data.pinned;
 
     if (data.member !== undefined)
-      this.member = data.member;
+      this.member = new Member(this.client, data.member);
 
     if (data.author !== undefined)
       this.author = this.client.users.put(new User(this.client, data.author));
@@ -335,7 +336,10 @@ export class Message<C extends AnyTextableChannel = AnyTextableChannel> extends 
    * Returns the guild object, if applicable
    */
   get guild() {
-    return null;
+    if (!this.guildID)
+      return undefined;
+
+    return this.client.guilds.get(this.guildID);
   }
 
   /**

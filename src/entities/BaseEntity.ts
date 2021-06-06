@@ -43,6 +43,7 @@ export class BaseEntity<D extends any> {
   /**
    * Patches data from Discord, hidden from typings
    * @param data The data to use
+   * @internal
    */
   patch(data: D) {
     // noop

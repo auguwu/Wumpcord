@@ -40,6 +40,7 @@ import { UserStore } from './stores/UserStore';
 import { APIStageInstance, StageInstance } from './entities/StageInstance';
 import Util from './util';
 import type { ButtonClickContext } from './gateway/events';
+import { GuildStore } from './stores/GuildStore';
 
 type RestClientEvents = {
   [P in keyof IRestClientEvents as `rest${Capitalize<P>}`]: IRestClientEvents[P];
@@ -176,6 +177,12 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
   public options: Required<types.ClientOptions>;
 
   /**
+   * All of the guilds this bot is apart of and is managed
+   * by cache.
+   */
+  public guilds: GuildStore;
+
+  /**
    * Manager for handling sharding
    */
   public shards: ShardManager;
@@ -225,6 +232,7 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
 
     this.channels = new ChannelStore(this);
     this.shards = new ShardManager(this);
+    this.guilds = new GuildStore(this);
     this.users = new UserStore(this);
     this.rest = new RestClient(this.options.rest);
 

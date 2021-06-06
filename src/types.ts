@@ -224,6 +224,15 @@ export interface CachingOptions {
   guilds?: AbstractEntityCache | 'memory' | 'no-op';
 
   /**
+   * Engine to use when caching guild emojis
+   *
+   * > **NOTE**: If you do not want to construct a new instance
+   * of an [[AbstractEntityCache]] engine, you can just specify
+   * the built in ones: `'memory'` or `'no-op'`
+   */
+  emojis?: AbstractEntityCache | 'memory' | 'no-op';
+
+  /**
    * Engine to use when caching users
    *
    * > **NOTE**: If you do not want to construct a new instance

@@ -21,46 +21,11 @@
  */
 
 import type { WebSocketClient } from '../Client';
-import type { APIChannel } from 'discord-api-types';
+import type { Emoji } from '../entities/Emoji';
 import { BaseStore } from './BaseStore';
-import { Channel } from '../entities/Channel';
 
-/**
- * Entity store for channels
- */
-export class ChannelStore extends BaseStore<Channel> {
-  /**
-   * Constructs a new [[ChannelStore]] instance
-   * @param client The client
-   */
+export class GuildEmojiStore extends BaseStore<Emoji> {
   constructor(client: WebSocketClient) {
-    super(client, 'channels');
-  }
-
-  /** @inheritdoc */
-  get<T extends Channel = Channel>(id: string) {
-    return super.get(id) as T | undefined;
-  }
-
-  /**
-   * Method to fetch a channel from Discord (and possibly cast it from the `T` generic)
-   * @param id The snowflake to use
-   * @returns A promise that has the class resolved and *possibly* cached or
-   * a promise that rejects this request and throws a [[DiscordRestError]] on why it failed.
-   */
-  fetch<T extends Channel = Channel>(id: string): Promise<T> {
-    return this.client.rest.dispatch<never, APIChannel>({
-      endpoint: '/channels/:id',
-      method: 'GET',
-      query: { id }
-    }).then(data => {
-      const channel = Channel.from<T>(this.client, data);
-      if (channel === null) {
-        this.client.emit('debug', `Received unknown channel type ${data.type}, returning null & not caching`);
-        return null;
-      }
-
-      return this.put(channel);
-    });
+    super(client, 'emojis');
   }
 }

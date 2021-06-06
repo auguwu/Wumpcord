@@ -34,7 +34,7 @@ export class ChannelMessageStore extends BaseStore<Message> {
    * @param channelID The channel's ID
    * @param messageID The message's ID
    */
-  fetch(channelID: string, messageID: string) {
+  fetch(channelID: string, messageID: string): Promise<Message> {
     return this.client.rest.dispatch<never, APIMessage>({
       endpoint: `/channels/${channelID}/messages/${messageID}`,
       method: 'GET'

@@ -24,7 +24,7 @@ import type { WebSocketClient } from '../Client';
 import type { Presence } from '../entities/Presence';
 import { BaseStore } from './BaseStore';
 
-export class GuildVoiceStateStore extends BaseStore<Presence> {
+export class GuildPresenceStore extends BaseStore<Presence> {
   constructor(client: WebSocketClient) {
     super(client, 'presences');
   }

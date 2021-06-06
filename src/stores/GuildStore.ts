@@ -19,3 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+import type { APIGuild } from 'discord-api-types';
+import { WebSocketClient } from '../Client';
+import { BaseStore } from './BaseStore';
+import { Guild } from '../entities/Guild';
+
+export class GuildStore extends BaseStore<Guild> {
+  constructor(client: WebSocketClient) {
+    super(client, 'guilds');
+  }
+
+  /**
+   * Method to fetch a guild from Discord's REST API and possibly caches it.
+   * @param id The guild's ID
+   */
+  fetch(id: string): Promise<Guild> {
+    return this.client.rest.dispatch<never, APIGuild>({
+      endpoint: `/guilds/${id}`,
+      method: 'GET'
+    }).then(d => this.put(new Guild(this.client, d)));
+  }
+}

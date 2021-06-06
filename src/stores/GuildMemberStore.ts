@@ -19,3 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+import { WebSocketClient } from '../Client';
+import type { Member } from '..';
+import { BaseStore } from './BaseStore';
+
+export class GuildMemberStore extends BaseStore<Member> {
+  constructor(client: WebSocketClient) {
+    super(client, 'members');
+  }
+
+  // Guild members cannot be fetched, so `fetch(...)` will throw a error.
+}

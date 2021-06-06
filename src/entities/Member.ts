@@ -20,9 +20,12 @@
  * SOFTWARE.
  */
 
+/* eslint-disable camelcase */
+
 import type { APIGuildMember as _APIGuildMember } from 'discord-api-types';
 import type { WebSocketClient } from '../Client';
 import { Permissions } from '../Constants';
+import type { Guild } from '..';
 import { Permission } from '../util/Permissions';
 import { BaseEntity } from './BaseEntity';
 import { Role } from './Role';
@@ -32,39 +35,89 @@ export interface ModifyGuildMemberOptions {
   a: 'b';
 }
 
-
+/**
+ * https://discord.com/developers/docs/resources/guild#guild-member-object
+ */
+export interface APIGuildMember extends _APIGuildMember {
+  /**
+   * The guild's ID if populated (Wumpcord does this, not Discord)
+   */
+  guild_id?: string;
+}
 
 /**
  * https://discord.com/developers/docs/resources/guild#guild-member-object
  */
-export class Member {}
-
-/*
-interface IGuildMember extends APIGuildMember {
-  guild_id?: string;
-}
-
-export default class GuildMember extends Base<IGuildMember> {
+export class Member extends BaseEntity<APIGuildMember> {
+  /**
+   * If the member has boosted the guild, this returns a JavaScript date
+   * of when they boosted, or `null` if they didn't.
+   */
   public boostedAt!: Date | null;
+
+  /**
+   * The member's joined at timestamp
+   */
   public joinedAt!: Date;
+
+  /**
+   * If the member is pending verification to join this guild, i.e hasn't
+   * passed the guild's Membership Screening requirements.
+   */
   public pending!: boolean;
-  public guildID!: string;
-  public isMuted!: boolean;
-  private _guild?: Guild | null;
-  public isDeaf!: boolean;
+
+  /**
+   * The guild ID this member belongs to, returns `undefined`
+   * if Wumpcord didn't populate the guild ID.
+   */
+  public guildID?: string;
+
+  /**
+   * Whenther the member is deafened in voice channels
+   */
+  public deafend!: boolean;
+
+  /**
+   * The populated guild
+   * @internal
+   */
+  private _guild?: Guild;
+
+  /**
+   * The client attached to this member.
+   * @internal
+   */
   private client: WebSocketClient;
-  public roles: GuildRole[] = [];
+
+  /**
+   * Whenther the member is muted in voice channels
+   */
+  public muted!: boolean;
+
+  /**
+   * The role IDs this member has
+   */
+  public roles: string[] = [];
+
+  /**
+   * The user's nickname if set, otherwise `null`.
+   */
   public nick!: string | null;
+
+  /**
+   * The user object for this member.
+   */
   public user!: User;
 
-  constructor(client: WebSocketClient, data: IGuildMember) {
+  constructor(client: WebSocketClient, data: APIGuildMember) {
     super(data.user?.id);
 
     this.client = client;
     this.patch(data);
   }
 
-  patch(data: Partial<IGuildMember>) {
+  /** @internal */
+  patch(data: Partial<APIGuildMember>) {
     if (data.premium_since !== undefined)
       this.boostedAt = data.premium_since !== null ? new Date(data.premium_since) : null;
 
@@ -81,37 +134,31 @@ export default class GuildMember extends Base<IGuildMember> {
       this.nick = data.nick;
 
     if (data.mute !== undefined)
-      this.isMuted = data.mute;
+      this.muted = data.mute;
 
     if (data.deaf !== undefined)
-      this.isDeaf = data.deaf;
+      this.deafend = data.deaf;
 
     if (data.user !== undefined)
-      this.user = this.client.users.add(new User(this.client, data.user));
+      this.user = this.client.users.put(new User(this.client, data.user));
 
-    if (data.roles !== undefined) {
-      for (let i = 0; i < data.roles.length; i++) {
-        const roleID = data.roles[i];
-        const guild = this.client.guilds.get(this.guildID);
+    if (data.roles !== undefined)
+      this.roles = data.roles;
 
-        if (guild !== null) {
-          const role = guild.roles.get(roleID);
-          if (role !== null) this.roles.push(role);
-        }
-      }
-    }
-
-    // don't populate it yet, maybe when a method is called?
-    this._guild = this.client.guilds.get(this.guildID);
+    this._guild = this.client.guilds.get(data.guild_id!);
   }
 
   get permission() {
-    if (!this._guild) return new Permission('0');
-    if (this.id === this._guild.ownerID) return new Permission(String(Permissions.all));
+    if (!this._guild)
+      return new Permission('0');
+
+    if (this.id === this._guild.ownerID)
+      return new Permission(String(Permissions.all));
 
     let permission = BigInt(this._guild.roles.get(this._guild.id)?.permissions.allow ?? 0);
-    this.roles.forEach(role => {
-      if (role === null) return;
+    this.roles.forEach(r => {
+      const role = this._guild?.roles.get(r);
+      if (!role) return;
 
       const permissions = BigInt(role.permissions.allow);
       if (permissions & Permissions.administrator) {
@@ -125,13 +172,17 @@ export default class GuildMember extends Base<IGuildMember> {
     return new Permission(String(permission));
   }
 
+  /** @internal */
   private async _populateGuild() {
     if (!this.guildID) throw new TypeError('Missing `guildID` property, was this created on accident?');
     if (!this._guild) {
       this._guild = await this.client.guilds.fetch(this.guildID);
     }
   }
+}
 
+/*
+export default class GuildMember extends Base<IGuildMember> {
   async modify(opts: ModifyGuildMemberOptions, reason?: string) {
     await this._populateGuild();
     return this._guild!.modifyMember(this.id, opts, reason);
