@@ -76,7 +76,12 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">Member</span>
+						<span class="tsd-signature-type">BaseEntity</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/apiguildmember.html" class="tsd-signature-type" data-tsd-kind="Interface">APIGuildMember</a><span class="tsd-signature-symbol">&gt;</span>
+						<ul class="tsd-hierarchy">
+							<li>
+								<span class="target">Member</span>
+							</li>
+						</ul>
 					</li>
 				</ul>
 			</section>
@@ -87,7 +92,29 @@
 						<section class="tsd-index-section ">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="member.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite"><a href="member.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="member.html#boostedat" class="tsd-kind-icon">boosted<wbr>At</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="member.html#deafend" class="tsd-kind-icon">deafend</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="member.html#guildid" class="tsd-kind-icon">guildID</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="member.html#id" class="tsd-kind-icon">id</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="member.html#joinedat" class="tsd-kind-icon">joined<wbr>At</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="member.html#muted" class="tsd-kind-icon">muted</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="member.html#nick" class="tsd-kind-icon">nick</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="member.html#pending" class="tsd-kind-icon">pending</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="member.html#roles" class="tsd-kind-icon">roles</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="member.html#user" class="tsd-kind-icon">user</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Accessors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="member.html#createdat" class="tsd-kind-icon">created<wbr>At</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="member.html#permission" class="tsd-kind-icon">permission</a></li>
 							</ul>
 						</section>
 					</div>
@@ -95,17 +122,229 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Constructors</h2>
-				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
-					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Member<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="member.html" class="tsd-signature-type" data-tsd-kind="Class">Member</a></li>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Member<span class="tsd-signature-symbol">(</span>client<span class="tsd-signature-symbol">: </span><a href="client.html" class="tsd-signature-type" data-tsd-kind="Class">Client</a>, data<span class="tsd-signature-symbol">: </span><a href="../interfaces/apiguildmember.html" class="tsd-signature-type" data-tsd-kind="Interface">APIGuildMember</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="member.html" class="tsd-signature-type" data-tsd-kind="Class">Member</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
+								<p>Overrides BaseEntity&lt;APIGuildMember&gt;.constructor</p>
+								<ul>
+									<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/ab6f02d/src/entities/Member.ts#L110">src/entities/Member.ts:110</a></li>
+								</ul>
 							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>client: <a href="client.html" class="tsd-signature-type" data-tsd-kind="Class">Client</a></h5>
+								</li>
+								<li>
+									<h5>data: <a href="../interfaces/apiguildmember.html" class="tsd-signature-type" data-tsd-kind="Interface">APIGuildMember</a></h5>
+								</li>
+							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="member.html" class="tsd-signature-type" data-tsd-kind="Class">Member</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="boostedat" class="tsd-anchor"></a>
+					<h3>boosted<wbr>At</h3>
+					<div class="tsd-signature tsd-kind-icon">boosted<wbr>At<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Date</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/ab6f02d/src/entities/Member.ts#L56">src/entities/Member.ts:56</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>If the member has boosted the guild, this returns a JavaScript date
+							of when they boosted, or <code>null</code> if they didn&#39;t.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="deafend" class="tsd-anchor"></a>
+					<h3>deafend</h3>
+					<div class="tsd-signature tsd-kind-icon">deafend<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/ab6f02d/src/entities/Member.ts#L78">src/entities/Member.ts:78</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Whenther the member is deafened in voice channels</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="guildid" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> guildID</h3>
+					<div class="tsd-signature tsd-kind-icon">guildID<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/ab6f02d/src/entities/Member.ts#L73">src/entities/Member.ts:73</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The guild ID this member belongs to, returns <code>undefined</code>
+							if Wumpcord didn&#39;t populate the guild ID.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+					<a name="id" class="tsd-anchor"></a>
+					<h3>id</h3>
+					<div class="tsd-signature tsd-kind-icon">id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from BaseEntity.id</p>
+						<ul>
+							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/ab6f02d/src/entities/BaseEntity.ts#L32">src/entities/BaseEntity.ts:32</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The ID of this [[BaseEntity]].</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="joinedat" class="tsd-anchor"></a>
+					<h3>joined<wbr>At</h3>
+					<div class="tsd-signature tsd-kind-icon">joined<wbr>At<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Date</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/ab6f02d/src/entities/Member.ts#L61">src/entities/Member.ts:61</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The member&#39;s joined at timestamp</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="muted" class="tsd-anchor"></a>
+					<h3>muted</h3>
+					<div class="tsd-signature tsd-kind-icon">muted<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/ab6f02d/src/entities/Member.ts#L95">src/entities/Member.ts:95</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Whenther the member is muted in voice channels</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="nick" class="tsd-anchor"></a>
+					<h3>nick</h3>
+					<div class="tsd-signature tsd-kind-icon">nick<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/ab6f02d/src/entities/Member.ts#L105">src/entities/Member.ts:105</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The user&#39;s nickname if set, otherwise <code>null</code>.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="pending" class="tsd-anchor"></a>
+					<h3>pending</h3>
+					<div class="tsd-signature tsd-kind-icon">pending<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/ab6f02d/src/entities/Member.ts#L67">src/entities/Member.ts:67</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>If the member is pending verification to join this guild, i.e hasn&#39;t
+							passed the guild&#39;s Membership Screening requirements.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="roles" class="tsd-anchor"></a>
+					<h3>roles</h3>
+					<div class="tsd-signature tsd-kind-icon">roles<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/ab6f02d/src/entities/Member.ts#L100">src/entities/Member.ts:100</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The role IDs this member has</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="user" class="tsd-anchor"></a>
+					<h3>user</h3>
+					<div class="tsd-signature tsd-kind-icon">user<span class="tsd-signature-symbol">:</span> <a href="user.html" class="tsd-signature-type" data-tsd-kind="Class">User</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/ab6f02d/src/entities/Member.ts#L110">src/entities/Member.ts:110</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The user object for this member.</p>
+						</div>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Accessors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="createdat" class="tsd-anchor"></a>
+					<h3>created<wbr>At</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> createdAt<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Date</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/ab6f02d/src/entities/BaseEntity.ts#L55">src/entities/BaseEntity.ts:55</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns when the entity was created at, a shortcut for [[Snowflake.createdAt]]</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Date</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="permission" class="tsd-anchor"></a>
+					<h3>permission</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> permission<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="permission.html" class="tsd-signature-type" data-tsd-kind="Class">Permission</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/ab6f02d/src/entities/Member.ts#L151">src/entities/Member.ts:151</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="permission.html" class="tsd-signature-type" data-tsd-kind="Class">Permission</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -126,8 +365,44 @@
 					<li class="current tsd-kind-class">
 						<a href="member.html" class="tsd-kind-icon">Member</a>
 						<ul>
-							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
 								<a href="member.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="member.html#boostedat" class="tsd-kind-icon">boosted<wbr>At</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="member.html#deafend" class="tsd-kind-icon">deafend</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="member.html#guildid" class="tsd-kind-icon">guildID</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+								<a href="member.html#id" class="tsd-kind-icon">id</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="member.html#joinedat" class="tsd-kind-icon">joined<wbr>At</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="member.html#muted" class="tsd-kind-icon">muted</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="member.html#nick" class="tsd-kind-icon">nick</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="member.html#pending" class="tsd-kind-icon">pending</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="member.html#roles" class="tsd-kind-icon">roles</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="member.html#user" class="tsd-kind-icon">user</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="member.html#createdat" class="tsd-kind-icon">created<wbr>At</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="member.html#permission" class="tsd-kind-icon">permission</a>
 							</li>
 						</ul>
 					</li>
