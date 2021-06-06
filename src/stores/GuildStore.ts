@@ -24,6 +24,9 @@ import type { APIGuild } from 'discord-api-types';
 import { WebSocketClient } from '../Client';
 import { BaseStore } from './BaseStore';
 import { Guild } from '../entities/Guild';
+import { deepStrictEqual } from 'assert';
+import { UnavailableGuild } from '../entities/UnavailableGuild';
+import { NoopEntityCache } from '../cache';
 
 export class GuildStore extends BaseStore<Guild> {
   constructor(client: WebSocketClient) {
@@ -38,6 +41,19 @@ export class GuildStore extends BaseStore<Guild> {
     return this.client.rest.dispatch<never, APIGuild>({
       endpoint: `/guilds/${id}`,
       method: 'GET'
-    }).then(d => this.put(new Guild(this.client, d)));
+    }).then(d => {
+      const shard = this.client.shards.filter(s => s.guilds.has(d.id));
+      let shardID = 0;
+
+      if (shard.length > 0) shardID = shard[0].id;
+      if (d.unavailable !== undefined && d.unavailable === true) return this.put(new UnavailableGuild({
+        shard_id: shardID, // eslint-disable-line camelcase
+        unavailable: true,
+        id: d.id
+      }) as any);
+
+      const guild = new Guild(this.client, { shard_id: shardID, nsfw_level: (d as any).nsfw_level, ...d }); // eslint-disable-line
+      return this.put(guild);
+    });
   }
 }

@@ -31,6 +31,7 @@ import WebSocket from 'ws';
 import Util from '../util';
 
 import * as events from './events';
+import { Guild } from '../entities/Guild';
 
 export interface ShardEvents {
   /**
@@ -249,6 +250,11 @@ export class Shard extends EventBus<ShardEvents> {
    * The actual end to end connection with Discord
    */
   public socket: WebSocket | null = null;
+
+  /**
+   * The guild IDs this shard belongs to
+   */
+  public guilds: Set<string> = new Set();
 
   /**
    * The status of the shard
@@ -696,9 +702,9 @@ export class Shard extends EventBus<ShardEvents> {
           const guild = d.d as discord.GatewayGuildCreateDispatchData;
           this.unavailableGuilds.delete(guild.id);
 
-          // const g = new Guild(this.client, { shard_id: tis.id, ...guild });
-          // this.guilds.add(guild.id);
-          // this.client.guilds.add(guild.id);
+          const g = new Guild(this.client, { shard_id: this.id, nsfw_level: (guild as any).nsfw_level, ...guild });
+          this.guilds.add(guild.id);
+          this.client.guilds.put(g);
 
           this._checkReady();
         } else {

@@ -45,6 +45,7 @@ import { Presence } from './Presence';
 import { Member } from './Member';
 import { Emoji } from './Emoji';
 import { Role } from './Role';
+import { UnavailableGuild } from './UnavailableGuild';
 
 /**
  * https://discord.com/developers/docs/resources/guild
@@ -179,7 +180,7 @@ interface ModifyGuildIntegrationOptions {
 /**
  * https://discord.com/developers/docs/resources/guild
  */
-class Guild extends BaseEntity<APIGuild> {
+class Guild extends UnavailableGuild {
   // Properties that are added when constructing FIRST
   /**
    * List of guild voice states available (requires the `GUILD_VOICE_STATES` intent to be available)
@@ -393,11 +394,6 @@ class Guild extends BaseEntity<APIGuild> {
   public threads?: any[];
 
   /**
-   * The shard ID this guild belongs to
-   */
-  public shardID!: number;
-
-  /**
    * ID of the owner who owns this guild
    */
   public ownerID!: string;
@@ -433,7 +429,7 @@ class Guild extends BaseEntity<APIGuild> {
   public name!: string;
 
   constructor(client: WebSocketClient, data: APIGuild) {
-    super(data.id);
+    super(data);
 
     this.voiceStates = new GuildVoiceStateStore(client);
     this.unavailable = false;
