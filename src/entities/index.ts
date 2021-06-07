@@ -21,7 +21,6 @@
  */
 
 export * from './inheritable/TextableChannel';
-export * from './inheritable/DynamicImage';
 export * from './channels';
 
 export * from './Application';
