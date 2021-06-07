@@ -24,16 +24,16 @@
 
 import type { APIUser, APIChannel, RESTPostAPICurrentUserCreateDMChannelJSONBody } from 'discord-api-types';
 import type { MessageContent, MessageContentOptions } from '../types';
+import { ImageFormats, UserFlags } from '../Constants';
 import type { WebSocketClient } from '../Client';
-import { DynamicImage } from './inheritable/DynamicImage';
+import { CDN, ImageFormat, ImageSize } from '@wumpcord/rest';
 import { BaseEntity } from './BaseEntity';
-import { UserFlags } from '../Constants';
 import { Channel } from './Channel';
 
 /**
  * https://discord.com/developers/docs/resources/user
  */
-class User extends BaseEntity<APIUser> {
+export class User extends BaseEntity<APIUser> {
   /**
    * The user's 4-digit discord tag
    */
@@ -119,6 +119,18 @@ class User extends BaseEntity<APIUser> {
   }
 
   /**
+   * Dynamically formats a user's avatar
+   * @param format The format to use (default `'png'`)
+   * @param size The size to use (default `1024`)
+   */
+  dynamicAvatarUrl(format: ImageFormat = 'png', size: ImageSize = 1024) {
+    if (!ImageFormats.includes(format))
+      throw new TypeError(`Invalid format: ${format} (acceptable: ${ImageFormats.join(', ')})`);
+
+    return this.avatar === null ? CDN.getDefaultUserAvatar(this.discriminator, format) : CDN.getUserAvatar(this.id, this.avatar, format, size);
+  }
+
+  /**
    * Checks if a user has a specific user flag
    * @param flag The flag to check for
    * @returns A boolean value if it exists or not
@@ -201,6 +213,3 @@ class User extends BaseEntity<APIUser> {
     return channel.send(message, options);
   }
 }
-
-DynamicImage.decorate(User, ['avatar']);
-export { User };

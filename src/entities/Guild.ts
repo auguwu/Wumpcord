@@ -24,20 +24,20 @@
 
 import type { APIStageInstance } from '..';
 import { WebSocketClient } from '../Client';
-import { GuildFeature } from '../Constants';
+import { GuildFeature, ImageFormats } from '../Constants';
 import { ChannelStore } from '../stores/ChannelStore';
 import { GuildEmojiStore } from '../stores/GuildEmojiStore';
 import { GuildMemberStore } from '../stores/GuildMemberStore';
 import { GuildPresenceStore } from '../stores/GuildPresenceStore';
 import { GuildRoleStore } from '../stores/GuildRoleStore';
 import { GuildVoiceStateStore } from '../stores/GuildVoiceStateStore';
-import { BaseEntity } from './BaseEntity';
-import { DynamicImage } from './inheritable/DynamicImage';
 import { StageInstance } from './StageInstance';
 
 import type {
   APIGuild as _APIGuild,
-  APIGuildWelcomeScreen
+  APIGuildPreview,
+  APIGuildWelcomeScreen,
+  RESTPatchAPIGuildJSONBody
 } from 'discord-api-types';
 import { VoiceState } from './VoiceState';
 import { Channel } from './Channel';
@@ -46,6 +46,9 @@ import { Member } from './Member';
 import { Emoji } from './Emoji';
 import { Role } from './Role';
 import { UnavailableGuild } from './UnavailableGuild';
+import { Application } from './Application';
+import { User } from './User';
+import { CDN, ImageFormat, ImageSize } from '@wumpcord/rest';
 
 /**
  * https://discord.com/developers/docs/resources/guild
@@ -67,120 +70,158 @@ export interface APIGuild extends _APIGuild {
   shard_id: number;
 }
 
-/*
-interface PartialPermissionOverwrite {
-  allow: string;
-  deny: string;
-  type: 'role' | 'member';
-  id: string;
-}
+/**
+ * https://discord.com/developers/docs/resources/guild#guild-preview-object
+ */
+// doesn't need a seperate entity
+export interface GuildPreview {
+  /**
+   * The approximate count of online members in this guild
+   */
+  approximatePresenceCount: number;
 
-interface FetchGuildMembersOptions {
-  presences?: boolean;
-  limit?: number;
-  query?: any;
-  nonce?: string;
-  force?: boolean;
-  time?: number;
-  ids?: string[];
-}
+  /**
+   * The approximate count of members in this guild
+   */
+  approximateMemberCount: number;
 
-export interface GuildBanOptions {
-  reason?: string;
-  days?: number;
-}
+  /**
+   * The discovery splash hash
+   */
+  discoverySplash: string | null;
 
-interface CreateChannelOptions {
-  permissionOverwrites?: PartialPermissionOverwrite[];
-  ratelimitPerUser?: number;
-  userLimit?: number;
-  parentID?: string;
-  position?: number;
-  bitrate?: number;
-  topic?: string;
-  nsfw?: boolean;
-  type: number;
+  /**
+   * The description for community guilds
+   */
+  description: string | null;
+
+  /**
+   * List of features this guild has enabled
+   */
+  features: GuildFeature[];
+
+  /**
+   * Array of custom guild emojis
+   */
+  emojis: Emoji[];
+
+  /**
+   * The splash hash for the guild's splash
+   */
+  splash: string | null;
+
+  /**
+   * The name of the guild
+   */
   name: string;
-}
 
-interface ModifyGuildOptions {
-  defaultMessageNotifications?: number;
-  explicitContentFilter?: number;
-  verificationLevel?: number;
-  afkChannelTimeout?: number;
-  systemChannelID?: string;
-  afkChannelID?: string;
-  ownerID?: string;
-  splash?: string;
-  banner?: string;
-  region?: string;
-  icon?: string;
-  name?: string;
-}
+  /**
+   * The icon hash for this guild's icon
+   */
+  icon: string | null;
 
-export interface ModifyGuildMemberOptions {
-  channelID?: string;
-  roles?: string[];
-  deaf?: boolean;
-  mute?: boolean;
-  nick?: string;
-}
-
-interface CreateRoleOptions {
-  permissions?: number;
-  mentionable?: boolean;
-  hoistable?: boolean;
-  color?: string | number;
-  name?: string;
-}
-
-interface GuildPruneOptions {
-  computed?: boolean;
-  roles?: string[];
-  days?: number;
-}
-
-interface FetchAuditLogsOptions {
-  actionType?: number;
-  before?: string;
-  limit?: number;
-}
-
-interface CreateEmojiOptions {
-  roles?: string[];
-  image: ImageData;
-  name: string;
-}
-
-interface ModifyEmojiOptions {
-  roles?: string[];
-  name?: string;
+  /**
+   * The guild ID for this preview
+   */
   id: string;
 }
 
-interface ImageData {
-  content: Buffer | Readable;
-  type?: 'jpg' | 'png' | 'gif';
-}
-
-type EditGuildRoleOptions = CreateRoleOptions;
-
-interface CreateGuildIntegrationOptions {
-  type: GuildIntegration['type'];
-  id: string;
-}
-
-interface ModifyGuildIntegrationOptions {
+/**
+ * https://discord.com/developers/docs/resources/guild#integration-object
+ */
+// doesn't need a seperate entity
+export interface GuildIntegration {
+  /**
+   * The grace period (in days) before expiring subscribers
+   */
   expireGracePeriod?: number;
-  expireBehaviour?: number;
-  emojis?: boolean;
+
+  /**
+   * Whether emoticons should be synced for this integration (Twitch is only currently supported)
+   */
+  enableEmoticons?: boolean;
+
+  /**
+   * The expire behaviour of expiring subscribers
+   */
+  expireBehaviour?: 'remove role' | 'kick';
+
+  /**
+   * How many subscribers this integration has
+   */
+  subscriberCount?: number;
+
+  /**
+   * The bot/OAuth2 application for discord integrations
+   */
+  application?: Application;
+
+  /**
+   * ISO8601-formatted timestamp when this integration
+   * was last synced.
+   */
+  syncedAt?: Date;
+
+  /**
+   * If this integration is syncing or not
+   */
+  syncing?: boolean;
+
+  /**
+   * If this integration has been revoked or not
+   */
+  revoked?: boolean;
+
+  /**
+   * The role ID for this integration uses for "subscribers"
+   */
+  roleID?: string;
+
+  /**
+   * Account details of the integration
+   */
+  account: { name: string; id: string };
+
+  /**
+   * If this integration is enabled
+   */
+  enabled: boolean;
+
+  /**
+   * The user for this integration
+   */
+  user?: User;
+
+  /**
+   * The integration type ('twitch', 'youtube', or 'discord')
+   */
+  type: 'twitch' | 'youtube' | 'discord';
+
+  /**
+   * The integration name
+   */
+  name: string;
+
+  /**
+   * The integration ID
+   */
+  id: string;
 }
-*/
+
+/**
+ * Options for modifying a guild
+ */
+export type ModifyGuildOptions = Partial<Pick<
+  APIGuild,
+  'name' | 'region' | 'verification_level' | 'default_message_notifications' | 'explicit_content_filter' | 'afk_channel_id'
+  | 'afk_timeout' | 'icon' | 'owner_id' | 'splash' | 'discovery_splash' | 'banner' | 'system_channel_id' | 'system_channel_flags'
+  | 'rules_channel_id' | 'public_updates_channel_id' | 'preferred_locale' | 'features' | 'description'
+>>;
 
 /**
  * https://discord.com/developers/docs/resources/guild
  */
-class Guild extends UnavailableGuild {
+export class Guild extends UnavailableGuild {
   // Properties that are added when constructing FIRST
   /**
    * List of guild voice states available (requires the `GUILD_VOICE_STATES` intent to be available)
@@ -584,7 +625,172 @@ class Guild extends UnavailableGuild {
       for (let i = 0; i < data.roles.length; i++)
         this.roles.put(new Role({ guild_id: this.id, ...data.roles[i] }));
   }
+
+  /**
+   * Returns new data for this [[Guild]].
+   * @param withCounts If it should include the `?with_counts` query
+   * parameter.
+   */
+  fetch(withCounts = true): Promise<this> {
+    return this.client.rest.dispatch<never, APIGuild>({
+      endpoint: `/guilds/${this.id}${withCounts === true ? '?with_counts=true' : ''}`,
+      method: 'GET'
+    }).then(data => {
+      this.client.guilds.remove(this.id);
+      this.patch(data);
+
+      return this.client.guilds.put(this);
+    });
+  }
+
+  /**
+   * Returns the preview for this guild, if the bot
+   * doesn't have access to the guild, the guild must have
+   * the `DISCOVERABLE` feature enabled.
+   */
+  getPreview(): Promise<GuildPreview> {
+    return this.client.rest.dispatch<never, APIGuildPreview>({
+      endpoint: `/guilds/${this.id}/preview`,
+      method: 'GET'
+    }).then(data => ({
+      approximatePresenceCount: data.approximate_presence_count,
+      approximateMemberCount: data.approximate_member_count,
+      discoverySplash: data.discovery_splash,
+      description: data.description,
+      features: data.features as any,
+      emojis: data.emojis.map(d => new Emoji(this.client, d)),
+      splash: data.splash,
+      name: data.name,
+      icon: data.icon,
+      id: data.id
+    }));
+  }
+
+  /**
+   * Dynamically formats a guild icon
+   * @param format The format to use
+   * @param size The size to use
+   */
+  dynamicIconUrl(format: ImageFormat = 'png', size: ImageSize = 1024) {
+    if (!ImageFormats.includes(format))
+      throw new TypeError(`Invalid format: ${format} (acceptable: ${ImageFormats.join(', ')})`);
+
+    return this.icon === null ? null : CDN.getGuildIcon(this.id, this.icon);
+  }
+
+  /**
+   * Dynamically formats a guild banner
+   * @param format The format to use (default `'png'`)
+   * @param size The size to use (default `1024`)
+   */
+  dynamicBannerUrl(format: ImageFormat = 'png', size: ImageSize = 1024) {
+    if (!ImageFormats.includes(format))
+      throw new TypeError(`Invalid format: ${format} (acceptable: ${ImageFormats.join(', ')})`);
+
+    return this.banner === null ? null : CDN.getGuildBanner(this.id, this.banner);
+  }
+
+  /**
+   * Dynamically formats a guild splash screen
+   * @param format The format to use (default `'png'`)
+   * @param size The size to use (default `1024`)
+   */
+  dynamicSplashUrl(format: ImageFormat = 'png', size: ImageSize = 1024) {
+    if (!ImageFormats.includes(format))
+      throw new TypeError(`Invalid format: ${format} (acceptable: ${ImageFormats.join(', ')})`);
+
+    return this.splash === null ? null : CDN.getGuildSplash(this.id, this.splash);
+  }
+
+  /**
+   * Dynamically formats a guild discovery splash
+   * @param format The format to use
+   * @param size The size to use
+   */
+  dynamicDiscoverySplashUrl(format: ImageFormat = 'png', size: ImageSize = 1024) {
+    if (!ImageFormats.includes(format))
+      throw new TypeError(`Invalid format: ${format} (acceptable: ${ImageFormats.join(', ')})`);
+
+    return this.discoverySplash === null ? null : CDN.getGuildDiscoverySplash(this.id, this.discoverySplash);
+  }
+
+  /**
+   * Modifies a guild data, the bot must have the `MANAGE_SERVER`
+   * permission to update data.
+   */
+  modify(data: ModifyGuildOptions = {}): Promise<this> {
+    return this.client.rest.dispatch<RESTPatchAPIGuildJSONBody, APIGuild>({
+      endpoint: `/guilds/${this.id}`,
+      method: 'PATCH',
+      data
+    }).then(data => {
+      this.client.guilds.remove(this.id);
+      this.patch(data);
+
+      return this.client.guilds.put(this);
+    });
+  }
+
+  /**
+   * Sets the name of the guild
+   * @param name The name of the guild
+   */
+  setName(name: string) {
+    return this.modify({ name });
+  }
+
+  /**
+   * Sets the voice region for this guild
+   * @param region The region ID or `null` to be automatic
+   */
+  setRegion(region: string) {
+    return this.modify({ region });
+  }
+
+  /**
+   * Sets the verification level for this guild
+   * @param level The verification level
+   */
+  setVerificationLevel(level: number) {
+    return this.modify({ verification_level: level });
+  }
+
+  /**
+   * Sets the default message notification type
+   * @param type The type of default message notification to use
+   */
+  setDefaultMessageNotifications(type: number) {
+    return this.modify({ default_message_notifications: type });
+  }
+
+  /**
+   * Sets the content explicit content filter
+   * @param filter The filter type to use
+   */
+  setExplicitContentFilter(filter: number) {
+    return this.modify({ explicit_content_filter: filter });
+  }
+
+  /**
+   * Sets the AFK channel by it's snowflake
+   *
+   * @param id The ID of the afk channel, pass in
+   * `null` if you want to reset the AFK channel.
+   */
+  setAFKChannel(id: string | null) {
+    return this.modify({ afk_channel_id: id as `${bigint}` | null });
+  }
+
+  /**
+   * Sets the AFK timeout
+   */
 }
 
-DynamicImage.decorate(Guild, ['banner', 'splash', 'icon']);
-export { Guild };
+/*
+export type ModifyGuildOptions = Partial<Pick<
+  APIGuild,
+  'name' | 'region' | 'verification_level' | 'default_message_notifications' | 'explicit_content_filter' | 'afk_channel_id'
+  | 'afk_timeout' | 'icon' | 'owner_id' | 'splash' | 'discovery_splash' | 'banner' | 'system_channel_id' | 'system_channel_flags'
+  | 'rules_channel_id' | 'public_updates_channel_id' | 'preferred_locale' | 'features' | 'description'
+>>;
+*/
