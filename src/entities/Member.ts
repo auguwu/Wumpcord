@@ -22,10 +22,10 @@
 
 /* eslint-disable camelcase */
 
+import type { Guild, ModifyGuildMemberOptions, Role } from '..';
 import type { APIGuildMember as _APIGuildMember } from 'discord-api-types';
 import type { WebSocketClient } from '../Client';
 import { Permissions } from '../Constants';
-import type { Guild } from '..';
 import { Permission } from '../util/Permissions';
 import { BaseEntity } from './BaseEntity';
 import { User } from './User';
@@ -143,6 +143,10 @@ export class Member extends BaseEntity<APIGuildMember> {
     this._guild = this.client.guilds.get(data.guild_id!);
   }
 
+  /**
+   * Returns a [Permission] object of what the member
+   * has in the guild as of their roles.
+   */
   get permission() {
     if (!this._guild)
       return new Permission('0');
@@ -174,59 +178,96 @@ export class Member extends BaseEntity<APIGuildMember> {
       this._guild = await this.client.guilds.fetch(this.guildID);
     }
   }
-}
 
-/*
-export default class GuildMember extends Base<IGuildMember> {
-  async modify(opts: ModifyGuildMemberOptions, reason?: string) {
+  /**
+   * Modify attributes of this guild member.
+   * @param options The options to use
+   * @param reason The reason to put in audit logs
+   */
+  async modify(opts: ModifyGuildMemberOptions = {}, reason?: string) { // eslint-disable-line default-param-last
     await this._populateGuild();
     return this._guild!.modifyMember(this.id, opts, reason);
   }
 
-  async addRole(role: string | GuildRole, reason?: string) {
+  /**
+   * Adds a role to this member
+   * @param roleID The role's ID or a [Role] to put in
+   * @param reason The reason to put in audit logs
+   */
+  async addRole(role: string | Role, reason?: string) {
     await this._populateGuild();
 
     const id = typeof role === 'string' ? role : role.id;
     return this._guild!.addRole(this.id, id, reason);
   }
 
-  async removeRole(role: string | GuildRole, reason?: string) {
+  /**
+   * Removes a role to this member
+   * @param roleID The role's ID or a [Role] to put in
+   * @param reason The reason to put in audit logs
+   */
+  async removeRole(role: string | Role, reason?: string) {
     await this._populateGuild();
 
     const id = typeof role === 'string' ? role : role.id;
     return this._guild!.removeRole(this.id, id, reason);
   }
 
-  setNick(nick: string, reason?: string) {
+  /**
+   * Edits the nickname of this member.
+   * @param nick The nickname to set or `null` to reset it
+   * @param reason The reason to put in audit logs
+   */
+  setNick(nick: string | null, reason?: string) {
     return this.modify({ nick }, reason);
   }
 
+  /**
+   * Mutes this member in the guild
+   * @param reason The reason to put in audit logs
+   */
   mute(reason?: string) {
     return this.modify({ mute: true }, reason);
   }
 
+  /**
+   * Unmutes this member in the guild
+   * @param reason The reason to put in audit logs
+   */
   unmute(reason?: string) {
     return this.modify({ mute: false }, reason);
   }
 
+  /**
+   * Deafens this member in the guild
+   * @param reason The reason to put in audit logs
+   */
   deafen(reason?: string) {
     return this.modify({ deaf: true }, reason);
   }
 
+  /**
+   * Undeafens this member in the guild
+   * @param reason The reason to put in audit logs
+   */
   undeafen(reason?: string) {
     return this.modify({ deaf: false }, reason);
   }
 
+  /**
+   * Switches the member's voice channel.
+   * @param channelID The channel to put or kick them in.
+   * @param reason The reason to put in audit logs
+   */
   async switch(channelID: string, reason?: string) {
     await this._populateGuild();
 
-    let channel = this.client.channels.get(channelID);
+    let channel = this.client.channels.get<any>(channelID);
     if (!channel) {
       channel = await this.client.channels.fetch(channelID);
     }
 
     if (channel.type !== 'voice') throw new TypeError(`Channel ${channel.id} was not a voice channel`);
-    return this.modify({ channelID: channel.id }, reason);
+    return this.modify({ channel_id: channel.id }, reason);
   }
 }
-*/
