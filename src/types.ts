@@ -23,7 +23,6 @@
 import type { CategoryChannel, DMChannel, GroupChannel, NewsChannel, StageChannel, StoreChannel, TextChannel, VoiceChannel } from './entities';
 import type { ClientOptions as WebSocketClientOptions } from 'ws';
 import type { RestClientOptions, MessageFile } from '@wumpcord/rest';
-import type { AbstractEntityCache } from './cache';
 import type { GatewayIntent } from './Constants';
 import type { BaseEntity } from './entities/BaseEntity';
 import type * as discord from 'discord-api-types';
@@ -102,11 +101,6 @@ export interface ClientOptions {
   intents?: number | GatewayIntent[];
 
   /**
-   * The caching strategy to customize the cache you need
-   */
-  cache?: CachingOptions;
-
-  /**
    * The token to authenicate to Discord's gateway and REST
    */
   token: string;
@@ -151,104 +145,6 @@ export interface WebSocketOptions {
    * @default false
    */
   compress?: boolean;
-}
-
-/**
- * Options to customize caching with Wumpcord.
- */
-export interface CachingOptions {
-  /**
-   * Engine to use when caching guild voice states
-   *
-   * > **NOTE**: If you do not want to construct a new instance
-   * of an [[AbstractEntityCache]] engine, you can just specify
-   * the built in ones: `'memory'` or `'no-op'`
-   */
-  voiceStates?: AbstractEntityCache | 'memory' | 'no-op';
-
-  /**
-   * Engine to use when caching guild presences
-   *
-   * > **NOTE**: If you do not want to construct a new instance
-   * of an [[AbstractEntityCache]] engine, you can just specify
-   * the built in ones: `'memory'` or `'no-op'`
-   */
-  presences?: AbstractEntityCache | 'memory' | 'no-op';
-
-  /**
-   * Engine to use when caching channel messages
-   *
-   * > **NOTE**: If you do not want to construct a new instance
-   * of an [[AbstractEntityCache]] engine, you can just specify
-   * the built in ones: `'memory'` or `'no-op'`
-   */
-  messages?: AbstractEntityCache | 'memory' | 'no-op';
-
-  /**
-   * Engine to use when caching channels
-   *
-   * > **NOTE**: If you do not want to construct a new instance
-   * of an [[AbstractEntityCache]] engine, you can just specify
-   * the built in ones: `'memory'` or `'no-op'`
-   */
-  channels?: AbstractEntityCache | 'memory' | 'no-op';
-
-  /**
-   * Engine to use when caching guild members
-   *
-   * > **NOTE**: If you do not want to construct a new instance
-   * of an [[AbstractEntityCache]] engine, you can just specify
-   * the built in ones: `'memory'` or `'no-op'`
-   */
-  members?: AbstractEntityCache | 'memory' | 'no-op';
-
-  /**
-   * The default entity cache engine to use, you can also override
-   * a specific entity's cache engine, for an example, if you don't
-   * need to cache channels, you can just set `channels` to a instance
-   * of [[NoopEntityCache]].
-   *
-   * > **NOTE**: If you do not want to construct a new instance
-   * of an [[AbstractEntityCache]] engine, you can just specify
-   * the built in ones: `'memory'` or `'no-op'`
-   */
-  engine?: AbstractEntityCache | 'memory' | 'no-op';
-
-  /**
-   * Engine to use when caching guilds
-   *
-   * > **NOTE**: If you do not want to construct a new instance
-   * of an [[AbstractEntityCache]] engine, you can just specify
-   * the built in ones: `'memory'` or `'no-op'`
-   */
-  guilds?: AbstractEntityCache | 'memory' | 'no-op';
-
-  /**
-   * Engine to use when caching guild emojis
-   *
-   * > **NOTE**: If you do not want to construct a new instance
-   * of an [[AbstractEntityCache]] engine, you can just specify
-   * the built in ones: `'memory'` or `'no-op'`
-   */
-  emojis?: AbstractEntityCache | 'memory' | 'no-op';
-
-  /**
-   * Engine to use when caching users
-   *
-   * > **NOTE**: If you do not want to construct a new instance
-   * of an [[AbstractEntityCache]] engine, you can just specify
-   * the built in ones: `'memory'` or `'no-op'`
-   */
-  users?: AbstractEntityCache | 'memory' | 'no-op';
-
-  /**
-   * Engine to use when caching guild roles
-   *
-   * > **NOTE**: If you do not want to construct a new instance
-   * of an [[AbstractEntityCache]] engine, you can just specify
-   * the built in ones: `'memory'` or `'no-op'`
-   */
-  roles?: AbstractEntityCache | 'memory' | 'no-op';
 }
 
 /**

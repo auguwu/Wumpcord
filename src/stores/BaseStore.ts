@@ -20,47 +20,23 @@
  * SOFTWARE.
  */
 
-import type { AbstractEntityCache } from '../cache';
 import type { WebSocketClient } from '../Client';
-import type { CachingOptions } from '../types';
-import { NoopEntityCache } from '../cache/NoopCache';
-import { MemoryCache } from '../cache/MemoryCache';
 import { Deprecated } from '../decorators/Deprecated';
-
-function getCacheEngine(options: CachingOptions) {
-  if (options.engine === 'memory')
-    return new MemoryCache();
-
-  if (options.engine === 'no-op')
-    return new NoopEntityCache();
-
-  return options.engine ?? new MemoryCache();
-}
+import { Collection } from '@augu/collections';
+import { BaseEntity } from '../entities/BaseEntity';
 
 /**
  * Represents a "store", to handling and retrieving entity cache
  */
-export class BaseStore<D> {
+export class BaseStore<D extends BaseEntity<any>> extends Collection<string, D> {
   /**
    * The [[WebSocketClient]] attached to this [[BaseStore]]
    */
   public client: WebSocketClient;
 
-  /**
-   * The cache engine available for this [[BaseStore]]
-   */
-  public engine: AbstractEntityCache;
-
-  constructor(client: WebSocketClient, type: keyof Omit<CachingOptions, 'engine'>) {
-    const t = client.options.cache[type];
-
+  constructor(client: WebSocketClient) {
+    super();
     this.client = client;
-    this.engine = t === undefined ? getCacheEngine(client.options.cache) :
-      t === 'memory'
-        ? new MemoryCache()
-        : t === 'no-op'
-          ? new NoopEntityCache()
-          : t as AbstractEntityCache;
   }
 
   /**
@@ -82,7 +58,7 @@ export class BaseStore<D> {
    * @returns The resolved data or `undefined` if not cached
    */
   get(id: string): D | undefined {
-    return this.engine.get(id);
+    return super.get(id);
   }
 
   /**
@@ -93,7 +69,23 @@ export class BaseStore<D> {
    * @returns The resolved data or a error on why it failed
    */
   put(data: D) {
-    return this.engine.put(data);
+    if (data === undefined || data === null)
+      return data;
+
+    if (data.id === undefined)
+      return data;
+
+    if (this.has(data.id)) {
+      const cached = this.get(data.id)!;
+      cached.patch?.(data);
+
+      this.delete(data.id);
+      this.set(data.id, cached);
+      return cached;
+    } else {
+      this.set(data.id, data);
+      return data;
+    }
   }
 
   /**
@@ -104,9 +96,9 @@ export class BaseStore<D> {
    * @param data The data to place
    * @returns The resolved data or a error on why it failed
    */
-  @Deprecated.Method
+  @Deprecated.Method('Please refer to BaseStore<D>.put(data) to remove this message.')
   add(data: D) {
-    return this.engine.put(data) as D;
+    return this.put(data) as D;
   }
 
   /**
@@ -116,17 +108,6 @@ export class BaseStore<D> {
    * @param id The snowflake to resolve
    */
   remove(id: string) {
-    return this.engine.remove(id);
-  }
-
-  /**
-   * Simpiler method for [[AbstractEntityCache.has]] since entity cache is privated in this class,
-   * but this method checks if a entity exists in cache.
-   *
-   * @param id The snowflake to resolve
-   * @returns Returns a boolean value if the value exists
-   */
-  has(id: string) {
-    return this.engine.has(id);
+    return super.delete(id);
   }
 }

@@ -34,9 +34,9 @@ export class CategoryChannel extends GuildChannel {
    * Returns the list of children of channels from this category channel.
    */
   get children() {
-    return this['client'].channels.engine.filter<GuildChannel>(channel =>
-      (channel.hasOwnProperty('parentID') && channel.parentID !== null) &&
-      channel.parentID === this.id
-    );
+    return this['client'].channels.filter(channel =>
+      (channel.hasOwnProperty('parentID') && (channel as any).parentID !== null) &&
+      (channel as GuildChannel).parentID === this.id
+    ) as GuildChannel[];
   }
 }

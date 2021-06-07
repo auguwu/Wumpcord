@@ -28,7 +28,7 @@ import { Role } from '../entities/Role';
 
 export class GuildRoleStore extends BaseStore<Role> {
   constructor(client: WebSocketClient) {
-    super(client, 'roles');
+    super(client);
   }
 
   /**

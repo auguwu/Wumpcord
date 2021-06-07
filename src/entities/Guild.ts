@@ -20,11 +20,12 @@
  * SOFTWARE.
  */
 
+/* eslint-disable default-param-last */
 /* eslint-disable camelcase */
 
-import type { APIStageInstance } from '..';
+import { APIGuildMember, APIStageInstance, Util } from '..';
 import { WebSocketClient } from '../Client';
-import { GuildFeature, ImageFormats } from '../Constants';
+import { GuildFeature, OPCodes } from '../Constants';
 import { ChannelStore } from '../stores/ChannelStore';
 import { GuildEmojiStore } from '../stores/GuildEmojiStore';
 import { GuildMemberStore } from '../stores/GuildMemberStore';
@@ -33,11 +34,23 @@ import { GuildRoleStore } from '../stores/GuildRoleStore';
 import { GuildVoiceStateStore } from '../stores/GuildVoiceStateStore';
 import { StageInstance } from './StageInstance';
 
-import type {
+import {
+  APIBan,
+  APIChannel,
   APIGuild as _APIGuild,
   APIGuildPreview,
   APIGuildWelcomeScreen,
-  RESTPatchAPIGuildJSONBody
+  APIRole,
+  GatewayRequestGuildMembersData,
+  RESTPatchAPICurrentGuildMemberNicknameResult,
+  RESTPatchAPIGuildChannelPositionsJSONBody,
+  RESTPatchAPIGuildJSONBody,
+  RESTPatchAPIGuildMemberJSONBody,
+  RESTPatchAPIGuildRoleJSONBody,
+  RESTPatchAPIGuildRolePositionsJSONBody,
+  RESTPostAPIGuildChannelJSONBody,
+  RESTPostAPIGuildRoleJSONBody,
+  RESTPutAPIGuildBanJSONBody
 } from 'discord-api-types';
 import { VoiceState } from './VoiceState';
 import { Channel } from './Channel';
@@ -48,7 +61,10 @@ import { Role } from './Role';
 import { UnavailableGuild } from './UnavailableGuild';
 import { Application } from './Application';
 import { User } from './User';
-import { CDN, ImageFormat, ImageSize } from '@wumpcord/rest';
+import { CDN } from '@wumpcord/rest';
+import { Readable } from 'stream';
+import { GuildChannel } from './channels/GuildChannel';
+import { Collection } from '@augu/collections';
 
 /**
  * https://discord.com/developers/docs/resources/guild
@@ -209,14 +225,99 @@ export interface GuildIntegration {
 }
 
 /**
+ * https://discord.com/developers/docs/topics/gateway#request-guild-members
+ */
+export interface FetchGuildMembersOptions {
+  /**
+   * If the fetching should include presences
+   */
+  presences?: boolean;
+
+  /**
+   * Maximum number of members to send matching the query; a limit
+   * of `0` can be used with an empty string query to return all members
+   */
+  limit?: number;
+
+  /**
+   * A query to fetch all guild members, this can be undefined
+   * to retrieve all guild members
+   */
+  query?: string;
+
+  /**
+   * Nonce string to verify the `Guild Members Chunk` response.
+   */
+  nonce?: string;
+
+  /**
+   * The time for the delay for retrieving members in chunks
+   */
+  time?: number;
+
+  /**
+   * The user IDs to specificy which users we wish to fetch one
+   * of the query or `ids`.
+   */
+  ids?: string | string[];
+}
+
+/**
  * Options for modifying a guild
  */
 export type ModifyGuildOptions = Partial<Pick<
   APIGuild,
   'name' | 'region' | 'verification_level' | 'default_message_notifications' | 'explicit_content_filter' | 'afk_channel_id'
   | 'afk_timeout' | 'icon' | 'owner_id' | 'splash' | 'discovery_splash' | 'banner' | 'system_channel_id' | 'system_channel_flags'
-  | 'rules_channel_id' | 'public_updates_channel_id' | 'preferred_locale' | 'features' | 'description'
+  | 'rules_channel_id' | 'public_updates_channel_id' | 'preferred_locale' | 'description'
 >>;
+
+/**
+ * Options for creating a guild channel
+ */
+export type CreateChannelOptions = Partial<Pick<
+  APIChannel,
+  'type' | 'topic' | 'bitrate' | 'user_limit' | 'rate_limit_per_user' | 'position'
+  | 'permission_overwrites' | 'nsfw'
+> & { parent_id: string }>;
+
+/**
+ * https://discord.com/developers/docs/resources/guild#list-guild-members-query-string-params
+ */
+export interface ListGuildMembersOptions {
+  /**
+   * Max number of members to return
+   */
+  limit?: number;
+
+  /**
+   * The highest user ID in the previous page
+   */
+  after?: string;
+}
+
+/**
+ * https://discord.com/developers/docs/resources/guild#modify-guild-member-json-params
+ */
+export type ModifyGuildMemberOptions = Partial<Pick<APIGuildMember, 'deaf' | 'mute' | 'nick'> & { channel_id: string, roles: string[] }>;
+
+/**
+ * https://discord.com/developers/docs/resources/guild#ban-object
+ */
+export interface GuildBan {
+  reason: string | null;
+  user: User;
+}
+
+/**
+ * https://discord.com/developers/docs/resources/guild#create-guild-role-json-params
+ */
+export type CreateGuildRoleOptions = Partial<Pick<APIRole, 'name' | 'color' | 'hoist' | 'mentionable'> & { permissions: bigint; }>;
+
+/**
+ * https://discord.com/developers/docs/resources/guild#modify-guild-role-json-params
+ */
+export type ModifyGuildRoleOptions = CreateGuildRoleOptions;
 
 /**
  * https://discord.com/developers/docs/resources/guild
@@ -627,11 +728,55 @@ export class Guild extends UnavailableGuild {
   }
 
   /**
+   * Returns the guild icon URL, if any.
+   */
+  get iconUrl() {
+    return this.icon === null ? null : CDN.getGuildIcon(this.id, this.icon);
+  }
+
+  /**
+   * Returns the guild banner if the guild has reached level 2 in boosts
+   * or is a partnered server.
+   */
+  get bannerUrl() {
+    return this.banner === null ? null : CDN.getGuildBanner(this.id, this.banner);
+  }
+
+  /**
+   * Returns the guild splash URL or `null` if the guild doesn't have an
+   * invite splash.
+   */
+  get splashUrl() {
+    return this.splash === null ? null : CDN.getGuildSplash(this.id, this.splash);
+  }
+
+  /**
+   * Returns the discovery splash URL, if any has been provided
+   */
+  get discoverySplashUrl() {
+    return this.discoverySplash === null ? null : CDN.getGuildDiscoverySplash(this.id, this.discoverySplash);
+  }
+
+  /**
+   * Returns the owner of this guild, if cached
+   */
+  get owner() {
+    return this.client.users.get(this.ownerID);
+  }
+
+  /**
+   * Returns the shard for this guild
+   */
+  get shard() {
+    return this.client.shards.get(this.shardID)!;
+  }
+
+  /**
    * Returns new data for this [[Guild]].
    * @param withCounts If it should include the `?with_counts` query
    * parameter.
    */
-  fetch(withCounts = true): Promise<this> {
+  fetch(withCounts = true): Promise<Guild> {
     return this.client.rest.dispatch<never, APIGuild>({
       endpoint: `/guilds/${this.id}${withCounts === true ? '?with_counts=true' : ''}`,
       method: 'GET'
@@ -666,60 +811,65 @@ export class Guild extends UnavailableGuild {
     }));
   }
 
-  /**
-   * Dynamically formats a guild icon
-   * @param format The format to use
-   * @param size The size to use
-   */
-  dynamicIconUrl(format: ImageFormat = 'png', size: ImageSize = 1024) {
-    if (!ImageFormats.includes(format))
-      throw new TypeError(`Invalid format: ${format} (acceptable: ${ImageFormats.join(', ')})`);
+  fetchMembers({
+    presences,
+    limit,
+    query,
+    nonce,
+    time,
+    ids
+  }: FetchGuildMembersOptions = {
+    presences: false,
+    limit: 0,
+    query: '',
+    time: 120e3,
+    nonce: Date.now().toString(16),
+    ids: []
+  }) {
+    return new Promise<Collection<string, Member>>((resolve, reject) => {
+      if (
+        this.memberCount === this.members.size,
+        !limit &&
+        !presences &&
+        !query &&
+        !ids
+      ) return resolve(this.members);
 
-    return this.icon === null ? null : CDN.getGuildIcon(this.id, this.icon);
+      if (nonce && nonce.length > 32) return reject(new RangeError('Nonce length was over 32'));
+      if (this.shard === undefined) return reject(new Error(`Shard #${this.shardID} doesn't exist...?`));
+
+      this.shard.send<GatewayRequestGuildMembersData>(OPCodes.GetGuildMembers, {
+        user_ids: ids as `${bigint}` | `${bigint}`[],
+        presences,
+        query: query ?? '',
+        nonce,
+        limit: limit ?? this.maxMembers ?? 250000,
+        guild_id: this.id as `${bigint}`
+      });
+
+      const timeout = setTimeout(() => {
+        clearTimeout(timeout);
+        return reject(new Error(`Unable to retrieve new members in ${(time ?? 120e2) / 1000}s.`));
+      }, time ?? 120e2);
+
+      const handler = () => {
+        // TODO: this
+      };
+
+      // this.client.on('guildMembersChunk', handler);
+    });
   }
 
   /**
-   * Dynamically formats a guild banner
-   * @param format The format to use (default `'png'`)
-   * @param size The size to use (default `1024`)
-   */
-  dynamicBannerUrl(format: ImageFormat = 'png', size: ImageSize = 1024) {
-    if (!ImageFormats.includes(format))
-      throw new TypeError(`Invalid format: ${format} (acceptable: ${ImageFormats.join(', ')})`);
-
-    return this.banner === null ? null : CDN.getGuildBanner(this.id, this.banner);
-  }
-
-  /**
-   * Dynamically formats a guild splash screen
-   * @param format The format to use (default `'png'`)
-   * @param size The size to use (default `1024`)
-   */
-  dynamicSplashUrl(format: ImageFormat = 'png', size: ImageSize = 1024) {
-    if (!ImageFormats.includes(format))
-      throw new TypeError(`Invalid format: ${format} (acceptable: ${ImageFormats.join(', ')})`);
-
-    return this.splash === null ? null : CDN.getGuildSplash(this.id, this.splash);
-  }
-
-  /**
-   * Dynamically formats a guild discovery splash
-   * @param format The format to use
-   * @param size The size to use
-   */
-  dynamicDiscoverySplashUrl(format: ImageFormat = 'png', size: ImageSize = 1024) {
-    if (!ImageFormats.includes(format))
-      throw new TypeError(`Invalid format: ${format} (acceptable: ${ImageFormats.join(', ')})`);
-
-    return this.discoverySplash === null ? null : CDN.getGuildDiscoverySplash(this.id, this.discoverySplash);
-  }
-
-  /**
-   * Modifies a guild data, the bot must have the `MANAGE_SERVER`
+   * Modifies attributes of a guild, the bot must have the `MANAGE_SERVER`
    * permission to update data.
+   *
+   * @param data The data to modify
+   * @param reason The reason to put in audit logs
    */
-  modify(data: ModifyGuildOptions = {}): Promise<this> {
+  modify(data: ModifyGuildOptions = {}, reason?: string): Promise<Guild> { // eslint-disable-line default-param-last
     return this.client.rest.dispatch<RESTPatchAPIGuildJSONBody, APIGuild>({
+      auditLogReason: reason,
       endpoint: `/guilds/${this.id}`,
       method: 'PATCH',
       data
@@ -734,41 +884,46 @@ export class Guild extends UnavailableGuild {
   /**
    * Sets the name of the guild
    * @param name The name of the guild
+   * @param reason The reason to put in audit logs
    */
-  setName(name: string) {
-    return this.modify({ name });
+  setName(name: string, reason?: string) {
+    return this.modify({ name }, reason);
   }
 
   /**
    * Sets the voice region for this guild
    * @param region The region ID or `null` to be automatic
+   * @param reason The reason to put in audit logs
    */
-  setRegion(region: string) {
-    return this.modify({ region });
+  setRegion(region: string, reason?: string) {
+    return this.modify({ region }, reason);
   }
 
   /**
    * Sets the verification level for this guild
    * @param level The verification level
+   * @param reason The reason to put in audit logs
    */
-  setVerificationLevel(level: number) {
-    return this.modify({ verification_level: level });
+  setVerificationLevel(level: number, reason?: string) {
+    return this.modify({ verification_level: level }, reason);
   }
 
   /**
    * Sets the default message notification type
    * @param type The type of default message notification to use
+   * @param reason The reason to put in audit logs
    */
-  setDefaultMessageNotifications(type: number) {
-    return this.modify({ default_message_notifications: type });
+  setDefaultMessageNotifications(type: number, reason?: string) {
+    return this.modify({ default_message_notifications: type }, reason);
   }
 
   /**
    * Sets the content explicit content filter
    * @param filter The filter type to use
+   * @param reason The reason to put in audit logs
    */
-  setExplicitContentFilter(filter: number) {
-    return this.modify({ explicit_content_filter: filter });
+  setExplicitContentFilter(filter: number, reason?: string) {
+    return this.modify({ explicit_content_filter: filter }, reason);
   }
 
   /**
@@ -776,21 +931,500 @@ export class Guild extends UnavailableGuild {
    *
    * @param id The ID of the afk channel, pass in
    * `null` if you want to reset the AFK channel.
+   *
+   * @param reason The reason to put in audit logs
    */
-  setAFKChannel(id: string | null) {
-    return this.modify({ afk_channel_id: id as `${bigint}` | null });
+  setAFKChannel(id: string | null, reason?: string) {
+    return this.modify({ afk_channel_id: id as `${bigint}` | null }, reason);
   }
 
   /**
    * Sets the AFK timeout
+   * @param timeout The timeout in seconds
+   * @param reason The reason to put in audit logs
    */
-}
+  setAFKTimeout(timeout: number, reason?: string) {
+    return this.modify({ afk_timeout: timeout }, reason);
+  }
 
-/*
-export type ModifyGuildOptions = Partial<Pick<
-  APIGuild,
-  'name' | 'region' | 'verification_level' | 'default_message_notifications' | 'explicit_content_filter' | 'afk_channel_id'
-  | 'afk_timeout' | 'icon' | 'owner_id' | 'splash' | 'discovery_splash' | 'banner' | 'system_channel_id' | 'system_channel_flags'
-  | 'rules_channel_id' | 'public_updates_channel_id' | 'preferred_locale' | 'features' | 'description'
->>;
-*/
+  /**
+   * Sets the guild icon
+   *
+   * @param icon A `Readable` stream or a `Buffer` to set the icon URL.
+   * @param reason The reason to put in audit logs
+   * @note Using readable streams takes O(N) the complexity time to
+   * gather all buffers into one. Recommend to use `readFileSync(...)`
+   * or use your http client's methods to return a `Buffer`.
+   */
+  async setIcon(data: Readable | Buffer, reason?: string) {
+    let image!: Buffer;
+    if (Util.isReadableStream(data)) {
+      image = await Util.readableToBuffer(data);
+    } else if (Buffer.isBuffer(data)) {
+      image = data;
+    } else {
+      throw new TypeError(`Expecting \`Readable\` (createReadStream) or \`Buffer\` (readFileSync, ...); gotten \`${typeof data === 'object' ? '(other object/class/array or null)' : typeof data}`);
+    }
+
+    return this.modify({
+      icon: Util.bufferToBase64(image)
+    }, reason);
+  }
+
+  /**
+   * Sets the owner of this guild, the bot must
+   * own this guild to set the owner.
+   *
+   * @param id The user's ID who will own this guild
+   * @param reason The reason to put in audit logs
+   */
+  setOwner(id: string, reason?: string) {
+    return this.modify({ owner_id: id as `${bigint}` }, reason);
+  }
+
+  /**
+   * Sets the guild splash
+   *
+   * @param icon A `Readable` stream or a `Buffer` to set the icon URL.
+   * @param reason The reason to put in audit logs
+   * @note Using readable streams takes O(N) the complexity time to
+   * gather all buffers into one. Recommend to use `readFileSync(...)`
+   * or use your http client's methods to return a `Buffer`.
+   */
+  async setSplash(data: Readable | Buffer, reason?: string) {
+    let image!: Buffer;
+    if (Util.isReadableStream(data)) {
+      image = await Util.readableToBuffer(data);
+    } else if (Buffer.isBuffer(data)) {
+      image = data;
+    } else {
+      throw new TypeError(`Expecting \`Readable\` (createReadStream) or \`Buffer\` (readFileSync, ...); gotten \`${typeof data === 'object' ? '(other object/class/array or null)' : typeof data}`);
+    }
+
+    return this.modify({
+      splash: Util.bufferToBase64(image)
+    }, reason);
+  }
+
+  /**
+   * Sets the discovery splash
+   *
+   * @param icon A `Readable` stream or a `Buffer` to set the icon URL.
+   * @param reason The reason to put in audit logs
+   * @note Using readable streams takes O(N) the complexity time to
+   * gather all buffers into one. Recommend to use `readFileSync(...)`
+   * or use your http client's methods to return a `Buffer`.
+   */
+  async setDiscoverySplash(data: Readable | Buffer, reason?: string) {
+    let image!: Buffer;
+    if (Util.isReadableStream(data)) {
+      image = await Util.readableToBuffer(data);
+    } else if (Buffer.isBuffer(data)) {
+      image = data;
+    } else {
+      throw new TypeError(`Expecting \`Readable\` (createReadStream) or \`Buffer\` (readFileSync, ...); gotten \`${typeof data === 'object' ? '(other object/class/array or null)' : typeof data}`);
+    }
+
+    return this.modify({
+      discovery_splash: Util.bufferToBase64(image)
+    }, reason);
+  }
+
+  /**
+   * Sets the guild banner
+   *
+   * @param icon A `Readable` stream or a `Buffer` to set the icon URL.
+   * @param reason The reason to put in audit logs
+   * @note Using readable streams takes O(N) the complexity time to
+   * gather all buffers into one. Recommend to use `readFileSync(...)`
+   * or use your http client's methods to return a `Buffer`.
+   */
+  async setGuildBanner(data: Readable | Buffer, reason?: string) {
+    let image!: Buffer;
+    if (Util.isReadableStream(data)) {
+      image = await Util.readableToBuffer(data);
+    } else if (Buffer.isBuffer(data)) {
+      image = data;
+    } else {
+      throw new TypeError(`Expecting \`Readable\` (createReadStream) or \`Buffer\` (readFileSync, ...); gotten \`${typeof data === 'object' ? '(other object/class/array or null)' : typeof data}`);
+    }
+
+    return this.modify({
+      banner: Util.bufferToBase64(image)
+    }, reason);
+  }
+
+  /**
+   * Sets the system channel ID
+   * @param id The ID for the system channel
+   * @param reason The reason to put in audit logs
+   */
+  setSystemChannel(id: string, reason?: string) {
+    return this.modify({ system_channel_id: id as `${bigint}` }, reason);
+  }
+
+  /**
+   * Sets the system channel flags
+   * @param flags The flags to set
+   * @param reason The reason to put in audit logs
+   */
+  setSystemChannelFlags(flags: number, reason?: string) {
+    return this.modify({ system_channel_flags: flags }, reason);
+  }
+
+  /**
+   * Sets a new rules channel
+   * @param id The rules channel ID
+   * @param reason The reason to put in audit logs
+   */
+  setRulesChannel(id: string, reason?: string) {
+    return this.modify({ rules_channel_id: id as `${bigint}` }, reason);
+  }
+
+  /**
+   * Sets a new public updates channel
+   * @param id The public update channel ID
+   * @param reason The reason to put in audit logs
+   */
+  setPublicUpdatesChannel(id: string, reason?: string) {
+    return this.modify({ public_updates_channel_id: id as `${bigint}` }, reason);
+  }
+
+  /**
+   * Sets the preferred locale for this guild
+   *
+   * @param locale The locale to set, omit this parameter
+   * to set to `"en-US"`
+   * @param reason The reason to put in audit logs
+   */
+  setPreferredLocale(locale?: string, reason?: string) {
+    return this.modify({ preferred_locale: locale ?? 'en-US' }, reason);
+  }
+
+  /**
+   * Sets the description of the community guild
+   * @param description The description
+   * @param reason The reason to put in audit logs
+   */
+  setDescription(description: string, reason?: string) {
+    return this.modify({ description }, reason);
+  }
+
+  /**
+   * Deletes the guild from Discord, fires a [Guild Delete](https://discord.com/developers/docs/topics/gateway#guild-delete)
+   * gateway event.
+   */
+  delete() {
+    return this.client.rest.dispatch<never, void>({
+      endpoint: `/guilds/${this.id}`,
+      method: 'DELETE'
+    });
+  }
+
+  /**
+   * Returns all the channels in this guild.
+   */
+  getChannels(): Promise<GuildChannel[]> {
+    return this.client.rest.dispatch<never, APIChannel[]>({
+      endpoint: `/guilds/${this.id}/channels`,
+      method: 'GET'
+    }).then(data => data.map(d => new GuildChannel(this.client, d)));
+  }
+
+  /**
+   * Creates a new guild channel
+   * @param name The name of the channel
+   * @param options The options to create this guild channel
+   * @param reason The reason to put in audit logs
+   */
+  createChannel(name: string, options: CreateChannelOptions = {}, reason?: string): Promise<GuildChannel | undefined> { // eslint-disable-line default-param-last
+    return this.client.rest.dispatch<RESTPostAPIGuildChannelJSONBody, APIChannel>({
+      endpoint: `/guilds/${this.id}/channels`,
+      method: 'POST',
+      data: {
+        name,
+        ...options
+      }
+    }).then(d => {
+      const channel = Channel.from<GuildChannel>(this.client, d);
+      if (channel === null) return undefined;
+
+      this.client.channels.put(channel);
+      this.channels.put(channel);
+      return channel;
+    });
+  }
+
+  /**
+   * Modifies a specific channel's position in the guild channel tree.
+   * @param channelID The channel's ID
+   * @param pos The sorting position to set it to
+   */
+  async editChannelPosition(channelID: string, pos: number): Promise<void> {
+    const channels = await this.getChannels();
+    const channel = channels.find(channel => channel.id === channelID)!;
+    if (channel.position === pos)
+      return Promise.resolve();
+
+    const min = Math.min(pos, channel.position);
+    const max = Math.max(pos, channel.position);
+    const sorted = channels.filter(chan =>
+      chan.type === channel.type
+        && min <= chan.position
+        && chan.position <= max
+        && chan.id !== channelID
+    ).sort((a, b) => a.position - b.position);
+
+    pos > channel.position ? sorted.push(channel) : sorted.unshift(channel);
+    return this.client.rest.dispatch<RESTPatchAPIGuildChannelPositionsJSONBody, void>({
+      endpoint: `/guilds/${this.id}/channels`,
+      method: 'PATCH',
+      data: sorted.map((channel, idx) => ({
+        position: idx + min,
+        id: channel.id as `${bigint}`
+      }))
+    });
+  }
+
+  /**
+   * Retrieves a guild member in this guild
+   * @param memberID The member's ID
+   */
+  getMember(memberID: string) {
+    return this.client.rest.dispatch<never, APIGuildMember>({
+      endpoint: `/guilds/${this.id}/members/${memberID}`,
+      method: 'GET'
+    }).then(data => new Member(this.client, data));
+  }
+
+  /**
+   * Returns a list of guild members available in this guild
+   * @param options The options to use
+   */
+  listMembers(options: ListGuildMembersOptions = {}) {
+    return this.client.rest.dispatch<never, APIGuildMember[]>({
+      endpoint: `/guilds/${this.id}/members${Util.objectToQuery(options)}`,
+      method: 'GET'
+    }).then(d => d.map(s => new Member(this.client, s)));
+  }
+
+  /**
+   * Returns a list of guilds members by a query whose username
+   * or nickname starts with.
+   *
+   * @param query The query to find the members
+   * @param limit The max limit to return
+   */
+  searchMembers(query: string, limit?: number) {
+    return this.client.rest.dispatch<never, APIGuildMember[]>({
+      endpoint: `/guilds/${this.id}/members/search${Util.objectToQuery({ query, limit })}`,
+      method: 'GET'
+    }).then(d => d.map(s => new Member(this.client, s)));
+  }
+
+  /**
+   * Modify attributes of a guild member.
+   * @param id The member's ID
+   * @param options The options to use
+   * @param reason The reason to put in audit logs
+   */
+  modifyMember(id: string, options: ModifyGuildMemberOptions = {}, reason?: string) { // eslint-disable-line default-param-last
+    return this.client.rest.dispatch<RESTPatchAPIGuildMemberJSONBody, APIGuildMember>({
+      endpoint: `/guilds/${this.id}/members/${id}`,
+      method: 'PATCH',
+      data: options as any
+    }).then(d => this.members.put(new Member(this.client, d)));
+  }
+
+  /**
+   * Modifies the nickname of the bot in this guild
+   *
+   * @param nick The nickname to use, omit this parameter
+   * to reset the nickname.
+   */
+  modifyNickname(nick?: string) {
+    return this.client.rest.dispatch<RESTPatchAPICurrentGuildMemberNicknameResult, APIGuildMember>({
+      endpoint: `/guilds/${this.id}/members/@me/nick`,
+      method: 'PATCH',
+      data: { nick: nick as `${bigint}` }
+    }).then(d => this.members.put(new Member(this.client, d)));
+  }
+
+  /**
+   * Adds a role to a member
+   * @param memberID The member's ID
+   * @param roleID The role's ID
+   * @param reason The reason to put in audit logs
+   */
+  addRole(memberID: string, roleID: string, reason?: string) {
+    return this.client.rest.dispatch<never, void>({
+      auditLogReason: reason,
+      endpoint: `/guilds/${this.id}/members/${memberID}/roles/${roleID}`,
+      method: 'PUT'
+    });
+  }
+
+  /**
+   * Removes a role from a member
+   * @param memberID The member's ID
+   * @param roleID The role's ID
+   * @param reason The reason to put in audit logs
+   */
+  removeRole(memberID: string, roleID: string, reason?: string) {
+    return this.client.rest.dispatch<never, void>({
+      auditLogReason: reason,
+      endpoint: `/guilds/${this.id}/members/${memberID}/roles/${roleID}`,
+      method: 'DELETE'
+    });
+  }
+
+  /**
+   * Kicks a member from the guild
+   * @param memberID The member's ID
+   */
+  kickMember(memberID: string, reason?: string) {
+    return this.client.rest.dispatch<never, void>({
+      auditLogReason: reason,
+      endpoint: `/guilds/${this.id}/members/${memberID}`,
+      method: 'DELETE'
+    });
+  }
+
+  /**
+   * Retrieve all the bans in this guild
+   */
+  getBans(): Promise<GuildBan[]> {
+    return this.client.rest.dispatch<never, APIBan[]>({
+      endpoint: `/guilds/${this.id}/bans`,
+      method: 'GET'
+    }).then(d => d.map(s => ({
+      reason: s.reason,
+      user: new User(this.client, s.user)
+    })));
+  }
+
+  /**
+   * Retrieve a single ban
+   * @param userID The user's ID
+   */
+  getBan(userID: string): Promise<GuildBan> {
+    return this.client.rest.dispatch<never, APIBan>({
+      endpoint: `/guilds/${this.id}/bans/${userID}`,
+      method: 'GET'
+    }).then(d => ({
+      reason: d.reason,
+      user: new User(this.client, d.user)
+    }));
+  }
+
+  /**
+   * Bans a member from the guild
+   * @param userID The user ID
+   * @param days The number of days to bulk-delete message
+   * @param reason The reason to set in audit logs and when retrieving bans
+   */
+  banMember(userID: string, days = 7, reason?: string) { // eslint-disable-line default-param-last
+    return this.client.rest.dispatch<RESTPutAPIGuildBanJSONBody, void>({
+      auditLogReason: reason,
+      endpoint: `/guilds/${this.id}/bans/${userID}`,
+      method: 'PUT',
+      data: {
+        delete_message_days: days
+      }
+    });
+  }
+
+  /**
+   * Removes a ban from a user
+   * @param userID The user's ID
+   */
+  unbanMember(userID: string) {
+    return this.client.rest.dispatch<never, void>({
+      endpoint: `/guilds/${this.id}/bans/${userID}`,
+      method: 'DELETE'
+    });
+  }
+
+  /**
+   * Retrieves all the guild roles available
+   */
+  getRoles(): Promise<Role[]> {
+    return this.client.rest.dispatch<never, APIRole[]>({
+      endpoint: `/guilds/${this.id}/roles`,
+      method: 'GET'
+    }).then(d => d.map(s => new Role({ guild_id: this.id, ...s })));
+  }
+
+  /**
+   * Creates a guild role
+   * @param options The options to use
+   * @param reason The reason to put in audit logs
+   */
+  createRole(options: CreateGuildRoleOptions = {}, reason?: string) {
+    return this.client.rest.dispatch<RESTPostAPIGuildRoleJSONBody, APIRole>({
+      auditLogReason: reason,
+      endpoint: `/guilds/${this.id}/roles`,
+      method: 'POST',
+      data: options as any
+    }).then(d => this.roles.put(new Role({ guild_id: this.id, ...d })));
+  }
+
+  /**
+   * Modifies the position of a role in the guild role tree.
+   * @param roleID The role ID to edit the position
+   * @param pos The position to set to
+   */
+  async editRolePosition(roleID: string, pos: number) {
+    const roles = await this.getRoles();
+    const role = roles.find(channel => channel.id === roleID)!;
+    if (role.position === pos)
+      return Promise.resolve();
+
+    const min = Math.min(pos, role.position);
+    const max = Math.max(pos, role.position);
+    const sorted = roles.filter(r =>
+      min <= r.position
+        && r.position <= max
+        && r.id !== roleID
+    ).sort((a, b) => a.position - b.position);
+
+    pos > role.position ? sorted.push(role) : sorted.unshift(role);
+    return this.client.rest.dispatch<RESTPatchAPIGuildRolePositionsJSONBody, void>({
+      endpoint: `/guilds/${this.id}/roles`,
+      method: 'PATCH',
+      data: sorted.map((channel, idx) => ({
+        position: idx + min,
+        id: channel.id as `${bigint}`
+      }))
+    });
+  }
+
+  /**
+   * Modifies attributes of a guild role.
+   *
+   * @param roleID The role ID
+   * @param options The options to set
+   * @param reason The reason to put in audit logs
+   */
+  modifyRole(roleID: string, options: ModifyGuildRoleOptions = {}, reason?: string) {
+    return this.client.rest.dispatch<RESTPatchAPIGuildRoleJSONBody, APIRole>({
+      auditLogReason: reason,
+      endpoint: `/guilds/${this.id}/roles/${roleID}`,
+      method: 'PATCH',
+      data: <any> options
+    }).then(d => this.roles.put(new Role({ guild_id: this.id, ...d })));
+  }
+
+  /**
+   * Deletes a role in the guild
+   * @param roleID The role's ID
+   * @param reason The reason to put in audit logs
+   */
+  deleteRole(roleID: string, reason?: string) {
+    return this.client.rest.dispatch<never, void>({
+      auditLogReason: reason,
+      endpoint: `/guilds/${this.id}/roles/${roleID}`,
+      method: 'DELETE'
+    });
+  }
+}

@@ -26,7 +26,7 @@ import { BaseStore } from './BaseStore';
 
 export class GuildPresenceStore extends BaseStore<Presence> {
   constructor(client: WebSocketClient) {
-    super(client, 'presences');
+    super(client);
   }
 
   // You cannot retrieve guild presences from REST, so `fetch()` will throw an error.

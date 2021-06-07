@@ -20,17 +20,16 @@
  * SOFTWARE.
  */
 
+import type { WebSocketClient } from '../Client';
+import { UnavailableGuild } from '../entities/UnavailableGuild';
 import type { APIGuild } from 'discord-api-types';
-import { WebSocketClient } from '../Client';
 import { BaseStore } from './BaseStore';
 import { Guild } from '../entities/Guild';
-import { deepStrictEqual } from 'assert';
-import { UnavailableGuild } from '../entities/UnavailableGuild';
-import { NoopEntityCache } from '../cache';
+
 
 export class GuildStore extends BaseStore<Guild> {
   constructor(client: WebSocketClient) {
-    super(client, 'guilds');
+    super(client);
   }
 
   /**

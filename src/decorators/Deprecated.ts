@@ -32,26 +32,27 @@ export namespace Deprecated {
    * @returns A function that shows a deprecation message
    * @internal
    */
-  export function deprecate<
+  export const deprecate = <
     F extends (...args: any[]) => any,
     Args extends any[] = Parameters<F>,
     TReturn = ReturnType<F>
-  >(factory: F): (...args: Args) => TReturn {
-    return (...args) => {
-      console.log(`(wumpcord:${process.pid}) DeprecationWarning: Function ${factory.name} is deprecated and will be removed in a future release.`);
-      return factory(...args);
+  >(message: string, factory: F): ((...args: Args) => TReturn) => {
+    const _defaultFactory = factory;
+    return function (this: any, ...args: any[]) {
+      console.log(`(wumpcord:${process.pid}) DeprecationWarning: Function ${factory.name ?? '(anonymous)'} is deprecated and will be removed in a future release.\n> ${message}`);
+      return _defaultFactory.call(this, ...args);
     };
-  }
+  };
 
   /**
    * Deprecates a method in a class
    * @internal
    */
-  export const Method: MethodDecorator = (target, prop, descriptor: TypedPropertyDescriptor<any>) => {
+  export const Method = (message: string): MethodDecorator => (target, prop, descriptor: TypedPropertyDescriptor<any>) => {
     const original = descriptor.value;
-    descriptor.value = (...args: any[]) => {
-      console.log(`(wumpcord:${process.pid}) DeprecationWarning: Method "${target.constructor.name}#${String(prop)}" is deprecated and will be removed in a future release.`);
-      return original(...args);
+    descriptor.value = function (this: any, ...args: any[]) {
+      console.log(`(wumpcord:${process.pid}) DeprecationWarning: Method ${target.constructor.name}#${String(prop)} is deprecated and will be removed in a future release.\n> ${message}`);
+      return original.call(this, ...args);
     };
 
     return descriptor;

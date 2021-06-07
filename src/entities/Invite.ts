@@ -198,7 +198,7 @@ export class Invite<
       this.inviter = this.client.users.put(new User(this.client, data.inviter));
 
     if (data.channel !== undefined)
-      this.channel = this.client.channels.put(Channel.from(this.client, data.channel)!);
+      this.channel = this.client.channels.put(Channel.from(this.client, data.channel)!) as unknown as C;
 
     if (data.code !== undefined)
       this.code = data.code;

@@ -22,7 +22,6 @@
 
 export * from './builders';
 export * from './entities';
-export * from './cache';
 export * from './uikit';
 
 export { default as Util } from './util';

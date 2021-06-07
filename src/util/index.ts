@@ -269,8 +269,7 @@ export default class Util {
    * @returns The data image
    */
   static bufferToBase64(image: Buffer, type?: 'png' | 'jpeg' | 'gif') {
-    // check the buffer ourselves
-    // to determine the type
+    // check the buffer ourselves to determine the type
     if (type === undefined) {
       if (is.png(image))
         type = 'png';

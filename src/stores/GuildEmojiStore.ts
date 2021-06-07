@@ -26,6 +26,6 @@ import { BaseStore } from './BaseStore';
 
 export class GuildEmojiStore extends BaseStore<Emoji> {
   constructor(client: WebSocketClient) {
-    super(client, 'emojis');
+    super(client);
   }
 }

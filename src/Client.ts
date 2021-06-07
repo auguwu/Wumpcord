@@ -29,7 +29,6 @@ import { EventBus, sleep } from '@augu/utils';
 import type * as discord from 'discord-api-types';
 import { ShardManager } from './gateway/ShardManager';
 import type * as types from './types';
-import { MemoryCache } from './cache/MemoryCache';
 
 import { ChannelStore } from './stores/ChannelStore';
 import { GatewayIntents, GatewayVersion, StageInstancePrivacyLevel } from './Constants';
@@ -130,9 +129,6 @@ const defaults: Omit<types.ClientOptions, 'token'> = {
   getAllUsers: false,
   shardCount: 'auto',
   intents: [],
-  cache: {
-    engine: new MemoryCache()
-  },
   ws: {
     largeThreshold: 250,
     connectTimeout: 25000,

@@ -73,7 +73,7 @@ const onSlashCommand = async (shard: Shard, data: GatewayInteractionCreateDispat
 };
 
 const onButtonClick = async (shard: Shard, data: GatewayInteractionCreateDispatchData) => {
-  const channel = await shard.client.channels.fetch<AnyTextableChannel>(data.channel_id);
+  const channel = await shard.client.channels.fetch<AnyTextableChannel>(data.channel_id) as unknown as AnyTextableChannel;
 
   // Ack a response
   await shard.client.rest.dispatch<RESTPostAPIInteractionCallbackJSONBody>({

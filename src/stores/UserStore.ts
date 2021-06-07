@@ -30,7 +30,7 @@ import { User } from '../entities';
  */
 export class UserStore extends BaseStore<User> {
   constructor(client: WebSocketClient) {
-    super(client, 'users');
+    super(client);
   }
 
   /**

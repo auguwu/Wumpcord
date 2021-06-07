@@ -26,7 +26,7 @@ import { BaseStore } from './BaseStore';
 
 export class GuildVoiceStateStore extends BaseStore<VoiceState> {
   constructor(client: WebSocketClient) {
-    super(client, 'voiceStates');
+    super(client);
   }
 
   // You cannot retrieve voice states from REST, so `fetch()` will throw an error.

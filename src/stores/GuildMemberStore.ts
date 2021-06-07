@@ -26,7 +26,7 @@ import { BaseStore } from './BaseStore';
 
 export class GuildMemberStore extends BaseStore<Member> {
   constructor(client: WebSocketClient) {
-    super(client, 'members');
+    super(client);
   }
 
   // Guild members cannot be fetched, so `fetch(...)` will throw a error.

@@ -34,7 +34,7 @@ export class ChannelStore extends BaseStore<Channel> {
    * @param client The client
    */
   constructor(client: WebSocketClient) {
-    super(client, 'channels');
+    super(client);
   }
 
   /** @inheritdoc */
@@ -48,7 +48,7 @@ export class ChannelStore extends BaseStore<Channel> {
    * @returns A promise that has the class resolved and *possibly* cached or
    * a promise that rejects this request and throws a [[DiscordRestError]] on why it failed.
    */
-  fetch<T extends Channel = Channel>(id: string): Promise<T> {
+  fetch<T extends Channel = Channel>(id: string): Promise<T | null> {
     return this.client.rest.dispatch<never, APIChannel>({
       endpoint: '/channels/:id',
       method: 'GET',
@@ -60,7 +60,7 @@ export class ChannelStore extends BaseStore<Channel> {
         return null;
       }
 
-      return this.put(channel);
+      return this.put(channel) as unknown as T;
     });
   }
 }

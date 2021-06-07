@@ -26,7 +26,7 @@ import { BaseStore } from './BaseStore';
 
 export class ChannelMessageStore extends BaseStore<Message> {
   constructor(client: WebSocketClient) {
-    super(client, 'messages');
+    super(client);
   }
 
   /**
