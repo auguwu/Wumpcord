@@ -28,12 +28,7 @@ import { Permissions } from '../Constants';
 import type { Guild } from '..';
 import { Permission } from '../util/Permissions';
 import { BaseEntity } from './BaseEntity';
-import { Role } from './Role';
 import { User } from './User';
-
-export interface ModifyGuildMemberOptions {
-  a: 'b';
-}
 
 /**
  * https://discord.com/developers/docs/resources/guild#guild-member-object
