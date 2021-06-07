@@ -23,8 +23,8 @@
 /* eslint-disable default-param-last */
 /* eslint-disable camelcase */
 
-import { APIGuildMember, APIStageInstance, Util } from '..';
-import { WebSocketClient } from '../Client';
+import type { APIGuildMember, APIStageInstance } from '..';
+import type { WebSocketClient } from '../Client';
 import { GuildFeature, OPCodes } from '../Constants';
 import { ChannelStore } from '../stores/ChannelStore';
 import { GuildEmojiStore } from '../stores/GuildEmojiStore';
@@ -32,16 +32,21 @@ import { GuildMemberStore } from '../stores/GuildMemberStore';
 import { GuildPresenceStore } from '../stores/GuildPresenceStore';
 import { GuildRoleStore } from '../stores/GuildRoleStore';
 import { GuildVoiceStateStore } from '../stores/GuildVoiceStateStore';
-import { StageInstance } from './StageInstance';
+import type { StageInstance } from './StageInstance';
 
 import {
   APIBan,
   APIChannel,
   APIGuild as _APIGuild,
+  APIGuildIntegration,
+  APIGuildIntegrationApplication,
   APIGuildPreview,
   APIGuildWelcomeScreen,
+  APIInvite,
   APIRole,
+  APIVoiceRegion,
   GatewayRequestGuildMembersData,
+  RESTGetAPIGuildVanityUrlResult,
   RESTPatchAPICurrentGuildMemberNicknameResult,
   RESTPatchAPIGuildChannelPositionsJSONBody,
   RESTPatchAPIGuildJSONBody,
@@ -49,6 +54,7 @@ import {
   RESTPatchAPIGuildRoleJSONBody,
   RESTPatchAPIGuildRolePositionsJSONBody,
   RESTPostAPIGuildChannelJSONBody,
+  RESTPostAPIGuildPruneJSONBody,
   RESTPostAPIGuildRoleJSONBody,
   RESTPutAPIGuildBanJSONBody
 } from 'discord-api-types';
@@ -59,12 +65,13 @@ import { Member } from './Member';
 import { Emoji } from './Emoji';
 import { Role } from './Role';
 import { UnavailableGuild } from './UnavailableGuild';
-import { Application } from './Application';
 import { User } from './User';
 import { CDN } from '@wumpcord/rest';
 import { Readable } from 'stream';
 import { GuildChannel } from './channels/GuildChannel';
 import { Collection } from '@augu/collections';
+import Util from '../util';
+import { Invite } from './Invite';
 
 /**
  * https://discord.com/developers/docs/resources/guild
@@ -170,7 +177,7 @@ export interface GuildIntegration {
   /**
    * The bot/OAuth2 application for discord integrations
    */
-  application?: Application;
+  application?: APIGuildIntegrationApplication;
 
   /**
    * ISO8601-formatted timestamp when this integration
@@ -318,6 +325,34 @@ export type CreateGuildRoleOptions = Partial<Pick<APIRole, 'name' | 'color' | 'h
  * https://discord.com/developers/docs/resources/guild#modify-guild-role-json-params
  */
 export type ModifyGuildRoleOptions = CreateGuildRoleOptions;
+
+/**
+ * https://discord.com/developers/docs/resources/guild#guild-widget-object
+ */
+export interface GuildWidget {
+  /**
+   * The channel ID, if enabled or `null` if not.
+   */
+  channelID: string | null;
+
+  /**
+   * Whether the widget is enabled
+   */
+  enabled: boolean;
+}
+
+/**
+ * https://discord.com/developers/docs/resources/guild#modify-guild-welcome-screen-json-params
+ */
+export type ModifyGuildWelcomeScreenOptions = Partial<Pick<APIGuildWelcomeScreen, 'welcome_channels' | 'description'> & { enabled: boolean }>;
+
+/**
+ * https://discord.com/developers/docs/resources/guild#update-current-user-voice-state-json-params or
+ * https://discord.com/developers/docs/resources/guild#update-user-voice-state-json-params
+ */
+export type ModifyUserGuildVoiceState<S extends '@me' | 'user' = '@me'> = S extends '@me'
+  ? Partial<{ suppress: boolean; request_to_speak_timestamp: Date; }>
+  : { suppress?: boolean };
 
 /**
  * https://discord.com/developers/docs/resources/guild
@@ -1425,6 +1460,197 @@ export class Guild extends UnavailableGuild {
       auditLogReason: reason,
       endpoint: `/guilds/${this.id}/roles/${roleID}`,
       method: 'DELETE'
+    });
+  }
+
+  /**
+   * Returns the number of members that were removed
+   * due a prune operation.
+   */
+  getPruneCount() {
+    return this.client.rest.dispatch<never, { pruned: number }>({
+      endpoint: `/guilds/${this.id}/prune`,
+      method: 'GET'
+    }).then(({ pruned }) => pruned);
+  }
+
+  /**
+   * Beings a prune operation, requires the `KICK_MEMBERS` permission. Returns
+   * the number of members that were removed in this prune operation, in large
+   * guilds, this will return `null`.
+   *
+   * @param days The amount of days to prune
+   * @param includeRoles Any roles to include when pruning
+   * @param reason The reason to set in audit logs
+   */
+  beginePrune(days: number = 7, includeRoles?: string[], reason?: string) {
+    const computePruneCount = this.large === true || this.large === undefined; // if it's undefined, compute anyway
+
+    return this.client.rest.dispatch<RESTPostAPIGuildPruneJSONBody, { pruned: number | null }>({
+      auditLogReason: reason,
+      endpoint: `/guilds/${this.id}/prune`,
+      method: 'POST',
+      data: {
+        days,
+        compute_prune_count: computePruneCount,
+        include_roles: includeRoles as `${bigint}`[]
+      }
+    }).then(({ pruned }) => computePruneCount ? pruned as number : null);
+  }
+
+  /**
+   * Returns a list of voice regions for the guild.
+   */
+  getVoiceRegions() {
+    return this.client.rest.dispatch<never, APIVoiceRegion[]>({
+      endpoint: `/guilds/${this.id}/regions`,
+      method: 'GET'
+    });
+  }
+
+  /**
+   * Returns a list of the integrations in this guild.
+   */
+  getIntegrations(): Promise<GuildIntegration[]> {
+    return this.client.rest.dispatch<never, APIGuildIntegration[]>({
+      endpoint: `/guilds/${this.id}/integrations`,
+      method: 'GET'
+    }).then(d => d.map(s => ({
+      expireGracePeriod: s.expire_grace_period,
+      enableEmotions: s.enable_emoticons,
+      expireBehaviour: s.expire_behavior !== undefined
+        ? s.expire_behavior === 0
+          ? 'remove role'
+          : 'kick'
+        : undefined,
+
+      subscriberCount: s.subscriber_count,
+      application: s.application,
+      syncedAt: s.synced_at !== undefined ? new Date(s.synced_at) : undefined,
+      syncing: s.syncing,
+      revoked: s.revoked,
+      roleID: s.role_id,
+      account: s.account,
+      enabled: s.enabled,
+      user: s.user !== undefined ? new User(this.client, s.user) : undefined,
+      type: s.type,
+      name: s.name,
+      id: s.id
+    })));
+  }
+
+  /**
+   * Deletes a guild integration
+   * @param id The integration ID
+   */
+  deleteIntegration(id: string) {
+    return this.client.rest.dispatch<never, void>({
+      endpoint: `/guilds/${this.id}/integrations/${id}`,
+      method: 'DELETE'
+    });
+  }
+
+  /**
+   * Returns a list of guild invites with metadata.
+   */
+  getInvites(): Promise<Invite<'withMetadata'>> {
+    return this.client.rest.dispatch<never, APIInvite[]>({
+      endpoint: `/guilds/${this.id}/invites`,
+      method: 'GET'
+    }).then(d => d.map(s => new Invite<'withMetadata'>(this.client, s)) as any);
+  }
+
+  /**
+   * Get the guild's widget object
+   */
+  getWidget(): Promise<GuildWidget> {
+    return this.client.rest.dispatch<never, GuildWidget>({
+      endpoint: `/guilds/${this.id}/widget`,
+      method: 'GET'
+    }).then(d => ({
+      enabled: d.enabled,
+      channelID: (d as any).channel_id
+    }));
+  }
+
+  /**
+   * Modifies the guild widget
+   * @param enabled If the widget is enabled or not
+   * @param channelID The channel ID or `null` if none should be set.
+   */
+  modifyWidget(enabled: true, channelID: string | null): Promise<void>;
+
+  /**
+   * Modifies the guild widget
+   * @param enabled If the widget should be disabled
+   */
+  modifyWidget(enabled: false): Promise<void>;
+  modifyWidget(enabled: boolean, channelID?: string | null) {
+    const data = enabled === true ? { enabled, channelID } : { enabled: false };
+    return this.client.rest.dispatch<any, void>({
+      endpoint: `/guilds/${this.id}/widget`,
+      method: 'PATCH',
+      data
+    });
+  }
+
+  /**
+   * Returns a partial invite of `[code, uses]` if this guild
+   * has the `VANITY_URL` feature.
+   */
+  getVanityUrl(): Promise<[code: string | null, uses: number]> {
+    return this.client.rest.dispatch<never, RESTGetAPIGuildVanityUrlResult>({
+      endpoint: `/guilds/${this.id}/vanity-url`,
+      method: 'GET'
+    }).then(d => [d.code, d.uses]);
+  }
+
+  /**
+   * Returns the welcome screen object for this guild
+   */
+  getWelcomeScreen() {
+    return this.client.rest.dispatch<never, APIGuildWelcomeScreen>({
+      endpoint: `/guilds/${this.id}/welcome-screen`,
+      method: 'GET'
+    });
+  }
+
+  /**
+   * Modifies the welcome screen
+   * @param options Any additional options to use
+   */
+  modifyWelcomeScreen(options: ModifyGuildWelcomeScreenOptions = {}) {
+    return this.client.rest.dispatch<any, void>({
+      endpoint: `/guilds/${this.id}/welcome-screen`,
+      method: 'PATCH',
+      data: options
+    });
+  }
+
+  /**
+   * Modifies the bot's voice state in this guild
+   * @param options Any additional options to use
+   */
+  modifyVoiceState(channelID: string, options?: ModifyUserGuildVoiceState<'@me'>): Promise<void>;
+
+  /**
+   * Modifies a user's voice state in this guild
+   * @param userID The user's ID
+   * @param channelID The channel's ID
+   * @param options Any additional options to use
+   */
+  modifyVoiceState(userID: string, channelID: string, options?: ModifyUserGuildVoiceState<'user'>): Promise<void>;
+  modifyVoiceState(userOrChanID: string, channelOrOptions?: string | ModifyUserGuildVoiceState<'@me'>, opts: ModifyUserGuildVoiceState<'user'> = {}) {
+    const endpoint = typeof channelOrOptions === 'string'
+      ? `/guilds/${this.id}/voice-states/${userOrChanID}`
+      : `/guilds/${this.id}/voice-states/@me`;
+
+    const data = typeof channelOrOptions === 'string' ? opts : channelOrOptions;
+
+    return this.client.rest.dispatch({
+      endpoint,
+      method: 'PATCH',
+      data
     });
   }
 }

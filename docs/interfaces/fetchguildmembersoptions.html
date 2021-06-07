@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>APIComponentButton | Wumpcord</title>
+	<title>FetchGuildMembersOptions | Wumpcord</title>
 	<meta name="description" content="Documentation for Wumpcord">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -55,10 +55,10 @@
 					<a href="../modules.html">Wumpcord</a>
 				</li>
 				<li>
-					<a href="apicomponentbutton.html">APIComponentButton</a>
+					<a href="fetchguildmembersoptions.html">FetchGuildMembersOptions</a>
 				</li>
 			</ul>
-			<h1>Interface APIComponentButton</h1>
+			<h1>Interface FetchGuildMembersOptions</h1>
 		</div>
 	</div>
 </header>
@@ -68,7 +68,7 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p><a href="https://discord.com/developers/docs/interactions/message-components#buttons">https://discord.com/developers/docs/interactions/message-components#buttons</a></p>
+						<p><a href="https://discord.com/developers/docs/topics/gateway#request-guild-members">https://discord.com/developers/docs/topics/gateway#request-guild-members</a></p>
 					</div>
 				</div>
 			</section>
@@ -76,7 +76,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">APIComponentButton</span>
+						<span class="target">FetchGuildMembersOptions</span>
 					</li>
 				</ul>
 			</section>
@@ -87,13 +87,12 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="apicomponentbutton.html#custom_id" class="tsd-kind-icon">custom_<wbr>id</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="apicomponentbutton.html#disabled" class="tsd-kind-icon">disabled</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="apicomponentbutton.html#emoji" class="tsd-kind-icon">emoji</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="apicomponentbutton.html#label" class="tsd-kind-icon">label</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="apicomponentbutton.html#style" class="tsd-kind-icon">style</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="apicomponentbutton.html#type" class="tsd-kind-icon">type</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="apicomponentbutton.html#url" class="tsd-kind-icon">url</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="fetchguildmembersoptions.html#ids" class="tsd-kind-icon">ids</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="fetchguildmembersoptions.html#limit" class="tsd-kind-icon">limit</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="fetchguildmembersoptions.html#nonce" class="tsd-kind-icon">nonce</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="fetchguildmembersoptions.html#presences" class="tsd-kind-icon">presences</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="fetchguildmembersoptions.html#query" class="tsd-kind-icon">query</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="fetchguildmembersoptions.html#time" class="tsd-kind-icon">time</a></li>
 							</ul>
 						</section>
 					</div>
@@ -102,85 +101,97 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="custom_id" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> custom_<wbr>id</h3>
-					<div class="tsd-signature tsd-kind-icon">custom_<wbr>id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<a name="ids" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> ids</h3>
+					<div class="tsd-signature tsd-kind-icon">ids<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/c067eb9/src/uikit/ComponentTreeBuilder.ts#L37">src/uikit/ComponentTreeBuilder.ts:37</a></li>
+							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/c067eb9/src/entities/Guild.ts#L269">src/entities/Guild.ts:269</a></li>
 						</ul>
 					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="disabled" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> disabled</h3>
-					<div class="tsd-signature tsd-kind-icon">disabled<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/c067eb9/src/uikit/ComponentTreeBuilder.ts#L39">src/uikit/ComponentTreeBuilder.ts:39</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="emoji" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> emoji</h3>
-					<div class="tsd-signature tsd-kind-icon">emoji<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>id<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/c067eb9/src/uikit/ComponentTreeBuilder.ts#L36">src/uikit/ComponentTreeBuilder.ts:36</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-type-declaration">
-						<h4>Type declaration</h4>
-						<ul class="tsd-parameters">
-							<li class="tsd-parameter">
-								<h5>id<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5>
-							</li>
-							<li class="tsd-parameter">
-								<h5>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h5>
-							</li>
-						</ul>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The user IDs to specificy which users we wish to fetch one
+							of the query or <code>ids</code>.</p>
+						</div>
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="label" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> label</h3>
-					<div class="tsd-signature tsd-kind-icon">label<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<a name="limit" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> limit</h3>
+					<div class="tsd-signature tsd-kind-icon">limit<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/c067eb9/src/uikit/ComponentTreeBuilder.ts#L35">src/uikit/ComponentTreeBuilder.ts:35</a></li>
+							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/c067eb9/src/entities/Guild.ts#L247">src/entities/Guild.ts:247</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Maximum number of members to send matching the query; a limit
+							of <code>0</code> can be used with an empty string query to return all members</p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="style" class="tsd-anchor"></a>
-					<h3>style</h3>
-					<div class="tsd-signature tsd-kind-icon">style<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<a name="nonce" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> nonce</h3>
+					<div class="tsd-signature tsd-kind-icon">nonce<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/c067eb9/src/uikit/ComponentTreeBuilder.ts#L34">src/uikit/ComponentTreeBuilder.ts:34</a></li>
+							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/c067eb9/src/entities/Guild.ts#L258">src/entities/Guild.ts:258</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Nonce string to verify the <code>Guild Members Chunk</code> response.</p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="type" class="tsd-anchor"></a>
-					<h3>type</h3>
-					<div class="tsd-signature tsd-kind-icon">type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">2</span></div>
+					<a name="presences" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> presences</h3>
+					<div class="tsd-signature tsd-kind-icon">presences<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/c067eb9/src/uikit/ComponentTreeBuilder.ts#L33">src/uikit/ComponentTreeBuilder.ts:33</a></li>
+							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/c067eb9/src/entities/Guild.ts#L241">src/entities/Guild.ts:241</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>If the fetching should include presences</p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="url" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> url</h3>
-					<div class="tsd-signature tsd-kind-icon">url<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<a name="query" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> query</h3>
+					<div class="tsd-signature tsd-kind-icon">query<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/c067eb9/src/uikit/ComponentTreeBuilder.ts#L38">src/uikit/ComponentTreeBuilder.ts:38</a></li>
+							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/c067eb9/src/entities/Guild.ts#L253">src/entities/Guild.ts:253</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A query to fetch all guild members, this can be undefined
+							to retrieve all guild members</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="time" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> time</h3>
+					<div class="tsd-signature tsd-kind-icon">time<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/c067eb9/src/entities/Guild.ts#L263">src/entities/Guild.ts:263</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The time for the delay for retrieving members in chunks</p>
+						</div>
+					</div>
 				</section>
 			</section>
 		</div>
@@ -197,28 +208,25 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface">
-						<a href="apicomponentbutton.html" class="tsd-kind-icon">APIComponent<wbr>Button</a>
+						<a href="fetchguildmembersoptions.html" class="tsd-kind-icon">Fetch<wbr>Guild<wbr>Members<wbr>Options</a>
 						<ul>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="apicomponentbutton.html#custom_id" class="tsd-kind-icon">custom_<wbr>id</a>
+								<a href="fetchguildmembersoptions.html#ids" class="tsd-kind-icon">ids</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="apicomponentbutton.html#disabled" class="tsd-kind-icon">disabled</a>
+								<a href="fetchguildmembersoptions.html#limit" class="tsd-kind-icon">limit</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="apicomponentbutton.html#emoji" class="tsd-kind-icon">emoji</a>
+								<a href="fetchguildmembersoptions.html#nonce" class="tsd-kind-icon">nonce</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="apicomponentbutton.html#label" class="tsd-kind-icon">label</a>
+								<a href="fetchguildmembersoptions.html#presences" class="tsd-kind-icon">presences</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="apicomponentbutton.html#style" class="tsd-kind-icon">style</a>
+								<a href="fetchguildmembersoptions.html#query" class="tsd-kind-icon">query</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="apicomponentbutton.html#type" class="tsd-kind-icon">type</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="apicomponentbutton.html#url" class="tsd-kind-icon">url</a>
+								<a href="fetchguildmembersoptions.html#time" class="tsd-kind-icon">time</a>
 							</li>
 						</ul>
 					</li>

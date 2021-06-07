@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>ModifyGuildMemberOptions | Wumpcord</title>
+	<title>GuildBan | Wumpcord</title>
 	<meta name="description" content="Documentation for Wumpcord">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -55,21 +55,28 @@
 					<a href="../modules.html">Wumpcord</a>
 				</li>
 				<li>
-					<a href="modifyguildmemberoptions.html">ModifyGuildMemberOptions</a>
+					<a href="guildban.html">GuildBan</a>
 				</li>
 			</ul>
-			<h1>Interface ModifyGuildMemberOptions</h1>
+			<h1>Interface GuildBan</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p><a href="https://discord.com/developers/docs/resources/guild#ban-object">https://discord.com/developers/docs/resources/guild#ban-object</a></p>
+					</div>
+				</div>
+			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">ModifyGuildMemberOptions</span>
+						<span class="target">GuildBan</span>
 					</li>
 				</ul>
 			</section>
@@ -80,7 +87,8 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="modifyguildmemberoptions.html#a" class="tsd-kind-icon">a</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="guildban.html#reason" class="tsd-kind-icon">reason</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="guildban.html#user" class="tsd-kind-icon">user</a></li>
 							</ul>
 						</section>
 					</div>
@@ -89,12 +97,22 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="a" class="tsd-anchor"></a>
-					<h3>a</h3>
-					<div class="tsd-signature tsd-kind-icon">a<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;b&quot;</span></div>
+					<a name="reason" class="tsd-anchor"></a>
+					<h3>reason</h3>
+					<div class="tsd-signature tsd-kind-icon">reason<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/0f54b68/src/entities/Member.ts#L35">src/entities/Member.ts:35</a></li>
+							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/c067eb9/src/entities/Guild.ts#L315">src/entities/Guild.ts:315</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="user" class="tsd-anchor"></a>
+					<h3>user</h3>
+					<div class="tsd-signature tsd-kind-icon">user<span class="tsd-signature-symbol">:</span> <a href="../classes/user.html" class="tsd-signature-type" data-tsd-kind="Class">User</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/auguwu/Wumpcord/blob/c067eb9/src/entities/Guild.ts#L316">src/entities/Guild.ts:316</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -113,10 +131,13 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface">
-						<a href="modifyguildmemberoptions.html" class="tsd-kind-icon">Modify<wbr>Guild<wbr>Member<wbr>Options</a>
+						<a href="guildban.html" class="tsd-kind-icon">Guild<wbr>Ban</a>
 						<ul>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="modifyguildmemberoptions.html#a" class="tsd-kind-icon">a</a>
+								<a href="guildban.html#reason" class="tsd-kind-icon">reason</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="guildban.html#user" class="tsd-kind-icon">user</a>
 							</li>
 						</ul>
 					</li>
@@ -143,7 +164,6 @@
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
-				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
