@@ -35,9 +35,12 @@ export const READY: ShardEventProcessor<GatewayReadyDispatchData> = (shard, data
     shard.client.user = new SelfUser(shard.client, data.user);
 
   shard.debug(`Received READY packet! Hello ${shard.client.user.tag} <3`);
+
+  shard.unavailableGuilds = new Set(data.guilds.map(r => r.id));
   shard.sessionID = data.session_id;
-  shard.client.users.put(shard.client.user);
   shard.status = 'WaitingForGuilds';
+
+  shard.client.users.put(shard.client.user);
 };
 
 /** @internal */

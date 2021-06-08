@@ -229,7 +229,7 @@ export class Shard extends EventBus<ShardEvents> {
   /**
    * The resolver function from [WebSocketShard._createConnection]
    */
-  private resolver?: (shard: this) => void;
+  private resolver?: () => void;
 
   /**
    * The rejecter function from [WebSocketShard._createConnection]
@@ -321,8 +321,8 @@ export class Shard extends EventBus<ShardEvents> {
 
     this.debug(`${this.sessionID !== undefined ? 'Resuming the' : 'Establishing a'} end to end connection...`);
     this.status = 'Handshaking';
-    return new Promise<this>((resolve, reject) => {
-      this.resolver = resolve as any;
+    return new Promise<void>((resolve, reject) => {
+      this.resolver = resolve;
       this.rejecter = reject;
 
       this.socket = new WebSocket(this.client.gatewayUrl, this.client.options.ws.clientOptions);
@@ -446,8 +446,7 @@ export class Shard extends EventBus<ShardEvents> {
       this.status = 'Connected';
       this.ready = true;
       this.emit('ready', this.id);
-
-      this.resolver?.(this);
+      this.resolver?.();
 
       delete this.resolver;
       delete this._readyTimeout;
@@ -456,7 +455,7 @@ export class Shard extends EventBus<ShardEvents> {
 
     this._readyTimeout = setTimeout(() => {
       this.debug(`Didn't receive any more guild packets in the last 15 seconds. Marking shard as ready with ${this.unavailableGuilds.size} unavailable guilds.`);
-      this.resolver?.(this);
+      this.resolver?.();
 
       delete this.resolver;
       delete this._readyTimeout;
@@ -760,6 +759,8 @@ export class Shard extends EventBus<ShardEvents> {
   }
 
   private async wsEvent(data: discord.GatewayDispatchPayload) {
+    this.emit('raw', this.id, data);
+
     if (data.t === 'RESUMED') {
       return events.RESUME(this, { s: data.s });
     } else {

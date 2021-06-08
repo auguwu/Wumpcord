@@ -34,12 +34,13 @@ import { ChannelStore } from './stores/ChannelStore';
 import { GatewayIntents, GatewayVersion, StageInstancePrivacyLevel } from './Constants';
 import { InteractionCommandBuilder } from './builders/InteractionCommandBuilder';
 import { Application } from './entities/Application';
-import { SelfUser } from './entities';
+import { InteractionMessage, SelfUser, TextableChannel } from './entities';
 import { UserStore } from './stores/UserStore';
 import { APIStageInstance, StageInstance } from './entities/StageInstance';
 import Util from './util';
 import type { ButtonClickContext } from './gateway/events';
 import { GuildStore } from './stores/GuildStore';
+import { APIApplicationCommand } from 'discord-api-types';
 
 type RestClientEvents = {
   [P in keyof IRestClientEvents as `rest${Capitalize<P>}`]: IRestClientEvents[P];
@@ -53,13 +54,26 @@ type ShardEvents = {
  * List of events related to any entity from the dispatch event.
  */
 export interface EntityBasedEvents {
+  // UIKit
+  /**
+   * Emitted when a button was clicked from a message
+   * @param message The interaction message created
+   */
+  'uikit:buttonClick'(message: InteractionMessage): void;
+
+  /**
+   * Emitted when a selection menu was chosen by a user
+   * @param message The interaction message created
+   */
+  'uikit:selectDropdownItem'(message: InteractionMessage): void;
+
   /**
    * Emitted when the bot has received a slash command interaction
    * in a guild.
    *
    * @param data The guild interaction message
    */
-  receiveGuildInteraction(data: null): void;
+  receiveGuildInteraction(data: InteractionMessage): void;
 
   /**
    * Emitted when the bot has received a slash command interaction
@@ -67,13 +81,7 @@ export interface EntityBasedEvents {
    *
    * @param data The DM interaction message
    */
-  receiveDMInteraction(data: null): void;
-
-  /**
-   * Emitted when a button was clicked from a message
-   * @param context The context of the button click
-   */
-  buttonClick(context: ButtonClickContext): void;
+  receiveDMInteraction(data: InteractionMessage): void;
 }
 
 /**
@@ -240,7 +248,6 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
       .on('debug', (message) => this.emit('restDebug', message))
       .on('call', (properties) => this.emit('restCall', properties));
 
-    /*
     this.once('ready', async() => {
       if (this.options.getAllUsers) {
         this.debug('[MEMBERS] Requesting all guild members...');
@@ -252,7 +259,6 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
         this._sweepInterval = setInterval(this._unsweep.bind(this)).unref();
       }
     });
-    */
   }
 
   /**
@@ -287,13 +293,21 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
     }
   }
 
+  /** @internal */
   private debug(message: string) {
     this.emit('debug', message);
   }
 
+  /** @internal */
   private _unsweep() {
     this.debug('[CACHE SWEEP] Un-needed cache is being swept up...');
-    // todo: this
+    for (const channel of this.channels.values()) {
+      const isTextable = ['news', 'text', 'dm', 'group'].includes(channel.type);
+      if (isTextable) {
+        const messages = (channel as TextableChannel).messages;
+        messages.forEach(msg => messages.delete(msg.id));
+      }
+    }
   }
 
   /**
@@ -440,17 +454,6 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
   }
 
   /**
-   * Method to retrieve a specific slash command by it's [[`commandID`]]
-   *
-   * [`Discord Docs`](https://discord.com/developers/docs/interactions/slash-commands#get-guild-application-command)
-   * @param guildID The guild ID to retrieve the slash command for
-   * @param commandID The command ID to retrieve
-   */
-  getGuildSlashCommand(guildID: string, commandID: string) {
-    // todo: this
-  }
-
-  /**
    * Method to create a guild slash command
    *
    * [`Discord Docs`](https://discord.com/developers/docs/interactions/slash-commands#create-guild-application-command)
@@ -477,7 +480,7 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
    * Method to create a global slash command
    *
    * [`Discord Docs`](https://discord.com/developers/docs/interactions/slash-commands#create-global-application-command)
-   * @param data The metadata or a [[InteractionCommandBuilder]].
+   * @param data The metadata or a [[InteractionCommandBuilder]] to create the slash command.
    */
   createGlobalSlashCommand(data: InteractionCommandBuilder | discord.RESTPostAPIApplicationGuildCommandsJSONBody) {
     if (data instanceof InteractionCommandBuilder)
@@ -494,40 +497,142 @@ export class WebSocketClient extends EventBus<WebSocketClientEvents> {
     });
   }
 
-  editGuildSlashCommand(guildID: string, commandID: string) {
-    // todo: this
+  /**
+   * Edits a guild slash command
+   * @param guildID The guild's ID
+   * @param commandID The command's ID
+   * @param metadata The metadata to edit.
+   */
+  editGuildSlashCommand(guildID: string, commandID: string, metadata: discord.RESTPatchAPIApplicationCommandJSONBody) {
+    return this.rest.dispatch<discord.RESTPatchAPIApplicationCommandJSONBody, discord.APIApplicationCommand>({
+      endpoint: `/applications/${this.user.id}/guilds/${guildID}/commands/${commandID}`,
+      method: 'PATCH',
+      data: metadata
+    });
   }
 
-  editGlobalSlashCommand(guildID: string) {
-    // todo: this
+  /**
+   * Edits a global slash command
+   * @param commandID The command's ID
+   * @param metadata The metadata to edit.
+   */
+  editGlobalSlashCommand(commandID: string, metadata: discord.RESTPatchAPIApplicationGuildCommandJSONBody) {
+    return this.rest.dispatch<discord.RESTPatchAPIApplicationCommandJSONBody, discord.APIApplicationCommand>({
+      endpoint: `/applications/${this.user.id}/commands/${commandID}`,
+      method: 'PATCH',
+      data: metadata
+    });
   }
 
+  /**
+   * Deletes a global slash command
+   * @param commandID The command's ID
+   */
   deleteGlobalSlashCommand(commandID: string) {
-    // todo: this
+    return this.rest.dispatch<never, void>({
+      endpoint: `/applications/${this.user.id}/commands/${commandID}`,
+      method: 'DELETE'
+    });
   }
 
+  /**
+   * Deletes a guild slash command
+   * @param guildID The guild's ID
+   * @param commandID The command's ID
+   */
   deleteGuildSlashCommand(guildID: string, commandID: string) {
-    // todo: this
+    return this.rest.dispatch<never, void>({
+      endpoint: `/applications/${this.user.id}/guilds/${guildID}/commands/${commandID}`,
+      method: 'DELETE'
+    });
   }
 
-  getAllSlashCommandPermissions(guildID: string) {
-    // todo: this
+  /**
+   * Deletes a guild slash command
+   * @param guildID The guild's ID
+   * @param commandID The command's ID
+   */
+  deleteGuildCommand(guildID: string, commandID: string) {
+    return this.rest.dispatch<never, void>({
+      endpoint: `/applications/${this.user.id}/guilds/${guildID}/commands/${commandID}`,
+      method: 'delete'
+    });
   }
 
-  getSlashCommandPermissions(guildID: string, commandID: string) {
-    // todo: this
+  /**
+   * Takes a list of commands and bulk overwrites them and returns
+   * the list.
+   */
+  bulkOverwriteSlashCommands() { // TODO: see what the hell this does?????
+    return this.rest.dispatch<never, discord.APIApplicationCommand[]>({
+      endpoint: `/applications/${this.user.id}/commands`,
+      method: 'PUT'
+    });
   }
 
-  editSlashCommandPermissions(guildID: string, commandID: string) {
-    // todo: this
+  /**
+   * Takes a list of commands and bulk overwrites them and returns
+   * the list.
+   *
+   * @param guildID The guild ID
+   */
+  bulkOverwriteGuildSlashCommands(guildID: string) { // TODO: see what the hell this does?????
+    return this.rest.dispatch<never, discord.APIApplicationCommand[]>({
+      endpoint: `/applications/${this.user.id}/guilds/${guildID}/commands`,
+      method: 'PUT'
+    });
   }
 
-  editBulkSlashCommandsPermissions(guildID: string) {
-    // todo: this
+  /**
+   * External method to create a interaction response, read more [here](https://discord.com/developers/docs/interactions/slash-commands#interaction-response)
+   * @param id The interaction's ID from the `interactionReceive` event or from the `raw` event
+   * @param token The token provided from the `interactionReceive` event or from the `raw` event
+   * @param type The interaction type, note that `2` and `3` are deprecated.
+   * @param data The data payload to send ([more information here](https://discord.com/developers/docs/interactions/slash-commands#interaction-response-interactionapplicationcommandcallbackdata))
+   */
+  createInteractionResponse(id: string, token: string, type: number, data?: any) {
+    return this.rest.dispatch<any, void>({
+      endpoint: `/interactions/${id}/${token}/callback`,
+      method: 'post',
+      data: {
+        type,
+        data
+      }
+    });
   }
 
-  bulkOverwriteGuildSlashCommands(guildID: string) {
-    // todo: this
+  /**
+   * External method to delete the original interaction response
+   * @param token The token provided from the `interactionReceive` event or from the `raw` event
+   * @param type The interaction type, note that `2` and `3` are deprecated.
+   * @param data The data payload to send ([more information here](https://discord.com/developers/docs/interactions/slash-commands#interaction-response-interactionapplicationcommandcallbackdata))
+   */
+  deleteOriginalInteraction(token: string, type: number, data?: any) {
+    return this.rest.dispatch<any, void>({
+      endpoint: `/webhooks/${this.user.id}/${token}/messages/@original`,
+      method: 'DELETE',
+      data: {
+        type,
+        data
+      }
+    });
+  }
+
+  /**
+   * External method to edit the original interaction response
+   * @param token The token provided from the `interactionReceive` event or from the `raw` event
+   * @param type The interaction type, note that `2` and `3` are deprecated.
+   * @param data The data payload to send ([more information here](https://discord.com/developers/docs/interactions/slash-commands#interaction-response-interactionapplicationcommandcallbackdata))
+   */
+  editOriginalInteraction(token: string, type: number, data?: any) {
+    return this.rest.dispatch<any, void>({
+      endpoint: `/webhooks/${this.user.id}/${token}/messages/@original`,
+      method: 'PATCH',
+      data: {
+        type,
+        data
+      }
+    });
   }
 
   /**

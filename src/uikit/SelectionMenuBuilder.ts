@@ -20,6 +20,14 @@
  * SOFTWARE.
  */
 
-export * from './SelectionMenuBuilder';
-export * from './ComponentTreeBuilder';
-export * from './ButtonBuilder';
+/* eslint-disable camelcase */
+
+/**
+ * Represents a builder class to create selection menus.
+ *
+ * @example
+ * ```js
+ * // coming soon cuz yes
+ * ```
+ */
+export class SelectionMenuBuilder {}

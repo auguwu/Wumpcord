@@ -100,14 +100,12 @@ export class ShardManager extends Collection<number, Shard> {
       .on('raw', (id, data)                       => this.#client.emit('shardRaw', id, data))
       .on('ready', (id, unavailable) => {
         this.#client.emit('shardReady', id, unavailable);
+        this.set(shard!.id, shard!);
+
         this._checkReady();
       });
 
-    return shard.connect()
-      .then((s) => {
-        this.set(s.id, s);
-        return s;
-      });
+    return shard.connect();
   }
 
   /**
