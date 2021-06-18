@@ -47,7 +47,7 @@
     "eslint": "7.28.0",
     "husky": "6.0.0",
     "typedoc": "0.21.0",
-    "typescript": "4.2.4"
+    "typescript": "4.3.4"
   },
   "peerDependencies": {
     "erlpack": "0.1.3",
