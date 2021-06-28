@@ -38,7 +38,7 @@
     "ws": "7.5.0"
   },
   "devDependencies": {
-    "@augu/eslint-config": "2.1.0",
+    "@augu/eslint-config": "2.1.2",
     "@augu/tsconfig": "1.1.1",
     "@types/node": "15.12.1",
     "@types/ws": "7.4.5",
