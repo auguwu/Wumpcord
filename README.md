@@ -1,3 +1,6 @@
+# WARNING
+**wumpcord** has been deprecated due to Discord's API changes being too fast paced for the limited time I have.
+
 # Wumpcord
 > 🚣 **Flexible, type-safe, and lightweight Discord API library made in TypeScript**
 
