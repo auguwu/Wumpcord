@@ -19,122 +19,138 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-/* eslint-disable camelcase */
 
-import type { TextChannel, VoiceChannel, StoreChannel, NewsChannel, GroupChannel, DMChannel, CategoryChannel } from './models';
+import type { CategoryChannel, DMChannel, GroupChannel, NewsChannel, StageChannel, StoreChannel, TextChannel, VoiceChannel } from './entities';
 import type { ClientOptions as WebSocketClientOptions } from 'ws';
-import type { GatewayEvent, GatewayIntent } from './Constants';
-import type { RatelimitInfo } from './rest/RatelimitBucket';
-import type { HttpMethod } from './rest/RestClient';
+import type { RestClientOptions, MessageFile } from '@wumpcord/rest';
+import type { GatewayIntent } from './Constants';
+import type { BaseEntity } from './entities/BaseEntity';
 import type * as discord from 'discord-api-types';
 
-/** Represents a guild textable channel */
-export type GuildTextableChannel = TextChannel | NewsChannel | StoreChannel;
 
-/** Represents a textable channel that is or not attached to a guild */
-export type TextableChannel = TextChannel | GroupChannel | DMChannel | NewsChannel;
-
-/** Represents all guild channels */
-export type AnyGuildChannel = TextChannel | VoiceChannel | NewsChannel | StoreChannel | CategoryChannel;
-
-/** Represents all guild textable channels */
-export type AnyGuildTextableChannel = TextChannel | NewsChannel;
-
-/** Represents all channel types */
-export type AnyChannel = TextChannel | VoiceChannel | CategoryChannel | DMChannel | GroupChannel | NewsChannel | StoreChannel;
-
-/** Represents of how a Discord message is constructed */
-export type MessageContent = string | MessageContentOptions;
-
-/** Represents a serialization strategy to use */
-export type Serializable = (...args: any[]) => string | Buffer;
-
-/** Represents a deserialization strategy to use */
-export type Deserializable<T = unknown> = (...args: any[]) => T;
+/** Represents a partial entity with `id` and any additional properties visible if not cached */
+export type PartialEntity<T extends BaseEntity<any>, Props = {}> = Partial<T> & { [P in keyof Props]: Props[P]; } & { id: string };
 
 /** Represents all of the online statuses to set */
-export type OnlineStatus = 'online' | 'offline' | 'idle' | 'dnd';
+export type OnlineStatus = 'online' | 'offline' | 'idle' | 'dnd' | 'invisible';
 
-/** Represents a Promise-value or not */
-export type MaybePromise<T> = Promise<T> | T;
+/** Represents any channel */
+export type AnyChannel = CategoryChannel | DMChannel | GroupChannel | NewsChannel | StageChannel | StoreChannel | VoiceChannel | TextChannel;
 
-/** Represents a partial entity */
-export type PartialEntity<T, P extends object = {}> = Partial<T> & { [K in keyof P]: P[K]; } & { id: string };
+/** Represents any guild channel, which has more properties than DMChannel and GroupChannel. */
+export type AnyGuildChannel = CategoryChannel | NewsChannel | StageChannel | StoreChannel | VoiceChannel | TextChannel;
 
-/** Represents a file to send to Discord */
-export interface MessageFile {
-  /** The name of the file, it'll default to `file.png` if not found. */
-  name?: string;
+/** Represents any textable channel, which can send messages */
+export type AnyTextableChannel = NewsChannel | TextChannel | DMChannel | GroupChannel;
 
-  /** The file buffer to send to Discord */
-  file: Buffer;
-}
+/** Represents any guild textable channel, which are text channels in guilds */
+export type AnyGuildTextableChannel = NewsChannel | TextChannel;
 
-/** Represents all the client options available */
+/**
+ * Represents of how a Discord message is constructed
+ */
+export type MessageContent = string | MessageContentOptions;
+
+/**
+ * Represents the options for constructing a [[Client]]
+ */
 export interface ClientOptions {
-  /** Number in milliseconds to clean un-needed cache in */
+  /**
+   * Number of milliseconds to recycle un-needed cache
+   */
   sweepUnneededCacheIn?: number;
 
-  /** If we should populate presences when requesting for all guild members */
+  /**
+   * If we populate presences from [[Shard.requestGuildMembers]]
+   */
   populatePresences?: boolean;
 
-  /** The reconnection timeout */
-  reconnectTimeout?: number;
-
-  /** Object of allowed mentions, this will be overrided if [MessageContent.mentions] is `null` or `undefined`. */
+  /**
+   * List of allowed mentions to use if `mentions` from [[AllowedMentions]] is not set.
+   */
   allowedMentions?: AllowedMentions;
 
-  /** List of disabled gateway events to not emit */
-  disabledEvents?: GatewayEvent[];
-
-  /** If we should call `WebSocketClient#requestGuildMembers` on all guilds once we are ready */
+  /**
+   * If the client should call [[Shard.requestGuildMembers]] on every shard
+   * once the bot is ready.
+   */
   getAllUsers?: boolean;
 
-  /** The shard count to start off with */
-  shardCount?: number | 'auto';
-
-  /** The serialization/deserialization strategy when encoding/decoding packets from Discord */
+  /**
+   * The (de)-serialization strategy to use
+   *
+   * @deprecated This property is deprecated in favour of the library
+   * detecting. This will be removed in a future release.
+   */
   strategy?: 'etf' | 'json';
 
-  /** List of intents to connect with */
-  intents?: number | number[] | GatewayIntent[];
-
-  /** The token to use */
-  token: string;
-
-  /** The WebSocket options for Discord */
-  ws?: WebSocketOptions;
-}
-
-/** The WebSocket options for Discord */
-export interface WebSocketOptions {
-  /** Enables dispatching of guild subscription events (presence and typing events) */
-  guildSubscriptions?: boolean;
-
-  /** Value between 50 and 250, total number of members where the gateway will stop sending offline members in the guild member list */
-  largeThreshold?: number;
-
-  /** The connection timeout before closing the shard's connection */
-  connectTimeout?: number;
-
-  /** The client options for [ws](https://npm.im/ws) (Do not mess with this unless you know what you're doing.) */
-  clientOptions?: WebSocketClientOptions;
-
-  /** Whether this connection supports compression of packets */
+  /**
+   * Enables compression of data packets, it requires
+   * the `zlib-sync` module to be enabled.
+   */
   compress?: boolean;
 
   /**
-   * The intents to connect with
-   *
-   * @deprecated This option is deprecated and will be removed in a later release. This option will error if this
-   * and [[ClientOptions.intents]] are both specified.
+   * The shard count to use, for automatic sharding, use `'auto'`
    */
-  intents?: number | number[] | GatewayIntent[];
+  shardCount?: number | 'auto';
 
-  /** Number of tries before closing the shard's connection, leave it as `undefined` to indefintely keep re-connecting */
-  tries?: number | undefined;
+  /**
+   * List of intents to use for this bot.
+   */
+  intents?: number | GatewayIntent[];
+
+  /**
+   * The token to authenicate to Discord's gateway and REST
+   */
+  token: string;
+
+  /**
+   * Options to modify the rest client attached to this [[Client]].
+   */
+  rest?: RestClientOptions;
+
+  /**
+   * List of WebSocket options for connecting to the Gateway
+   */
+  ws?: WebSocketOptions;
 }
 
+/**
+ * Represents options for establishing a peer to peer connection with Discord
+ * to the world! **☆=(ゝω･)/**
+ */
+export interface WebSocketOptions {
+  /**
+   * Value between 50 and 250, total number of members where the gateway will stop sending offline members in the guild member list
+   * @default true
+   */
+  largeThreshold?: number;
+
+  /**
+   * Timeout in milliseconds to stop dispatching connection timeouts
+   * once the connection wasn't established.
+   * @default 25000
+   */
+  connectTimeout?: number;
+
+  /**
+   * The client options for [ws](https://npm.im/ws) (Do not mess with this unless you know what you're doing.)
+   * @default undefined
+   */
+  clientOptions?: WebSocketClientOptions;
+
+  /**
+   * Whether this connection supports compression of packets (requires `zlib-sync` to be installed)
+   * @default false
+   */
+  compress?: boolean;
+}
+
+/**
+ * Options to customizing the [[MessageContentOptions.mentions]] to populate
+ * default items in that object for simplicity
+ */
 export interface AllowedMentions {
   /** If we should allow the bot to ping @everyone/@here */
   everyone?: boolean;
@@ -149,60 +165,79 @@ export interface AllowedMentions {
   users?: boolean | string[];
 }
 
-export interface ShardInfo {
-  /** The session information, this is `undefined` if [ClientOptions.shardCount] is not `auto`. */
-  session?: discord.APIGatewaySessionStartLimit;
-
-  /** The number of shards to spawn with */
-  shards: number;
-
-  /** The gateway URL to connect to Discord */
-  url: string;
-}
-
+/**
+ * Additional options to send a message in a guild textable channel on Discord.
+ */
 export interface MessageContentOptions {
-  /** List of attachments to send to Discord */
+  /**
+   * Allows to send one or multiple attachments.
+   *
+   * @deprecated This property is deprecated for [[MessageContentOptions.file]],
+   * this property will be removed in a future release.
+   */
   attachments?: MessageFile | MessageFile[];
 
-  /** List of allowed mentions to use, if this is `undefined`, it'll default to the client options' allowed mentions */
+  /**
+   * Customizes the behaviour for sending mentions towards entities or everyone.
+   */
   mentions?: AllowedMentions;
 
-  /** The content to send to Discord */
+  /**
+   * The raw content to send to Discord.
+   */
   content?: string;
 
-  /** The embed structure to send */
+  /**
+   * A custom embed to send to Discord
+   */
   embed?: discord.APIEmbed;
 
-  /** The snowflake to reply to using the Inline Replies feature */
+  /**
+   * If we should send a message with a reply of this message's ID
+   * as the reply reference.
+   */
   reply?: string;
 
-  /** If we should use Text to Speech on this message */
+  /**
+   * A file to send on Discord
+   */
+  file?: MessageFile;
+
+  /**
+   * If we should use Text to Speech on this message
+   */
   tts?: boolean;
 }
 
-export interface RestCallProperties {
-  /** The ratelimit information details */
-  ratelimitInfo: RatelimitInfo;
+/**
+ * Object of what [[Client.getShardInfo]] returns.
+ */
+export interface ShardingInfo {
+  /**
+   * A starting session object, used when [[Client.getBotGateway]]
+   * is called rather than [[Client.getGatewayInfo]].
+   */
+  session?: discord.APIGatewaySessionStartLimit;
 
-  /** If the request was successful or not */
-  successful: boolean;
+  /**
+   * Number of shards to spawn
+   */
+  shards: number;
 
-  /** The endpoint we made a request to */
-  endpoint: string;
-
-  /** The http method verb we used */
-  method: HttpMethod;
-
-  /** The body payload from Discord */
-  body: string;
-
-  /** The ping of when the request was dispatched / called */
-  ping: number;
+  /**
+   * The gateway URL, cached as [[Client.gatewayUrl]]
+   */
+  url: string;
 }
 
 export interface SendActivityOptions {
-  name: string;
-  type: number;
-  url?: string;
+  /**
+   * The list of activities to display
+   */
+  activities: discord.GatewayActivityUpdateData[];
+
+  /**
+   * Whenther or not the client is AFK
+   */
   afk?: boolean;
 }

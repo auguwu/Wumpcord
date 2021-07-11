@@ -1,7 +1,7 @@
 {
+  "excludeInternal": true,
   "excludeProtected": true,
   "excludePrivate": true,
-  "highlightTheme": "nord",
   "tsconfig": "tsconfig.json",
   "readme": "README.md",
   "name": "Wumpcord"

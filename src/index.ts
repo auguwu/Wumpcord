@@ -20,23 +20,19 @@
  * SOFTWARE.
  */
 
-const { version: pkgVersion } = require('../package.json');
+export * from './builders';
+export * from './entities';
+export * from './uikit';
 
-export { default as InteractionClient } from './interactions/InteractionClient';
-export { DiscordRestError } from './errors/DiscordRestError';
-export { DiscordAPIError } from './errors/DiscordAPIError';
-export { default as Client } from './gateway/WebSocketClient';
+export { default as Util } from './util';
+export * from './util/Permissions';
+export * from './util/Extensions';
 
+export { WebSocketClient as Client } from './Client';
 export * as Constants from './Constants';
+export * from './types'; // used for documentation purposes
 
-export * from './interactions/types';
-export * from './events';
-export * from './models';
-export * from './types';
-
-// export misc types
-export { InteractionClientEvents } from './interactions/InteractionClient';
-export { WebSocketClientEvents } from './gateway/WebSocketClient';
-
-/** Returns the version of Wumpcord */
-export const version: string = pkgVersion;
+/**
+ * Returns the version of Wumpcord
+ */
+export const version: string = require('../package.json').version;

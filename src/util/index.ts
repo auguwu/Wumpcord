@@ -22,11 +22,13 @@
 
 /* eslint-disable camelcase */
 
-import type { AllowedMentions, MessageContent, MessageContentOptions, MessageFile } from '../types';
-import type WebSocketClient from '../gateway/WebSocketClient';
+import type { AllowedMentions, MessageContent, MessageContentOptions } from '../types';
+import type { WebSocketClient } from '../Client';
+import type { MessageFile } from '@wumpcord/rest';
 import * as discord from 'discord-api-types';
-import { isObject } from '@augu/utils';
 import { Readable } from 'stream';
+import * as utils from '@augu/utils';
+import * as is from './is';
 
 /**
  * All utilities available to Wumpcord
@@ -91,17 +93,17 @@ export default class Util {
    * @param options Any additional options, if needed
    */
   static formatMessage(client: WebSocketClient, content: MessageContent, options?: MessageContentOptions) {
-    const data: discord.RESTPostAPIChannelMessageJSONBody & { file?: MessageFile | MessageFile[] } = {};
+    const data: discord.RESTPostAPIChannelMessageJSONBody & { file?: MessageFile } = {};
 
-    if (isObject(content) && (options !== undefined && isObject(options)))
+    if (utils.isObject(content) && (options !== undefined && utils.isObject(options)))
       throw new TypeError('Conflicting message contents, choose one or the other.');
 
     if (typeof content === 'string' && options === undefined) {
       data.content = content;
       return data;
-    } else if (isObject(content) && options === undefined) {
+    } else if (utils.isObject<MessageContentOptions>(content) && options === undefined) {
       if (content.attachments !== undefined)
-        data.file = content.attachments;
+        data.file = content.attachments[0];
 
       if (content.mentions !== undefined)
         data.allowed_mentions = this.formatAllowedMentions(content.mentions, client);
@@ -113,15 +115,18 @@ export default class Util {
         data.embed = content.embed;
 
       if (content.reply !== undefined)
-        data.message_reference = { message_id: content.reply };
+        data.message_reference = { message_id: content.reply as unknown as discord.Snowflake };
+
+      if (content.file !== undefined)
+        data.file = content.file;
 
       if (content.tts !== undefined)
         data.tts = Boolean(data.tts);
-    } else if (typeof content === 'string' && (options !== undefined && isObject(options))) {
+    } else if (typeof content === 'string' && (options !== undefined && utils.isObject<MessageContentOptions>(options))) {
       data.content = content;
 
       if (options.attachments !== undefined)
-        data.file = options.attachments;
+        data.file = options.attachments[0];
 
       if (options.mentions !== undefined)
         data.allowed_mentions = this.formatAllowedMentions(options.mentions, client);
@@ -130,13 +135,16 @@ export default class Util {
         data.embed = options.embed;
 
       if (options.reply !== undefined)
-        data.message_reference = { message_id: options.reply };
+        data.message_reference = { message_id: options.reply as unknown as discord.Snowflake };
+
+      if (options.file !== undefined)
+        data.file = options.file;
 
       if (options.tts !== undefined)
         data.tts = Boolean(data.tts);
-    } else if (options !== undefined && isObject(options)) {
+    } else if (options !== undefined && utils.isObject<MessageContentOptions>(options)) {
       if (options.attachments !== undefined)
-        data.file = options.attachments;
+        data.file = options.attachments[0];
 
       if (options.mentions !== undefined)
         data.allowed_mentions = this.formatAllowedMentions(options.mentions, client);
@@ -148,7 +156,10 @@ export default class Util {
         data.embed = options.embed;
 
       if (options.reply !== undefined)
-        data.message_reference = { message_id: options.reply };
+        data.message_reference = { message_id: options.reply as unknown as discord.Snowflake };
+
+      if (options.file !== undefined)
+        data.file = options.file;
 
       if (options.tts !== undefined)
         data.tts = Boolean(data.tts);
@@ -165,19 +176,19 @@ export default class Util {
    * @param client The [[WebSocketClient]] for the default allowed mention
    * @returns The formatted allowed mentions list
    */
-  static formatAllowedMentions(mentions: AllowedMentions, client: WebSocketClient): discord.APIAllowedMentionsSend {
-    const data: discord.APIAllowedMentionsSend = {
+  static formatAllowedMentions(mentions: AllowedMentions, client: WebSocketClient): discord.APIAllowedMentions {
+    const data: discord.APIAllowedMentions = {
       replied_user: mentions?.replied ?? client.options.allowedMentions?.replied ?? false,
       parse: []
     };
 
     if (!mentions) {
-      if (client.options.allowedMentions?.everyone === true) data.parse!.push(discord.AllowedMentionsTypes.Everyone);
-      if (client.options.allowedMentions?.roles === true) data.parse!.push(discord.AllowedMentionsTypes.Role);
-      if (client.options.allowedMentions?.users === true) data.parse!.push(discord.AllowedMentionsTypes.User);
+      if (client.options.allowedMentions.everyone === true) data.parse!.push(discord.AllowedMentionsTypes.Everyone);
+      if (client.options.allowedMentions.roles === true) data.parse!.push(discord.AllowedMentionsTypes.Role);
+      if (client.options.allowedMentions.users === true) data.parse!.push(discord.AllowedMentionsTypes.User);
 
-      if (Array.isArray(client.options.allowedMentions?.roles)) data.roles = client.options.allowedMentions?.roles;
-      if (Array.isArray(client.options.allowedMentions?.users)) data.users = client.options.allowedMentions?.users;
+      if (Array.isArray(client.options.allowedMentions.roles)) data.roles = client.options.allowedMentions?.roles as discord.Snowflake[];
+      if (Array.isArray(client.options.allowedMentions.users)) data.users = client.options.allowedMentions?.users as discord.Snowflake[];
 
       return data;
     }
@@ -186,8 +197,8 @@ export default class Util {
     if (mentions.roles === true) data.parse!.push(discord.AllowedMentionsTypes.Role);
     if (mentions.users === true) data.parse!.push(discord.AllowedMentionsTypes.User);
 
-    if (Array.isArray(mentions.roles)) data.roles = mentions.roles;
-    if (Array.isArray(mentions.users)) data.users = mentions.users;
+    if (Array.isArray(mentions.roles)) data.roles = mentions.roles as discord.Snowflake[];
+    if (Array.isArray(mentions.users)) data.users = mentions.users as discord.Snowflake[];
 
     return data;
   }
@@ -228,7 +239,7 @@ export default class Util {
   }
 
   /**
-   * Converts a key-value map into a querystring
+   * Converts a key-value map into a querystring, omits undefined / null values
    * @param obj The key-value map
    * @returns The querystring that is created
    */
@@ -236,13 +247,14 @@ export default class Util {
     let url = '';
     if (!Object.keys(obj).length) throw new TypeError('Missing key-value pairs in `obj`');
 
-    const entries = Object.entries(obj);
+    const allEntries = utils.omitUndefinedOrNull(obj);
+    const entries = Object.entries(allEntries);
     for (let i = 0; i < entries.length; i++) {
       const prefix = i === 0 ? '?' : '&';
       const [k, v] = entries[i];
 
-      // Skip on undefined, null, or empty string values
-      if (v === undefined || v === null || v === '') continue;
+      // Skip empty string values
+      if (v === '') continue;
 
       url += `${prefix}${k}=${v}`;
     }
@@ -256,13 +268,17 @@ export default class Util {
    * @param type The content type to use
    * @returns The data image
    */
-  static bufferToBase64(image: Buffer, type?: 'png' | 'jpg' | 'gif') {
-    // Force the type to be .png if the headers match
-    // https://tools.ietf.org/html/rfc2083
-
-    if (image.length > 8 && image[0] === 0x89 && image[1] === 0x50 && image[2] === 0x4E && image[3] === 0x47 && image[4] === 0x0D && image[5] === 0x0A && image[6] === 0x1A && image[7] === 0x0A) {
-      if (type === undefined)
+  static bufferToBase64(image: Buffer, type?: 'png' | 'jpeg' | 'gif') {
+    // check the buffer ourselves to determine the type
+    if (type === undefined) {
+      if (is.png(image))
         type = 'png';
+
+      if (is.jpg(image))
+        type = 'jpeg';
+
+      if (is.gif(image))
+        type = 'gif';
     }
 
     const base64 = image.toString('base64');

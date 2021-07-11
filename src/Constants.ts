@@ -46,10 +46,7 @@ export type GuildFeature = 'ANIMATED_ICON' | 'BANNER' | 'COMMERECE' | 'COMMUNITY
 /**
  * List of gateway intents available
  */
-export type GatewayIntent = 'guilds' | 'guildMembers' | 'guildBans' | 'guildEmojis'
-  | 'guildIntegrations' | 'guildInvites' | 'guildVoiceStates' | 'guildPresences'
-  | 'guildMessages' | 'guildMessageReactions' | 'directMessages' | 'directMessageTyping'
-  | 'directMessageReactions';
+export type GatewayIntent = keyof typeof GatewayIntents;
 
 /**
  * List of strategy types available
@@ -71,12 +68,17 @@ export const UnrecoverableCodes = [
 /**
  * Returns the gateway version
  */
-export const GatewayVersion = 8;
+export const GatewayVersion = 9;
 
 /**
- * Returns the REST version
+ * The `User-Agent` header value in the [[RestClient]]
  */
-export const RestVersion = 8;
+export const UserAgent = `DiscordBot (+https://github.com/auguwu/Wumpcord; v${version})`;
+
+/**
+ * List of webhook types, the first type index at 1, so it's gonna be null
+ */
+export const WebhookTypes: [first: null, ...rest: string[]] = [null, 'Incoming', 'Channel Following'];
 
 /**
  * List of acceptable image formats
@@ -88,26 +90,6 @@ export const ImageFormats = [
   'webp',
   'jpeg'
 ];
-
-/**
- * The `User-Agent` header value in the [[RestClient]]
- */
-export const UserAgent = `DiscordBot (https://github.com/auguwu/Wumpcord, v${version})`;
-
-/**
- * CDN url for images, banners, etc
- */
-export const CDNUrl = 'https://cdn.discordapp.com';
-
-/**
- * REST API URL for interacting with Discord
- */
-export const RestUrl = 'https://discord.com/api';
-
-/**
- * List of webhook types, the first type index at 1, so it's gonna be null
- */
-export const WebhookTypes: [first: null, ...rest: string[]] = [null, 'Incoming', 'Channel Following'];
 
 /**
  * List of activity statuses available
@@ -263,6 +245,20 @@ export enum MessageTypes {
 /**
  * The channel types as their name
  */
+export enum ChannelTypes {
+  Text,
+  DM,
+  Voice,
+  Group,
+  Category,
+  News,
+  Store,
+  NewsThread = 10,
+  PublicThread,
+  PrivateThread,
+  Stage
+}
+
 export const ChannelTypesObject = {
   0: 'text',
   1: 'dm',
@@ -271,27 +267,40 @@ export const ChannelTypesObject = {
   4: 'category',
   5: 'news',
   6: 'store',
+  10: 'news_thread',
+  11: 'public_thread',
+  12: 'private_thread',
   13: 'stage'
 } as const;
+
+/**
+ * The nitro subscription type
+ */
+export enum NitroSubscription {
+  None,
+  Classic,
+  Nitro
+}
 
 /**
  * List of user flags available
  */
 export enum UserFlags {
   None,
-  Staff           = 1 << 0,
-  Partner         = 1 << 1,
-  HypesquadEvents = 1 << 2,
-  BugHunterLevel1 = 1 << 3,
-  Bravery         = 1 << 6,
-  Brillance       = 1 << 7,
-  Balance         = 1 << 8, // the best house dont @ me <3
-  EarlySupporter  = 1 << 9,
-  TeamUser        = 1 << 10,
-  System          = 1 << 12,
-  BugHunterLevel2 = 1 << 14,
-  VerifiedBot     = 1 << 16,
-  VerifiedBotDev  = 1 << 17
+  Staff              = 1 << 0,
+  Partner            = 1 << 1,
+  HypesquadEvents    = 1 << 2,
+  BugHunterLevel1    = 1 << 3,
+  Bravery            = 1 << 6,
+  Brillance          = 1 << 7,
+  Balance            = 1 << 8, // the best house dont @ me <3
+  EarlySupporter     = 1 << 9,
+  TeamUser           = 1 << 10,
+  System             = 1 << 12,
+  BugHunterLevel2    = 1 << 14,
+  VerifiedBot        = 1 << 16,
+  VerifiedBotDev     = 1 << 17,
+  CertifiedModerator = 1 << 18
 }
 
 /**
@@ -380,4 +389,14 @@ export enum ShardStatus {
   Nearly           = 'nearly',
   Dead             = 'dead',
   WaitingForGuilds = 'waiting_for_guilds'
+}
+
+export enum StageInstancePrivacyLevel {
+  Public = 1,
+  GuildOnly
+}
+
+export enum InviteTargetType {
+  Stream = 1,
+  EmbeddedApp
 }

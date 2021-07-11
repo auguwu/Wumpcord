@@ -1,0 +1,558 @@
+/**
+ * Copyright (c) 2020-2021 August
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+/* eslint-disable camelcase */
+
+import type { AnyTextableChannel, MessageContentOptions } from '../types';
+import type { APIComponentActionRow, APIComponentButton } from '../uikit';
+import type { WebSocketClient } from '../Client';
+import { isObject } from '@augu/utils';
+import { BaseEntity } from './BaseEntity';
+import { Emoji } from './Emoji';
+import { User } from './User';
+import Util from '../util';
+
+import type {
+  APIEmbed,
+  APIMessage as _APIMessage,
+  APIMessageReference,
+  APIReaction,
+  APIMessageActivity,
+  RESTPatchAPIChannelMessageJSONBody,
+  RESTPostAPIChannelMessageJSONBody,
+  APISticker,
+  APIAttachment,
+  APIApplication,
+  APIMessageInteraction,
+  APIUser
+} from 'discord-api-types';
+import { Member } from '..';
+
+/**
+ * Type-alias for the content to send with [Message.edit]
+ */
+export type EditedMessageContent = string | Omit<MessageContentOptions, 'file'>;
+
+/**
+ * Type-alias for the conten to send with [Message.reply]
+ */
+export type ReplyMessageContent  = string | Omit<MessageContentOptions, 'reply'>;
+
+/**
+ * https://discord.com/developers/docs/resources/channel#message-object
+ */
+export interface APIMessage extends _APIMessage {
+  /**
+   * if the message is a response to an [Interaction]({@link https://discord.com/developers/docs/interactions/slash-commands}), this is the id of the interaction's application
+   */
+  application_id?: string;
+
+  /**
+   * sent if the message contains components like buttons, action rows, or other interactive components
+   */
+  components?: (APIComponentActionRow | APIComponentButton)[];
+
+  /**
+   * 	the thread that was started from this message, includes thread member object
+   */
+  thread?: any;
+}
+
+/**
+ * https://discord.com/developers/docs/resources/channel#get-reactions-query-string-params
+ */
+export interface GetMessageReactionOptions {
+  /**
+   * Get users after this user ID
+   */
+  after?: string;
+
+  /**
+   * Max limit of users to return (1-100)
+   */
+  limit?: number;
+}
+
+/**
+ * https://discord.com/developers/docs/resources/channel#message-object
+ */
+export class Message<C extends AnyTextableChannel = AnyTextableChannel> extends BaseEntity<APIMessage> {
+  /**
+   * The message associated with the message reference.
+   */
+  public referencedMessage?: Message<C> | null;
+
+  /**
+   * List of channel IDs that were shown in this message
+   */
+  public mentionedChannels?: string[];
+
+  /**
+   * If this message was mentioned by everyone in the guild or dm/group channel.
+   */
+  public mentionedEveryone!: boolean;
+
+  /**
+   * Data showing the source of a crosspost message, channel follow add,
+   * pinned message, or a reply message.
+   */
+  public messageReference?: APIMessageReference;
+
+  /**
+   * Timestamp of when this message was edited, returns `null`
+   * if this message was never edited.
+   */
+  public editedTimestamp!: Date | null;
+
+  /**
+   * List of role IDs that were mentioned in this message
+   */
+  public mentionedRoles!: string[];
+
+  /**
+   * If the message is a response to an Interaction, this is the id of the interaction's application
+   */
+  public applicationID?: string;
+
+  /**
+   * Array of attachments provided in this message
+   */
+  public attachments!: APIAttachment[];
+
+  /**
+   * Application metadata if this message was Rich Presence metadata
+   */
+  public application?: APIApplication;
+
+  /**
+   * If this message was a response to a interaction
+   */
+  public interaction?: APIMessageInteraction;
+
+  /**
+   * List of components (action rows, buttons) in this message
+   */
+  public components?: (APIComponentActionRow | APIComponentButton)[];
+
+  /**
+   * List of reaction objects this message has
+   */
+  public reactions?: APIReaction[];
+
+  /**
+   * If the message is generated by a webhook, this is the webhook's id
+   */
+  public webhookID?: string;
+
+  /**
+   * The channel ID the message was sent
+   */
+  public channelID!: string;
+
+  /**
+   * Timestamp of when this message was sent
+   */
+  public timestamp!: Date;
+
+  /**
+   * Array of User IDs that were mentioned in this message
+   */
+  public mentions!: string[];
+
+  /**
+   * Sent with rich presence metadata
+   */
+  public activity?: APIMessageActivity;
+
+  /**
+   * List of stickers sent with this message
+   */
+  public stickers?: APISticker[];
+
+  /**
+   * ID of the guild this message was sent to
+   */
+  public guildID?: string;
+
+  /**
+   * Contents of the message
+   */
+  public content!: string;
+
+  /**
+   * The thread that was started from this message
+   */
+  public thread?: any;
+
+  /**
+   * If this message was pinned or not
+   */
+  public pinned!: boolean;
+
+  /**
+   * Guild member object of this message
+   */
+  public member?: Member;
+
+  /**
+   * The author of the message
+   */
+  public author!: User;
+
+  /**
+   * Any embedded content
+   */
+  public embeds!: APIEmbed[];
+
+  /**
+   * Integer or string used for validating a message was sent
+   */
+  public nonce?: string | number;
+
+  /**
+   * Message flags combined as a bitfield
+   */
+  public flags?: number;
+
+  /**
+   * The type of message this is
+   */
+  public type!: number;
+
+  /**
+   * Whether this was a TTS message
+   */
+  public tts!: boolean;
+
+  constructor(public client: WebSocketClient, data: APIMessage) {
+    super(data.id);
+
+    this.patch(data);
+  }
+
+  patch(data: Partial<APIMessage>) {
+    if (data.referenced_message !== undefined)
+      this.referencedMessage = data.referenced_message !== null ? new Message<C>(this.client, data.referenced_message) : null;
+
+    if (data.mention_channels !== undefined)
+      this.mentionedChannels = data.mention_channels.map(data => data.id as string);
+
+    if (data.mention_everyone !== undefined)
+      this.mentionedEveryone = data.mention_everyone;
+
+    if (data.message_reference !== undefined)
+      this.messageReference = data.message_reference;
+
+    if (data.edited_timestamp !== undefined)
+      this.editedTimestamp = data.edited_timestamp !== null ? new Date(data.edited_timestamp) : null;
+
+    if (data.mention_roles !== undefined)
+      this.mentionedRoles = data.mention_roles;
+
+    if (data.application_id !== undefined)
+      this.applicationID = data.application_id;
+
+    if (data.attachments !== undefined)
+      this.attachments = data.attachments;
+
+    if (data.interaction !== undefined)
+      this.interaction = data.interaction;
+
+    if (data.components !== undefined)
+      this.components = data.components;
+
+    if (data.reactions !== undefined)
+      this.reactions = data.reactions;
+
+    if (data.webhook_id !== undefined)
+      this.webhookID = data.webhook_id;
+
+    if (data.channel_id !== undefined)
+      this.channelID = data.channel_id;
+
+    if (data.timestamp !== undefined)
+      this.timestamp = new Date(data.timestamp);
+
+    if (data.mentions !== undefined)
+      this.mentions = data.mentions.map(user => user.id);
+
+    if (data.activity !== undefined)
+      this.activity = data.activity;
+
+    if (data.guild_id !== undefined)
+      this.guildID = data.guild_id;
+
+    if (data.content !== undefined)
+      this.content = data.content;
+
+    if (data.thread !== undefined)
+      this.thread = data.thread;
+
+    if (data.pinned !== undefined)
+      this.pinned = data.pinned;
+
+    if (data.member !== undefined)
+      this.member = new Member(this.client, data.member);
+
+    if (data.author !== undefined)
+      this.author = this.client.users.put(new User(this.client, data.author));
+
+    if (data.embeds !== undefined)
+      this.embeds = data.embeds;
+
+    if (data.nonce !== undefined)
+      this.nonce = data.nonce;
+
+    if (data.flags !== undefined)
+      this.flags = data.flags;
+
+    if (data.type !== undefined)
+      this.type = data.type;
+
+    if (data.tts !== undefined)
+      this.tts = data.tts;
+  }
+
+  /**
+   * Returns the guild object, if applicable
+   */
+  get guild() {
+    if (!this.guildID)
+      return undefined;
+
+    return this.client.guilds.get(this.guildID);
+  }
+
+  /**
+   * Returns the channel that this message belongs to
+   */
+  get channel() {
+    return this.client.channels.get<C>(this.channelID) as C;
+  }
+
+  /**
+   * Deletes this message from the channel
+   */
+  delete() {
+    return this.client.rest.dispatch<never, void>({
+      endpoint: '/channels/:channelID/messages/:id',
+      method: 'DELETE',
+      query: {
+        channelID: this.channelID,
+        id: this.id
+      }
+    });
+  }
+
+  /**
+   * Crossposts this message to all channels that have subscribed to the news channel
+   * this message is in.
+   */
+  crosspost() {
+    return this.client.rest.dispatch<never, APIMessage>({
+      endpoint: '/channels/:channelID/messages/:id/crosspost',
+      method: 'POST',
+      query: {
+        channelID: this.channelID,
+        id: this.id
+      }
+    }).then(data => new Message(this.client, data));
+  }
+
+  /**
+   * Reacts to an emoji to this message
+   * @param emoji The emoji unicode or a guild emoji
+   */
+  react(emoji: string | Emoji) {
+    let emote!: string;
+    if (emoji instanceof Emoji) {
+      emote = `${emoji.name}:${emoji.id}`;
+    } else {
+      emote = encodeURIComponent(emoji);
+    }
+
+    return this.client.rest.dispatch<never, void>({
+      endpoint: '/channels/:channelID/messages/:id/reactions/:emote/@me',
+      method: 'PUT',
+      query: {
+        channelID: this.channelID,
+        emote,
+        id: this.id
+      }
+    });
+  }
+
+  /**
+   * Removes the reaction of the emoji specified
+   * @param emoji The emoji unicode or a guild emoji
+   */
+  unreact(emoji: string | Emoji) {
+    let emote!: string;
+    if (emoji instanceof Emoji) {
+      emote = `${emoji.name}:${emoji.id}`;
+    } else {
+      emote = encodeURIComponent(emoji);
+    }
+
+    return this.client.rest.dispatch<never, void>({
+      endpoint: '/channels/:channelID/messages/:id/reactions/:emote/@me',
+      method: 'DELETE',
+      query: {
+        channelID: this.channelID,
+        emote,
+        id: this.id
+      }
+    });
+  }
+
+  /**
+   * Returns the users who reacted with a specific emoji
+   * @param emoji The emoji to use
+   * @param options Any additional options to construct the request
+   */
+  getReactions(emoji: string | Emoji, options?: GetMessageReactionOptions) {
+    if (options !== undefined && !isObject<GetMessageReactionOptions>(options))
+      throw new TypeError(`Expected \`object\`, but received ${typeof options === 'object' ? 'array/null' : typeof options}`);
+
+    const opts = Util.merge(options, { limit: 25 });
+    let emote!: string;
+    if (emoji instanceof Emoji) {
+      emote = `${emoji.name}:${emoji.id}`;
+    } else {
+      emote = encodeURIComponent(emoji);
+    }
+
+    return this.client.rest.dispatch<never, APIUser[]>({
+      endpoint: `/channels/:channelID/messages/:id/reactions/:emote/@me${Util.objectToQuery(opts!)}`,
+      method: 'GET',
+      query: {
+        channelID: this.channelID,
+        emote,
+        id: this.id
+      }
+    }).then(users => users.map(d => new User(this.client, d)));
+  }
+
+  /**
+   * Deletes every reaction from this message
+   */
+  deleteReactions() {
+    return this.client.rest.dispatch<never, void>({
+      endpoint: `/channels/${this.channelID}/messages/${this.id}/reactions`,
+      method: 'DELETE'
+    });
+  }
+
+  /**
+   * Deletes everybody reactions from this message from a specific emoji
+   * @param emoji The emoji unicode or a guild emoji
+   */
+  deleteReactionsFor(emoji: string | Emoji) {
+    let emote!: string;
+    if (emoji instanceof Emoji) {
+      emote = `${emoji.name}:${emoji.id}`;
+    } else {
+      emote = encodeURIComponent(emoji);
+    }
+
+    return this.client.rest.dispatch<never, void>({
+      endpoint: `/channels/${this.channelID}/messages/${this.id}/reactions/${emote}`,
+      method: 'DELETE'
+    });
+  }
+
+  /**
+   * Edits this message with new contents, you cannot reupload attachments.
+   * @param content The message content as a string or message content options
+   * @param options Any additional options to construct a new message
+   */
+  edit(content: EditedMessageContent, options?: Omit<MessageContentOptions, 'file'>) {
+    const data = Util.formatMessage(this.client, content, options);
+    if (data.file !== undefined)
+      delete data.file;
+
+    return this.client.rest.dispatch<RESTPatchAPIChannelMessageJSONBody, APIMessage>({
+      endpoint: `/channels/${this.channelID}/messages/${this.id}`,
+      method: 'PATCH',
+      data
+    }).then(data => new Message(this.client, data));
+  }
+
+  /**
+   * Replies to a message with this message as the referenced message
+   * @param content The message content as a string or message content options
+   * @param options Any additional options to construct a new message
+   */
+  reply(content: ReplyMessageContent, options?: Omit<MessageContentOptions, 'reply'>) {
+    let message: MessageContentOptions = {
+      reply: this.id
+    };
+
+    if (typeof content === 'string') {
+      const data = Util.formatMessage(this.client, {
+        reply: this.id,
+        content: content
+      });
+
+      return this.client.rest.dispatch<RESTPostAPIChannelMessageJSONBody, APIMessage>({
+        endpoint: `/channels/${this.channelID}/messages`,
+        method: 'POST',
+        data
+      }).then(data => new Message(this.client, data));
+    }
+
+    if (isObject(content) && isObject(options)) throw new Error('Cannot have `content` and `options` as message options');
+    if (isObject(content)) message = { reply: this.id, ...content };
+    if (isObject(options)) message = { reply: this.id, ...options };
+
+    const data = Util.formatMessage(this.client, message);
+    let file = data.file;
+    delete data.file;
+
+    return this.client.rest.dispatch<RESTPostAPIChannelMessageJSONBody, APIMessage>({
+      endpoint: `/channels/${this.channelID}/messages`,
+      method: 'POST',
+      data,
+      file
+    }).then(data => new Message(this.client, data));
+  }
+
+  /**
+   * Pins this message from the channel
+   */
+  pin() {
+    return this.client.rest.dispatch<never, void>({
+      endpoint: `/channels/${this.id}/pins/${this.id}`,
+      method: 'PUT'
+    });
+  }
+
+  /**
+   * Unpins this message from the channel
+   */
+  unpin() {
+    return this.client.rest.dispatch<never, void>({
+      endpoint: `/channels/${this.id}/pins/${this.id}`,
+      method: 'DELETE'
+    });
+  }
+}

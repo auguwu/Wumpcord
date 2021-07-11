@@ -1,29 +1,33 @@
-name: Deploy docs
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - 'master'
-    paths-ignore:
-      - '.github/**'
-      - '.vscode/**'
-      - 'examples/'
-      - '.eslintignore'
-      - '.gitignore'
-      - '.npmignore'
-      - '**.md'
-      - 'jest.config.js'
-      - 'LICENSE'
-      - 'package.json'
-      - 'renovate.json'
-      - 'tsconfig.json'
-      - 'tsconfig.test.json'
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Update documentation
-        run: |
-          mkdir ~/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
-          kubectl rollout restart deployment/wumpdocs
+#name: Deploy docs
+#on:
+#  workflow_dispatch:
+#  push:
+#    branches:
+#      - 'master'
+#    paths-ignore:
+#      - '.github/**'
+#      - '.vscode/**'
+#      - 'examples/'
+#     - '.eslintignore'
+#      - '.gitignore'
+#      - '.npmignore'
+#      - '**.md'
+#      - 'jest.config.js'
+#      - 'LICENSE'
+#      - 'package.json'
+#      - 'renovate.json'
+#      - 'tsconfig.json'
+#      - 'tsconfig.test.json'
+#jobs:
+#  deploy:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Update documentation
+#        uses: fjogeleit/http-request-action@master
+#        with:
+#          url: 'https://docs.floofy.dev/update?project=Wumpcord&branch=${{ github.ref }}'
+#          method: 'POST'
+#          headers: '{"Authorization":"${{ secrets.UPDATE_DOCS_SECRET }}"}'
+#
+#      - name: Show response metadata
+#        run: echo ${{ steps.myRequest.outputs.response }}

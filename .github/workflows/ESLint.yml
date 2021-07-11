@@ -9,8 +9,8 @@ on:
     paths-ignore:
       - '.github/**'
       - '.vscode/**'
-      - 'examples/'
-      - 'docs/'
+      - 'examples/**'
+      - 'docs/**'
       - '.eslintignore'
       - '.gitignore'
       - '.npmignore'
@@ -21,6 +21,7 @@ on:
       - 'renovate.json'
       - 'tsconfig.json'
       - 'tsconfig.test.json'
+      - '.husky'
 
   pull_request:
     branches:

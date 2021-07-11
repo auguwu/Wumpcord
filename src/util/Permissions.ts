@@ -25,7 +25,7 @@ import { Permissions } from '../Constants';
 /**
  * Utility to handle permissions
  */
-export default class Permission {
+export class Permission {
   /** The bit for the allowed permission */
   public allow: bigint;
 

@@ -54,6 +54,13 @@ client.on('ready', async () => {
 client.connect();
 ```
 
+## Packages
+> List of packages that is tailored for the community but can be used in any real application (except for cache drivers).
+
+- @wumpcord/redis-driver (Coming soon!)
+- [@wumpcord/commands](https://github.com/Wumpcord/commands)
+- [@wumpcord/rest](https://github.com/Wumpcord/rest)
+
 ## Maintainers
 - [August](https://floofy.dev)
 
@@ -61,4 +68,4 @@ client.connect();
 None at the moment.
 
 ## License
-**Wumpcord** is released under the [MIT](/LICENSE) License. :sparkling_heart:
+**Wumpcord** is released under the [MIT](/LICENSE) License. 💖
